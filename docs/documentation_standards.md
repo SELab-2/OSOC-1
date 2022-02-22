@@ -59,4 +59,4 @@ is an example of how you could document a class. From these comments, Dokka gene
 
 The [C4](https://c4model.com/) model is a loose and simple model to document projects in multiple levels. 
 We will only be using the first (System Context diagram) and second (Container diagram) levels to have a high level overview of the architecture.
-Take a look at the link for a detailed explanation.
+Take a look at the link for a detailed explanation. To create these diagrams, you could use a website like [draw.io](https://app.diagrams.net/).
