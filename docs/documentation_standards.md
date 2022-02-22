@@ -51,3 +51,12 @@ the description of these tags in the main text if possible instead of using thes
 [Here](https://github.com/Kotlin/dokka/blob/master/examples/gradle/dokka-gradle-example/src/main/kotlin/demo/HelloWorld.kt)
 is an example of how you could document a class. From these comments, Dokka generates 
 [this](https://kotlin.github.io/dokka/examples/dokka-gradle-example/html/-dokka%20-gradle%20-example/demo/index.html).
+
+
+
+
+# Architectural documentation
+
+The [C4](https://c4model.com/) model is a loose and simple model to document projects in multiple levels. 
+We will only be using the first (System Context diagram) and second (Container diagram) levels to have a high level overview of the architecture.
+Take a look at the link for a detailed explanation.
