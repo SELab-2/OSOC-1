@@ -17,3 +17,10 @@ node -v
 ```
 
 Next, you should just run `npm install` in the main directory of the project (same location as the .husky directory). This should fix the installation for you.
+
+
+## Frontend
+Run `npm install` in the frontend directory to install the required files. More information can be found in the [README.md](../frontend/README.md) file in the frontend directory.
+
+## Backend
+Run `./mvnw spring-boot:run` in the backend directory to compile and run the backend project.
