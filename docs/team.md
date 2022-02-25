@@ -15,7 +15,7 @@ TODO:
 ## API Administrator: [Maarten Stevens](https://github.com/MaartenS11)
 - Responsible for managing the REST api.
 
-## Test Administrator: [Micheal Meuleman](https://github.com/Mikxox)
+## Test Administrator: [Michael Meuleman](https://github.com/Mikxox)
 - Controlling test coverage for every part of the system.
 
 ## Documentation Administrator: [Tom Alard](https://github.com/TomAlard)
