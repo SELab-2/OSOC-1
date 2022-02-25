@@ -43,3 +43,4 @@ mvn ktlint:ktlint
 ```
 
 These commands are also available in IntelliJ. To navigate to these commands follow `Maven (top right) > Plugins > ktlint`.
+A .editorconfig file is also added to ensure everyone uses the same coding style, make sure to enable the editorconfig plugin in IntelliJ to use this!
