@@ -1,0 +1,46 @@
+name: Run backend kotlin tests with maven
+
+on:
+  push:
+    branches: [ master, development ]
+  pull_request:
+    branches: [ master, development ]
+
+jobs:
+  container-job:
+
+    runs-on: self-hosted
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      # Need to actually run a postgres container to allow app to build
+      postgres:
+        image: postgres
+        ports:
+          - 5432:5432
+
+        env:
+          POSTGRES_USER: ${{ secrets.database_username }}
+          POSTGRES_PASSWORD: ${{ secrets.database_password }}
+          POSTGRES_DB: ${{ secrets.database_name }}
+
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Test with Maven
+        # -B: run in non-interactive (batch) mode
+        run: mvn -B test --file backend/pom.xml
