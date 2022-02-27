@@ -1,4 +1,4 @@
-package be.osoc.team1.backend.unittests
+package be.osoc.team1.backend.integrationtests
 
 import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Test
