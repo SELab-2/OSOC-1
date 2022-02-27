@@ -51,7 +51,7 @@ jobs:
           sudo mv jdk-17 /opt/
           export JAVA_HOME=/opt/jdk-17
           export PATH=$PATH:$JAVA_HOME/bin 
-          source ~/.bashrc
+          . ~/.bashrc
           java --version
       - uses: actions/checkout@v2
       - name: Set up JDK 17
