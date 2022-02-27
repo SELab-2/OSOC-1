@@ -9,7 +9,7 @@ docker build -t osoc_postgres_image_local_dev:latest .
 ```
 
 ### Run docker container
-First create a directory that will contain the database files, here named /some/placeholder in line 4.
+First create a directory that will contain the database files, here named ```/some/placeholder``` in line 4.
 Make sure you use the absolute path to this folder! \
 Do not change ```:/var/lib/postgresql/data``` this is a fixed path inside the docker container itself. \
 After building the docker image you can run it as a container with the following command:
@@ -27,7 +27,7 @@ Note: Persistent volumes were only tested on Ubuntu not on Windows.
 On Windows you should first share the folder via docker desktop.
 
 ### Container commands:
-You can start, stop or remove a container with the following commands: \
+You can start, stop or remove a container with the following commands:
 ```shell
 docker container start osoc_postgres_container_local_dev
 docker container stop osoc_postgres_container_local_dev
