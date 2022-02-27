@@ -16,6 +16,7 @@ jobs:
   container-job:
 
     runs-on: self-hosted
+    container: ubuntu-latest
 
     # Service containers to run with `container-job`
     services:
