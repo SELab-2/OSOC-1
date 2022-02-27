@@ -63,6 +63,8 @@ jobs:
           
       - name: Test maven version
         run: |
+          export JAVA_HOME=/opt/jdk-17
+          export PATH=$PATH:$JAVA_HOME/bin
           /opt/maven/bin/mvn -v
 
       - uses: actions/checkout@v2
@@ -88,4 +90,6 @@ jobs:
       - name: Test with Maven
         # -B: run in non-interactive (batch) mode
         run: |
+          export JAVA_HOME=/opt/jdk-17
+          export PATH=$PATH:$JAVA_HOME/bin 
           /opt/maven/bin/mvn -B -Dtest="unittests.**" test --file backend/pom.xml
