@@ -16,7 +16,8 @@ jobs:
   container-job:
 
     runs-on: self-hosted
-    container: ubuntu:latest
+    container: 
+      image: ubuntu:latest
 
     # Service containers to run with `container-job`
     services:
@@ -46,7 +47,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: maven
+          check-latest: true
 
       - name: Test with Maven
         # -B: run in non-interactive (batch) mode
