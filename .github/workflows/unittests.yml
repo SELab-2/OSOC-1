@@ -60,6 +60,11 @@ jobs:
           sudo mv apache-maven-${VER} /opt/maven
           export MAVEN_HOME=/opt/maven
           export PATH=\$PATH:\$MAVEN_HOME/bin
+          mvn -v
+          
+      - name: Test maven version
+        run: |
+          mvn -v
 
       - uses: actions/checkout@v2
 #       - name: Set up JDK 17
@@ -83,4 +88,5 @@ jobs:
 
       - name: Test with Maven
         # -B: run in non-interactive (batch) mode
-        run: mvn -B -Dtest="unittests.**" test --file backend/pom.xml
+        run: |
+          mvn -B -Dtest="unittests.**" test --file backend/pom.xml
