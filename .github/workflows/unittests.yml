@@ -25,8 +25,8 @@ jobs:
       # Need to actually run a postgres container to allow app to build
       postgres:
         image: postgres
-#         ports:
-#           - 5432:5432
+        ports:
+          - localhost:5432:5432
 
         env:
           POSTGRES_USER: ${{ secrets.database_username }}
