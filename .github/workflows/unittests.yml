@@ -94,5 +94,5 @@ jobs:
           export PATH=$PATH:$JAVA_HOME/bin 
           /opt/maven/bin/mvn -B -Dtest="unittests.**" test --file backend/pom.xml
         env:
-          POSTGRES_HOST: postgres
+          POSTGRES_HOST: localhost
           POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
