@@ -2,7 +2,6 @@
 
 TODO:
 - Front-end administrator
-- Secretary
 
 ## Project Lead: [Niels Praet](https://github.com/NielsPraet)
 - Point of contact for the group.
@@ -24,3 +23,5 @@ TODO:
 
 ## Customer Relations Officer: [Lars Van Cauter](https://github.com/lars-vc)
 - Responsible for communication with the customer (The only one on the team that has direct communication with the customer).
+
+## Secretary: [Tymen Van Himme](https://github.com/tvhimme)
