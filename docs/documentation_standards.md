@@ -77,3 +77,4 @@ tutorial is a good place to get started with Swagger.
 # User manual
 
 The user manual will be hosted on this repository's [wiki](https://github.com/SELab-2/OSOC-1/wiki).
+The manual should at least contain a 'quick start' guide and explain how to do certain common actions.
