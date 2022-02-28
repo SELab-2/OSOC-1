@@ -4,6 +4,8 @@ on: [push]
 jobs:
   commitlint:
     runs-on: self-hosted
+    container:
+      image: mikxox/maven-test-action:latest
     steps:
       - uses: actions/checkout@v2
         with:

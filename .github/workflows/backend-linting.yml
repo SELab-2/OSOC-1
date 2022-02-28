@@ -5,6 +5,8 @@ jobs:
   ktlint:
     name: Check Code Quality
     runs-on: self-hosted
+    container:
+      image: mikxox/maven-test-action:latest
 
     steps:
       - name: Clone repo
