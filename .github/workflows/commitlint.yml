@@ -7,7 +7,13 @@ jobs:
     container:
       image: mikxox/maven-test-action:latest
     steps:
+      - name: install git
+        run: |
+          apt update -y && apt install -y git
+      - name: show env.GITHUB_WORKSPACE
+        run: |
+          echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 1
+          fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v4
