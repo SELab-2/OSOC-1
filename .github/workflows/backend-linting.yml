@@ -11,21 +11,18 @@ jobs:
       GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 
     steps:
-#      - run: |
-#          cd /home/selab2/actions-runner/workspace
       - name: Clone repo
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
           path: 'temppath'
       - run: |
-          pwd
-          ls -a
-          cd /__w/OSOC-1/OSOC-1/temppath
-          ls -a
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint && chmod a+x ktlint
+          cd /__w/OSOC-1/OSOC-1/temppath/backend
+          ktlint --verbose
 
-      - name: ktlint
-        uses: ScaCap/action-ktlint@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+#      - name: ktlint
+#        uses: ScaCap/action-ktlint@master
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          reporter: github-pr-review

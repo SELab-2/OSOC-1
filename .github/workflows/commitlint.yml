@@ -13,10 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 1
+          fetch-depth: 0
           path: 'temppath'
 
       - name: Validate all commits from PR
         run: |
           cd /__w/OSOC-1/OSOC-1/temppath
-          npx commitlint --verbose --from HEAD~1 --to HEAD
+          git log -1 --pretty=format:"%s" | npx commitlint --verbose
