@@ -1,0 +1,158 @@
+# Tally Form Information - https://tally.so/templates/osoc22/5mDAp3
+
+questions:
+  - practical questions:
+    -
+      title: Will you live in Belgium in July 2022?
+      answer:
+          type: boolean
+          required: true
+    -
+      title: Are you able to work 128 hours with a student employment agreement, or as a volunteer?
+      answer:
+        type:
+          - enum
+          - string
+        options:
+          - yes, I can work with a student employment agreement in Belgium
+          - yes, I can work as a volunteer in Belgium
+          - no, but I would like to join this experience for free
+          - no, I won't be able to work as a student, as a volunteer or for free
+        required: true
+    -
+      title: Can you work during the month of July, Monday through Thursday (~09:00 to 17:00)?
+      answer:
+        type: boolean
+        required: true
+    -
+      title: Are there any responsibilities you might have which could hinder you during the day?
+      answer:
+        type: text
+        required: false
+  
+  - personal details:
+    -
+      title: Before we start, what is the your first name and last name?
+      answer:
+        - birth name:
+            type: string
+            required: true
+        - last name:
+            type: string
+            required: true
+    -
+      title: Would you like to be called by a different name than your birth name?
+      answer:
+        -
+          type: boolean
+          required: true
+        - name:
+            type: string
+            required: false
+    -
+      title: What is your gender?
+      answer:
+        type: enum/string
+        options:
+          - Female
+          - Male
+          - Transgender
+          - Rather not say
+    -
+      title: Would you like to add your pronouns?
+      answer:
+        -
+          type: boolean
+          required: true
+        - preferred_pronouns:
+            type: string
+            required: false
+    -
+      title: What language are you most fluent in?
+      answer:
+        type: string
+        required: true
+    -
+      title: How would you rate your English?
+      answer:
+        type: int
+        options: 1-5
+        required: true
+    - 
+      title: Phone number
+      answer:
+        type: string
+        required: true
+    -
+      title: Your email address
+      answer:
+        type: string
+        required: true
+  - about you:
+    -
+      title: Give us a better image of who you are, upload your CV.
+      answer:
+        type: file / path
+        required: false
+    -
+      title: Show us what you've done in the past, what you like doing, add your portfolio.
+      answer:
+        type: file / path
+        required: false
+    -
+      title: Convince us, why would you like to join open summer of code?
+      answer:
+        type: file / path / text
+        required: false
+    -
+      title: Add a fun fact about yourself
+      answer:
+        type: text
+        required: true
+  - studies and experience:
+    -
+      title: What do/did you study?
+      answer:
+        type: string (max 2)
+        required: true
+    -
+      title: What kind of diploma are you currently going for?
+      answer:
+        type: string
+        required: true
+    -
+      title: How many years does your degree take?
+      answer:
+        type: int
+        required: true
+    -
+      title: Which year of your degree are you in?
+      answer:
+        type: int
+        required: true
+    -
+      title: What is the name of your college or university?
+      answer:
+        type: string
+        required: true
+    -
+      title: Which role are you applying for?
+      answer:
+        type: string (max 2)
+        required: false
+    -
+      title: Which skill would you list as your best one?
+      answer:
+        type: string
+        required: true
+    -
+      title: Have you participated in osoc before?
+      answer:
+        type: boolean
+        required: true
+    -
+      title: Would you like to be a student coach this year?
+      answer:
+        type: boolean
+        required: false
+      
