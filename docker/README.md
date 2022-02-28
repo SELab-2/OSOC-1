@@ -1,5 +1,11 @@
 ## Docker instructions:
 
+### Bash Script
+Instead of manually running these commands you can run the bash script `rund`. To see all the commands run:
+```
+./rund help
+```
+
 ### Build docker image
 First create a docker image based upon the Dockerfile, this will also couple init.sql to the docker container.
 Changes to either the Dockerfile or init.sql means you will need to remove and then rebuild the container. \
