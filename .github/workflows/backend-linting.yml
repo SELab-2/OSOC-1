@@ -19,8 +19,9 @@ jobs:
       - run: |
           cd /__w/OSOC-1/OSOC-1/temppath/backend
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint
-          ls -a
+          ls -la
           chmod a+x ktlint
+          ls -la
           ktlint --verbose
 
 #      - name: ktlint
