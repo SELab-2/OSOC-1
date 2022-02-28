@@ -40,6 +40,8 @@ jobs:
         working-directory: ./frontend
       - run: npm test --if-present
         working-directory: ./frontend
+      - run: cp -r build /home/selab2/production
+        working-directory: ./frontend
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
