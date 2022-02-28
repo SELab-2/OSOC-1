@@ -21,11 +21,11 @@ jobs:
       - run: |
           pwd
           ls -a
-          cd /__w/OSOC-1/OSOC-1
+          cd /__w/OSOC-1/OSOC-1/ktlint
           ls -a
 
-#      - name: ktlint
-#        uses: ScaCap/action-ktlint@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          reporter: github-pr-review
+      - name: ktlint
+        uses: ScaCap/action-ktlint@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
