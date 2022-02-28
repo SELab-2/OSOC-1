@@ -11,8 +11,8 @@ jobs:
       GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 
     steps:
-      - run: |
-          cd /home/selab2/actions-runner/workspace
+#      - run: |
+#          cd /home/selab2/actions-runner/workspace
       - name: Clone repo
         uses: actions/checkout@v2
         with:
@@ -21,7 +21,7 @@ jobs:
       - run: |
           pwd
           ls -a
-          cd /home/selab2/actions-runner/workspace/ktlint
+          cd /__w/OSOC-1/OSOC-1
           ls -a
 
 #      - name: ktlint
