@@ -17,7 +17,7 @@ jobs:
 
     runs-on: self-hosted
     container: 
-      image: ubuntu:latest
+      image: mikxox/maven-test-action:latest
 
     # Service containers to run with `container-job`
     services:
@@ -41,25 +41,25 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Install sudo and wget
-        run: |
-          apt update && apt install -y sudo && sudo apt install -y wget
-      - name: Install java manually
-        run: |
-          sudo wget https://download.java.net/java/GA/jdk17/0d483333a00540d886896bac774ff48b/35/GPL/openjdk-17_linux-x64_bin.tar.gz
-          sudo tar xvf openjdk-17_linux-x64_bin.tar.gz
-          sudo mv jdk-17 /opt/
-          export JAVA_HOME=/opt/jdk-17
-          export PATH=$PATH:$JAVA_HOME/bin 
+#       - name: Install sudo and wget
+#         run: |
+#           apt update && apt install -y sudo && sudo apt install -y wget
+#       - name: Install java manually
+#         run: |
+#           sudo wget https://download.java.net/java/GA/jdk17/0d483333a00540d886896bac774ff48b/35/GPL/openjdk-17_linux-x64_bin.tar.gz
+#           sudo tar xvf openjdk-17_linux-x64_bin.tar.gz
+#           sudo mv jdk-17 /opt/
+#           export JAVA_HOME=/opt/jdk-17
+#           export PATH=$PATH:$JAVA_HOME/bin 
           
-      - name: Install maven manually
-        run: |
-          export VER="3.8.4"
-          sudo wget http://www-eu.apache.org/dist/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
-          sudo tar xvf apache-maven-${VER}-bin.tar.gz
-          sudo mv apache-maven-${VER} /opt/maven
-          export MAVEN_HOME=/opt/maven
-          export PATH=\$PATH:\$MAVEN_HOME/bin
+#       - name: Install maven manually
+#         run: |
+#           export VER="3.8.4"
+#           sudo wget http://www-eu.apache.org/dist/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
+#           sudo tar xvf apache-maven-${VER}-bin.tar.gz
+#           sudo mv apache-maven-${VER} /opt/maven
+#           export MAVEN_HOME=/opt/maven
+#           export PATH=\$PATH:\$MAVEN_HOME/bin
           
 #       - name: Test maven version
 #         run: |
@@ -72,6 +72,8 @@ jobs:
       - name: Test with Maven
         # -B: run in non-interactive (batch) mode
         run: |
-          export JAVA_HOME=/opt/jdk-17
-          export PATH=$PATH:$JAVA_HOME/bin 
-          /opt/maven/bin/mvn -B -Dtest="unittests.**" -DfailIfNoTests=false test --file backend/pom.xml
+          mvn -B -Dtest="unittests.**" -DfailIfNoTests=false test --file backend/pom.xml
+#         run: |
+#           export JAVA_HOME=/opt/jdk-17
+#           export PATH=$PATH:$JAVA_HOME/bin 
+#           /opt/maven/bin/mvn -B -Dtest="unittests.**" -DfailIfNoTests=false test --file backend/pom.xml
