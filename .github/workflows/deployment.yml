@@ -24,7 +24,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: '16.x'
+        java-version: '17'
 
     steps:
       - uses: actions/checkout@v2
@@ -42,10 +43,10 @@ jobs:
         working-directory: ./frontend
       - run: cp -R build/ /home/selab2/production/
         working-directory: ./frontend
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v2
         with:
-          java-version: '17'
+          java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
           cache: maven
       - name: Build backend with Maven
