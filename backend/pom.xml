@@ -101,14 +101,4 @@
 		</plugins>
 	</build>
 
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>com.github.gantsign.maven</groupId>
-				<artifactId>ktlint-maven-plugin</artifactId>
-				<version>1.11.2</version>
-			</plugin>
-		</plugins>
-	</reporting>
-
 </project>
