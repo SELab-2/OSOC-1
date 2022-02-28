@@ -40,7 +40,7 @@ jobs:
         working-directory: ./frontend
       - run: npm test --if-present
         working-directory: ./frontend
-      - run: cp -R build /home/selab2/production
+      - run: cp -R build/ /home/selab2/production/
         working-directory: ./frontend
       - name: Set up JDK 17
         uses: actions/setup-java@v2
@@ -51,5 +51,7 @@ jobs:
       - name: Build backend with Maven
         working-directory: ./backend
         run: mvn -B package --file pom.xml
+      - run: cp /home/selab2/actions-runner/selab2/OSOC-1/OSOC-1/backend/target/backend-0.0.1-SNAPSHOT.jar /home/selab2/production/
+        working-directory: ./backend
       - name: Execute Jar File
         run: java -jar /home/selab2/actions-runner/selab2/OSOC-1/OSOC-1/backend/target/backend-0.0.1-SNAPSHOT.jar &
