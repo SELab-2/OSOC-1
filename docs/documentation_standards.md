@@ -63,6 +63,17 @@ Take a look at the link for a detailed explanation. To create these diagrams, yo
 
 
 
+
+# API documentation
+
+We will use [Swagger UI](https://swagger.io/tools/swagger-ui/) for this as it seems to be the most popular tool out there.
+Sadly it does not seem to be trivial to automatically change the API documentation based on changes in the API code,
+but hopefully we won't be changing this code too much anyway. [This](https://www.youtube.com/watch?v=xggucT_xl5U)
+tutorial is a good place to get started with Swagger.
+
+
+
+
 # User manual
 
 The user manual will be hosted on this repository's [wiki](https://github.com/SELab-2/OSOC-1/wiki).
