@@ -16,20 +16,29 @@ jobs:
         with:
           fetch-depth: 1
           path: 'temppath'
-      - run: |
+      - name: install ktlint v0.44.0
+        run: |
           cd /__w/OSOC-1/OSOC-1/temppath/backend
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint
           chmod a+x ktlint
-      - name: run ktlint
+#      - name: run ktlint
+#        run: |
+#          ./ktlint --verbose --reporter=checkstyle,output=build/ktlint-report.xml
+#        continue-on-error: true
+      - name: install reviewdog
         run: |
-          ./ktlint --verbose --reporter=checkstyle,output=build/ktlint-report.xml
-        continue-on-error: true
-      - run: |
-          ls -a
-      - uses: yutailang0119/action-ktlint@v2
-        with:
-          report-path: build/ktlint-report.xml
-        continue-on-error: false
+          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b /usr/local/bin/ v0.13.0
+
+      - name: ktlint with reviewdog
+        run: |
+          ktlint --reporter=checkstyle | reviewdog -f=checkstyle -name="ktlint" -reporter="github-pr-check" -level="error" -filter-mode="added" -fail-on-error="false"
+
+#      - run: |
+#          ls -a
+#      - uses: yutailang0119/action-ktlint@v2
+#        with:
+#          report-path: build/ktlint-report.xml
+#        continue-on-error: false
 
 #      - name: Ktlint check
 #        run:
