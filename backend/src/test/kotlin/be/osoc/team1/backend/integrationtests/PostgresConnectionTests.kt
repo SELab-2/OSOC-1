@@ -12,9 +12,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
-
 // Basic test to ensure postgresql testcontainer works
-
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
@@ -45,5 +43,4 @@ class PostgresConnectionTests {
         val actualDatabaseVersion = jdbcTemplate.queryForObject("SELECT version()", String::class.java)
         actualDatabaseVersion shouldContain "PostgreSQL 14.2"
     }
-
 }
