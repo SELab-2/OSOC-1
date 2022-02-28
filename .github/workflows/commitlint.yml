@@ -19,4 +19,4 @@ jobs:
       - name: Validate all commits from PR
         run: |
           cd /__w/OSOC-1/OSOC-1/temppath
-          npx commitlint --verbose --from HEAD~1 --to HEAD --verbose
+          npx commitlint --verbose
