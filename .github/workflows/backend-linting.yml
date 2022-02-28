@@ -1,0 +1,20 @@
+name: backend-linting
+on: [pull_request]
+
+jobs:
+  ktlint:
+    name: Check Code Quality
+    runs-on: self-hosted
+    container:
+      image: mikxox/maven-test-action:latest
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+      - name: ktlint
+        uses: ScaCap/action-ktlint@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
