@@ -7,12 +7,15 @@ jobs:
     runs-on: self-hosted
     container:
       image: mikxox/maven-test-action:latest
+    env:
+      GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 
     steps:
       - name: Clone repo
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
         with:
           fetch-depth: 1
+          path: 'commitlint'
       - name: ktlint
         uses: ScaCap/action-ktlint@master
         with:
