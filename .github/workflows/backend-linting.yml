@@ -20,9 +20,18 @@ jobs:
           cd /__w/OSOC-1/OSOC-1/temppath/backend
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint
           chmod a+x ktlint
-      - name: Ktlint check
-        run:
-          ./ktlint --verbose --debug --trace -F --color
+      - name: run ktlint
+        run: |
+          ./ktlint --reporter=checkstyle,output=build/ktlint-report.xml
+        continue-on-error: true
+      - uses: yutailang0119/action-ktlint@v2
+        with:
+          report-path: build/*.xml # Support glob patterns by https://www.npmjs.com/package/@actions/glob
+          continue-on-error: false # If annotations contain error of severity, action-ktlint exit 1.
+
+#      - name: Ktlint check
+#        run:
+#          ./ktlint --verbose --debug --trace -F --color
 
 #      - name: ktlint
 #        uses: ScaCap/action-ktlint@master
