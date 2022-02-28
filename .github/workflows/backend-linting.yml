@@ -31,7 +31,7 @@ jobs:
 
       - name: ktlint with reviewdog
         run: |
-          ktlint --reporter=checkstyle | reviewdog -f=checkstyle -name="ktlint" -reporter="github-pr-check" -level="error" -filter-mode="added" -fail-on-error="false"
+          ./ktlint --reporter=checkstyle | reviewdog -f=checkstyle -name="ktlint" -reporter="github-pr-check" -level="error" -filter-mode="added" -fail-on-error="false"
 
 #      - run: |
 #          ls -a
