@@ -17,8 +17,10 @@ jobs:
           fetch-depth: 1
           path: 'temppath'
       - run: |
-          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint && chmod a+x ktlint
           cd /__w/OSOC-1/OSOC-1/temppath/backend
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint
+          ls -a
+          chmod a+x ktlint
           ktlint --verbose
 
 #      - name: ktlint
