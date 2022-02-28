@@ -22,7 +22,7 @@ jobs:
           chmod a+x ktlint
       - name: Ktlint check
         run:
-          ./ktlint --verbose -F --color
+          ./ktlint --verbose --debug --trace -F --color
 
 #      - name: ktlint
 #        uses: ScaCap/action-ktlint@master
