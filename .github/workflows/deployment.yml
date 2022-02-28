@@ -24,8 +24,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: '16.x'
-        java-version: '17'
+        node-version: ['16.x']
+        java-version: ['17']
 
     steps:
       - uses: actions/checkout@v2
