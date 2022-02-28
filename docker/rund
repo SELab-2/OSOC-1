@@ -1,21 +1,21 @@
 #!/bin/bash
 if [[ $1 == "build" ]]
 then
-    docker build -t osoc_postgres_image_local_dev:latest .
+    sudo docker build -t osoc_postgres_image_local_dev:latest .
 elif [[ $1 == "run" ]]
 then
     rm -r "database_placeholder" &> /dev/null
     mkdir "database_placeholder" 
-    docker run -d --name osoc_postgres_container_local_dev -p 127.0.0.1:5432:5432 -v $PWD/database_placeholder:/var/lib/postgresql/data -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=osoc osoc_postgres_image_local_dev:latest
+    sudo docker run -d --name osoc_postgres_container_local_dev -p 127.0.0.1:5432:5432 -v $PWD/database_placeholder:/var/lib/postgresql/data -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=osoc osoc_postgres_image_local_dev:latest
 elif [[ $1 == "start" ]]
 then
-    docker container start osoc_postgres_container_local_dev
+    sudo docker container start osoc_postgres_container_local_dev
 elif [[ $1 == "stop" ]]
 then
-    docker container stop osoc_postgres_container_local_dev
+    sudo docker container stop osoc_postgres_container_local_dev
 elif [[ $1 == "remove" ]] || [[ $1 == "rm" ]]
 then
-    docker container rm osoc_postgres_container_local_dev
+    sudo docker container rm osoc_postgres_container_local_dev
 else 
     echo "Unknown command"
     echo "Possible commands are:"
