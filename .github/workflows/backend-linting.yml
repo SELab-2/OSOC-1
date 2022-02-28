@@ -17,11 +17,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-          path: 'ktlint'
+          path: 'temppath'
       - run: |
           pwd
           ls -a
-          cd /__w/OSOC-1/OSOC-1/ktlint
+          cd /__w/OSOC-1/OSOC-1/temppath
           ls -a
 
       - name: ktlint
