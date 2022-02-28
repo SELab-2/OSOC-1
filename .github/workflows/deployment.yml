@@ -49,3 +49,5 @@ jobs:
       - name: Build backend with Maven
         working-directory: ./backend
         run: mvn -B package --file pom.xml
+      - name: Execute Jar File
+        run: sudo java -jar /home/selab2/actions-runner/selab2/OSOC-1/OSOC-1/backend/target/backend-0.0.1-SNAPSHOT.jar &
