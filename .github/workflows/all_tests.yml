@@ -1,4 +1,4 @@
-name: Run backend kotlin tests with maven
+name: Run backend all tests with maven
 
 on:
   push:
