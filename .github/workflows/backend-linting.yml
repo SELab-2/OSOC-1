@@ -15,8 +15,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: ktlint
-        uses: ScaCap/action-ktlint@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          path: 'ktlint'
+      - run: |
+          pwd
+          ls -a
+
+#      - name: ktlint
+#        uses: ScaCap/action-ktlint@master
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          reporter: github-pr-review
