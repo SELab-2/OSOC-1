@@ -22,7 +22,7 @@ jobs:
           ls -la
           chmod a+x ktlint
           ls -la
-          ktlint --verbose
+          ./ktlint --verbose
 
 #      - name: ktlint
 #        uses: ScaCap/action-ktlint@master
