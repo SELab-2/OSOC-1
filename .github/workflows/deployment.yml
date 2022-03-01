@@ -61,4 +61,4 @@ jobs:
       - run: cp /home/selab2/actions-runner/selab2/OSOC-1/OSOC-1/backend/target/backend-0.0.1-SNAPSHOT.jar /home/selab2/production/
         working-directory: ./backend
       - name: Execute Jar File
-        run: java -jar /home/selab2/production/backend-0.0.1-SNAPSHOT.jar &
+        run: sudo kill -9 `sudo lsof -t -i:8080` & sudo java -jar /home/selab2/production/backend-0.0.1-SNAPSHOT.jar &
