@@ -15,6 +15,13 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  ## Sets environment variable
+  OSOC_DB_USERNAME: ${{ secrets.OSOC_DB_USERNAME }}
+  OSOC_DB_PASSWORD: ${{ secrets.OSOC_DB_PASSWORD }}
+  OSOC_DBNAME: ${{ secrets.OSOC_DBNAME }}
+  OSOC_DB_URL: ${{ secrets.OSOC_DB_URL }}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
