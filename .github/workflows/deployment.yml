@@ -51,7 +51,7 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: 'temurin' # We are using temurin since adopt isn't supported anymore
-          cache: maven
+          cache: 'maven'
       - name: Build spring backend with Maven
         working-directory: ./backend
         run: mvn -B package --file pom.xml
