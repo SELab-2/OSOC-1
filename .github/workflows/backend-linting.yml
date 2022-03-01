@@ -31,6 +31,7 @@ jobs:
           ./ktlint --reporter=checkstyle | reviewdog -f=checkstyle -name="ktlint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="false"
 
       - name: remove temppath
+        if: always()
         run: |
           cd ..
           sudo rm -rf temppath

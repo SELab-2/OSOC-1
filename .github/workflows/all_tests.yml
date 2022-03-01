@@ -48,6 +48,7 @@ jobs:
           mvn -B -DfailIfNoTests=false test --file backend/pom.xml
 
       - name: remove temppath
+        if: always()
         run: |
           cd ..
           sudo rm -rf temppath
