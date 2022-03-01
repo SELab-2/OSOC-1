@@ -240,6 +240,100 @@ paths:
             responses:
                 '200':
                     description: successful operation
+    /users:
+        get:
+            summary: Get list containing all users
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/User'
+    /users/{userId}:
+        get:
+            summary: get User by id
+            parameters:
+                - name: userId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                '404':
+                    description: NOT FOUND
+        patch:
+            summary: update User by id
+            parameters:
+                - name: userId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/User'
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                '400':
+                    description: BAD REQUEST
+                '404':
+                    description: NOT FOUND
+        delete:
+            summary: delete user by id
+            parameters:
+                - name: userId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: OK
+                '404':
+                    description: NOT FOUND
+    /users/create:
+        put:
+            summary: add new user to database
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/User'
+            responses:
+                '201':
+                    description: CREATED
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+    /users/{userId}/role:
+        post:
+            summary: change role of user
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: string
+                            enum: [disabled, coach, admin]
 components:
     schemas:
         Student:
@@ -270,6 +364,29 @@ components:
                     type: string
                 desc:
                     type: string
+        User:
+            type: object
+            required:
+                - id
+                - name
+                - email
+                - password
+                - role
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                name:
+                    type: string
+                email:
+                    type: string
+                role:
+                    type: string
+                    enum: [disabled, coach, admin]
+                password:
+                    type: string
+                    format: bcrypt
+
     securitySchemes:
         BasicAuth:
             type: http
