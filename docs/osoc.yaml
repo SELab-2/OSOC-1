@@ -328,12 +328,28 @@ paths:
     /users/{userId}/role:
         post:
             summary: change role of user
+            parameters:
+                - name: userId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid            
             requestBody:
                 content:
                     application/json:
                         schema:
                             type: string
                             enum: [disabled, coach, admin]
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                '404':
+                    description: NOT FOUND                    
 components:
     schemas:
         Student:
