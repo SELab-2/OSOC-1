@@ -50,5 +50,5 @@ jobs:
       - name: remove temppath
         if: always()
         run: |
-          cd ..
+          cd /__w/OSOC-1/OSOC-1/
           sudo rm -rf temppath
