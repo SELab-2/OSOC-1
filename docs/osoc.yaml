@@ -9,7 +9,7 @@ servers:
 paths:
     /students:
         get:
-            summary: Get list containg all Student objects
+            summary: Get a list containing all Student objects
             responses:
                 '200':
                     description: successful operation
