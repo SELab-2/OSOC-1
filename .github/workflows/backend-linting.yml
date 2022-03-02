@@ -29,3 +29,9 @@ jobs:
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint
           chmod a+x ktlint
           ./ktlint --reporter=checkstyle | reviewdog -f=checkstyle -name="ktlint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="false"
+
+      - name: remove temppath
+        if: always()
+        run: |
+          cd /__w/OSOC-1/OSOC-1/
+          sudo rm -rf temppath

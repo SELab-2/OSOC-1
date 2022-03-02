@@ -17,6 +17,22 @@ jobs:
           path: 'temppath'
 
       - name: Validate all commits from PR
+        shell: bash
         run: |
           cd /__w/OSOC-1/OSOC-1/temppath
-          git log -1 --pretty=format:"%s" | npx commitlint --verbose
+          STATUS="$(git log -1 --pretty=format:"%s" | npx commitlint)"
+          echo -E ::notice title=commitmessage::$(git log -1 --pretty=format:"%s" | npx commitlint --verbose | sed 's/%/%25/g' | sed 's/\n/%0A/g' | sed 's/\r/%0D/g')
+
+      - name: Validate all commits from PR
+        shell: bash
+        if: failure()
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath
+          echo -E ::error title=commitmessage::$(git log -1 --pretty=format:"%s" | npx commitlint --verbose | sed 's/%/%25/g' | sed 's/\n/%0A/g' | sed 's/\r/%0D/g')
+
+
+      - name: remove temppath
+        if: always()
+        run: |
+          cd /__w/OSOC-1/OSOC-1/
+          sudo rm -rf temppath

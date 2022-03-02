@@ -46,3 +46,9 @@ jobs:
         run: |
           cd /__w/OSOC-1/OSOC-1/temppath
           mvn -B -DfailIfNoTests=false test --file backend/pom.xml
+
+      - name: remove temppath
+        if: always()
+        run: |
+          cd /__w/OSOC-1/OSOC-1/
+          sudo rm -rf temppath
