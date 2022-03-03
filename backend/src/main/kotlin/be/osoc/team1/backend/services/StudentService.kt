@@ -48,6 +48,4 @@ class StudentService(private val repository: StudentRepository) {
         else
             throw InvalidIdException()
     }
-
-
 }

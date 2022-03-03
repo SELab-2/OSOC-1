@@ -5,7 +5,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-class Student (
+class Student(
     @Id
     @GeneratedValue
     val id: Long,
