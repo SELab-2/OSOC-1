@@ -26,7 +26,7 @@ Run `./mvnw spring-boot:run` in the backend directory to compile and run the bac
 
 ### Linting Code
 Linting is done using [Ktlint](https://github.com/pinterest/ktlint#command-line-usage)
-Because the maven plugin is currently broken(?), it is advised to use the Command Line Interface for this.
+Because the maven plugin is currently broken, it is advised to use the Command Line Interface for this.
 
 Command Line:
 - Checking code for style violations
