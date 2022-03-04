@@ -22,10 +22,10 @@ class StudentService(private val repository: StudentRepository) {
      * in the database in the first place.
      */
     fun deleteStudentById(id: UUID) {
-        if (repository.existsById(id))
-            repository.deleteById(id)
-        else
+        if (!repository.existsById(id))
             throw InvalidIdException()
+
+        repository.deleteById(id)
     }
 
     /**
@@ -35,8 +35,8 @@ class StudentService(private val repository: StudentRepository) {
     fun putStudent(student: Student) {
         if (repository.existsById(student.id))
             throw IllegalArgumentException()
-        else
-            repository.save(student)
+
+        repository.save(student)
     }
 
     /**
@@ -44,9 +44,9 @@ class StudentService(private val repository: StudentRepository) {
      * InvalidIdException if no student with that id exists.
      */
     fun patchStudent(student: Student) {
-        if (repository.existsById(student.id))
-            repository.save(student)
-        else
+        if (!repository.existsById(student.id))
             throw InvalidIdException()
+
+        repository.save(student)
     }
 }
