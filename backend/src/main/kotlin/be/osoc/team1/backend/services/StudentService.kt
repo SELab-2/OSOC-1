@@ -5,6 +5,7 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class StudentService(private val repository: StudentRepository) {
@@ -14,13 +15,13 @@ class StudentService(private val repository: StudentRepository) {
     /**
      * Get a student by their [id]. Throws an InvalidIdException if no such student exists.
      */
-    fun getStudentById(id: Long): Student = repository.findByIdOrNull(id) ?: throw InvalidIdException()
+    fun getStudentById(id: UUID): Student = repository.findByIdOrNull(id) ?: throw InvalidIdException()
 
     /**
      * Delete a student by their [id]. Throws an InvalidIdException if no such student existed
      * in the database in the first place.
      */
-    fun deleteStudentById(id: Long) {
+    fun deleteStudentById(id: UUID) {
         if (repository.existsById(id))
             repository.deleteById(id)
         else

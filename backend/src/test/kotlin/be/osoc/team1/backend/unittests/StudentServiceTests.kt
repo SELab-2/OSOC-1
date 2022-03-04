@@ -10,10 +10,11 @@ import io.mockk.just
 import io.mockk.mockk
 import org.junit.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.util.*
 
 class StudentServiceTests {
 
-    private val testId: Long = 0
+    private val testId: UUID = UUID.randomUUID()
     private val testStudent = Student(testId, "Tom", "Alard")
 
     private fun getService(studentAlreadyExists: Boolean): StudentService {
