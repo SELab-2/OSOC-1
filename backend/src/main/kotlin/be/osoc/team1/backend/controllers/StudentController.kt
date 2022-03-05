@@ -38,11 +38,5 @@ class StudentController(private val service: StudentService) {
     }
 
     @PutMapping("/students/create")
-    fun putStudent(@RequestBody student: Student) {
-        try {
-            service.putStudent(student)
-        } catch (_: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Student with given id already exists")
-        }
-    }
+    fun putStudent(@RequestBody student: Student) = service.putStudent(student)
 }

@@ -9,20 +9,22 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.springframework.data.repository.findByIdOrNull
 import java.util.*
 
 class StudentServiceTests {
 
-    private val testId: UUID = UUID.randomUUID()
+    private val testId = UUID.randomUUID()
     private val testStudent = Student(testId, "Tom", "Alard")
+    private val savedStudent = Student(UUID.randomUUID(), "Tom", "Alard")
 
     private fun getService(studentAlreadyExists: Boolean): StudentService {
         val repository: StudentRepository = mockk()
         every { repository.existsById(testId) } returns studentAlreadyExists
         every { repository.findByIdOrNull(testId) } returns if (studentAlreadyExists) testStudent else null
         every { repository.deleteById(testId) } just Runs
-        every { repository.save(testStudent) } returns testStudent
+        every { repository.save(testStudent) } returns savedStudent
         return StudentService(repository)
     }
 
@@ -51,15 +53,9 @@ class StudentServiceTests {
     }
 
     @Test
-    fun `putStudent puts student in database when no other student with same id exists`() {
+    fun `putStudent returns some other id than what was passed`() {
         val service = getService(false)
-        service.putStudent(testStudent)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun `putStudent fails when student with same id already exists`() {
-        val service = getService(true)
-        service.putStudent(testStudent)
+        assertNotEquals(service.putStudent(testStudent), testId)
     }
 
     @Test

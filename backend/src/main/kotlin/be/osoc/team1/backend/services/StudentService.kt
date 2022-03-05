@@ -29,15 +29,10 @@ class StudentService(private val repository: StudentRepository) {
     }
 
     /**
-     * Add the given [student] entity to the database. Throws an IllegalArgumentException
-     * if a student already exists with the same id.
+     * Add the given [student] entity to the database. Returns the student's new id as decided by the database.
      */
-    fun putStudent(student: Student) {
-        if (repository.existsById(student.id))
-            throw IllegalArgumentException()
+    fun putStudent(student: Student) = repository.save(student).id
 
-        repository.save(student)
-    }
 
     /**
      * Change the values of a student already present in the database. Throws an
