@@ -11,31 +11,27 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @RestController
+@RequestMapping("/students")
 class StudentController(private val service: StudentService) {
-
-    /**
-     * Handle InvalidIdExceptions at this level, so no try catches are required
-     */
-    @ExceptionHandler(InvalidIdException::class)
-    fun handleNotFound(e: InvalidIdException): ResponseEntity<String> =
-        ResponseEntity(e.message, HttpStatus.NOT_FOUND)
 
     /**
      * Get a list of all students in the database. This request cannot fail.
      */
-    @GetMapping("/students")
+    @GetMapping("")
     fun getAllStudents() = service.getAllStudents()
 
     /**
      * Returns the student with the corresponding [id]. If no such student exists,
      * returns a "404: Not Found" message instead.
      */
-    @GetMapping("/students/{id}")
+    @GetMapping("/{id}")
     fun getStudentById(@PathVariable id: UUID): Student {
         return service.getStudentById(id)
     }
@@ -44,7 +40,7 @@ class StudentController(private val service: StudentService) {
      * Deletes the student with the corresponding [id]. If no such student exists,
      * returns a "404: Not Found" message instead.
      */
-    @DeleteMapping("/students/{id}")
+    @DeleteMapping("/{id}")
     fun deleteStudentById(@PathVariable id: UUID) {
         service.deleteStudentById(id)
     }
@@ -65,6 +61,6 @@ class StudentController(private val service: StudentService) {
      * which implies that no checking is done to see if firstName or lastName qualify as valid 'names'.
      * This verification is the responsibility of the caller.
      */
-    @PutMapping("/students/create")
+    @PutMapping("/create")
     fun putStudent(@RequestBody student: Student) = service.putStudent(student)
 }
