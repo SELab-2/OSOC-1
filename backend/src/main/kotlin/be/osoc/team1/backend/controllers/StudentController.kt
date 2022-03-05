@@ -16,9 +16,16 @@ import java.util.*
 @RestController
 class StudentController(private val service: StudentService) {
 
+    /**
+     * Get a list of all students in the database. This request cannot fail.
+     */
     @GetMapping("/students")
     fun getAllStudents() = service.getAllStudents()
 
+    /**
+     * Returns the student with the corresponding [id]. If no such student exists,
+     * returns a "404: Not Found" message instead.
+     */
     @GetMapping("/students/{id}")
     fun getStudentById(@PathVariable id: UUID): Student {
         try {
@@ -28,6 +35,10 @@ class StudentController(private val service: StudentService) {
         }
     }
 
+    /**
+     * Deletes the student with the corresponding [id]. If no such student exists,
+     * returns a "404: Not Found" message instead.
+     */
     @DeleteMapping("/students/{id}")
     fun deleteStudentById(@PathVariable id: UUID) {
         try {
@@ -37,6 +48,22 @@ class StudentController(private val service: StudentService) {
         }
     }
 
+    /**
+     * Add a student to the database. The student should be passed in the request body
+     * as a JSON object and should have the following format:
+     *
+     * {
+     *     "id": "(INSERT ANY VALID UUID)",
+     *     "firstName": "(INSERT FIRST NAME)",
+     *     "lastName": "(INSERT LAST NAME)"
+     * }
+     *
+     * The id can be any UUID, the database will simply ignore it and choose another random
+     * UUID for this student. TODO: find a way to remove the need to send an id
+     * The chosen id is then returned to the API caller. This request cannot fail,
+     * which implies that no checking is done to see if firstName or lastName qualify as valid 'names'.
+     * This verification is the responsibility of the caller.
+     */
     @PutMapping("/students/create")
     fun putStudent(@RequestBody student: Student) = service.putStudent(student)
 }
