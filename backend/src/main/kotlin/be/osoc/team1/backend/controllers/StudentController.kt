@@ -4,7 +4,9 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -15,6 +17,13 @@ import java.util.*
 
 @RestController
 class StudentController(private val service: StudentService) {
+
+    /**
+     * Handle InvalidIdExceptions at this level, so no try catches are required
+     */
+    @ExceptionHandler(InvalidIdException::class)
+    fun handleNotFound(e: InvalidIdException): ResponseEntity<String> =
+        ResponseEntity(e.message, HttpStatus.NOT_FOUND)
 
     /**
      * Get a list of all students in the database. This request cannot fail.
@@ -28,11 +37,7 @@ class StudentController(private val service: StudentService) {
      */
     @GetMapping("/students/{id}")
     fun getStudentById(@PathVariable id: UUID): Student {
-        try {
-            return service.getStudentById(id)
-        } catch (_: InvalidIdException) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No student found with given id")
-        }
+        return service.getStudentById(id)
     }
 
     /**
@@ -41,11 +46,7 @@ class StudentController(private val service: StudentService) {
      */
     @DeleteMapping("/students/{id}")
     fun deleteStudentById(@PathVariable id: UUID) {
-        try {
-            service.deleteStudentById(id)
-        } catch (_: InvalidIdException) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No student found with given id")
-        }
+        service.deleteStudentById(id)
     }
 
     /**
