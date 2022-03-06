@@ -5,7 +5,7 @@ on:
   # Triggers the workflow on push events but only for the main branch
   push:
     branches: 
-      - main
+      - deployment-yarn
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -31,19 +31,19 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      
-      - name: Install npm dependencies
-        run: npm i
+      - name: Install and update yarn
+        run: npm install -g yarn
+      - name: Install yarn dependencies
+        run: yarn install --frozen-lockfile
         working-directory: ./frontend
-      - name: Build react frontend with npm
-        run: npm run build --if-present
+      - name: Build react frontend with yarn
+        run: yarn build
         working-directory: ./frontend
-      - name: Running npm tests
-        run: npm test --if-present
+      - name: Running yarn tests
+        run: yarn test
         working-directory: ./frontend
       - name: Copy react build files to production folder
-        run: cp -R build/ /home/selab2/production/
+        run: cp -R out/ /home/selab2/production/
         working-directory: ./frontend
 
       - name: Set up JDK ${{ matrix.java-version }}
