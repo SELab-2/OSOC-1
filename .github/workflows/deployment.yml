@@ -39,9 +39,6 @@ jobs:
       - name: Build react frontend with yarn
         run: yarn build
         working-directory: ./frontend
-      - name: Running yarn tests
-        run: yarn test
-        working-directory: ./frontend
       - name: Copy react build files to production folder
         run: cp -R out/ /home/selab2/production/
         working-directory: ./frontend
