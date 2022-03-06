@@ -70,7 +70,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val databaseId = UUID.randomUUID()
         every { studentService.putStudent(any()) } returns databaseId
         mockMvc.perform(
-            put("/students/create")
+            put("/students")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isOk).andExpect(content().string("\"$databaseId\""))
