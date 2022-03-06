@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.Project
+import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -48,5 +49,14 @@ class ProjectService(private val repository: ProjectRepository) {
             throw InvalidIdException()
 
         repository.save(proj)
+    }
+
+    /**
+     * Adds student to project based on [projId], if [projId] is not in [repository] throw InvalidIdException
+     */
+    fun addStudentToProject(projId:UUID, stud: Student) {
+        val project:Project = repository.findByIdOrNull(projId) ?: throw InvalidIdException()
+        project.students.add(stud)
+        repository.save(project)
     }
 }
