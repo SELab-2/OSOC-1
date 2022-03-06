@@ -3,22 +3,27 @@ package be.osoc.team1.backend.entities
 import org.hibernate.annotations.GenericGenerator
 import java.util.*
 import javax.persistence.CascadeType
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.OneToMany
+import javax.persistence.Table
 
 @Entity
 class Project(
+    val name: String,
+
+    val description: String,
+
+    @OneToMany(cascade = [CascadeType.ALL])
+    val students: MutableCollection<Student>,
+
+    @OneToMany(cascade = [CascadeType.ALL])
+    val coaches: MutableCollection<Student>
+) {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    val id: UUID,
-
-    val name: String,
-
-    val desc: String,
-
-    @OneToMany(cascade = [CascadeType.ALL])
-    val students: MutableCollection<Student>
-)
+    val id: UUID = UUID.randomUUID()
+}

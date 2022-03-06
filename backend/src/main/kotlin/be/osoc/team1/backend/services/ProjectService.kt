@@ -52,11 +52,24 @@ class ProjectService(private val repository: ProjectRepository) {
     }
 
     /**
-     * Adds student to project based on [projId], if [projId] is not in [repository] throw InvalidIdException
+     * Adds a student to project based on [projId], if [projId] is not in [repository] throw InvalidIdException
      */
     fun addStudentToProject(projId:UUID, stud: Student) {
         val project:Project = getProjectById(projId)
         project.students.add(stud)
+        repository.save(project)
+    }
+    /**
+     * Removes a student from project based on [projId] and [studId], if [projId] is not in [repository]
+     * or [studId] not in project throw InvalidIdException
+     */
+    fun removeStudentFromProject(projId:UUID, studId: UUID) {
+        val project:Project = getProjectById(projId)
+        val s = project.students.size
+        project.students.filter { it.id != studId }
+        if (project.students.size ==s){
+            throw InvalidIdException()
+        }
         repository.save(project)
     }
 }

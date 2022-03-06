@@ -18,8 +18,6 @@ import java.util.UUID
 class ProjectController(private val service: ProjectService) {
 
     /** check list
-     * post projects/id/student
-     * delete projects/id/students/id
      * post projects/id/coaches
      * delete projects/id/coaches/id
      * get projects/conflicts
@@ -58,5 +56,10 @@ class ProjectController(private val service: ProjectService) {
     @PostMapping("/{projId}/students")
     fun postStudentToProject(@PathVariable projId: UUID, @RequestBody stud: Student) {
         service.addStudentToProject(projId, stud)
+    }
+
+    @DeleteMapping("/{projId}/students/{studId}")
+    fun deleteStudentFromProject(@PathVariable projId: UUID, @PathVariable studId: UUID){
+        service.removeStudentFromProject(projId,studId)
     }
 }
