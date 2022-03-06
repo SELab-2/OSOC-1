@@ -17,43 +17,53 @@ class StudentServiceTests {
     private val testStudent = Student("Tom", "Alard")
     private val testId = testStudent.id
 
-    private fun getService(studentAlreadyExists: Boolean): StudentService {
+    private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
         every { repository.existsById(testId) } returns studentAlreadyExists
         every { repository.findByIdOrNull(testId) } returns if (studentAlreadyExists) testStudent else null
         every { repository.deleteById(testId) } just Runs
         val differentIdTestStudent = Student("Tom", "Alard")
         every { repository.save(testStudent) } returns differentIdTestStudent
-        return StudentService(repository)
+        return repository
     }
 
     @Test
     fun `getStudentById succeeds when student with id exists`() {
-        val service = getService(true)
-        service.getStudentById(testId)
+        val service = StudentService(getRepository(true))
+        assertEquals(service.getStudentById(testId), testStudent)
     }
 
     @Test(expected = InvalidIdException::class)
     fun `getStudentById fails when no student with that id exists`() {
-        val service = getService(false)
+        val service = StudentService(getRepository(false))
         service.getStudentById(testId)
     }
 
     @Test
     fun `deleteStudentById succeeds when student with id exists`() {
-        val service = getService(true)
+        val repository = getRepository(true)
+        val service = StudentService(repository)
         service.deleteStudentById(testId)
+        verify { repository.deleteById(testId) }
     }
 
     @Test(expected = InvalidIdException::class)
     fun `deleteStudentById fails when no student with that id exists`() {
-        val service = getService(false)
+        val service = StudentService(getRepository(false))
         service.deleteStudentById(testId)
     }
 
     @Test
+    fun `putStudent saves student`() {
+        val repository = getRepository(false)
+        val service = StudentService(repository)
+        service.putStudent(testStudent)
+        verify { repository.save(testStudent) }
+    }
+
+    @Test
     fun `putStudent returns some other id than what was passed`() {
-        val service = getService(false)
+        val service = StudentService(getRepository(false))
         assertNotEquals(service.putStudent(testStudent), testId)
     }
 }
