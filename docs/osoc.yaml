@@ -19,6 +19,16 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/Student'
+        put:
+            summary: Add a new student to the database
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Student'
+            responses:
+                '200':
+                    description: successful operation
     /students/{studentId}:
         get:
             summary: Get Student by id
@@ -45,17 +55,6 @@ paths:
                 schema:
                     type: integer
                     format: int64
-            responses:
-                '200':
-                    description: successful operation
-    /students:
-        put:
-            summary: Add a new student to the database
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/Student'
             responses:
                 '200':
                     description: successful operation
@@ -97,6 +96,16 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/Project'
+        put:
+            summary: Add new project
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Project'
+            responses:
+                '200': 
+                    description: successful operation
     /projects/{projectId}:
         get:
             summary: Get Project by id
@@ -130,7 +139,7 @@ paths:
         get:
             summary: Get all students from a project
             parameters: 
-              - name: projectID
+              - name: projectId
                 required: true
                 in: path
                 schema:
@@ -215,17 +224,6 @@ paths:
             responses:
                 '200':
                     description: successful operation
-    /projects:
-        put:
-            summary: Add new project
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/Project'
-            responses:
-                '200': 
-                    description: successful operation
     /communications/{studentId}:
         get:
             summary: Get all registered communications with a student
@@ -239,7 +237,6 @@ paths:
             responses:
                 '200':
                     description: successful operation
-    /communications/{studentId}:
         put:
             summary: Register communication with a student
             parameters:
@@ -264,6 +261,20 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/User'
+        put:
+            summary: add new user to database
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/User'
+            responses:
+                '201':
+                    description: CREATED
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
     /users/{userId}:
         get:
             summary: get User by id
@@ -322,21 +333,6 @@ paths:
                     description: OK
                 '404':
                     description: NOT FOUND
-    /users:
-        put:
-            summary: add new user to database
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/User'
-            responses:
-                '201':
-                    description: CREATED
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/User'
     /users/{userId}/role:
         post:
             summary: change role of user
