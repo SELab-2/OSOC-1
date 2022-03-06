@@ -27,7 +27,7 @@ class ProjectController(private val service: ProjectService) {
     /**
      * Get all projects from service
      */
-    @GetMapping("/")
+    @GetMapping
     fun getAllProjects(): Iterable<Project> = service.getAllProjects()
 
     /**

@@ -15,8 +15,8 @@ import java.util.*
 
 class ProjectServiceTests {
     private val testId = UUID.randomUUID()
-    private val testProject = Project(testId, "Test", "a test project")
-    private val savedProject = Project(UUID.randomUUID(), "Saved", "a saved project")
+    private val testProject = Project(testId, "Test", "a test project", mutableListOf())
+    private val savedProject = Project(UUID.randomUUID(), "Saved", "a saved project", mutableListOf())
 
     private fun getService(projectAlreadyExists: Boolean): ProjectService {
         val repository: ProjectRepository = mockk()
@@ -67,5 +67,10 @@ class ProjectServiceTests {
     fun `patchProject fails when no project with same id exists`() {
         val service = getService(false)
         service.patchProject(testProject)
+    }
+
+    @Test
+    fun `addStudentToProject adds a student`(){
+
     }
 }

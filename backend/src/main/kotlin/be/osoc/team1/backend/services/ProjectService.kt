@@ -55,7 +55,7 @@ class ProjectService(private val repository: ProjectRepository) {
      * Adds student to project based on [projId], if [projId] is not in [repository] throw InvalidIdException
      */
     fun addStudentToProject(projId:UUID, stud: Student) {
-        val project:Project = repository.findByIdOrNull(projId) ?: throw InvalidIdException()
+        val project:Project = getProjectById(projId)
         project.students.add(stud)
         repository.save(project)
     }
