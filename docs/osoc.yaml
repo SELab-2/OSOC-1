@@ -370,6 +370,7 @@ components:
                 id:
                     type: string
                     format: uuid
+                    readOnly: true
                 firstname:
                     type: string
                 lastname:
@@ -384,6 +385,7 @@ components:
                 id:
                     type: string
                     format: uuid
+                    readOnly: true
                 name:
                     type: string
                 desc:
@@ -400,6 +402,7 @@ components:
                 id:
                     type: string
                     format: uuid
+                    readOnly: true
                 name:
                     type: string
                 email:
