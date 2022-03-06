@@ -41,14 +41,11 @@ class StudentController(private val service: StudentService) {
      * as a JSON object and should have the following format:
      *
      * {
-     *     "id": "(INSERT ANY VALID UUID)",
      *     "firstName": "(INSERT FIRST NAME)",
      *     "lastName": "(INSERT LAST NAME)"
      * }
      *
-     * The id can be any UUID, the database will simply ignore it and choose another random
-     * UUID for this student. TODO: find a way to remove the need to send an id
-     * The chosen id is then returned to the API caller. This request cannot fail,
+     * The id for this student chosen by the database is then returned to the API caller. This request cannot fail,
      * which implies that no checking is done to see if firstName or lastName qualify as valid 'names'.
      * This verification is the responsibility of the caller.
      */
