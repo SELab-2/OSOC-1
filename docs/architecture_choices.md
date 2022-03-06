@@ -4,6 +4,8 @@ This document explains why the technologies in the [c4 container diagram](docs/C
 
 ## Frontend
 
+### TypeScript
+
 ### Next.js
 
 
