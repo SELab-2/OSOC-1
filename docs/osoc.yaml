@@ -368,8 +368,8 @@ components:
                 - lastname
             properties:
                 id:
-                    type: integer
-                    format: int64
+                    type: string
+                    format: uuid
                 firstname:
                     type: string
                 lastname:
@@ -382,8 +382,8 @@ components:
                 - desc
             properties:
                 id:
-                    type: integer
-                    format: int64
+                    type: string
+                    format: uuid
                 name:
                     type: string
                 desc:
