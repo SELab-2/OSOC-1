@@ -4,6 +4,7 @@ import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.UserRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -12,7 +13,7 @@ class UserService(private val repository: UserRepository) {
 
     fun getAllUsers(): Iterable<User> = repository.findAll()
 
-    fun getUserById(id: UUID) = repository.findById(id)
+    fun getUserById(id: UUID) = repository.findByIdOrNull(id) ?: throw InvalidIdException()
 
     fun deleteUserById(id: UUID) {
         if (!repository.existsById(id))
