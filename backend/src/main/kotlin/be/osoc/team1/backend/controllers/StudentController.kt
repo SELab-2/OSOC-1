@@ -52,6 +52,6 @@ class StudentController(private val service: StudentService) {
      * which implies that no checking is done to see if firstName or lastName qualify as valid 'names'.
      * This verification is the responsibility of the caller.
      */
-    @PutMapping("/create")
+    @PutMapping("")
     fun putStudent(@RequestBody student: Student) = service.putStudent(student)
 }
