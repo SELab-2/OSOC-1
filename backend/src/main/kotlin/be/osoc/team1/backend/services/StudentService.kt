@@ -15,7 +15,7 @@ class StudentService(private val repository: StudentRepository) {
     /**
      * Get a student by their [id]. Throws an InvalidIdException if no such student exists.
      */
-    fun getStudentById(id: UUID): Student = repository.findByIdOrNull(id) ?: throw InvalidIdException()
+    fun getStudentById(id: UUID) = repository.findByIdOrNull(id) ?: throw InvalidIdException()
 
     /**
      * Delete a student by their [id]. Throws an InvalidIdException if no such student existed
