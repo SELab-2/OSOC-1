@@ -7,13 +7,9 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-class Student(
+class Student(val firstName: String, val lastName: String) {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    val id: UUID,
-
-    val firstName: String,
-
-    val lastName: String
-)
+    val id: UUID = UUID.randomUUID()
+}
