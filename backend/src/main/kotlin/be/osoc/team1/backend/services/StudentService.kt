@@ -1,6 +1,9 @@
 package be.osoc.team1.backend.services
 
+import be.osoc.team1.backend.entities.StatusEnum
+import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -32,4 +35,26 @@ class StudentService(private val repository: StudentRepository) {
      * Add the given [student] entity to the database. Returns the student's new id as decided by the database.
      */
     fun putStudent(student: Student) = repository.save(student).id
+
+    /**
+     * Retrieve the student with the specified [id], then set his status to [newStatus].
+     * Throws an InvalidIdException if no student with that [id] exists.
+     */
+    fun setStudentStatus(id: UUID, newStatus: StatusEnum) {
+        val student = getStudentById(id)
+        student.status = newStatus
+        repository.save(student)
+    }
+
+    /**
+     * Retrieve the student with the specified [id], then create a new StatusSuggestion with
+     * the given [suggestionEnum] and [motivation] and it to the student's list.
+     * Throws an InvalidIdException if no student with that [id] exists.
+     */
+    fun addStudentStatusSuggestion(id: UUID, suggestionEnum: SuggestionEnum, motivation: String) {
+        val student = getStudentById(id)
+        val suggestion = StatusSuggestion(student, suggestionEnum, motivation)
+        student.statusSuggestions.add(suggestion)
+        repository.save(student)
+    }
 }
