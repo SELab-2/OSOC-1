@@ -48,7 +48,7 @@ paths:
             responses:
                 '200':
                     description: successful operation
-    /students/create:
+    /students:
         put:
             summary: Add a new student to the database
             requestBody:
@@ -126,7 +126,19 @@ paths:
             responses:
                 '200':
                     description: successful operation
-    /projects/{projectId}/students/draft:
+    /projects/{projectId}/students:
+        get:
+            summary: Get all students from a project
+            parameters: 
+              - name: projectID
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
         post:
             summary: Draft student for project
             parameters:
@@ -203,7 +215,7 @@ paths:
             responses:
                 '200':
                     description: successful operation
-    /projects/create:
+    /projects:
         put:
             summary: Add new project
             requestBody:
@@ -227,7 +239,7 @@ paths:
             responses:
                 '200':
                     description: successful operation
-    /communications/{studentId}/register:
+    /communications/{studentId}:
         put:
             summary: Register communication with a student
             parameters:
@@ -310,7 +322,7 @@ paths:
                     description: OK
                 '404':
                     description: NOT FOUND
-    /users/create:
+    /users:
         put:
             summary: add new user to database
             requestBody:
