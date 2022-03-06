@@ -1,6 +1,9 @@
 package be.osoc.team1.backend.unittests
 
+import be.osoc.team1.backend.entities.StatusEnum
+import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
@@ -8,7 +11,9 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.springframework.data.repository.findByIdOrNull
 
@@ -65,5 +70,38 @@ class StudentServiceTests {
     fun `putStudent returns some other id than what was passed`() {
         val service = StudentService(getRepository(false))
         assertNotEquals(service.putStudent(testStudent), testId)
+    }
+
+    @Test
+    fun `setStudentStatus changes student status when student with id exists`() {
+        val repository = getRepository(true)
+        val service = StudentService(repository)
+        service.setStudentStatus(testId, StatusEnum.Yes)
+        testStudent.status = StatusEnum.Yes  // Bit of a hack
+        verify { repository.save(testStudent) }
+        testStudent.status = StatusEnum.Undecided
+    }
+
+    @Test(expected = InvalidIdException::class)
+    fun `setStudentStatus fails when no student with that id exists`() {
+        val service = StudentService(getRepository(false))
+        service.setStudentStatus(testId, StatusEnum.Yes)
+    }
+
+    @Test
+    fun `addStudentStatusSuggestion adds status suggestion to list when student with id exists`() {
+        val repository = getRepository(true)
+        val service = StudentService(repository)
+        val testSuggestion = StatusSuggestion(testStudent, SuggestionEnum.Yes, "test motivation")
+        service.addStudentStatusSuggestion(testId, testSuggestion.status, testSuggestion.motivation)
+        testStudent.statusSuggestions.add(testSuggestion)  // Bit of a hack
+        verify { repository.save(testStudent) }
+        testStudent.statusSuggestions.remove(testSuggestion)
+    }
+
+    @Test(expected = InvalidIdException::class)
+    fun `addStudentStatusSuggestion fails when no student with that id exists`() {
+        val service = StudentService(getRepository(false))
+        service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "")
     }
 }
