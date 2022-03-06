@@ -32,16 +32,4 @@ class StudentService(private val repository: StudentRepository) {
      * Add the given [student] entity to the database. Returns the student's new id as decided by the database.
      */
     fun putStudent(student: Student) = repository.save(student).id
-
-
-    /**
-     * Change the values of a student already present in the database. Throws an
-     * InvalidIdException if no student with that id exists.
-     */
-    fun patchStudent(student: Student) {
-        if (!repository.existsById(student.id))
-            throw InvalidIdException()
-
-        repository.save(student)
-    }
 }

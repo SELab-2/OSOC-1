@@ -56,16 +56,4 @@ class StudentServiceTests {
         val service = getService(false)
         assertNotEquals(service.putStudent(testStudent), testId)
     }
-
-    @Test
-    fun `patchStudent updates student when student with same id exists`() {
-        val service = getService(true)
-        service.patchStudent(testStudent)
-    }
-
-    @Test(expected = InvalidIdException::class)
-    fun `patchStudent fails when no student with same id exists`() {
-        val service = getService(false)
-        service.patchStudent(testStudent)
-    }
 }
