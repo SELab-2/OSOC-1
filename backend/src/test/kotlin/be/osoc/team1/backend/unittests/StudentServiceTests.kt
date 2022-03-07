@@ -21,6 +21,7 @@ class StudentServiceTests {
 
     private val testStudent = Student("Tom", "Alard")
     private val testId = testStudent.id
+    private val testMotivation = "test motivation"
 
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
@@ -92,7 +93,7 @@ class StudentServiceTests {
     fun `addStudentStatusSuggestion adds status suggestion to list when student with id exists`() {
         val repository = getRepository(true)
         val service = StudentService(repository)
-        val testSuggestion = StatusSuggestion(testStudent, SuggestionEnum.Yes, "test motivation")
+        val testSuggestion = StatusSuggestion(SuggestionEnum.Yes, testMotivation)
         service.addStudentStatusSuggestion(testId, testSuggestion.status, testSuggestion.motivation)
         testStudent.statusSuggestions.add(testSuggestion)  // Bit of a hack
         verify { repository.save(testStudent) }

@@ -53,7 +53,7 @@ class StudentService(private val repository: StudentRepository) {
      */
     fun addStudentStatusSuggestion(id: UUID, suggestionEnum: SuggestionEnum, motivation: String) {
         val student = getStudentById(id)
-        val suggestion = StatusSuggestion(student, suggestionEnum, motivation)
+        val suggestion = StatusSuggestion(suggestionEnum, motivation)
         student.statusSuggestions.add(suggestion)
         repository.save(student)
     }
