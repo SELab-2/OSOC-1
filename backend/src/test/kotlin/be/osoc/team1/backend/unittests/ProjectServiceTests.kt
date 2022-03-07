@@ -71,7 +71,7 @@ class ProjectServiceTests {
 
     @Test
     fun `addStudentToProject adds a student`(){
-
+        
     }
 
     @Test

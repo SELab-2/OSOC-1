@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.services
 
+import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.InvalidIdException
@@ -54,20 +55,44 @@ class ProjectService(private val repository: ProjectRepository) {
     /**
      * Adds a student to project based on [projId], if [projId] is not in [repository] throw InvalidIdException
      */
-    fun addStudentToProject(projId:UUID, stud: Student) {
-        val project:Project = getProjectById(projId)
+    fun addStudentToProject(projId: UUID, stud: Student) {
+        val project: Project = getProjectById(projId)
         project.students.add(stud)
         repository.save(project)
     }
+
     /**
-     * Removes a student from project based on [projId] and [studId], if [projId] is not in [repository]
+     * removes a student from project based on [projId] and [studId], if [projId] is not in [repository]
      * or [studId] not in project throw InvalidIdException
      */
-    fun removeStudentFromProject(projId:UUID, studId: UUID) {
-        val project:Project = getProjectById(projId)
+    fun removeStudentFromProject(projId: UUID, studId: UUID) {
+        val project: Project = getProjectById(projId)
         val s = project.students.size
         project.students.filter { it.id != studId }
-        if (project.students.size ==s){
+        if (project.students.size == s) {
+            throw InvalidIdException()
+        }
+        repository.save(project)
+    }
+
+    /**
+     * Adds a coach to project based on [projId], if [projId] is not in [repository] throw InvalidIdException
+     */
+    fun addCoachToProject(projId: UUID, coach: Coach) {
+        val project: Project = getProjectById(projId)
+        project.coaches.add(coach)
+        repository.save(project)
+    }
+
+    /**
+     * removes a coach from project based on [projId] and [coachId], if [projId] is not in [repository]
+     * or [coachId] not in project throw InvalidIdException
+     */
+    fun removeCoachFromProject(projId: UUID, coachId: UUID) {
+        val project: Project = getProjectById(projId)
+        val s = project.coaches.size
+        project.coaches.filter { it.id != coachId }
+        if (project.coaches.size == s) {
             throw InvalidIdException()
         }
         repository.save(project)

@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.services.ProjectService
@@ -36,7 +37,7 @@ class ProjectController(private val service: ProjectService) {
     fun getProjectById(@PathVariable id: UUID): Project = service.getProjectById(id)
 
     /**
-     * Deletes a project with its [id], if this id doesn't exist the service will throw a InvalidIdException
+     * Deletes a project with its [id], if this [id] doesn't exist the service will throw a InvalidIdException
      * which will be converted in to a 404
      */
     @DeleteMapping("/{id}")
@@ -48,18 +49,80 @@ class ProjectController(private val service: ProjectService) {
     @PutMapping
     fun putProject(@RequestBody proj: Project) = service.putProject(proj)
 
+    /**
+     * Gets all students of a project, if this [projId] doesn't exist the service will throw an InvalidIdException
+     * which will be converted in to a 404
+     */
     @GetMapping("/{projId}/students")
     fun GetStudentsOfProject(@PathVariable projId: UUID): Collection<Student> {
         return service.getProjectById(projId).students
     }
 
+    /**
+     * Post a student to a project, if this [projId] doesn't exist the service will throw an InvalidIdException
+     * which will be converted in to a 404
+     */
     @PostMapping("/{projId}/students")
     fun postStudentToProject(@PathVariable projId: UUID, @RequestBody stud: Student) {
         service.addStudentToProject(projId, stud)
     }
 
+    /**
+     * Deletes a student [studId] from a project [projId], if [projId] or [studId] doesn't exist the service will throw an InvalidIdException
+     * which will be converted in to a 404
+     */
     @DeleteMapping("/{projId}/students/{studId}")
-    fun deleteStudentFromProject(@PathVariable projId: UUID, @PathVariable studId: UUID){
-        service.removeStudentFromProject(projId,studId)
+    fun deleteStudentFromProject(@PathVariable projId: UUID, @PathVariable studId: UUID) {
+        service.removeStudentFromProject(projId, studId)
+    }
+
+    /**
+     * Gets all coaches of a project, if this [projId] doesn't exist the service will throw an InvalidIdException
+     * which will be converted in to a 404
+     */
+    @GetMapping("/{projId}/coaches")
+    fun GetCoachesOfProject(@PathVariable projId: UUID): Collection<Coach> {
+        return service.getProjectById(projId).coaches
+    }
+
+    /**
+     * Post a coach to a project, if this [projId] doesn't exist the service will throw an InvalidIdException
+     * which will be converted in to a 404
+     */
+    @PostMapping("/{projId}/coaches")
+    fun postCoachToProject(@PathVariable projId: UUID, @RequestBody coach: Coach) {
+        service.addCoachToProject(projId, coach)
+    }
+
+    /**
+     * Deletes a coach [coachId] from a project [projId], if [projId] or [coachId] doesn't exist the service will throw an InvalidIdException
+     * which will be converted in to a 404
+     */
+    @DeleteMapping("/{projId}/coaches/{coachId}")
+    fun deleteCoachFromProject(@PathVariable projId: UUID, @PathVariable coachId: UUID) {
+        service.removeCoachFromProject(projId, coachId)
+    }
+
+    /**
+     * Get conflicts of students
+     */
+    @GetMapping("/conflicts")
+    fun getProjectConflicts() {
+        val projectList = service.getAllProjects()
+        val studentsMap = mutableMapOf<Student, MutableCollection<Project>>()
+        for (project in projectList) {
+            for (student in project.students) {
+                if (studentsMap.containsKey(student)) {
+                    studentsMap[student]!!.add(project)
+                } else {
+                    studentsMap[student] = mutableListOf(project)
+                }
+            }
+        }
+        for (student in studentsMap.keys) {
+            if (studentsMap[student]!!.size > 1) {
+                // this student has a conflict
+            }
+        }
     }
 }
