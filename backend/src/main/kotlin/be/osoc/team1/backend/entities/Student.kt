@@ -27,15 +27,15 @@ class StatusSuggestion(val status: SuggestionEnum, val motivation: String) {
 }
 
 @Entity
-class Student(
-    val firstName: String,
-    val lastName: String,
-    var status: StatusEnum = StatusEnum.Undecided,
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()) {
+class Student(val firstName: String, val lastName: String) {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     val id: UUID = UUID.randomUUID()
+
+    var status: StatusEnum = StatusEnum.Undecided
+
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 }
