@@ -4,7 +4,9 @@
     "dev": "next dev",
     "build": "next build && next export",
     "start": "next start",
-    "lint": "yarn run eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "yarn run eslint . --ext .js,.jsx,.ts,.tsx",
+    "prettier:check": "yarn prettier --check .",
+    "prettier:write": "yarn prettier --write ."
   },
   "dependencies": {
     "next": "latest",
