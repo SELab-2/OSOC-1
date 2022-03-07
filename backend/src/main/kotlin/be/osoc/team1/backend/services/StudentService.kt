@@ -48,7 +48,7 @@ class StudentService(private val repository: StudentRepository) {
 
     /**
      * Retrieve the student with the specified [id], then create a new StatusSuggestion with
-     * the given [suggestionEnum] and [motivation] and it to the student's list.
+     * the given [suggestionEnum] and [motivation] and add it to the student's list.
      * Throws an InvalidIdException if no student with that [id] exists.
      */
     fun addStudentStatusSuggestion(id: UUID, suggestionEnum: SuggestionEnum, motivation: String) {
