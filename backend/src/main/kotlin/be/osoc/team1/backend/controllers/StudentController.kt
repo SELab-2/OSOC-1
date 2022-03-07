@@ -47,8 +47,8 @@ class StudentController(private val service: StudentService) {
      *     "lastName": "(INSERT LAST NAME)"
      * }
      *
-     * The id for this student chosen by the database is then returned to the API caller. This request cannot fail,
-     * which implies that no checking is done to see if firstName or lastName qualify as valid 'names'.
+     * The id for this student chosen by the database is then returned to the API caller.
+     * No checking is done to see if firstName or lastName qualify as valid 'names'.
      * This verification is the responsibility of the caller.
      */
     @PutMapping
