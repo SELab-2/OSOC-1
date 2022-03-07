@@ -1,7 +1,10 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StudentController
+import be.osoc.team1.backend.entities.StatusEnum
+import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.StudentService
 import com.google.gson.Gson
@@ -16,6 +19,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -30,7 +34,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Tom", "Alard")
-    private val jsonRepresentation = Gson().toJson(testStudent)
+    private val gson = Gson()
+    private val jsonRepresentation = gson.toJson(testStudent)
+    private val testMotivation = "test motivation"
 
     @Test
     fun `getAllStudents should not fail`() {
@@ -74,5 +80,55 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isOk).andExpect(content().string("\"$databaseId\""))
+    }
+
+    @Test
+    fun `setStudentStatus succeeds when student with given id exists`() {
+        val status = StatusEnum.Yes
+        every { studentService.setStudentStatus(testId, status) } just Runs
+        mockMvc.perform(
+            post("/students/$testId/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(status))
+        ).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `setStudentStatus returns 404 Not Found if student with given id does not exist`() {
+        val status = StatusEnum.Yes
+        every { studentService.setStudentStatus(testId, status) }.throws(InvalidIdException())
+        mockMvc.perform(
+            post("/students/$testId/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(status))
+        ).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `addStudentStatusSuggestion succeeds when student with given id exists`() {
+        val suggestion = SuggestionEnum.Yes
+        val statusSuggestion = StatusSuggestion(suggestion, testMotivation)
+        every {
+            studentService.addStudentStatusSuggestion(testId, statusSuggestion.status, statusSuggestion.motivation)
+        } just Runs
+        mockMvc.perform(
+            post("/students/$testId/suggestions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(statusSuggestion))
+        ).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `addStudentStatusSuggestion returns 404 Not Found if student with given id does not exist`() {
+        val suggestion = SuggestionEnum.Yes
+        val statusSuggestion = StatusSuggestion(suggestion, testMotivation)
+        every {
+            studentService.addStudentStatusSuggestion(testId, statusSuggestion.status, statusSuggestion.motivation)
+        }.throws(InvalidIdException())
+        mockMvc.perform(
+            post("/students/$testId/suggestions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(statusSuggestion))
+        ).andExpect(status().isNotFound)
     }
 }
