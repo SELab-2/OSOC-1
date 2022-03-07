@@ -1,0 +1,15 @@
+# don't ever lint node_modules
+node_modules/
+# don't lint build output
+.next/
+
+# other js config files
+.eslintrc.js
+next-env.d.ts
+next.config.js
+postcss.config.js
+prettier.config.js
+tailwind.config.js
+
+# Other files
+*.md
