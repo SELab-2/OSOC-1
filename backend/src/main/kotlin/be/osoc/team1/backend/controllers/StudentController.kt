@@ -21,7 +21,7 @@ class StudentController(private val service: StudentService) {
     /**
      * Get a list of all students in the database. This request cannot fail.
      */
-    @GetMapping("")
+    @GetMapping
     fun getAllStudents(): Iterable<Student> = service.getAllStudents()
 
     /**
@@ -51,7 +51,7 @@ class StudentController(private val service: StudentService) {
      * which implies that no checking is done to see if firstName or lastName qualify as valid 'names'.
      * This verification is the responsibility of the caller.
      */
-    @PutMapping("")
+    @PutMapping
     fun putStudent(@RequestBody student: Student): UUID = service.putStudent(student)
 
     /**
