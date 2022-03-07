@@ -7,7 +7,7 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.StudentService
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -34,8 +34,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Tom", "Alard")
-    private val gson = Gson()
-    private val jsonRepresentation = gson.toJson(testStudent)
+    private val objectMapper = ObjectMapper()
+    private val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
     private val testMotivation = "test motivation"
 
     @Test
@@ -89,7 +89,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(
             post("/students/$testId/status")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(status))
+                .content(objectMapper.writeValueAsString(status))
         ).andExpect(status().isOk)
     }
 
@@ -100,7 +100,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(
             post("/students/$testId/status")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(status))
+                .content(objectMapper.writeValueAsString(status))
         ).andExpect(status().isNotFound)
     }
 
@@ -114,7 +114,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(
             post("/students/$testId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(statusSuggestion))
+                .content(objectMapper.writeValueAsString(statusSuggestion))
         ).andExpect(status().isOk)
     }
 
@@ -128,7 +128,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(
             post("/students/$testId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(statusSuggestion))
+                .content(objectMapper.writeValueAsString(statusSuggestion))
         ).andExpect(status().isNotFound)
     }
 }
