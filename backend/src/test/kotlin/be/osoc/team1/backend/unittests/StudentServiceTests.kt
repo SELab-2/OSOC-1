@@ -78,7 +78,7 @@ class StudentServiceTests {
         val repository = getRepository(true)
         val service = StudentService(repository)
         service.setStudentStatus(testId, StatusEnum.Yes)
-        testStudent.status = StatusEnum.Yes  // Bit of a hack
+        testStudent.status = StatusEnum.Yes // Bit of a hack
         verify { repository.save(testStudent) }
         testStudent.status = StatusEnum.Undecided
     }
@@ -95,7 +95,7 @@ class StudentServiceTests {
         val service = StudentService(repository)
         val testSuggestion = StatusSuggestion(SuggestionEnum.Yes, testMotivation)
         service.addStudentStatusSuggestion(testId, testSuggestion.status, testSuggestion.motivation)
-        testStudent.statusSuggestions.add(testSuggestion)  // Bit of a hack
+        testStudent.statusSuggestions.add(testSuggestion) // Bit of a hack
         verify { repository.save(testStudent) }
         testStudent.statusSuggestions.remove(testSuggestion)
     }
