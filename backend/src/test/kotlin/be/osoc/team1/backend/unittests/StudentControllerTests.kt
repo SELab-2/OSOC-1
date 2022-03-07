@@ -4,7 +4,6 @@ import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.StudentService
-import com.google.gson.Gson
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -29,8 +28,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var studentService: StudentService
 
     private val testId = UUID.randomUUID()
-    private val testStudent = Student(testId, "Tom", "Alard")
-    private val jsonRepresentation = Gson().toJson(testStudent)
+    private val testStudent = Student("Tom", "Alard")
+    private val jsonRepresentation = "{\"firstName\": \"Tom\", \"lastName\":\"Alard\"}"
 
     @Test
     fun `getAllStudents should not fail`() {
