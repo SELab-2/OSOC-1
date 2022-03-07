@@ -19,15 +19,14 @@ class StudentController(private val service: StudentService) {
      * Get a list of all students in the database. This request cannot fail.
      */
     @GetMapping("")
-    fun getAllStudents() = service.getAllStudents()
+    fun getAllStudents(): Iterable<Student> = service.getAllStudents()
 
     /**
      * Returns the student with the corresponding [id]. If no such student exists,
      * returns a "404: Not Found" message instead.
      */
     @GetMapping("/{id}")
-    fun getStudentById(@PathVariable id: UUID) = service.getStudentById(id)
-
+    fun getStudentById(@PathVariable id: UUID): Student = service.getStudentById(id)
 
     /**
      * Deletes the student with the corresponding [id]. If no such student exists,
@@ -50,5 +49,13 @@ class StudentController(private val service: StudentService) {
      * This verification is the responsibility of the caller.
      */
     @PutMapping("")
-    fun putStudent(@RequestBody student: Student) = service.putStudent(student)
+    fun putStudent(@RequestBody student: Student): UUID = service.putStudent(student)
+
+    @PostMapping("/{id}/status")
+    fun setStudentStatus(@PathVariable id: UUID, @RequestBody suggestion: StatusEnum) =
+        service.setStudentStatus(id, suggestion)
+
+    @PostMapping("/{id}/suggestions")
+    fun addStudentStatusSuggestion(@PathVariable id: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
+        service.addStudentStatusSuggestion(id, statusSuggestion.status, statusSuggestion.motivation)
 }
