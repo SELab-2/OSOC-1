@@ -1,10 +1,13 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.StatusEnum
+import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -52,8 +55,7 @@ class StudentController(private val service: StudentService) {
     fun putStudent(@RequestBody student: Student): UUID = service.putStudent(student)
 
     @PostMapping("/{id}/status")
-    fun setStudentStatus(@PathVariable id: UUID, @RequestBody suggestion: StatusEnum) =
-        service.setStudentStatus(id, suggestion)
+    fun setStudentStatus(@PathVariable id: UUID, @RequestBody status: StatusEnum) = service.setStudentStatus(id, status)
 
     @PostMapping("/{id}/suggestions")
     fun addStudentStatusSuggestion(@PathVariable id: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
