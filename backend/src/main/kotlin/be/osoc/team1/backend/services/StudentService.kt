@@ -1,6 +1,9 @@
 package be.osoc.team1.backend.services
 
+import be.osoc.team1.backend.entities.StatusEnum
+import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -15,7 +18,7 @@ class StudentService(private val repository: StudentRepository) {
     /**
      * Get a student by their [id]. Throws an InvalidIdException if no such student exists.
      */
-    fun getStudentById(id: UUID): Student = repository.findByIdOrNull(id) ?: throw InvalidIdException()
+    fun getStudentById(id: UUID) = repository.findByIdOrNull(id) ?: throw InvalidIdException()
 
     /**
      * Delete a student by their [id]. Throws an InvalidIdException if no such student existed
@@ -34,13 +37,24 @@ class StudentService(private val repository: StudentRepository) {
     fun putStudent(student: Student) = repository.save(student).id
 
     /**
-     * Change the values of a student already present in the database. Throws an
-     * InvalidIdException if no student with that id exists.
+     * Retrieve the student with the specified [id], then set his status to [newStatus].
+     * Throws an InvalidIdException if no student with that [id] exists.
      */
-    fun patchStudent(student: Student) {
-        if (!repository.existsById(student.id))
-            throw InvalidIdException()
+    fun setStudentStatus(id: UUID, newStatus: StatusEnum) {
+        val student = getStudentById(id)
+        student.status = newStatus
+        repository.save(student)
+    }
 
+    /**
+     * Retrieve the student with the specified [id], then create a new StatusSuggestion with
+     * the given [suggestionEnum] and [motivation] and add it to the student's list.
+     * Throws an InvalidIdException if no student with that [id] exists.
+     */
+    fun addStudentStatusSuggestion(id: UUID, suggestionEnum: SuggestionEnum, motivation: String) {
+        val student = getStudentById(id)
+        val suggestion = StatusSuggestion(suggestionEnum, motivation)
+        student.statusSuggestions.add(suggestion)
         repository.save(student)
     }
 }
