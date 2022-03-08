@@ -18,11 +18,6 @@ import java.util.UUID
 @RequestMapping("/projects")
 class ProjectController(private val service: ProjectService) {
 
-    /** check list
-     * post projects/id/coaches
-     * delete projects/id/coaches/id
-     * get projects/conflicts
-     */
     /**
      * Get all projects from service
      */
