@@ -1,0 +1,59 @@
+name: Deployment
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events but only for the main branch
+  push:
+    branches: 
+      - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  ## Sets environment variable
+  OSOC_DB_USERNAME: ${{ secrets.OSOC_DB_USERNAME }}
+  OSOC_DB_PASSWORD: ${{ secrets.OSOC_DB_PASSWORD }}
+  OSOC_DB_URL: ${{ secrets.OSOC_DB_URL }}
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: ['16.x']
+        java-version: ['17']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install and update yarn
+        run: npm install -g yarn
+      - name: Install yarn dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: ./frontend
+      - name: Build react frontend with yarn
+        run: yarn build
+        working-directory: ./frontend
+      - name: Copy react build files to production folder
+        run: cp -R out/ /home/selab2/production/
+        working-directory: ./frontend
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin' # We are using temurin since adopt isn't supported anymore
+          cache: 'maven'
+      - name: Build spring backend with Maven
+        working-directory: ./backend
+        run: mvn -B package --file pom.xml
+      - name: Copy spring build files to production folder
+        run: cp /home/selab2/actions-runner/selab2/OSOC-1/OSOC-1/backend/target/backend-0.0.1-SNAPSHOT.jar /home/selab2/production/
+        working-directory: ./backend
+      - name: Execute Jar File
+        run: sudo -E /home/selab2/production/start_backend.sh

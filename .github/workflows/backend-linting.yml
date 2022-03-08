@@ -1,0 +1,37 @@
+name: backend-linting
+on: [pull_request]
+
+jobs:
+  ktlint:
+    name: Check Code Quality
+    runs-on: self-hosted
+    container:
+      image: mikxox/maven-test-action:latest
+    env:
+      GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'temppath'
+
+      - name: install reviewdog
+        run: |
+          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b /usr/local/bin/ v0.13.0
+
+      - name: ktlint with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath/backend
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint
+          chmod a+x ktlint
+          ./ktlint --reporter=checkstyle | reviewdog -f=checkstyle -name="ktlint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="false"
+
+      - name: remove temppath
+        if: always()
+        run: |
+          cd /__w/OSOC-1/OSOC-1/
+          sudo rm -rf temppath

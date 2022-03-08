@@ -1,0 +1,41 @@
+#!/bin/bash
+if [[ $1 == "build" ]]
+then
+    sudo docker build -t osoc_postgres_image_local_dev:latest .
+elif [[ $1 == "run" ]]
+then
+    sudo docker run -d --name osoc_postgres_container_local_dev -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=osoc osoc_postgres_image_local_dev:latest
+elif [[ $1 == "start" ]]
+then
+    sudo docker container start osoc_postgres_container_local_dev
+elif [[ $1 == "stop" ]]
+then
+    sudo docker container stop osoc_postgres_container_local_dev
+elif [[ $1 == "remove" ]] || [[ $1 == "rm" ]]
+then
+    sudo docker container rm osoc_postgres_container_local_dev
+elif [[ $1 == "status" ]]
+then
+    sudo systemctl status docker
+elif [[ $1 == "logs" ]]
+then 
+    sudo docker logs osoc_postgres_container_local_dev
+elif [[ $1 == "exec" ]]
+then
+    sudo docker build -t osoc_postgres_image_local_dev:latest .
+    sudo docker run -d --name osoc_postgres_container_local_dev -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=osoc osoc_postgres_image_local_dev:latest
+    sudo docker container start osoc_postgres_container_local_dev
+else 
+    echo "Unknown command"
+    echo "Possible commands are:"
+    echo "  build:  docker build with args"
+    echo "  run:    docker run with args"
+    echo "  start:  docker container start with args"
+    echo "  stop:   docker container stop with args"
+    echo "  remove: docker container remove with args"
+    echo "  status: systemctl status docker"
+    echo "  logs:   docker logs"
+    echo "  exec:   executes build, run and start"
+
+fi
+

@@ -1,0 +1,422 @@
+openapi: 3.0.0
+info:
+    version: '1.0.0'
+    title: 'OSOC'
+    license:
+        name: MIT
+servers:
+  - url: 'localhost:3000'
+paths:
+    /students:
+        get:
+            summary: Get a list containing all Student objects
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Student'
+        put:
+            summary: Add a new student to the database
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Student'
+            responses:
+                '200':
+                    description: successful operation
+    /students/{studentId}:
+        get:
+            summary: Get Student by id
+            parameters:
+              - name: studentId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Student'
+        delete:
+            summary: Delete Student by id
+            parameters:
+              - name: studentId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /students/{studentId}/suggestions:
+        post:
+            summary: Suggest student status
+            parameters:
+              - name: studentId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /students/{studentId}/status:
+        post:
+            summary: Set student status
+            parameters:
+              - name: studentId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /projects:
+        get:
+            summary: Get list containing all Project objects
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Project'
+        put:
+            summary: Add new project
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Project'
+            responses:
+                '200': 
+                    description: successful operation
+    /projects/{projectId}:
+        get:
+            summary: Get Project by id
+            parameters:
+              - name: projectId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Project'
+        delete:
+            summary: Remove project by id
+            parameters:
+              - name: projectId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /projects/{projectId}/students:
+        get:
+            summary: Get all students from a project
+            parameters: 
+              - name: projectId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+        post:
+            summary: Draft student for project
+            parameters:
+              - name: projectId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            description: studentId
+                            type: integer
+                            format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /projects/{projectId}/students/{studentId}:
+        delete:
+            summary: Remove student from project
+            parameters:
+              - name: projectId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+              - name: studentId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /projects/{projectId}/coaches:
+        post:
+            summary: Assign a coach to project
+            parameters:
+              - name: projectId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /projects/{projectId}/coaches/{coachId}:
+        delete:
+            summary: Remove a coach from a project
+            parameters:
+              - name: projectId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+              - name: coachId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /projects/conflicts:
+        get:
+            summary: Get student assignment conflicts
+            responses:
+                '200':
+                    description: successful operation
+    /communications/{studentId}:
+        get:
+            summary: Get all registered communications with a student
+            parameters:
+              - name: studentId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+        put:
+            summary: Register communication with a student
+            parameters:
+              - name: studentId
+                required: true
+                in: path
+                schema:
+                    type: integer
+                    format: int64
+            responses:
+                '200':
+                    description: successful operation
+    /users:
+        get:
+            summary: Get list containing all users
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/User'
+        put:
+            summary: add new user to database
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/User'
+            responses:
+                '201':
+                    description: CREATED
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+    /users/{userId}:
+        get:
+            summary: get User by id
+            parameters:
+                - name: userId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                '404':
+                    description: NOT FOUND
+        patch:
+            summary: update User by id
+            parameters:
+                - name: userId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/User'
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                '400':
+                    description: BAD REQUEST
+                '404':
+                    description: NOT FOUND
+        delete:
+            summary: delete user by id
+            parameters:
+                - name: userId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: OK
+                '404':
+                    description: NOT FOUND
+    /users/{userId}/role:
+        post:
+            summary: change role of user
+            parameters:
+                - name: userId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid            
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: string
+                            enum: [disabled, coach, admin]
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                '404':
+                    description: NOT FOUND                    
+components:
+    schemas:
+        Student:
+            type: object
+            required:
+                - id
+                - firstname
+                - lastname
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                firstname:
+                    type: string
+                lastname:
+                    type: string
+        Project:
+            type: object
+            required:
+                - id
+                - name
+                - desc
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                name:
+                    type: string
+                desc:
+                    type: string
+        User:
+            type: object
+            required:
+                - id
+                - name
+                - email
+                - password
+                - role
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                name:
+                    type: string
+                email:
+                    type: string
+                role:
+                    type: string
+                    enum: [disabled, coach, admin]
+                password:
+                    type: string
+                    format: bcrypt
+
+    securitySchemes:
+        BasicAuth:
+            type: http
+            scheme: basic
+security:
+  - BasicAuth: []
