@@ -5,7 +5,7 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class StudentService(private val repository: StudentRepository) {
@@ -32,7 +32,6 @@ class StudentService(private val repository: StudentRepository) {
      * Add the given [student] entity to the database. Returns the student's new id as decided by the database.
      */
     fun putStudent(student: Student) = repository.save(student).id
-
 
     /**
      * Change the values of a student already present in the database. Throws an

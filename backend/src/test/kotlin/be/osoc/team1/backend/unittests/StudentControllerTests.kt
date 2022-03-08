@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.*
+import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
 @WebMvcTest(StudentController::class)
@@ -40,8 +40,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getStudentById returns student if student with given id exists`() {
         every { studentService.getStudentById(testId) } returns testStudent
-        mockMvc.perform(get("/students/$testId")).andExpect(status().isOk).
-            andExpect(content().json(jsonRepresentation))
+        mockMvc.perform(get("/students/$testId")).andExpect(status().isOk).andExpect(content().json(jsonRepresentation))
     }
 
     @Test

@@ -14,12 +14,12 @@ import io.mockk.mockk
 import org.junit.Test
 import org.junit.jupiter.api.Assertions
 import org.springframework.data.repository.findByIdOrNull
-import java.util.*
+import java.util.UUID
 
 class ProjectServiceTests {
     private val testId = UUID.randomUUID()
-    private val testStudent = Student("Lars","Van Cauter")
-    private val testCoach = Coach("Lars2","Van Cauter")
+    private val testStudent = Student("Lars", "Van Cauter")
+    private val testCoach = Coach("Lars2", "Van Cauter")
     private val testProject = Project("Test", "a test project", mutableListOf(testStudent), mutableListOf(testCoach))
     private val savedProject = Project("Saved", "a saved project", mutableListOf(testStudent), mutableListOf(testCoach))
 
@@ -119,6 +119,7 @@ class ProjectServiceTests {
         val service = getService(true)
         service.removeCoachFromProject(testProject.id, testCoach.id)
     }
+
     @Test(expected = FailedOperationException::class)
     fun `removeCoachFromProject fails when student is not in project`() {
         val service = getService(true)

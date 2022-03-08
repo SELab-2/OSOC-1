@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/students")
@@ -27,7 +27,6 @@ class StudentController(private val service: StudentService) {
      */
     @GetMapping("/{id}")
     fun getStudentById(@PathVariable id: UUID) = service.getStudentById(id)
-
 
     /**
      * Deletes the student with the corresponding [id]. If no such student exists,
