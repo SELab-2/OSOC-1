@@ -1,0 +1,60 @@
+name: Run backend unit tests with maven
+
+on:
+  push:
+    branches:
+      - '**'        # matches every branch
+      - '!master'   # excludes master
+      - '!development'   # excludes development
+  pull_request:
+    branches:
+      - '**'        # matches every branch
+      - '!master'   # excludes master
+      - '!development'   # excludes development
+
+jobs:
+  container-job:
+
+    runs-on: self-hosted
+    container: 
+      image: mikxox/maven-test-action:latest
+    env:
+      GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      # Need to actually run a postgres container to allow app to build
+      postgres:
+        image: postgres
+        ports:
+          - 5432
+
+        env:
+          POSTGRES_USER: ${{ secrets.database_username }}
+          POSTGRES_PASSWORD: ${{ secrets.database_password }}
+          POSTGRES_DB: ${{ secrets.database_name }}
+
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: 'temppath'
+
+      - name: Test with Maven
+        # -B: run in non-interactive (batch) mode
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath
+          mvn -B -Dtest="unittests.**" -DfailIfNoTests=false test --file backend/pom.xml
+
+      - name: remove temppath
+        if: always()
+        run: |
+          cd /__w/OSOC-1/OSOC-1/
+          sudo rm -rf temppath
