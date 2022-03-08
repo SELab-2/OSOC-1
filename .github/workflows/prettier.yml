@@ -41,7 +41,7 @@ jobs:
           INPUT_COMMIT_DESCRIPTION: ""
           INPUT_SAME_COMMIT: false
           INPUT_COMMIT_OPTIONS: ""
-          INPUT_FILE_PATTERN: "pages/* public/* src/* styles/*"
+          INPUT_FILE_PATTERN: "*"
           INPUT_PRETTIER_OPTIONS: "--config /__w/OSOC-1/OSOC-1/temppath/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.prettierignore"
           INPUT_DRY: false
           INPUT_PRETTIER_VERSION: false
