@@ -34,8 +34,8 @@ jobs:
       - name: manual prettify code and amend commit
         shell: bash
         run: |
-          chmod +x "/__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettiercommit.sh"
-          /__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettiercommit.sh
+          chmod +x "/__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettierscript.sh"
+          /__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettierscript.sh
         env:
           INPUT_COMMIT_MESSAGE: "Prettified Code!"
           INPUT_COMMIT_DESCRIPTION: ""
