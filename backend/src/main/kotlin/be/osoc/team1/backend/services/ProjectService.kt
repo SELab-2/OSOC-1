@@ -3,6 +3,7 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -68,9 +69,9 @@ class ProjectService(private val repository: ProjectRepository) {
     fun removeStudentFromProject(projId: UUID, studId: UUID) {
         val project: Project = getProjectById(projId)
         val s = project.students.size
-        project.students.filter { it.id != studId }
+        project.students.retainAll { it.id != studId }
         if (project.students.size == s) {
-            throw InvalidIdException()
+            throw FailedOperationException()
         }
         repository.save(project)
     }
@@ -91,9 +92,9 @@ class ProjectService(private val repository: ProjectRepository) {
     fun removeCoachFromProject(projId: UUID, coachId: UUID) {
         val project: Project = getProjectById(projId)
         val s = project.coaches.size
-        project.coaches.filter { it.id != coachId }
+        project.coaches.retainAll { it.id != coachId }
         if (project.coaches.size == s) {
-            throw InvalidIdException()
+            throw FailedOperationException()
         }
         repository.save(project)
     }
