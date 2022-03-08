@@ -15,16 +15,12 @@ class ProjectService(private val repository: ProjectRepository) {
     /**
      * Get all projects
      */
-    fun getAllProjects(): Iterable<Project> {
-        return repository.findAll()
-    }
+    fun getAllProjects(): Iterable<Project> = repository.findAll()
 
     /**
      * Get a project by its [id], if this id doesn't exist throw an InvalidIdException
      */
-    fun getProjectById(id: UUID): Project {
-        return repository.findByIdOrNull(id) ?: throw InvalidIdException()
-    }
+    fun getProjectById(id: UUID): Project = repository.findByIdOrNull(id) ?: throw InvalidIdException()
 
     /**
      * Deletes a project by its [id], if this id doesn't exist throw an InvalidIdException
@@ -56,9 +52,9 @@ class ProjectService(private val repository: ProjectRepository) {
     /**
      * Adds a student to project based on [projId], if [projId] is not in [repository] throw InvalidIdException
      */
-    fun addStudentToProject(projId: UUID, stud: Student) {
+    fun addStudentToProject(projId: UUID, student: Student) {
         val project: Project = getProjectById(projId)
-        project.students.add(stud)
+        project.students.add(student)
         repository.save(project)
     }
 

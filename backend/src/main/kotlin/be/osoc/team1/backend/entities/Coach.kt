@@ -6,6 +6,11 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
+/**
+ * Represents a coach in the database. A coach is constructed with a [firstName]
+ * and a [lastName]. Note that neither of these fields, nor the combination of both of them need be unique.
+ * I.e. there could be two coaches in the database with [firstName] "Tom" and [lastName] "Alard".
+ */
 @Entity
 class Coach(
     val firstName: String,

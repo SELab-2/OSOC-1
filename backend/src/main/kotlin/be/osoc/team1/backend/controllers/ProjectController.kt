@@ -26,77 +26,70 @@ class ProjectController(private val service: ProjectService) {
 
     /**
      * Get a project by its [id], if this id doesn't exist the service will throw a InvalidIdException
-     * which will be converted in to a 404
+     * which will be converted into a 404
      */
-    @GetMapping("/{id}")
-    fun getProjectById(@PathVariable id: UUID): Project = service.getProjectById(id)
+    @GetMapping("/{projId}")
+    fun getProjectById(@PathVariable projId: UUID): Project = service.getProjectById(projId)
 
     /**
      * Deletes a project with its [id], if this [id] doesn't exist the service will throw a InvalidIdException
-     * which will be converted in to a 404
+     * which will be converted into a 404
      */
-    @DeleteMapping("/{id}")
-    fun deleteProjectById(@PathVariable id: UUID) = service.deleteProjectById(id)
+    @DeleteMapping("/{projId}")
+    fun deleteProjectById(@PathVariable projId: UUID) = service.deleteProjectById(projId)
 
     /**
      * Creates a project from the request body, this can also override an already existing project
+     * returns the id of the project
      */
     @PutMapping
-    fun putProject(@RequestBody proj: Project) = service.putProject(proj)
+    fun putProject(@RequestBody project: Project): UUID = service.putProject(project)
 
     /**
-     * Gets all students of a project, if this [projId] doesn't exist the service will throw an InvalidIdException
-     * which will be converted in to a 404
+     * Gets all students assigned to a project, if this [projId] doesn't exist the service will throw an InvalidIdException
+     * which will be converted into a 404
      */
     @GetMapping("/{projId}/students")
-    fun GetStudentsOfProject(@PathVariable projId: UUID): Collection<Student> {
-        return service.getProjectById(projId).students
-    }
+    fun GetStudentsOfProject(@PathVariable projId: UUID): Collection<Student> = service.getProjectById(projId).students
 
     /**
      * Post a student to a project, if this [projId] doesn't exist the service will throw an InvalidIdException
-     * which will be converted in to a 404
+     * which will be converted into a 404
      */
     @PostMapping("/{projId}/students")
-    fun postStudentToProject(@PathVariable projId: UUID, @RequestBody stud: Student) {
+    fun postStudentToProject(@PathVariable projId: UUID, @RequestBody stud: Student) =
         service.addStudentToProject(projId, stud)
-    }
 
     /**
      * Deletes a student [studId] from a project [projId], if [projId] or [studId] doesn't exist the service will throw an InvalidIdException
-     * which will be converted in to a 404
+     * which will be converted into a 404
      */
     @DeleteMapping("/{projId}/students/{studId}")
-    fun deleteStudentFromProject(@PathVariable projId: UUID, @PathVariable studId: UUID) {
+    fun deleteStudentFromProject(@PathVariable projId: UUID, @PathVariable studId: UUID) =
         service.removeStudentFromProject(projId, studId)
-    }
 
     /**
      * Gets all coaches of a project, if this [projId] doesn't exist the service will throw an InvalidIdException
-     * which will be converted in to a 404
+     * which will be converted into a 404
      */
     @GetMapping("/{projId}/coaches")
-    fun GetCoachesOfProject(@PathVariable projId: UUID): Collection<Coach> {
-        return service.getProjectById(projId).coaches
-    }
+    fun GetCoachesOfProject(@PathVariable projId: UUID): Collection<Coach> = service.getProjectById(projId).coaches
 
     /**
      * Post a coach to a project, if this [projId] doesn't exist the service will throw an InvalidIdException
-     * which will be converted in to a 404
+     * which will be converted into a 404
      */
     @PostMapping("/{projId}/coaches")
-    fun postCoachToProject(@PathVariable projId: UUID, @RequestBody coach: Coach) {
+    fun postCoachToProject(@PathVariable projId: UUID, @RequestBody coach: Coach) =
         service.addCoachToProject(projId, coach)
-    }
 
     /**
      * Deletes a coach [coachId] from a project [projId], if [projId] or [coachId] doesn't exist the service will throw an InvalidIdException
-     * which will be converted in to a 404
+     * which will be converted into a 404
      */
     @DeleteMapping("/{projId}/coaches/{coachId}")
-    fun deleteCoachFromProject(@PathVariable projId: UUID, @PathVariable coachId: UUID) {
+    fun deleteCoachFromProject(@PathVariable projId: UUID, @PathVariable coachId: UUID) =
         service.removeCoachFromProject(projId, coachId)
-    }
 
     /**
      * Get conflicts of students
