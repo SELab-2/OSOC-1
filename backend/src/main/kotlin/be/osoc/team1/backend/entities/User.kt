@@ -1,6 +1,6 @@
 package be.osoc.team1.backend.entities
 
-import java.util.*
+import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -19,7 +19,7 @@ enum class Role(private val permissionLevel: Int) {
     /**
      * Check if [role] has a [permissionLevel] of at minimum another role, return true if that's the case.
      */
-    fun hasPermissionLevel(role: Role) : Boolean {
+    fun hasPermissionLevel(role: Role): Boolean {
         return permissionLevel >= role.permissionLevel
     }
 }
