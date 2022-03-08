@@ -1,0 +1,58 @@
+name: Run prettier and eslint
+
+on:
+  push:
+    branches: [ master, development ]
+  pull_request:
+    branches: [ master, development ]
+
+jobs:
+  container-job:
+
+    runs-on: self-hosted
+    container:
+      image: mikxox/maven-test-action:latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          path: 'temppath'
+
+      - name: install yarn
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+          npm install --global yarn
+          yarn install --frozen-lockfile
+
+      - name: run eslint
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+          yarn run lint --fix -c /__w/OSOC-1/OSOC-1/temppath/frontend/.eslintrc.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.eslintignore
+
+      - name: manual prettify code and amend commit
+        shell: bash
+        run: |
+          chmod +x "/__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettiercommit.sh"
+          /__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettiercommit.sh
+        env:
+          INPUT_COMMIT_MESSAGE: "Prettified Code!"
+          INPUT_COMMIT_DESCRIPTION: ""
+          INPUT_SAME_COMMIT: false
+          INPUT_COMMIT_OPTIONS: ""
+          INPUT_FILE_PATTERN: "frontend/*/*"
+          INPUT_PRETTIER_OPTIONS: "--config /__w/OSOC-1/OSOC-1/temppath/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.prettierignore"
+          INPUT_DRY: false
+          INPUT_PRETTIER_VERSION: false
+          INPUT_ONLY_CHANGED: false
+          INPUT_PRETTIER_PLUGINS: ""
+          INPUT_WORKING_DIRECTORY: "/__w/OSOC-1/OSOC-1/temppath/frontend"
+          INPUT_GITHUB_TOKEN: ${{ secrets.github_token }}
+          GITHUB_ACTION_PATH: "/__w/OSOC-1/OSOC-1/temppath/frontend"
+
+      - name: remove temppath
+        if: always()
+        run: |
+          cd /__w/OSOC-1/OSOC-1
+          sudo rm -rf temppath
