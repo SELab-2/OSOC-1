@@ -57,6 +57,7 @@ paths:
                 '200':
                     description: |
                         The response if there is a student in the database with the given id.
+                        Returns the student in the response body.
                     content:
                         application/json:
                             schema:
