@@ -4,14 +4,18 @@ import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.services.StudentService
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.UUID
 
 @RestController
@@ -36,6 +40,7 @@ class StudentController(private val service: StudentService) {
      * returns a "404: Not Found" message instead.
      */
     @DeleteMapping("/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun deleteStudentById(@PathVariable id: UUID) = service.deleteStudentById(id)
 
     /**
@@ -47,12 +52,20 @@ class StudentController(private val service: StudentService) {
      *     "lastName": "(INSERT LAST NAME)"
      * }
      *
-     * The id for this student chosen by the database is then returned to the API caller.
+     * The location of the newly created student is then returned to the API caller in the location header.
      * No checking is done to see if firstName or lastName qualify as valid 'names'.
      * This verification is the responsibility of the caller.
      */
-    @PutMapping
-    fun putStudent(@RequestBody student: Student): UUID = service.putStudent(student)
+    @PostMapping
+    fun addStudent(@RequestBody student: Student): ResponseEntity<Void> {
+        val id = service.addStudent(student)
+        val location = ServletUriComponentsBuilder
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(id)
+            .toUriString()
+        return ResponseEntity.status(HttpStatus.CREATED).header(HttpHeaders.LOCATION, location).build()
+    }
 
     /**
      * Set the [status] of the student with the given [id]. If no such student exists,
@@ -67,6 +80,7 @@ class StudentController(private val service: StudentService) {
      * Any other input value will result in a "400: Bad Request" response. These values are also case-sensitive.
      */
     @PostMapping("/{id}/status")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun setStudentStatus(@PathVariable id: UUID, @RequestBody status: StatusEnum) = service.setStudentStatus(id, status)
 
     /**
@@ -84,6 +98,7 @@ class StudentController(private val service: StudentService) {
      * This is because a user cannot suggest to change the status of a student to "Undecided".
      */
     @PostMapping("/{id}/suggestions")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun addStudentStatusSuggestion(@PathVariable id: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
         service.addStudentStatusSuggestion(id, statusSuggestion.status, statusSuggestion.motivation)
 }
