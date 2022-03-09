@@ -1,20 +1,24 @@
 package be.osoc.team1.backend.entities
 
-import org.hibernate.annotations.GenericGenerator
-import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.OneToMany
+import org.hibernate.annotations.GenericGenerator
+import java.util.UUID
 
 /**
  * Represents the possible values that a student's status can have.
  *
  * Yes: Student looks promising and we have a project for them.
+ *
  * Maybe: Student looks promising but we might not have a project for them.
+ *
  * No: Student doesn't look promising.
+ *
  * Undecided: No decision has been made yet about this student.
+ *
  */
 enum class StatusEnum {
     Yes, Maybe, No, Undecided
@@ -24,7 +28,9 @@ enum class StatusEnum {
  * Represents the possible values a suggestion to update a student's status can have.
  *
  * Yes: Student looks promising and we have a project for them.
+ *
  * Maybe: Student looks promising but we might not have a project for them.
+ *
  * No: Student doesn't look promising.
  *
  * Importantly, the Undecided value is not included in this enum. This is because
