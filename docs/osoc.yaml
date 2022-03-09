@@ -19,7 +19,7 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/Student'
-        put:
+        post:
             summary: Add a new student to the database
             requestBody:
                 content:
@@ -96,7 +96,7 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/Project'
-        put:
+        post:
             summary: Add new project
             requestBody:
                 content:
@@ -237,7 +237,7 @@ paths:
             responses:
                 '200':
                     description: successful operation
-        put:
+        post:
             summary: Register communication with a student
             parameters:
               - name: studentId
@@ -261,7 +261,7 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/User'
-        put:
+        post:
             summary: add new user to database
             requestBody:
                 content:
