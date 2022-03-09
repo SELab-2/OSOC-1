@@ -1,12 +1,12 @@
 package be.osoc.team1.backend.entities
 
+import org.hibernate.annotations.GenericGenerator
+import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.OneToMany
-import org.hibernate.annotations.GenericGenerator
-import java.util.UUID
 
 /**
  * Represents the possible values that a student's status can have.
