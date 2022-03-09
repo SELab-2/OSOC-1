@@ -16,6 +16,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<kotlin.version>1.6.10</kotlin.version>
+        <dokka.version>1.6.10</dokka.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -139,6 +140,19 @@
 					</execution>
 				</executions>
 			</plugin> -->
+            <plugin>
+				<groupId>org.jetbrains.dokka</groupId>
+				<artifactId>dokka-maven-plugin</artifactId>
+				<version>${dokka.version}</version>
+				<executions>
+					<execution>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>dokka</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
