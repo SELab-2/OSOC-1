@@ -11,7 +11,7 @@ module.exports = {
         'osoc-green': '#44DBA4',
         'osoc-red': '#F14A3B',
        'osoc-btn-primary': '#1DE1AE'
-      }
+      },
     },
     fontFamily: {
       sans: ['Montserrat', 'sans-serif']
