@@ -56,7 +56,7 @@ jobs:
           root_dir: /__w/OSOC-1/OSOC-1/temppath
           fail_ci_if_error: true
           files: /__w/OSOC-1/OSOC-1/temppath/backend/target/site/jacoco/jacoco.xml
-          flags: unittests,integrationtests
+          flags: all_tests
           name: codecov-umbrella
           verbose: true
 
