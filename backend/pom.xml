@@ -152,15 +152,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<dokkaPlugins>
-						<plugin>
-							<groupId>org.jetbrains.dokka</groupId>
-							<artifactId>kotlin-as-java-plugin</artifactId>
-							<version>${dokka.version}</version>
-						</plugin>
-					</dokkaPlugins>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
