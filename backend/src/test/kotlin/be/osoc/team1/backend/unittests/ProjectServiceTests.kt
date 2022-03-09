@@ -11,6 +11,8 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
+import junit.framework.Assert.assertEquals
 import org.junit.Test
 import org.junit.jupiter.api.Assertions
 import org.springframework.data.repository.findByIdOrNull
@@ -23,106 +25,108 @@ class ProjectServiceTests {
     private val testProject = Project("Test", "a test project", mutableListOf(testStudent), mutableListOf(testCoach))
     private val savedProject = Project("Saved", "a saved project", mutableListOf(testStudent), mutableListOf(testCoach))
 
-    private fun getService(projectAlreadyExists: Boolean): ProjectService {
+    private fun getRepository(projectAlreadyExists: Boolean): ProjectRepository {
         val repository: ProjectRepository = mockk()
         every { repository.existsById(any()) } returns projectAlreadyExists
         every { repository.findByIdOrNull(any()) } returns if (projectAlreadyExists) testProject else null
         every { repository.deleteById(any()) } just Runs
         every { repository.save(any()) } returns savedProject
-        return ProjectService(repository)
+        return repository
     }
 
     @Test
     fun `getProjectById succeeds when project with id exists`() {
-        val service = getService(true)
-        service.getProjectById(testId)
+        val service = ProjectService(getRepository(true))
+        assertEquals(service.getProjectById(testId), testProject)
     }
 
     @Test(expected = InvalidIdException::class)
     fun `getProjectById fails when no project with that id exists`() {
-        val service = getService(false)
+        val service = ProjectService(getRepository(false))
         service.getProjectById(testId)
     }
 
     @Test
     fun `deleteProjectById succeeds when project with id exists`() {
-        val service = getService(true)
+        val repo = getRepository(true)
+        val service = ProjectService(repo)
         service.deleteProjectById(testId)
+        verify { repo.deleteById(testId) }
     }
 
     @Test(expected = InvalidIdException::class)
     fun `deleteProjectById fails when no project with that id exists`() {
-        val service = getService(false)
+        val service = ProjectService(getRepository(false))
         service.deleteProjectById(testId)
     }
 
     @Test
     fun `putProject returns some other id than what was passed`() {
-        val service = getService(false)
+        val service = ProjectService(getRepository(false))
         Assertions.assertNotEquals(service.putProject(testProject), testId)
     }
 
     @Test
     fun `patchProject updates project when project with same id exists`() {
-        val service = getService(true)
+        val service = ProjectService(getRepository(true))
         service.patchProject(testProject)
     }
 
     @Test(expected = InvalidIdException::class)
     fun `patchProject fails when no project with same id exists`() {
-        val service = getService(false)
+        val service = ProjectService(getRepository(false))
         service.patchProject(testProject)
     }
 
     @Test
     fun `addStudentToProject runs`() {
-        val service = getService(true)
+        val service = ProjectService(getRepository(true))
         val student = Student("Lars", "Van Cauter")
         service.addStudentToProject(testProject.id, student)
     }
 
     @Test(expected = InvalidIdException::class)
     fun `addStudentToProject fails when project doesnt exist`() {
-        val service = getService(false)
+        val service = ProjectService(getRepository(false))
         val student = Student("Lars", "Van Cauter")
         service.addStudentToProject(testProject.id, student)
     }
 
     @Test
     fun `addCoachToProject runs`() {
-        val service = getService(true)
+        val service = ProjectService(getRepository(true))
         val student = Coach("Lars", "Van Cauter")
         service.addCoachToProject(testProject.id, student)
     }
 
     @Test(expected = InvalidIdException::class)
     fun `addCoachToProject fails when project doesnt exit`() {
-        val service = getService(false)
+        val service = ProjectService(getRepository(false))
         val student = Coach("Lars", "Van Cauter")
         service.addCoachToProject(testProject.id, student)
     }
 
     @Test
     fun `removeStudentFromProject succeeds when student is in project`() {
-        val service = getService(true)
+        val service = ProjectService(getRepository(true))
         service.removeStudentFromProject(testProject.id, testStudent.id)
     }
 
     @Test(expected = FailedOperationException::class)
     fun `removeStudentFromProject fails when student is not in project`() {
-        val service = getService(true)
+        val service = ProjectService(getRepository(true))
         service.removeStudentFromProject(testProject.id, UUID.randomUUID())
     }
 
     @Test
     fun `removeCoachFromProject succeeds when student is in project`() {
-        val service = getService(true)
+        val service = ProjectService(getRepository(true))
         service.removeCoachFromProject(testProject.id, testCoach.id)
     }
 
     @Test(expected = FailedOperationException::class)
     fun `removeCoachFromProject fails when student is not in project`() {
-        val service = getService(true)
+        val service = ProjectService(getRepository(true))
         service.removeCoachFromProject(testProject.id, UUID.randomUUID())
     }
 }
