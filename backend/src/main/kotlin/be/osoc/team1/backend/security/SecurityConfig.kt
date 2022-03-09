@@ -1,17 +1,20 @@
 package be.osoc.team1.backend.security
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.annotation.Order
+import org.springframework.http.HttpMethod
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.NoOpPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
@@ -25,7 +28,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Autowired
     @Throws(Exception::class)
-    protected fun configureGlobal(auth: AuthenticationManagerBuilder) {
+    override fun configure(auth: AuthenticationManagerBuilder) {
         auth.userDetailsService(
             UserDetailsService { s ->
                 // val user: User = userRepository.findOneByUsername(s)
@@ -35,13 +38,41 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         ).passwordEncoder(passwordEncoder)
     }
 
+    // @Throws(Exception::class)
+    // override fun configure(webSecurity: WebSecurity) {
+    //     webSecurity
+    //         .ignoring()
+    //         .antMatchers(
+    //             "/api/login", "api/logout", // "/ui/**", "/401.html", "/404.html", "/500.html", "/resources/**", "/templates/**",
+    //         )
+    // }
+
+    /**
+     * https://www.youtube.com/watch?v=VVn9OG9nfH0&t=5424s
+     */
     @Throws(Exception::class)
-    override fun configure(webSecurity: WebSecurity) {
-        webSecurity
-            .ignoring()
-            .antMatchers(
-                "/api/login", "api/logout", // "/ui/**", "/401.html", "/404.html", "/500.html", "/resources/**", "/templates/**",
-            )
+    override fun configure(http: HttpSecurity) {
+        val authenticationFilter: AuthenticationFilter = AuthenticationFilter(authenticationManagerBean())
+        authenticationFilter.setFilterProcessesUrl("/api/login")
+
+        http.csrf().disable()
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+        http.formLogin()
+
+        http.authorizeRequests().antMatchers("/", "/login", "/logout").permitAll()
+
+        http.authorizeRequests().antMatchers(HttpMethod.GET).hasAnyAuthority("ROLE_USER")
+        http.authorizeRequests().antMatchers(HttpMethod.POST).hasAnyAuthority("ROLE_ADMIN")
+        http.authorizeRequests().anyRequest().authenticated()
+
+        http.addFilterBefore(AuthorizationFilter(), UsernamePasswordAuthenticationFilter::class.java)
+        http.addFilter(authenticationFilter)
+    }
+
+    @Bean
+    override fun authenticationManagerBean(): AuthenticationManager {
+        return super.authenticationManagerBean()
     }
 
     // @Configuration
@@ -82,49 +113,49 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     /**
      * Github authentication
      */
-    @Configuration
-    @Order(0)
-    class WebSecurityConfig : WebSecurityConfigurerAdapter() {
-        @Throws(Exception::class)
-        protected override fun configure(http: HttpSecurity) {
-            http
-                .authorizeRequests()
-                .antMatchers("/api").permitAll()
-                .antMatchers("/students").authenticated()
-                // .anyRequest().authenticated()
-                .and()
-                .oauth2Login()
-        }
-    }
+    // @Configuration
+    // @Order(0)
+    // class WebSecurityConfig : WebSecurityConfigurerAdapter() {
+    //     @Throws(Exception::class)
+    //     protected override fun configure(http: HttpSecurity) {
+    //         http
+    //             .authorizeRequests()
+    //             .antMatchers("/api").permitAll()
+    //             .antMatchers("/students").authenticated()
+    //             // .anyRequest().authenticated()
+    //             .and()
+    //             .oauth2Login()
+    //     }
+    // }
 
     /**
      * authentication with User object
      */
-    @Configuration
-    @Order(1)
-    class FormLoginWebSecurityConfigurerAdapter : WebSecurityConfigurerAdapter() {
-        @Throws(Exception::class)
-        public override fun configure(http: HttpSecurity) {
-            http
-                .csrf().disable()
-                .authorizeRequests()
-                // .antMatchers("/ui/admin.xhtml").hasAnyAuthority("admin", "ADMIN")
-                // .antMatchers("/thymeleaf").hasAnyAuthority("admin", "ADMIN")
-                .antMatchers("/students").authenticated()
-                .and()
-                .formLogin()
-                // .loginPage("/login")
-                .defaultSuccessUrl("/")
-                .failureUrl("/login?error=1")
-                .permitAll()
-                .and()
-                .logout()
-                .permitAll()
-                .and()
-                .rememberMe()
-                .and().exceptionHandling().accessDeniedPage("/error/403")
-        }
-    }
+    // @Configuration
+    // @Order(1)
+    // class FormLoginWebSecurityConfigurerAdapter : WebSecurityConfigurerAdapter() {
+    //     @Throws(Exception::class)
+    //     public override fun configure(http: HttpSecurity) {
+    //         http
+    //             .csrf().disable()
+    //             .authorizeRequests()
+    //             // .antMatchers("/ui/admin.xhtml").hasAnyAuthority("admin", "ADMIN")
+    //             // .antMatchers("/thymeleaf").hasAnyAuthority("admin", "ADMIN")
+    //             .antMatchers("/students").authenticated()
+    //             .and()
+    //             .formLogin()
+    //             // .loginPage("/login")
+    //             .defaultSuccessUrl("/")
+    //             .failureUrl("/login?error=1")
+    //             .permitAll()
+    //             .and()
+    //             .logout()
+    //             .permitAll()
+    //             .and()
+    //             .rememberMe()
+    //             .and().exceptionHandling().accessDeniedPage("/error/403")
+    //     }
+    // }
 
     // @Order(2)
     // @Configuration
