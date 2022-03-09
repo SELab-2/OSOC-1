@@ -60,17 +60,17 @@ class StudentServiceTests {
     }
 
     @Test
-    fun `putStudent saves student`() {
+    fun `addStudent saves student`() {
         val repository = getRepository(false)
         val service = StudentService(repository)
-        service.putStudent(testStudent)
+        service.addStudent(testStudent)
         verify { repository.save(testStudent) }
     }
 
     @Test
-    fun `putStudent returns some other id than what was passed`() {
+    fun `addStudent returns some other id than what was passed`() {
         val service = StudentService(getRepository(false))
-        assertNotEquals(service.putStudent(testStudent), testId)
+        assertNotEquals(service.addStudent(testStudent), testId)
     }
 
     @Test
