@@ -4,7 +4,7 @@ import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
-import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
 import io.mockk.Runs
@@ -39,7 +39,7 @@ class StudentServiceTests {
         assertEquals(service.getStudentById(testId), testStudent)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidStudentIdException::class)
     fun `getStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
         service.getStudentById(testId)
@@ -53,7 +53,7 @@ class StudentServiceTests {
         verify { repository.deleteById(testId) }
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidStudentIdException::class)
     fun `deleteStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
         service.deleteStudentById(testId)
@@ -83,7 +83,7 @@ class StudentServiceTests {
         testStudent.status = StatusEnum.Undecided
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidStudentIdException::class)
     fun `setStudentStatus fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
         service.setStudentStatus(testId, StatusEnum.Yes)
@@ -100,7 +100,7 @@ class StudentServiceTests {
         testStudent.statusSuggestions.remove(testSuggestion)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidStudentIdException::class)
     fun `addStudentStatusSuggestion fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
         service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "")

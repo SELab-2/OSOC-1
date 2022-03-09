@@ -27,14 +27,14 @@ class ProjectController(private val service: ProjectService) {
     /**
      * Get a project by its [id], if this id doesn't exist the service will return a 404
      */
-    @GetMapping("/{projId}")
-    fun getProjectById(@PathVariable projId: UUID): Project = service.getProjectById(projId)
+    @GetMapping("/{projectId}")
+    fun getProjectById(@PathVariable projectId: UUID): Project = service.getProjectById(projectId)
 
     /**
      * Deletes a project with its [id], if this [id] doesn't exist the service will return a 404
      */
-    @DeleteMapping("/{projId}")
-    fun deleteProjectById(@PathVariable projId: UUID) = service.deleteProjectById(projId)
+    @DeleteMapping("/{projectId}")
+    fun deleteProjectById(@PathVariable projectId: UUID) = service.deleteProjectById(projectId)
 
     /**
      * Creates a project from the request body, this can also override an already existing project
@@ -44,42 +44,42 @@ class ProjectController(private val service: ProjectService) {
     fun putProject(@RequestBody project: Project): UUID = service.putProject(project)
 
     /**
-     * Gets all students assigned to a project, if this [projId] doesn't exist the service will return a 404
+     * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
      */
-    @GetMapping("/{projId}/students")
-    fun GetStudentsOfProject(@PathVariable projId: UUID): Collection<Student> = service.getProjectById(projId).students
+    @GetMapping("/{projectId}/students")
+    fun getStudentsOfProject(@PathVariable projectId: UUID): Collection<Student> = service.getProjectById(projectId).students
 
     /**
-     * Assign a student to a project, if this [projId] doesn't exist the service will return a 404
+     * Assign a student to a project, if this [projectId] doesn't exist the service will return a 404
      */
-    @PostMapping("/{projId}/students")
-    fun postStudentToProject(@PathVariable projId: UUID, @RequestBody stud: Student) =
-        service.addStudentToProject(projId, stud)
+    @PostMapping("/{projectId}/students")
+    fun postStudentToProject(@PathVariable projectId: UUID, @RequestBody stud: Student) =
+        service.addStudentToProject(projectId, stud)
 
     /**
-     * Deletes a student [studId] from a project [projId], if [projId] or [studId] doesn't exist the service will return a 404
+     * Deletes a student [studentId] from a project [projectId], if [projectId] or [studentId] doesn't exist the service will return a 404
      */
-    @DeleteMapping("/{projId}/students/{studId}")
-    fun deleteStudentFromProject(@PathVariable projId: UUID, @PathVariable studId: UUID) =
-        service.removeStudentFromProject(projId, studId)
+    @DeleteMapping("/{projectId}/students/{studentId}")
+    fun deleteStudentFromProject(@PathVariable projectId: UUID, @PathVariable studentId: UUID) =
+        service.removeStudentFromProject(projectId, studentId)
 
     /**
-     * Gets all coaches of a project, if this [projId] doesn't exist the service will return a 404
+     * Gets all coaches of a project, if this [projectId] doesn't exist the service will return a 404
      */
-    @GetMapping("/{projId}/coaches")
-    fun GetCoachesOfProject(@PathVariable projId: UUID): Collection<Coach> = service.getProjectById(projId).coaches
+    @GetMapping("/{projectId}/coaches")
+    fun getCoachesOfProject(@PathVariable projectId: UUID): Collection<Coach> = service.getProjectById(projectId).coaches
 
     /**
-     * assign a coach to a project, if this [projId] doesn't exist the service will return a 404
+     * assign a coach to a project, if this [projectId] doesn't exist the service will return a 404
      */
-    @PostMapping("/{projId}/coaches")
-    fun postCoachToProject(@PathVariable projId: UUID, @RequestBody coach: Coach) =
-        service.addCoachToProject(projId, coach)
+    @PostMapping("/{projectId}/coaches")
+    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coach: Coach) =
+        service.addCoachToProject(projectId, coach)
 
     /**
-     * Deletes a coach [coachId] from a project [projId], if [projId] or [coachId] doesn't exist the service will return a 404
+     * Deletes a coach [coachId] from a project [projectId], if [projectId] or [coachId] doesn't exist the service will return a 404
      */
-    @DeleteMapping("/{projId}/coaches/{coachId}")
-    fun deleteCoachFromProject(@PathVariable projId: UUID, @PathVariable coachId: UUID) =
-        service.removeCoachFromProject(projId, coachId)
+    @DeleteMapping("/{projectId}/coaches/{coachId}")
+    fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID) =
+        service.removeCoachFromProject(projectId, coachId)
 }

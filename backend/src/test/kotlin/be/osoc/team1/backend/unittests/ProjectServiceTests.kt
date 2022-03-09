@@ -4,7 +4,7 @@ import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.FailedOperationException
-import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
 import be.osoc.team1.backend.services.ProjectService
 import io.mockk.Runs
@@ -40,7 +40,7 @@ class ProjectServiceTests {
         assertEquals(service.getProjectById(testId), testProject)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidProjectIdException::class)
     fun `getProjectById fails when no project with that id exists`() {
         val service = ProjectService(getRepository(false))
         service.getProjectById(testId)
@@ -54,7 +54,7 @@ class ProjectServiceTests {
         verify { repo.deleteById(testId) }
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidProjectIdException::class)
     fun `deleteProjectById fails when no project with that id exists`() {
         val service = ProjectService(getRepository(false))
         service.deleteProjectById(testId)
@@ -72,7 +72,7 @@ class ProjectServiceTests {
         service.patchProject(testProject)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidProjectIdException::class)
     fun `patchProject fails when no project with same id exists`() {
         val service = ProjectService(getRepository(false))
         service.patchProject(testProject)
@@ -85,7 +85,7 @@ class ProjectServiceTests {
         service.addStudentToProject(testProject.id, student)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidProjectIdException::class)
     fun `addStudentToProject fails when project doesnt exist`() {
         val service = ProjectService(getRepository(false))
         val student = Student("Lars", "Van Cauter")
@@ -99,7 +99,7 @@ class ProjectServiceTests {
         service.addCoachToProject(testProject.id, student)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test(expected = InvalidProjectIdException::class)
     fun `addCoachToProject fails when project doesnt exit`() {
         val service = ProjectService(getRepository(false))
         val student = Coach("Lars", "Van Cauter")

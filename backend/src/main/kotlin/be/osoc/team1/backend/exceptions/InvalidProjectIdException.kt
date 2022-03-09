@@ -4,10 +4,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
 /**
- * This exception is thrown by service classes when a given id does not have
+ * This exception is thrown by service classes when a given project id does not have
  * a matching record in the database.
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
-open class InvalidIdException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
+class InvalidProjectIdException(message: String? = null, cause: Throwable? = null) : InvalidIdException(message, cause) {
     constructor(cause: Throwable) : this(null, cause)
 }
