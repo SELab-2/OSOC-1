@@ -21,10 +21,10 @@ class Project(
     val description: String,
 
     @OneToMany(cascade = [CascadeType.ALL])
-    val students: MutableCollection<Student>,
+    val students: MutableCollection<Student> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.ALL])
-    val coaches: MutableCollection<Coach>
+    val coaches: MutableCollection<Coach> = mutableListOf()
 ) {
     @Id
     @GeneratedValue(generator = "UUID")
