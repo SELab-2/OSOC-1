@@ -47,10 +47,12 @@ class StudentController(private val service: StudentService) {
      * Add a student to the database. The student should be passed in the request body
      * as a JSON object and should have the following format:
      *
+     * ```
      * {
      *     "firstName": "(INSERT FIRST NAME)",
      *     "lastName": "(INSERT LAST NAME)"
      * }
+     * ```
      *
      * The location of the newly created student is then returned to the API caller in the location header.
      * No checking is done to see if firstName or lastName qualify as valid 'names'.
@@ -73,8 +75,11 @@ class StudentController(private val service: StudentService) {
      * as a JSON string and can have the following values:
      *
      * "Yes" for [StatusEnum.Yes],
+     *
      * "Maybe" for [StatusEnum.Maybe],
+     *
      * "No" for [StatusEnum.No] and
+     *
      * "Undecided" for [StatusEnum.Undecided]
      *
      * Any other input value will result in a "400: Bad Request" response. These values are also case-sensitive.
@@ -88,10 +93,12 @@ class StudentController(private val service: StudentService) {
      * returns a "404: Not Found" message instead. The [statusSuggestion] should be passed in the request body
      * as a JSON object and should have the following format:
      *
+     * ```
      * {
      *      "status": "Yes" OR "Maybe" OR "No",
      *      "motivation": "(INSERT MOTIVATION)"
      * }
+     *```
      *
      * Any other values for the status will result in a "400: Bad Request" response.
      * Importantly, this includes the "Undecided" value, which is a valid value in other endpoints.
