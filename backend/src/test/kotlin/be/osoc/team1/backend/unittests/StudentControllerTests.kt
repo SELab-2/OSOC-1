@@ -60,7 +60,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `deleteStudentById succeeds if student with given id exists`() {
         every { studentService.deleteStudentById(testId) } just Runs
-        mockMvc.perform(delete("/students/$testId")).andExpect(status().isOk)
+        mockMvc.perform(delete("/students/$testId")).andExpect(status().isNoContent)
     }
 
     @Test
@@ -89,7 +89,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("/students/$testId/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(status))
-        ).andExpect(status().isOk)
+        ).andExpect(status().isNoContent)
     }
 
     @Test
@@ -114,7 +114,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("/students/$testId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(statusSuggestion))
-        ).andExpect(status().isOk)
+        ).andExpect(status().isNoContent)
     }
 
     @Test

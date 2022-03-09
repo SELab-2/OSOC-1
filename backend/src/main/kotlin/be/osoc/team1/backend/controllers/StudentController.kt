@@ -35,6 +35,7 @@ class StudentController(private val service: StudentService) {
      * returns a "404: Not Found" message instead.
      */
     @DeleteMapping("/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun deleteStudentById(@PathVariable id: UUID) = service.deleteStudentById(id)
 
     /**
@@ -66,6 +67,7 @@ class StudentController(private val service: StudentService) {
      * Any other input value will result in a "400: Bad Request" response. These values are also case-sensitive.
      */
     @PostMapping("/{id}/status")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun setStudentStatus(@PathVariable id: UUID, @RequestBody status: StatusEnum) = service.setStudentStatus(id, status)
 
     /**
@@ -83,6 +85,7 @@ class StudentController(private val service: StudentService) {
      * This is because a user cannot suggest to change the status of a student to "Undecided".
      */
     @PostMapping("/{id}/suggestions")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun addStudentStatusSuggestion(@PathVariable id: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
         service.addStudentStatusSuggestion(id, statusSuggestion.status, statusSuggestion.motivation)
 }
