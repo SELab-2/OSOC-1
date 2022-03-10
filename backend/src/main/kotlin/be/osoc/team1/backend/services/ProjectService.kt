@@ -59,8 +59,9 @@ class ProjectService(private val repository: ProjectRepository) {
     }
 
     /**
-     * removes a student from project based on [projectId] and [studentId], if [projectId] is not in [repository]
-     * or [studentId] not in project throw InvalidProjectIdException
+     * removes a student from project based on [projectId] and [studentId],
+     * if [projectId] is not in [repository] throw InvalidProjectIdException
+     * if [studentId] not assigned to project throw FailedOperationException
      */
     fun removeStudentFromProject(projectId: UUID, studentId: UUID) {
         val project: Project = getProjectById(projectId)
@@ -71,7 +72,8 @@ class ProjectService(private val repository: ProjectRepository) {
     }
 
     /**
-     * Adds a coach to project based on [projectId], if [projectId] is not in [repository] throw InvalidProjectIdException
+     * Adds a coach to project based on [projectId],
+     * if [projectId] is not in [repository] throw InvalidProjectIdException
      */
     fun addCoachToProject(projectId: UUID, coach: Coach) {
         val project: Project = getProjectById(projectId)
@@ -80,8 +82,9 @@ class ProjectService(private val repository: ProjectRepository) {
     }
 
     /**
-     * removes a coach from project based on [projectId] and [coachId], if [projectId] is not in [repository]
-     * or [coachId] not in project throw InvalidProjectIdException
+     * removes a coach from project based on [projectId] and [coachId],
+     * if [projectId] is not in [repository] throw InvalidProjectIdException
+     * if [coachId] not assigned to project throw FailedOperationException
      */
     fun removeCoachFromProject(projectId: UUID, coachId: UUID) {
         val project: Project = getProjectById(projectId)
