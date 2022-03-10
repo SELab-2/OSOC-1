@@ -68,8 +68,10 @@ class ProjectServiceTests {
 
     @Test
     fun `patchProject updates project when project with same id exists`() {
-        val service = ProjectService(getRepository(true))
+        val repository = getRepository(true)
+        val service = ProjectService(repository)
         service.patchProject(testProject)
+        verify { repository.save(testProject) }
     }
 
     @Test(expected = InvalidProjectIdException::class)
@@ -80,9 +82,11 @@ class ProjectServiceTests {
 
     @Test
     fun `addStudentToProject runs`() {
-        val service = ProjectService(getRepository(true))
+        val repository = getRepository(true)
+        val service = ProjectService(repository)
         val student = Student("Lars", "Van Cauter")
         service.addStudentToProject(testProject.id, student)
+        verify { repository.save(testProject) }
     }
 
     @Test(expected = InvalidProjectIdException::class)
@@ -94,9 +98,11 @@ class ProjectServiceTests {
 
     @Test
     fun `addCoachToProject runs`() {
-        val service = ProjectService(getRepository(true))
+        val repository = getRepository(true)
+        val service = ProjectService(repository)
         val student = Coach("Lars", "Van Cauter")
         service.addCoachToProject(testProject.id, student)
+        verify { repository.save(testProject) }
     }
 
     @Test(expected = InvalidProjectIdException::class)
@@ -108,8 +114,10 @@ class ProjectServiceTests {
 
     @Test
     fun `removeStudentFromProject succeeds when student is in project`() {
-        val service = ProjectService(getRepository(true))
+        val repository = getRepository(true)
+        val service = ProjectService(repository)
         service.removeStudentFromProject(testProject.id, testStudent.id)
+        verify { repository.save(testProject) }
     }
 
     @Test(expected = FailedOperationException::class)
@@ -120,8 +128,10 @@ class ProjectServiceTests {
 
     @Test
     fun `removeCoachFromProject succeeds when student is in project`() {
-        val service = ProjectService(getRepository(true))
+        val repository = getRepository(true)
+        val service = ProjectService(repository)
         service.removeCoachFromProject(testProject.id, testCoach.id)
+        verify { repository.save(testProject) }
     }
 
     @Test(expected = FailedOperationException::class)

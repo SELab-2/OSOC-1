@@ -33,20 +33,20 @@ class ProjectService(private val repository: ProjectRepository) {
     }
 
     /**
-     * Creates a new project based on [proj]
+     * Creates a new project based on [project]
      */
-    fun putProject(proj: Project): UUID {
-        return repository.save(proj).id
+    fun putProject(project: Project): UUID {
+        return repository.save(project).id
     }
 
     /**
-     * Updates a project based on [proj], if [proj] is not in [repository] throw InvalidProjectIdException
+     * Updates a project based on [project], if [project] is not in [repository] throw InvalidProjectIdException
      */
-    fun patchProject(proj: Project) {
-        if (!repository.existsById(proj.id))
+    fun patchProject(project: Project) {
+        if (!repository.existsById(project.id))
             throw InvalidProjectIdException()
 
-        repository.save(proj)
+        repository.save(project)
     }
 
     /**

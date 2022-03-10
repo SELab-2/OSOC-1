@@ -25,13 +25,13 @@ class ProjectController(private val service: ProjectService) {
     fun getAllProjects(): Iterable<Project> = service.getAllProjects()
 
     /**
-     * Get a project by its [id], if this id doesn't exist the service will return a 404
+     * Get a project by its [projectId], if this id doesn't exist the service will return a 404
      */
     @GetMapping("/{projectId}")
     fun getProjectById(@PathVariable projectId: UUID): Project = service.getProjectById(projectId)
 
     /**
-     * Deletes a project with its [id], if this [id] doesn't exist the service will return a 404
+     * Deletes a project with its [projectId], if this [projectId] doesn't exist the service will return a 404
      */
     @DeleteMapping("/{projectId}")
     fun deleteProjectById(@PathVariable projectId: UUID) = service.deleteProjectById(projectId)
@@ -53,8 +53,8 @@ class ProjectController(private val service: ProjectService) {
      * Assign a student to a project, if this [projectId] doesn't exist the service will return a 404
      */
     @PostMapping("/{projectId}/students")
-    fun postStudentToProject(@PathVariable projectId: UUID, @RequestBody stud: Student) =
-        service.addStudentToProject(projectId, stud)
+    fun postStudentToProject(@PathVariable projectId: UUID, @RequestBody student: Student) =
+        service.addStudentToProject(projectId, student)
 
     /**
      * Deletes a student [studentId] from a project [projectId], if [projectId] or [studentId] doesn't exist the service will return a 404
