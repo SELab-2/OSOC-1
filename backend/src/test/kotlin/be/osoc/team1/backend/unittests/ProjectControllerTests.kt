@@ -33,7 +33,6 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testProject)
 
-
     @Test
     fun `getAllProjects should not fail`() {
         every { projectService.getAllProjects() } returns emptyList()
