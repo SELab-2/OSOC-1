@@ -12,8 +12,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import junit.framework.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
@@ -128,7 +128,7 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `removeCoachFromProject succeeds when student is in project`() {
+    fun `removeCoachFromProject succeeds when coach is in project`() {
         val repository = getRepository(true)
         val service = ProjectService(repository)
         service.removeCoachFromProject(testProject.id, testCoach.id)
@@ -136,7 +136,7 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `removeCoachFromProject fails when student is not in project`() {
+    fun `removeCoachFromProject fails when coach is not in project`() {
         val service = ProjectService(getRepository(true))
         assertThrows<FailedOperationException> { service.removeCoachFromProject(testProject.id, UUID.randomUUID()) }
     }

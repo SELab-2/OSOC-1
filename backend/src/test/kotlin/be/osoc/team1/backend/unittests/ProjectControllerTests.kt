@@ -1,7 +1,9 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.ProjectController
+import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
+import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.ProjectService
@@ -98,6 +100,29 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `postStudentOfProject succeeds if project with given id exists`() {
+        val student = Student("Lars", "Van Cauter")
+        every { projectService.addStudentToProject(testId, any()) } just Runs
+        mockMvc.perform(
+            post("/projects/$testId/students/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(student))
+        ).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `postStudentOfProject returns 404 Not Found if project with given id does not exist`() {
+        val student = Student("Lars", "Van Cauter")
+        val differentId = UUID.randomUUID()
+        every { projectService.addStudentToProject(differentId, any()) }.throws(InvalidIdException())
+        mockMvc.perform(
+            post("/projects/$differentId/students/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(student))
+        ).andExpect(status().isNotFound)
+    }
+
+    @Test
     fun `deleteStudentOfProject succeeds if project with given id exists`() {
         val studentId = UUID.randomUUID()
         every { projectService.removeStudentFromProject(testId, studentId) } just Runs
@@ -117,10 +142,13 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `deleteStudentOfProject returns 400 if coach with given id is not assigned to project`() {
         val not_assigned_studentId = UUID.randomUUID()
-        every { projectService.removeCoachFromProject(testId, not_assigned_studentId) }.throws(FailedOperationException())
-        mockMvc.perform(delete("/projects/$testId/coaches/$not_assigned_studentId"))
+        every { projectService.removeStudentFromProject(testId, not_assigned_studentId) }.throws(
+            FailedOperationException()
+        )
+        mockMvc.perform(delete("/projects/$testId/students/$not_assigned_studentId"))
             .andExpect(status().isBadRequest)
     }
+
     @Test
     fun `getCoachOfProject succeeds if project with given id exists`() {
         every { projectService.getProjectById(testId) } returns testProject
@@ -136,6 +164,28 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(status().isNotFound)
     }
 
+    @Test
+    fun `postCoachOfProject succeeds if project with given id exists`() {
+        val coach = Coach("Lars", "Van Cauter")
+        every { projectService.addCoachToProject(testId, any()) } just Runs
+        mockMvc.perform(
+            post("/projects/$testId/coaches/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(coach))
+        ).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `postCoachOfProject returns 404 Not Found if project with given id does not exist`() {
+        val coach = Coach("Lars", "Van Cauter")
+        val differentId = UUID.randomUUID()
+        every { projectService.addCoachToProject(differentId, any()) }.throws(InvalidIdException())
+        mockMvc.perform(
+            post("/projects/$differentId/coaches/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(coach))
+        ).andExpect(status().isNotFound)
+    }
     @Test
     fun `deleteCoachOfProject succeeds if project with given id exists`() {
         val coachId = UUID.randomUUID()
