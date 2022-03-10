@@ -12,11 +12,14 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
 
+@SpringBootTest
 class StudentServiceTests {
 
     private val testStudent = Student("Tom", "Alard")
@@ -39,10 +42,10 @@ class StudentServiceTests {
         assertEquals(service.getStudentById(testId), testStudent)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test
     fun `getStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.getStudentById(testId)
+        assertThrows<InvalidIdException> { service.getStudentById(testId) }
     }
 
     @Test
@@ -53,10 +56,10 @@ class StudentServiceTests {
         verify { repository.deleteById(testId) }
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test
     fun `deleteStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.deleteStudentById(testId)
+        assertThrows<InvalidIdException> { service.deleteStudentById(testId) }
     }
 
     @Test
@@ -83,10 +86,10 @@ class StudentServiceTests {
         testStudent.status = StatusEnum.Undecided
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test
     fun `setStudentStatus fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.setStudentStatus(testId, StatusEnum.Yes)
+        assertThrows<InvalidIdException> { service.setStudentStatus(testId, StatusEnum.Yes) }
     }
 
     @Test
@@ -100,9 +103,9 @@ class StudentServiceTests {
         testStudent.statusSuggestions.remove(testSuggestion)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test
     fun `addStudentStatusSuggestion fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "")
+        assertThrows<InvalidIdException> { service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "") }
     }
 }
