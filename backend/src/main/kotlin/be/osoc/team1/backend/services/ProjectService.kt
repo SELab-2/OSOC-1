@@ -35,7 +35,7 @@ class ProjectService(private val repository: ProjectRepository) {
     /**
      * Creates a new project based on [project]
      */
-    fun putProject(project: Project): UUID {
+    fun postProject(project: Project): UUID {
         return repository.save(project).id
     }
 

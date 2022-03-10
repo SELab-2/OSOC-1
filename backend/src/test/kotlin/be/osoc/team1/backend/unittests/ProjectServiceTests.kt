@@ -62,9 +62,9 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `putProject returns some other id than what was passed`() {
+    fun `postProject returns some other id than what was passed`() {
         val service = ProjectService(getRepository(false))
-        Assertions.assertNotEquals(service.putProject(testProject), testId)
+        Assertions.assertNotEquals(service.postProject(testProject), testId)
     }
 
     @Test

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -40,8 +39,8 @@ class ProjectController(private val service: ProjectService) {
      * Creates a project from the request body, this can also override an already existing project
      * returns the id of the project
      */
-    @PutMapping
-    fun putProject(@RequestBody project: Project): UUID = service.putProject(project)
+    @PostMapping
+    fun postProject(@RequestBody project: Project): UUID = service.postProject(project)
 
     /**
      * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
