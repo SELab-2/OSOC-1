@@ -2,8 +2,10 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.ProjectController
 import be.osoc.team1.backend.entities.Project
+import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.ProjectService
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -28,7 +30,9 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     private val testId = UUID.randomUUID()
     private val testProject = Project("Proj", "desc", mutableListOf(), mutableListOf())
-    private val jsonRepresentation = "{\"name\": \"Proj\", \"description\":\"desc\", \"students\": [], \"coaches\": []}"
+    private val objectMapper = ObjectMapper()
+    private val jsonRepresentation = objectMapper.writeValueAsString(testProject)
+
 
     @Test
     fun `getAllProjects should not fail`() {
@@ -96,21 +100,28 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `deleteStudentOfProject succeeds if project with given id exists`() {
-        val studId = UUID.randomUUID()
-        every { projectService.removeStudentFromProject(testId, studId) } just Runs
-        mockMvc.perform(delete("/projects/$testId/students/$studId"))
+        val studentId = UUID.randomUUID()
+        every { projectService.removeStudentFromProject(testId, studentId) } just Runs
+        mockMvc.perform(delete("/projects/$testId/students/$studentId"))
             .andExpect(status().isOk)
     }
 
     @Test
     fun `deleteStudentOfProject returns 404 Not Found if project with given id does not exist`() {
-        val studId = UUID.randomUUID()
+        val studentId = UUID.randomUUID()
         val differentId = UUID.randomUUID()
-        every { projectService.removeStudentFromProject(differentId, studId) }.throws(InvalidIdException())
-        mockMvc.perform(delete("/projects/$differentId/students/$studId"))
+        every { projectService.removeStudentFromProject(differentId, studentId) }.throws(InvalidIdException())
+        mockMvc.perform(delete("/projects/$differentId/students/$studentId"))
             .andExpect(status().isNotFound)
     }
 
+    @Test
+    fun `deleteStudentOfProject returns 400 if coach with given id is not assigned to project`() {
+        val not_assigned_studentId = UUID.randomUUID()
+        every { projectService.removeCoachFromProject(testId, not_assigned_studentId) }.throws(FailedOperationException())
+        mockMvc.perform(delete("/projects/$testId/coaches/$not_assigned_studentId"))
+            .andExpect(status().isBadRequest)
+    }
     @Test
     fun `getCoachOfProject succeeds if project with given id exists`() {
         every { projectService.getProjectById(testId) } returns testProject
@@ -141,5 +152,13 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { projectService.removeCoachFromProject(differentId, coachId) }.throws(InvalidIdException())
         mockMvc.perform(delete("/projects/$differentId/coaches/$coachId"))
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `deleteCoachOfProject returns 400 if coach with given id is not assigned to project`() {
+        val not_assigned_coachId = UUID.randomUUID()
+        every { projectService.removeCoachFromProject(testId, not_assigned_coachId) }.throws(FailedOperationException())
+        mockMvc.perform(delete("/projects/$testId/coaches/$not_assigned_coachId"))
+            .andExpect(status().isBadRequest)
     }
 }
