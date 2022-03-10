@@ -15,8 +15,10 @@ import io.mockk.verify
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
 
+@SpringBootTest
 class StudentServiceTests {
 
     private val testStudent = Student("Tom", "Alard")
