@@ -16,6 +16,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<kotlin.version>1.6.10</kotlin.version>
+        <dokka.version>1.6.10</dokka.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -125,6 +126,29 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<!-- JaCoCo Plugin for code coverage -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.7</version>
+				<configuration>
+					<formats>XML</formats>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 <!-- 			<plugin>
 				<groupId>com.github.gantsign.maven</groupId>
 				<artifactId>ktlint-maven-plugin</artifactId>
@@ -139,6 +163,19 @@
 					</execution>
 				</executions>
 			</plugin> -->
+            <plugin>
+				<groupId>org.jetbrains.dokka</groupId>
+				<artifactId>dokka-maven-plugin</artifactId>
+				<version>${dokka.version}</version>
+				<executions>
+					<execution>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>dokka</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

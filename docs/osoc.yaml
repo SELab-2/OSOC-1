@@ -20,7 +20,7 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/Student'
-        put:
+        post:
             summary: Add a new student to the database
             description: |
                 Add a student to the database.
@@ -33,13 +33,14 @@ paths:
                         schema:
                             $ref: '#/components/schemas/Student'
             responses:
-                '200':
+                '201':
                     description: successful operation, returns the assigned id of the newly added student.
                     content:
                         application/json:
                             schema:
                                 type: string
                                 format: uuid
+
     /students/{studentId}:
         get:
             summary: Get Student by id
@@ -78,7 +79,7 @@ paths:
                     type: integer
                     format: int64
             responses:
-                '200':
+                '204':
                     description: |
                         The response if there was a student in the database with the given id.
                 '404':
@@ -102,7 +103,7 @@ paths:
                     type: integer
                     format: int64
             responses:
-                '200':
+                '204':
                     description: |
                         The response if there is a student in the database with the given id.
                 '404':
@@ -132,7 +133,7 @@ paths:
                     type: integer
                     format: int64
             responses:
-                '200':
+                '204':
                     description: |
                         The response if there is a student in the database with the given id.
                 '404':
@@ -155,7 +156,7 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/Project'
-        put:
+        post:
             summary: Add new project
             requestBody:
                 content:
@@ -296,7 +297,7 @@ paths:
             responses:
                 '200':
                     description: successful operation
-        put:
+        post:
             summary: Register communication with a student
             parameters:
               - name: studentId
@@ -320,7 +321,7 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/User'
-        put:
+        post:
             summary: add new user to database
             requestBody:
                 content:
