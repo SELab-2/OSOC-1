@@ -29,7 +29,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var projectService: ProjectService
 
     private val testId = UUID.randomUUID()
-    private val testProject = Project("Proj", "desc", mutableListOf(), mutableListOf())
+    private val testProject = Project("Proj", "desc")
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testProject)
 
