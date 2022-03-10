@@ -4,7 +4,7 @@ import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
-import be.osoc.team1.backend.exceptions.InvalidStudentIdException
+import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
 import io.mockk.Runs
@@ -15,6 +15,8 @@ import io.mockk.verify
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
 
 class StudentServiceTests {
@@ -39,10 +41,10 @@ class StudentServiceTests {
         assertEquals(service.getStudentById(testId), testStudent)
     }
 
-    @Test(expected = InvalidStudentIdException::class)
+    @Test
     fun `getStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.getStudentById(testId)
+        assertThrows<InvalidIdException> { service.getStudentById(testId) }
     }
 
     @Test
@@ -53,24 +55,24 @@ class StudentServiceTests {
         verify { repository.deleteById(testId) }
     }
 
-    @Test(expected = InvalidStudentIdException::class)
+    @Test
     fun `deleteStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.deleteStudentById(testId)
+        assertThrows<InvalidIdException> { service.deleteStudentById(testId) }
     }
 
     @Test
-    fun `putStudent saves student`() {
+    fun `addStudent saves student`() {
         val repository = getRepository(false)
         val service = StudentService(repository)
-        service.putStudent(testStudent)
+        service.addStudent(testStudent)
         verify { repository.save(testStudent) }
     }
 
     @Test
-    fun `putStudent returns some other id than what was passed`() {
+    fun `addStudent returns some other id than what was passed`() {
         val service = StudentService(getRepository(false))
-        assertNotEquals(service.putStudent(testStudent), testId)
+        assertNotEquals(service.addStudent(testStudent), testId)
     }
 
     @Test
@@ -83,10 +85,10 @@ class StudentServiceTests {
         testStudent.status = StatusEnum.Undecided
     }
 
-    @Test(expected = InvalidStudentIdException::class)
+    @Test
     fun `setStudentStatus fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.setStudentStatus(testId, StatusEnum.Yes)
+        assertThrows<InvalidIdException> { service.setStudentStatus(testId, StatusEnum.Yes) }
     }
 
     @Test
@@ -100,9 +102,9 @@ class StudentServiceTests {
         testStudent.statusSuggestions.remove(testSuggestion)
     }
 
-    @Test(expected = InvalidStudentIdException::class)
+    @Test
     fun `addStudentStatusSuggestion fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "")
+        assertThrows<InvalidIdException> { service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "") }
     }
 }

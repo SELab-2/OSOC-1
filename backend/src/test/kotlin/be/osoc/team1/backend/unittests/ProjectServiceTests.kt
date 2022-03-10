@@ -13,8 +13,9 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
 
@@ -40,10 +41,10 @@ class ProjectServiceTests {
         assertEquals(service.getProjectById(testId), testProject)
     }
 
-    @Test(expected = InvalidProjectIdException::class)
+    @Test
     fun `getProjectById fails when no project with that id exists`() {
         val service = ProjectService(getRepository(false))
-        service.getProjectById(testId)
+        assertThrows<InvalidProjectIdException> {service.getProjectById(testId)}
     }
 
     @Test
@@ -54,10 +55,10 @@ class ProjectServiceTests {
         verify { repo.deleteById(testId) }
     }
 
-    @Test(expected = InvalidProjectIdException::class)
+    @Test
     fun `deleteProjectById fails when no project with that id exists`() {
         val service = ProjectService(getRepository(false))
-        service.deleteProjectById(testId)
+        assertThrows<InvalidProjectIdException> {service.deleteProjectById(testId)}
     }
 
     @Test
@@ -74,10 +75,10 @@ class ProjectServiceTests {
         verify { repository.save(testProject) }
     }
 
-    @Test(expected = InvalidProjectIdException::class)
+    @Test
     fun `patchProject fails when no project with same id exists`() {
         val service = ProjectService(getRepository(false))
-        service.patchProject(testProject)
+        assertThrows<InvalidProjectIdException> {service.patchProject(testProject)}
     }
 
     @Test
@@ -89,11 +90,11 @@ class ProjectServiceTests {
         verify { repository.save(testProject) }
     }
 
-    @Test(expected = InvalidProjectIdException::class)
+    @Test
     fun `addStudentToProject fails when project doesnt exist`() {
         val service = ProjectService(getRepository(false))
         val student = Student("Lars", "Van Cauter")
-        service.addStudentToProject(testProject.id, student)
+        assertThrows<InvalidProjectIdException> {service.addStudentToProject(testProject.id, student)}
     }
 
     @Test
@@ -105,11 +106,11 @@ class ProjectServiceTests {
         verify { repository.save(testProject) }
     }
 
-    @Test(expected = InvalidProjectIdException::class)
+    @Test
     fun `addCoachToProject fails when project doesnt exit`() {
         val service = ProjectService(getRepository(false))
         val student = Coach("Lars", "Van Cauter")
-        service.addCoachToProject(testProject.id, student)
+        assertThrows<InvalidProjectIdException> {service.addCoachToProject(testProject.id, student)}
     }
 
     @Test
@@ -120,10 +121,10 @@ class ProjectServiceTests {
         verify { repository.save(testProject) }
     }
 
-    @Test(expected = FailedOperationException::class)
+    @Test
     fun `removeStudentFromProject fails when student is not in project`() {
         val service = ProjectService(getRepository(true))
-        service.removeStudentFromProject(testProject.id, UUID.randomUUID())
+        assertThrows<FailedOperationException> {service.removeStudentFromProject(testProject.id, UUID.randomUUID())}
     }
 
     @Test
@@ -134,9 +135,9 @@ class ProjectServiceTests {
         verify { repository.save(testProject) }
     }
 
-    @Test(expected = FailedOperationException::class)
+    @Test
     fun `removeCoachFromProject fails when student is not in project`() {
         val service = ProjectService(getRepository(true))
-        service.removeCoachFromProject(testProject.id, UUID.randomUUID())
+        assertThrows<FailedOperationException> {service.removeCoachFromProject(testProject.id, UUID.randomUUID())}
     }
 }
