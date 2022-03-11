@@ -9,7 +9,7 @@ import java.util.UUID
 class CommunicationService(private val repository: CommunicationRepository) {
 
     /**
-     * Creates a new communication based on [communication]
+     * Creates a new communication based on [communication]. Returns the student's new id as decided by the database.
      */
     fun createCommunication(communication: Communication): UUID = repository.save(communication).id
 }

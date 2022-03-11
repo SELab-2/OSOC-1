@@ -31,7 +31,18 @@ class CommunicationController(
         studentService.getStudentById(studentId).communications
 
     /**
-     * Creates a communication from the request body, returns a reference to the communication
+     * Add a communication to the database. The communication should be passed in the request body
+     * as a JSON object and should have the following format:
+     *
+     * ```
+     * {
+     *     "message": "(INSERT MESSAGE)",
+     *     "type": "Email"
+     * }
+     * ```
+     *
+     * The location of the newly created communication is then returned to the API caller in the location header.
+     * Note that the type can be any of the types defined in [Communication]
      */
     @PostMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
