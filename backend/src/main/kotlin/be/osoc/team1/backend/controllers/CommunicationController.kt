@@ -24,7 +24,7 @@ class CommunicationController(
 ) {
 
     /**
-     * Gets all communications that belongs to a student, if this [studentId] doesn't exist the service will return a 404
+     * Gets all communications that belong to a student, if this [studentId] doesn't exist the service will return a 404
      */
     @GetMapping("/{studentId}")
     fun getCommunicationsByStudentId(@PathVariable studentId: UUID): Collection<Communication> =
