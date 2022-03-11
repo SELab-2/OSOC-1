@@ -10,13 +10,10 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
-import java.util.UUID
 
 class CommunicationServiceTests {
-    private val testId = UUID.randomUUID()
     private val testStudent = Student("Jitse", "Willaert")
     private val testCommunication = Communication("test message", TypeEnum.Email, testStudent)
     private val savedCommunication = Communication("a saved communication", TypeEnum.Email, testStudent)
@@ -31,16 +28,10 @@ class CommunicationServiceTests {
     }
 
     @Test
-    fun `postCommunication saves communication`() {
+    fun `createCommunication saves communication`() {
         val repository = getRepository(false)
         val service = CommunicationService(repository)
-        service.postCommunication(testCommunication)
+        service.createCommunication(testCommunication)
         verify { repository.save(testCommunication) }
-    }
-
-    @Test
-    fun `postCommunication returns some other id than what was passed`() {
-        val service = CommunicationService(getRepository(false))
-        Assertions.assertNotEquals(service.postCommunication(testCommunication), testId)
     }
 }

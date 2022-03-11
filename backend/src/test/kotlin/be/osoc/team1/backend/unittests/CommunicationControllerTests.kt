@@ -12,14 +12,18 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.context.properties.bind.Bindable.listOf
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import java.util.UUID
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.*
 
 @WebMvcTest(CommunicationController::class)
 class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
@@ -38,42 +42,43 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getCommunicationsByStudentId succeeds if student with given id exists`() {
-        every { studentService.getStudentById(testId) } returns testStudent
-        mockMvc.perform(MockMvcRequestBuilders.get("/communications/$testId"))
-            .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().string("[]"))
+        val mutableList: MutableList<Communication> = ArrayList()
+        mutableList.add(testCommunication)
+        every { studentService.getStudentById(testId).communications } returns mutableList
+        mockMvc.perform(get("/communications/$testId"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("test message")))
     }
 
     @Test
     fun `getCommunicationsByStudentId returns 404 Not Found if student with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { studentService.getStudentById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(MockMvcRequestBuilders.get("/communications/$differentId"))
-            .andExpect(MockMvcResultMatchers.status().isNotFound)
+        mockMvc.perform(get("/communications/$differentId"))
+            .andExpect(status().isNotFound)
     }
 
     @Test
-    fun `postCommunication succeeds if student with given id exists`() {
+    fun `createCommunication succeeds if student with given id exists`() {
         val databaseId = UUID.randomUUID()
-        every { communicationService.postCommunication(any()) } returns databaseId
+        every { communicationService.createCommunication(any()) } returns databaseId
         every { studentService.addCommunicationToStudent(testId, any()) } just Runs
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/communications/$testId")
+            post("/communications/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
-        ).andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().string("\"$databaseId\""))
+        ).andExpect(status().isCreated)
     }
 
     @Test
-    fun `postCommunication returns 404 Not Found if student with given id does not exist`() {
+    fun `createCommunication returns 404 Not Found if student with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { communicationService.postCommunication(any()) } returns differentId
+        every { communicationService.createCommunication(any()) } returns differentId
         every { studentService.addCommunicationToStudent(differentId, any()) }.throws(InvalidIdException())
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/communications/$differentId")
+            post("/communications/$differentId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
-        ).andExpect(MockMvcResultMatchers.status().isNotFound)
+        ).andExpect(status().isNotFound)
     }
 }

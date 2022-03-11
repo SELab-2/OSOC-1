@@ -17,12 +17,12 @@ class StudentService(private val repository: StudentRepository) {
     fun getAllStudents(): Iterable<Student> = repository.findAll()
 
     /**
-     * Get a student by their [id]. Throws an InvalidStudentIdException if no such student exists.
+     * Get a student by their [id]. Throws an [InvalidStudentIdException] if no such student exists.
      */
     fun getStudentById(id: UUID) = repository.findByIdOrNull(id) ?: throw InvalidStudentIdException()
 
     /**
-     * Delete a student by their [id]. Throws an InvalidStudentIdException if no such student existed
+     * Delete a student by their [id]. Throws an [InvalidStudentIdException] if no such student existed
      * in the database in the first place.
      */
     fun deleteStudentById(id: UUID) {
@@ -39,7 +39,7 @@ class StudentService(private val repository: StudentRepository) {
 
     /**
      * Retrieve the student with the specified [id], then set his status to [newStatus].
-     * Throws an InvalidStudentIdException if no student with that [id] exists.
+     * Throws an [InvalidStudentIdException] if no student with that [id] exists.
      */
     fun setStudentStatus(id: UUID, newStatus: StatusEnum) {
         val student = getStudentById(id)
@@ -50,7 +50,7 @@ class StudentService(private val repository: StudentRepository) {
     /**
      * Retrieve the student with the specified [id], then create a new StatusSuggestion with
      * the given [suggestionEnum] and [motivation] and add it to the student's list.
-     * Throws an InvalidStudentIdException if no student with that [id] exists.
+     * Throws an [InvalidStudentIdException] if no student with that [id] exists.
      */
     fun addStudentStatusSuggestion(id: UUID, suggestionEnum: SuggestionEnum, motivation: String) {
         val student = getStudentById(id)
@@ -60,7 +60,7 @@ class StudentService(private val repository: StudentRepository) {
     }
 
     /**
-     * Adds a communication to student based on [studentId], if [studentId] is not in [repository] throw InvalidProjectIdException
+     * Adds a communication to student based on [studentId], if [studentId] is not in [repository] throw [InvalidStudentIdException]
      */
     fun addCommunicationToStudent(studentId: UUID, communication: Communication) {
         val student = getStudentById(studentId)

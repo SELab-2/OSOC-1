@@ -11,5 +11,5 @@ class CommunicationService(private val repository: CommunicationRepository) {
     /**
      * Creates a new communication based on [communication]
      */
-    fun postCommunication(communication: Communication): UUID = repository.save(communication).id
+    fun createCommunication(communication: Communication): UUID = repository.save(communication).id
 }
