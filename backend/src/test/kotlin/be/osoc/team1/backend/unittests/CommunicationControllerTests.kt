@@ -2,7 +2,6 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.CommunicationController
 import be.osoc.team1.backend.entities.Communication
-import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.TypeEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.CommunicationService
@@ -35,8 +34,7 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var studentService: StudentService
 
     private val testId = UUID.randomUUID()
-    private val testStudent = Student("Jitse", "Willaert")
-    private val testCommunication = Communication("test message", TypeEnum.Email, testStudent)
+    private val testCommunication = Communication("test message", TypeEnum.Email)
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testCommunication)
 

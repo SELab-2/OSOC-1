@@ -113,7 +113,7 @@ class StudentServiceTests {
     fun `addCommunicationToStudent adds communication to list of student`() {
         val repository = getRepository(true)
         val service = StudentService(repository)
-        val testCommunication = Communication("test message", TypeEnum.Email, testStudent)
+        val testCommunication = Communication("test message", TypeEnum.Email)
         service.addCommunicationToStudent(testId, testCommunication)
         testStudent.communications.add(testCommunication) // Bit of a hack
         verify { repository.save(testStudent) }
@@ -123,7 +123,7 @@ class StudentServiceTests {
     @Test
     fun `addCommunicationToStudent fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        val testCommunication = Communication("test message", TypeEnum.Email, testStudent)
+        val testCommunication = Communication("test message", TypeEnum.Email)
         assertThrows<InvalidIdException> { service.addCommunicationToStudent(testId, testCommunication) }
     }
 }

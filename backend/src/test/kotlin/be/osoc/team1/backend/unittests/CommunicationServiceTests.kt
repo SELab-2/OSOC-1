@@ -1,7 +1,6 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.entities.Communication
-import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.TypeEnum
 import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.services.CommunicationService
@@ -14,9 +13,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 
 class CommunicationServiceTests {
-    private val testStudent = Student("Jitse", "Willaert")
-    private val testCommunication = Communication("test message", TypeEnum.Email, testStudent)
-    private val savedCommunication = Communication("a saved communication", TypeEnum.Email, testStudent)
+    private val testCommunication = Communication("test message", TypeEnum.Email)
+    private val savedCommunication = Communication("a saved communication", TypeEnum.Email)
 
     private fun getRepository(communicationAlreadyExists: Boolean): CommunicationRepository {
         val repository: CommunicationRepository = mockk()
