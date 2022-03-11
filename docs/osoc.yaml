@@ -366,6 +366,7 @@ components:
                 - id
                 - firstname
                 - lastname
+                - alumn
             properties:
                 id:
                     type: string
@@ -375,6 +376,9 @@ components:
                     type: string
                 lastname:
                     type: string
+                alumn:
+                    type: boolean
+                    default: false
         Project:
             type: object
             required:
