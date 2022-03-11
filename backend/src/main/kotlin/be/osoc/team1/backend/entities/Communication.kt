@@ -22,5 +22,5 @@ class Communication(
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    val id: UUID = UUID.randomUUID()
+    var id: UUID = UUID.randomUUID()
 }

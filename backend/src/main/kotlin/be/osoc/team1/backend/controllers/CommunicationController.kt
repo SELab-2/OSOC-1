@@ -31,13 +31,13 @@ class CommunicationController(
         studentService.getStudentById(studentId).communications
 
     /**
-     * Creates a communication from the request body, this can also override an already existing communication
-     * returns the id of the communication
+     * Creates a communication from the request body, returns a reference to the communication
      */
     @PostMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun createCommunication(@PathVariable studentId: UUID, @RequestBody communication: Communication): ResponseEntity<Void> {
         val id = communicationService.createCommunication(communication)
+        communication.id = id
         studentService.addCommunicationToStudent(studentId, communication)
         val location = ServletUriComponentsBuilder
             .fromCurrentRequest()
