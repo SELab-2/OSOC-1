@@ -224,6 +224,84 @@ paths:
             responses:
                 '200':
                     description: successful operation
+    /projects/{projectId}/devroles:
+        post:
+            summary: Add a new developer role to a project
+            parameters:
+                - name: projectId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            requestBody:
+                content:
+                  application/json:
+                    schema:
+                        $ref: '#/components/schemas/DevRole'
+            responses:
+                '200':
+                    description: succesful operation
+    /projects/{projectId}/devroles/{devroleId}:
+        delete:
+            summary: Remove a developer role from a project
+            parameters:
+                - name: projectId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+                - name: devroleId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: succesful operation
+                '404':
+                    description: NOT FOUND
+    /projects/{projectId}/assignments:
+        post:
+            summary: Add a new student developer assignment
+            parameters:
+                - name: projectId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            requestBody:
+                content:
+                  application/json:
+                    schema:
+                        $ref: '#/components/schemas/DevAssignment'
+            responses:
+                '200':
+                    description: succesful operation
+    /projects/{projectId}/assignments/{assignmentId}:
+        delete:
+            summary: Remove a student developer assignment from a project
+            parameters:
+                - name: projectId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+                - name: assignmentId
+                  required: true
+                  in: path
+                  schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: succesful operation
+                '404':
+                    description: NOT FOUND
     /communications/{studentId}:
         get:
             summary: Get all registered communications with a student
@@ -433,13 +511,18 @@ components:
         DevRole:
             type: object
             required:
+                - id
                 - title
                 - amount
             properties:
+                id:
+                    type: string
+                    format: uuid
                 title:
                     type: string
                 amount:
                     type: integer
+                    default: 1
                 information:
                     type: string
         DevAssignment:
