@@ -22,9 +22,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.UUID
 import java.util.ArrayList
-
+import java.util.UUID
 
 @WebMvcTest(CommunicationController::class)
 class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
