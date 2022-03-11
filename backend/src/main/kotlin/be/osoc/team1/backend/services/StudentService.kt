@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.services
 
+import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
@@ -55,6 +56,15 @@ class StudentService(private val repository: StudentRepository) {
         val student = getStudentById(id)
         val suggestion = StatusSuggestion(suggestionEnum, motivation)
         student.statusSuggestions.add(suggestion)
+        repository.save(student)
+    }
+
+    /**
+     * Adds a communication to student based on [studentId], if [studentId] is not in [repository] throw InvalidProjectIdException
+     */
+    fun addCommunicationToStudent(studentId: UUID, communication: Communication) {
+        val student = getStudentById(studentId)
+        student.communications.add(communication)
         repository.save(student)
     }
 }
