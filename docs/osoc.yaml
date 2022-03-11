@@ -442,7 +442,26 @@ components:
                     type: integer
                 information:
                     type: string
-
+        DevAssignment:
+            type: object
+            required:
+                - id
+                - student
+                - role
+                - suggester
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                student:
+                    $ref: '#/components/schemas/Student'
+                role:
+                    $ref: '#/components/schemas/DevRole'
+                suggester:
+                    $ref: '#/components/schemas/User'
+                information:
+                    type: string
 
     securitySchemes:
         BasicAuth:
