@@ -13,8 +13,8 @@ enum class TypeEnum {
 }
 
 /**
- * Represents communication in the database. Communication is constructed with a [student]
- * and a [type] and a [message]. Note that neither of these fields, nor the combination of both of them need be unique.
+ * Represents communication in the database. Communication is constructed with a [student], [type] and a [message]
+ * Note that neither of these fields, nor the combination of all of them need to be unique.
  */
 @Entity
 class Communication(
