@@ -74,4 +74,7 @@ class Student(val firstName: String, val lastName: String) {
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
+
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    val communications: MutableList<Communication> = mutableListOf()
 }
