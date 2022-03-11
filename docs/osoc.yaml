@@ -385,6 +385,7 @@ components:
                 - id
                 - name
                 - desc
+                - devRoles
             properties:
                 id:
                     type: string
@@ -394,6 +395,10 @@ components:
                     type: string
                 desc:
                     type: string
+                devRoles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/DevRole'
         User:
             type: object
             required:
@@ -417,6 +422,19 @@ components:
                 password:
                     type: string
                     format: bcrypt
+        DevRole:
+            type: object
+            required:
+                - title
+                - amount
+            properties:
+                title:
+                    type: string
+                amount:
+                    type: integer
+                information:
+                    type: string
+
 
     securitySchemes:
         BasicAuth:
