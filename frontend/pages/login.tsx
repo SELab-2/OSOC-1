@@ -82,7 +82,7 @@ const Login = ({
             </p>
           </Link>
           {/* Add line styling like in Figma */}
-          <p className="pt-4 pb-2 text-sm opacity-80">Or login using</p>
+          <p className="pt-4 pb-2 text-sm opacity-80">Or log in using</p>
           {/* Github provider */}
           <button
             className="bg-[#302727] px-4 py-1 text-white"
