@@ -384,6 +384,8 @@ components:
             required:
                 - id
                 - name
+                - client
+                - admins
                 - desc
                 - devRoles
             properties:
@@ -393,6 +395,12 @@ components:
                     readOnly: true
                 name:
                     type: string
+                client:
+                    type: string # Later on this could be a different schema if clients need to be saved in the database
+                admins:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/User'
                 desc:
                     type: string
                 devRoles:
