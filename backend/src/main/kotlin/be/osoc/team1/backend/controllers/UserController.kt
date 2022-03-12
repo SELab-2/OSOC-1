@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/users")
@@ -25,7 +27,10 @@ class UserController(private val service: UserService) {
     fun getUserById(@PathVariable id: UUID) = service.getUserById(id)
 
     @PatchMapping("/{id}")
-    fun patchUser(@PathVariable id: UUID, @RequestBody user: User) = service.patchUser(user)
+    fun patchUser(@PathVariable id: UUID, @RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse) {
+        responseHeader.addHeader("Location", request.requestURL.toString())
+        service.patchUser(user)
+    }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -33,7 +38,10 @@ class UserController(private val service: UserService) {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody user: User) = service.postUser(user)
+    fun postUser(@RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
+        responseHeader.addHeader("Location", request.requestURL.toString())
+        return service.postUser(user)
+    }
 
     @PostMapping("/{id}/role")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
