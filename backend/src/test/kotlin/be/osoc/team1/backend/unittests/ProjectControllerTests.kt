@@ -103,19 +103,19 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `postStudentOfProject succeeds if project with given id exists`() {
+    fun `postStudentToProject succeeds if project with given id exists`() {
         val student = Student("Lars", "Van Cauter")
         every { projectService.addStudentToProject(testId, student) } just Runs
         every { studentService.getStudentById(student.id) } returns student
         mockMvc.perform(
             post("/projects/$testId/students/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("\"${student.id}\"")
+                .content(objectMapper.writeValueAsString(student.id))
         ).andExpect(status().isOk)
     }
 
     @Test
-    fun `postStudentOfProject returns 404 Not Found if project with given id does not exist`() {
+    fun `postStudentToProject returns 404 Not Found if project with given id does not exist`() {
         val student = Student("Lars", "Van Cauter")
         val differentId = UUID.randomUUID()
         every { projectService.addStudentToProject(differentId, student) }.throws(InvalidIdException())
@@ -123,7 +123,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(
             post("/projects/$differentId/students/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("\"${student.id}\"")
+                .content(objectMapper.writeValueAsString(student.id))
         ).andExpect(status().isNotFound)
     }
 
