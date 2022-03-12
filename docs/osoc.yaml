@@ -259,7 +259,7 @@ paths:
                     type: string
                     format: uuid
             responses:
-                '200':
+                '204':
                     description: succesful operation
                 '404':
                     description: NOT FOUND
@@ -298,7 +298,7 @@ paths:
                     type: string
                     format: uuid
             responses:
-                '200':
+                '204':
                     description: succesful operation
                 '404':
                     description: NOT FOUND
