@@ -7,6 +7,7 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.ProjectService
+import be.osoc.team1.backend.services.StudentService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
@@ -29,6 +30,8 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @MockkBean
     private lateinit var projectService: ProjectService
+    @MockkBean
+    private lateinit var studentService: StudentService
 
     private val testId = UUID.randomUUID()
     private val testProject = Project("Proj", "desc")
@@ -100,25 +103,27 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `postStudentOfProject succeeds if project with given id exists`() {
+    fun `postStudentToProject succeeds if project with given id exists`() {
         val student = Student("Lars", "Van Cauter")
-        every { projectService.addStudentToProject(testId, any()) } just Runs
+        every { projectService.addStudentToProject(testId, student) } just Runs
+        every { studentService.getStudentById(student.id) } returns student
         mockMvc.perform(
             post("/projects/$testId/students/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(student))
+                .content(objectMapper.writeValueAsString(student.id))
         ).andExpect(status().isOk)
     }
 
     @Test
-    fun `postStudentOfProject returns 404 Not Found if project with given id does not exist`() {
+    fun `postStudentToProject returns 404 Not Found if project with given id does not exist`() {
         val student = Student("Lars", "Van Cauter")
         val differentId = UUID.randomUUID()
-        every { projectService.addStudentToProject(differentId, any()) }.throws(InvalidIdException())
+        every { projectService.addStudentToProject(differentId, student) }.throws(InvalidIdException())
+        every { studentService.getStudentById(student.id) } returns student
         mockMvc.perform(
             post("/projects/$differentId/students/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(student))
+                .content(objectMapper.writeValueAsString(student.id))
         ).andExpect(status().isNotFound)
     }
 

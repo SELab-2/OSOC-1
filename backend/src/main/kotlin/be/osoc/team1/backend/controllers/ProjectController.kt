@@ -4,6 +4,8 @@ import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.services.ProjectService
+import be.osoc.team1.backend.services.StudentService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,7 +17,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/projects")
-class ProjectController(private val service: ProjectService) {
+class ProjectController(private val service: ProjectService, @Autowired private val studentService: StudentService) {
 
     /**
      * Get all projects from service
@@ -49,11 +51,14 @@ class ProjectController(private val service: ProjectService) {
     fun getStudentsOfProject(@PathVariable projectId: UUID): Collection<Student> = service.getProjectById(projectId).students
 
     /**
-     * Assign a student to a project, if this [projectId] doesn't exist the service will return a 404
+     * Assign a student to a project, [studentId] is placed in the request body,
+     * if this [projectId] doesn't exist the service will return a 404
      */
     @PostMapping("/{projectId}/students")
-    fun postStudentToProject(@PathVariable projectId: UUID, @RequestBody student: Student) =
+    fun postStudentToProject(@PathVariable projectId: UUID, @RequestBody studentId: UUID) {
+        val student = studentService.getStudentById(studentId)
         service.addStudentToProject(projectId, student)
+    }
 
     /**
      * Deletes a student [studentId] from a project [projectId], if [projectId] or [studentId] doesn't exist the service will return a 404
