@@ -26,7 +26,7 @@ export async function middleware(req: NextMiddlewareRequest) {
   url.pathname = '/login';
 
   // if the request is trying to access protected resources, we redirect them to the login
-  if (!token && pathname !== '/login') {
+  if (!token && !(pathname === '/login' || pathname === '/register')) {
     return NextResponse.redirect(url);
   }
 }
