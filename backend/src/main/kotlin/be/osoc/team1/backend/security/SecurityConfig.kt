@@ -10,11 +10,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.NoOpPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+// import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
@@ -22,21 +23,11 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     // @Autowired
     // private val userRepository: UserRepository? = null
 
+    private val userDetailsService: UserDetailsService = UserDetailsService { User("user", "pass", mutableListOf(SimpleGrantedAuthority("ROLE_USER"))) }
+
     // private val passwordEncoder: BCryptPasswordEncoder = BCryptPasswordEncoder()
 
     private val passwordEncoder: PasswordEncoder = NoOpPasswordEncoder.getInstance()
-
-    @Autowired
-    @Throws(Exception::class)
-    override fun configure(auth: AuthenticationManagerBuilder) {
-        auth.userDetailsService(
-            UserDetailsService { s ->
-                // val user: User = userRepository.findOneByUsername(s)
-                //     ?: throw UsernameNotFoundException("The user with email $s was not found")
-                User("user", "pwd", emptyList())
-            }
-        ).passwordEncoder(passwordEncoder)
-    }
 
     // @Throws(Exception::class)
     // override fun configure(webSecurity: WebSecurity) {
@@ -52,8 +43,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
      */
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        val authenticationFilter: AuthenticationFilter = AuthenticationFilter(authenticationManagerBean())
-        authenticationFilter.setFilterProcessesUrl("/api/login")
+        val authenticationFilter = AuthenticationFilter(authenticationManagerBean())
 
         http.csrf().disable()
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -66,8 +56,14 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http.authorizeRequests().antMatchers(HttpMethod.POST).hasAnyAuthority("ROLE_ADMIN")
         http.authorizeRequests().anyRequest().authenticated()
 
-        http.addFilterBefore(AuthorizationFilter(), UsernamePasswordAuthenticationFilter::class.java)
         http.addFilter(authenticationFilter)
+        http.addFilterBefore(AuthorizationFilter(), authenticationFilter::class.java)
+    }
+
+    @Autowired
+    @Throws(Exception::class)
+    protected fun configureGlobal(auth: AuthenticationManagerBuilder) {
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder)
     }
 
     @Bean

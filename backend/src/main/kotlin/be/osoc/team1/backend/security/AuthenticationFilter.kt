@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import java.util.*
+import java.util.Date
 import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
@@ -20,9 +20,10 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     override fun attemptAuthentication(request: HttpServletRequest?, response: HttpServletResponse?): Authentication {
+        println(">>> pls >>>")
         val username: String = request!!.getParameter("username")
         val password: String = request.getParameter("password")
-        println(username)
+        println(username + password)
         return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(username, password))
     }
 
@@ -33,7 +34,6 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         authentication: Authentication
     ) {
         val user: User = authentication.principal as User
-        // TODO user.username should be replaced with something more secret
         val accesToken: String = JWT.create()
             .withSubject(user.username)
             .withExpiresAt(Date(System.currentTimeMillis() + 5 * 60 * 1000))
@@ -49,5 +49,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         tokens["refreshToken"] = refreshToken
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(response.outputStream, tokens)
+        // response.setHeader("accesToken", accesToken)
+        // response.setHeader("refreshToken", refreshToken)
     }
 }

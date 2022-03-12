@@ -39,7 +39,7 @@ class AuthorizationFilter : OncePerRequestFilter() {
                     SecurityContextHolder.getContext().authentication = authenticationToken
                     filterChain.doFilter(request, response)
                 } catch (e: Exception) {
-                    println("ERROR: an error occured in AuthorizationFilter")
+                    println("MY ERROR: an error occured in AuthorizationFilter")
                     response.setHeader("error", e.message)
                     response.status = HttpStatus.FORBIDDEN.value()
                     response.sendError(HttpStatus.FORBIDDEN.value())
