@@ -79,7 +79,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `deleteUser should not fail if the user exists`() {
         every { userService.deleteUserById(testId) } just Runs
-        mockMvc.perform(delete("/users/$testId")).andExpect(status().isOk)
+        mockMvc.perform(delete("/users/$testId")).andExpect(status().isNoContent)
     }
 
     @Test
@@ -95,7 +95,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
             post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
-        ).andExpect(status().isOk)
+        ).andExpect(status().isCreated)
     }
 
     @Test
@@ -105,7 +105,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
             post("/users/$testId/role")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(ObjectMapper().writeValueAsString(Role.Admin))
-        ).andExpect(status().isOk)
+        ).andExpect(status().isNoContent)
     }
 
     @Test
