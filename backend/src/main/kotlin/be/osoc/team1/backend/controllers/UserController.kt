@@ -29,7 +29,7 @@ class UserController(private val service: UserService) {
     @DeleteMapping("/{id}")
     fun deleteUser(@PathVariable id: UUID) = service.deleteUserById(id)
 
-    @PutMapping("/create")
+    @PutMapping
     fun putUser(@RequestBody user: User) = service.putUser(user)
 
     @PostMapping("/{id}/role")

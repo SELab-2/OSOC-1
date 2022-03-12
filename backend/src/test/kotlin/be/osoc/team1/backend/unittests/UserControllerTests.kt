@@ -56,8 +56,8 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `patchUser should not fail if the user exists`() {
         /*
-         * We use any here because the json -> object will be a different instance of the same object, but we don't have
-         * a reference to that specific reference.
+         * We use any here because the json to object conversion will result in a different instance with the same data,
+         * but we don't have a reference to that specific instance.
          */
         every { userService.patchUser(any()) } just Runs
         mockMvc.perform(
@@ -93,7 +93,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     fun `putUser should not fail`() {
         every { userService.putUser(any()) } returns testUser.id
         mockMvc.perform(
-            put("/users/create")
+            put("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
         ).andExpect(status().isOk)
