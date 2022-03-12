@@ -66,7 +66,7 @@ class ProjectService(private val repository: ProjectRepository) {
     fun removeStudentFromProject(projectId: UUID, studentId: UUID) {
         val project: Project = getProjectById(projectId)
         if (!project.students.removeIf { it.id == studentId }) {
-            throw FailedOperationException()
+            throw FailedOperationException("given student is not assigned to project")
         }
         repository.save(project)
     }
@@ -89,7 +89,7 @@ class ProjectService(private val repository: ProjectRepository) {
     fun removeCoachFromProject(projectId: UUID, coachId: UUID) {
         val project: Project = getProjectById(projectId)
         if (!project.coaches.removeIf { it.id == coachId }) {
-            throw FailedOperationException()
+            throw FailedOperationException("given coach is not assigned to project")
         }
         repository.save(project)
     }

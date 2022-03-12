@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
  * a matching record in the database.
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
-class InvalidStudentIdException(message: String? = null, cause: Throwable? = null) : InvalidIdException(message, cause) {
+class InvalidStudentIdException(message: String? = "wrong student id given", cause: Throwable? = null) : InvalidIdException(message, cause) {
     constructor(cause: Throwable) : this(null, cause)
 }
