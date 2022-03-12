@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -29,8 +28,8 @@ class UserController(private val service: UserService) {
     @DeleteMapping("/{id}")
     fun deleteUser(@PathVariable id: UUID) = service.deleteUserById(id)
 
-    @PutMapping
-    fun putUser(@RequestBody user: User) = service.putUser(user)
+    @PostMapping
+    fun postUser(@RequestBody user: User) = service.postUser(user)
 
     @PostMapping("/{id}/role")
     fun postUserRole(@PathVariable id: UUID, @RequestBody role: Role) = service.changeRole(id, role)

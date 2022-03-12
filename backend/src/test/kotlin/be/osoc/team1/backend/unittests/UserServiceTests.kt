@@ -55,10 +55,10 @@ class UserServiceTests {
     }
 
     @Test
-    fun `putUser does not fail`() {
+    fun `postUser does not fail`() {
         val repository = getRepository(true)
         val service = UserService(repository)
-        service.putUser(testUser)
+        service.postUser(testUser)
         verify { repository.save(testUser) }
     }
 

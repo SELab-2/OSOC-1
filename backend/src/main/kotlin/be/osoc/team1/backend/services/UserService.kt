@@ -31,7 +31,7 @@ class UserService(private val repository: UserRepository) {
     /**
      * Save [user] in the [repository]. Returns the id of the newly saved user object.
      */
-    fun putUser(user: User) = repository.save(user).id
+    fun postUser(user: User) = repository.save(user).id
 
     /**
      * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidIdException] will

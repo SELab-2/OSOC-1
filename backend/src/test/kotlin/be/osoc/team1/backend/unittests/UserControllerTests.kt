@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delet
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
@@ -90,10 +89,10 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `putUser should not fail`() {
-        every { userService.putUser(any()) } returns testUser.id
+    fun `postUser should not fail`() {
+        every { userService.postUser(any()) } returns testUser.id
         mockMvc.perform(
-            put("/users")
+            post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
         ).andExpect(status().isOk)
