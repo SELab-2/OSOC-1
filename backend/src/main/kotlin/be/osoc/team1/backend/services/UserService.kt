@@ -38,11 +38,7 @@ class UserService(private val repository: UserRepository) {
      * be thrown.
      */
     fun changeRole(id: UUID, newRole: Role) {
-        val userOptional = repository.findById(id)
-        if (userOptional.isEmpty)
-            throw InvalidIdException()
-
-        val user = userOptional.get()
+        val user = getUserById(id)
         user.role = newRole
         repository.save(user)
     }
