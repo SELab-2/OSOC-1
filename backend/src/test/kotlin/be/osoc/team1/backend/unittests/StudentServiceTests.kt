@@ -1,9 +1,11 @@
 package be.osoc.team1.backend.unittests
 
+import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
+import be.osoc.team1.backend.entities.TypeEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
@@ -105,5 +107,23 @@ class StudentServiceTests {
     fun `addStudentStatusSuggestion fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
         assertThrows<InvalidIdException> { service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "") }
+    }
+
+    @Test
+    fun `addCommunicationToStudent adds communication to list of student`() {
+        val repository = getRepository(true)
+        val service = StudentService(repository)
+        val testCommunication = Communication("test message", TypeEnum.Email)
+        service.addCommunicationToStudent(testId, testCommunication)
+        testStudent.communications.add(testCommunication) // Bit of a hack
+        verify { repository.save(testStudent) }
+        testStudent.communications.remove(testCommunication)
+    }
+
+    @Test
+    fun `addCommunicationToStudent fails when no student with that id exists`() {
+        val service = StudentService(getRepository(false))
+        val testCommunication = Communication("test message", TypeEnum.Email)
+        assertThrows<InvalidIdException> { service.addCommunicationToStudent(testId, testCommunication) }
     }
 }
