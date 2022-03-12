@@ -22,7 +22,7 @@ class UserServiceTests {
     private fun getRepository(userAlreadyExists: Boolean): UserRepository {
         val repository: UserRepository = mockk()
         every { repository.existsById(testId) } returns userAlreadyExists
-        every { repository.findByIdOrNull(testId) } returns if(userAlreadyExists) testUser else null
+        every { repository.findByIdOrNull(testId) } returns if (userAlreadyExists) testUser else null
         every { repository.deleteById(testId) } just Runs
         every { repository.save(testUser) } returns testUser
         return repository
