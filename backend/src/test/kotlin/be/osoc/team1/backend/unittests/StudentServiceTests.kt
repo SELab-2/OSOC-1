@@ -6,6 +6,7 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.entities.TypeEnum
+import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidCoachIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
@@ -98,12 +99,15 @@ class StudentServiceTests {
 
     @Test
     fun `addStudentStatusSuggestion adds status suggestion to list when student with id exists`() {
-        val repository = getRepository(true)
+        val repository: StudentRepository = mockk()
+        val student: Student = mockk()
+        every { student.statusSuggestions.add(testSuggestion) } returns true
+        every { student.statusSuggestions.iterator() } returns mutableListOf<StatusSuggestion>().iterator()
+        every { repository.findByIdOrNull(studentId) } returns student
+        every { repository.save(student) } returns student
         val service = StudentService(repository)
         service.addStudentStatusSuggestion(studentId, testSuggestion)
-        testStudent.statusSuggestions.add(testSuggestion) // Bit of a hack
-        verify { repository.save(testStudent) }
-        testStudent.statusSuggestions.remove(testSuggestion)
+        verify { student.statusSuggestions.add(testSuggestion) }
     }
 
     @Test
@@ -113,17 +117,26 @@ class StudentServiceTests {
     }
 
     @Test
+    fun `addStudentStatusSuggestion fails when coach already made suggestion for student`() {
+        val repository: StudentRepository = mockk()
+        val student: Student = mockk()
+        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
+        every { repository.findByIdOrNull(studentId) } returns student
+        val service = StudentService(repository)
+        assertThrows<FailedOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
+    }
+
+    @Test
     fun `deleteStudentStatusSuggestion removes suggestion when student, suggestion and coach exist`() {
         val repository: StudentRepository = mockk()
-        val testStudentWithSuggestion: Student = mockk()
-        every { testStudentWithSuggestion.id } returns studentId
-        every { testStudentWithSuggestion.statusSuggestions.remove(testSuggestion) } returns true
-        every { testStudentWithSuggestion.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
-        every { repository.findByIdOrNull(studentId) } returns testStudentWithSuggestion
-        every { repository.save(testStudentWithSuggestion) } returns testStudentWithSuggestion
+        val student: Student = mockk()
+        every { student.statusSuggestions.remove(testSuggestion) } returns true
+        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
+        every { repository.findByIdOrNull(studentId) } returns student
+        every { repository.save(student) } returns student
         val service = StudentService(repository)
         service.deleteStudentStatusSuggestion(studentId, coachId)
-        verify { testStudentWithSuggestion.statusSuggestions.remove(testSuggestion) }
+        verify { student.statusSuggestions.remove(testSuggestion) }
     }
 
     @Test

@@ -4,6 +4,7 @@ import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidCoachIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
@@ -54,10 +55,11 @@ class StudentService(private val repository: StudentRepository) {
      */
     fun addStudentStatusSuggestion(id: UUID, statusSuggestion: StatusSuggestion) {
         val student = getStudentById(id)
-        val suggestion = StatusSuggestion(
-            statusSuggestion.coachId, statusSuggestion.status, statusSuggestion.motivation
-        )
-        student.statusSuggestions.add(suggestion)
+        val sameCoachSuggestion = student.statusSuggestions.find { it.coachId == statusSuggestion.coachId }
+        if (sameCoachSuggestion !== null) {
+            throw FailedOperationException("This coach has already made a suggestion for this student.")
+        }
+        student.statusSuggestions.add(statusSuggestion)
         // See the comment at StatusSuggestion.student to understand why we have to do this.
         statusSuggestion.student = student
         repository.save(student)

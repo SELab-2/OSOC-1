@@ -9,8 +9,6 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
 import org.hibernate.annotations.GenericGenerator
 import java.util.UUID
 
@@ -53,6 +51,7 @@ enum class SuggestionEnum {
  * is included in the object. A [Coach] can make multiple suggestions about different [Student]s, but
  * it wouldn't make any sense for a [Coach] to make multiple suggestions about the same [Student].
  * Therefore the combination of [coachId] and [student] must be unique.
+ * This constraint is checked when adding a new [StatusSuggestion] to a [Student].
  * A [StatusSuggestion] always belongs to one particular [Student] in the database.
  * This [Student] is included in the [StatusSuggestion] to verify the unique constraint,
  * but when serializing the [StatusSuggestion] to a JSON object, this field is ignored.
@@ -61,9 +60,6 @@ enum class SuggestionEnum {
  * Apart from the suggested [status], a [motivation] for the suggestion should also be included.
  */
 @Entity
-@Table(uniqueConstraints = [
-    UniqueConstraint(columnNames = ["student_id", "coachId"])
-])
 class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motivation: String) {
 
     @Id
