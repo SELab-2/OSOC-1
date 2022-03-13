@@ -89,12 +89,14 @@ class StudentController(private val service: StudentService) {
     fun setStudentStatus(@PathVariable id: UUID, @RequestBody status: StatusEnum) = service.setStudentStatus(id, status)
 
     /**
-     * Add a [statusSuggestion] to the student with the given [id]. If no such student exists,
-     * returns a "404: Not Found" message instead. The [statusSuggestion] should be passed in the request body
-     * as a JSON object and should have the following format:
+     * Add a [statusSuggestion] to the student with the given [id]. The coachId field should be equal to the id
+     * of the coach who is making this suggestion. If either of these id's do not have a matching record
+     * in the database, a "404: Not Found" message is returned to the caller instead. The [statusSuggestion] should be
+     * passed in the request body as a JSON object and should have the following format:
      *
      * ```
      * {
+     *      "coachId": "(INSERT ID)"
      *      "status": "Yes" OR "Maybe" OR "No",
      *      "motivation": "(INSERT MOTIVATION)"
      * }
@@ -107,5 +109,15 @@ class StudentController(private val service: StudentService) {
     @PostMapping("/{id}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun addStudentStatusSuggestion(@PathVariable id: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
-        service.addStudentStatusSuggestion(id, statusSuggestion.status, statusSuggestion.motivation)
+        service.addStudentStatusSuggestion(id, statusSuggestion)
+
+    /**
+     * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId]
+     * from the [Student] with the given [studentId]. If either the [Student] or the [StatusSuggestion]
+     * doesn't exist, the method returns a "404: Not Found" message instead.
+     */
+    @DeleteMapping("/{studentId}/suggestions/{coachId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    fun deleteStudentStatusSuggestion(@PathVariable studentId: UUID, @PathVariable coachId: UUID) =
+        service.deleteStudentStatusSuggestion(studentId, coachId)
 }

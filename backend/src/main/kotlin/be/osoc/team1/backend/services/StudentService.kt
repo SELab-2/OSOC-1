@@ -4,7 +4,7 @@ import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
-import be.osoc.team1.backend.entities.SuggestionEnum
+import be.osoc.team1.backend.exceptions.InvalidCoachIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -48,14 +48,35 @@ class StudentService(private val repository: StudentRepository) {
     }
 
     /**
-     * Retrieve the student with the specified [id], then create a new StatusSuggestion with
-     * the given [suggestionEnum] and [motivation] and add it to the student's list.
+     * Retrieve the [Student] with the specified [id], then create a new [StatusSuggestion] based
+     * on the information in the given [statusSuggestion] and add it to the [Student]'s list.
      * Throws an [InvalidStudentIdException] if no student with that [id] exists.
      */
-    fun addStudentStatusSuggestion(id: UUID, suggestionEnum: SuggestionEnum, motivation: String) {
+    fun addStudentStatusSuggestion(id: UUID, statusSuggestion: StatusSuggestion) {
         val student = getStudentById(id)
-        val suggestion = StatusSuggestion(suggestionEnum, motivation)
+        val suggestion = StatusSuggestion(
+            statusSuggestion.coachId, statusSuggestion.status, statusSuggestion.motivation
+        )
         student.statusSuggestions.add(suggestion)
+        // See the comment at StatusSuggestion.student to understand why we have to do this.
+        statusSuggestion.student = student
+        repository.save(student)
+    }
+
+    /**
+     * Retrieve the [Student] with the specified [studentId], then get the [StatusSuggestion]
+     * that was made by the coach identified by the given [coachId] and delete it.
+     * Throws an [InvalidStudentIdException] if no [Student] with that [studentId] exists,
+     * or an [InvalidCoachIdException] if either no coach exists with that [coachId],
+     * or if the coach does exist, but he hasn't made a [StatusSuggestion] for this [Student].
+     */
+    fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID) {
+        // TODO: check if coach actually exists (need User endpoint for this)
+        val student = getStudentById(studentId)
+        val suggestion = student.statusSuggestions.find { it.coachId == coachId } ?: throw InvalidCoachIdException()
+        student.statusSuggestions.remove(suggestion)
+        // See the comment at StatusSuggestion.student to understand why we have to do this.
+        suggestion.student = null
         repository.save(student)
     }
 
