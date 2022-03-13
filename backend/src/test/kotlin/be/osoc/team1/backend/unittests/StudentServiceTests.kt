@@ -30,7 +30,6 @@ class StudentServiceTests {
     private val coachId = UUID.randomUUID()
     private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
 
-
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
         every { repository.existsById(studentId) } returns studentAlreadyExists

@@ -1,6 +1,8 @@
 package be.osoc.team1.backend.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.hibernate.annotations.GenericGenerator
+import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -9,8 +11,6 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
-import org.hibernate.annotations.GenericGenerator
-import java.util.UUID
 
 /**
  * Represents the possible values that a student's status can have.
@@ -43,7 +43,6 @@ enum class StatusEnum {
 enum class SuggestionEnum {
     Yes, Maybe, No
 }
-
 
 /**
  * Represents the entry of a [status] suggestion in the database.
