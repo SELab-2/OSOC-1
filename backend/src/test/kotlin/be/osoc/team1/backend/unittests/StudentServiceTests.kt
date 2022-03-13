@@ -6,7 +6,8 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.entities.TypeEnum
-import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.exceptions.InvalidCoachIdException
+import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
 import io.mockk.Runs
@@ -19,18 +20,21 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
+import java.util.UUID
 
 class StudentServiceTests {
 
     private val testStudent = Student("Tom", "Alard")
-    private val testId = testStudent.id
-    private val testMotivation = "test motivation"
+    private val studentId = testStudent.id
+    private val coachId = UUID.randomUUID()
+    private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
+
 
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
-        every { repository.existsById(testId) } returns studentAlreadyExists
-        every { repository.findByIdOrNull(testId) } returns if (studentAlreadyExists) testStudent else null
-        every { repository.deleteById(testId) } just Runs
+        every { repository.existsById(studentId) } returns studentAlreadyExists
+        every { repository.findByIdOrNull(studentId) } returns if (studentAlreadyExists) testStudent else null
+        every { repository.deleteById(studentId) } just Runs
         val differentIdTestStudent = Student("Tom", "Alard")
         every { repository.save(testStudent) } returns differentIdTestStudent
         return repository
@@ -39,27 +43,27 @@ class StudentServiceTests {
     @Test
     fun `getStudentById succeeds when student with id exists`() {
         val service = StudentService(getRepository(true))
-        assertEquals(service.getStudentById(testId), testStudent)
+        assertEquals(service.getStudentById(studentId), testStudent)
     }
 
     @Test
     fun `getStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        assertThrows<InvalidIdException> { service.getStudentById(testId) }
+        assertThrows<InvalidStudentIdException> { service.getStudentById(studentId) }
     }
 
     @Test
     fun `deleteStudentById succeeds when student with id exists`() {
         val repository = getRepository(true)
         val service = StudentService(repository)
-        service.deleteStudentById(testId)
-        verify { repository.deleteById(testId) }
+        service.deleteStudentById(studentId)
+        verify { repository.deleteById(studentId) }
     }
 
     @Test
     fun `deleteStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        assertThrows<InvalidIdException> { service.deleteStudentById(testId) }
+        assertThrows<InvalidStudentIdException> { service.deleteStudentById(studentId) }
     }
 
     @Test
@@ -73,14 +77,14 @@ class StudentServiceTests {
     @Test
     fun `addStudent returns some other id than what was passed`() {
         val service = StudentService(getRepository(false))
-        assertNotEquals(service.addStudent(testStudent), testId)
+        assertNotEquals(service.addStudent(testStudent), studentId)
     }
 
     @Test
     fun `setStudentStatus changes student status when student with id exists`() {
         val repository = getRepository(true)
         val service = StudentService(repository)
-        service.setStudentStatus(testId, StatusEnum.Yes)
+        service.setStudentStatus(studentId, StatusEnum.Yes)
         testStudent.status = StatusEnum.Yes // Bit of a hack
         verify { repository.save(testStudent) }
         testStudent.status = StatusEnum.Undecided
@@ -89,15 +93,14 @@ class StudentServiceTests {
     @Test
     fun `setStudentStatus fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        assertThrows<InvalidIdException> { service.setStudentStatus(testId, StatusEnum.Yes) }
+        assertThrows<InvalidStudentIdException> { service.setStudentStatus(studentId, StatusEnum.Yes) }
     }
 
     @Test
     fun `addStudentStatusSuggestion adds status suggestion to list when student with id exists`() {
         val repository = getRepository(true)
         val service = StudentService(repository)
-        val testSuggestion = StatusSuggestion(SuggestionEnum.Yes, testMotivation)
-        service.addStudentStatusSuggestion(testId, testSuggestion.status, testSuggestion.motivation)
+        service.addStudentStatusSuggestion(studentId, testSuggestion)
         testStudent.statusSuggestions.add(testSuggestion) // Bit of a hack
         verify { repository.save(testStudent) }
         testStudent.statusSuggestions.remove(testSuggestion)
@@ -106,15 +109,43 @@ class StudentServiceTests {
     @Test
     fun `addStudentStatusSuggestion fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        assertThrows<InvalidIdException> { service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "") }
+        assertThrows<InvalidStudentIdException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
     }
+
+    @Test
+    fun `deleteStudentStatusSuggestion removes suggestion when student, suggestion and coach exist`() {
+        val repository: StudentRepository = mockk()
+        val testStudentWithSuggestion: Student = mockk()
+        every { testStudentWithSuggestion.id } returns studentId
+        every { testStudentWithSuggestion.statusSuggestions.remove(testSuggestion) } returns true
+        every { testStudentWithSuggestion.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
+        every { repository.findByIdOrNull(studentId) } returns testStudentWithSuggestion
+        every { repository.save(testStudentWithSuggestion) } returns testStudentWithSuggestion
+        val service = StudentService(repository)
+        service.deleteStudentStatusSuggestion(studentId, coachId)
+        verify { testStudentWithSuggestion.statusSuggestions.remove(testSuggestion) }
+    }
+
+    @Test
+    fun `deleteStudentStatusSuggestion fails when no student with that id exists`() {
+        val service = StudentService(getRepository(false))
+        assertThrows<InvalidStudentIdException> { service.deleteStudentStatusSuggestion(studentId, coachId) }
+    }
+
+    @Test
+    fun `deleteStudentStatusSuggestion fails when given coach hasn't made a suggestion for this student`() {
+        val service = StudentService(getRepository(true))
+        assertThrows<InvalidCoachIdException> { service.deleteStudentStatusSuggestion(studentId, coachId) }
+    }
+
+    // TODO: make test that fails when coach doesn't actually exist (requires TODO in deleteStudentStatusSuggestion)
 
     @Test
     fun `addCommunicationToStudent adds communication to list of student`() {
         val repository = getRepository(true)
         val service = StudentService(repository)
         val testCommunication = Communication("test message", TypeEnum.Email)
-        service.addCommunicationToStudent(testId, testCommunication)
+        service.addCommunicationToStudent(studentId, testCommunication)
         testStudent.communications.add(testCommunication) // Bit of a hack
         verify { repository.save(testStudent) }
         testStudent.communications.remove(testCommunication)
@@ -124,6 +155,6 @@ class StudentServiceTests {
     fun `addCommunicationToStudent fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
         val testCommunication = Communication("test message", TypeEnum.Email)
-        assertThrows<InvalidIdException> { service.addCommunicationToStudent(testId, testCommunication) }
+        assertThrows<InvalidStudentIdException> { service.addCommunicationToStudent(studentId, testCommunication) }
     }
 }
