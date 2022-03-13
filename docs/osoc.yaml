@@ -518,14 +518,13 @@ components:
         StatusSuggestion:
             type: object
             required:
-                - id
+                - coachId
                 - status
                 - motivation
             properties:
-                id:
+                coachId:
                     type: string
                     format: uuid
-                    readOnly: true
                 status:
                     type: string
                     enum: [Yes, Maybe, No]
