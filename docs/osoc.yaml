@@ -331,7 +331,7 @@ paths:
             responses:
                 '201':
                     description: | 
-                        Successful operation. Returns a link the newly added 
+                        Successful operation. Return a link the newly added 
                         communication in the location header.
                     content:
                         application/json:
