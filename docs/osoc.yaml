@@ -35,11 +35,6 @@ paths:
             responses:
                 '201':
                     description: successful operation, returns the assigned id of the newly added student.
-                    content:
-                        application/json:
-                            schema:
-                                type: string
-                                format: uuid
                     headers:
                         Location:
                             schema:
