@@ -333,6 +333,9 @@ paths:
                     description: | 
                         Successful operation. Returns a link to the newly added 
                         communication in the location header.
+                '404':
+                    description: |
+                        The response if there is no student in the database with the given student id.
     /users:
         get:
             summary: Get list containing all users
