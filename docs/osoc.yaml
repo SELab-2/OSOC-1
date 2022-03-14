@@ -333,11 +333,6 @@ paths:
                     description: | 
                         Successful operation. Returns a link to the newly added 
                         communication in the location header.
-                    content:
-                        application/json:
-                            schema:
-                                type: string
-                                format: path
     /users:
         get:
             summary: Get list containing all users
