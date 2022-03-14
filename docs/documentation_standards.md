@@ -120,7 +120,7 @@ interface IWarningOptions<T> {
    * Determines how the warning will be displayed.
    *
    * @remarks
-   * See {@link WarningStyle| the WarningStyle enum} for more details.
+   * @see {@link WarningStyle| the WarningStyle enum} for more details.
    *
    * @defaultValue `WarningStyle.DialogBox`
    */
@@ -142,8 +142,44 @@ interface IWarningOptions<T> {
 
 ```
 
-Because there is no real React documentation standard, we are going to create our own little standard.
+Because there is no real React documentation standard, we are just going to adapt the above rules as such:
 
+```ts
+/**
+ * (Brief summary)
+ * 
+ */
+type CustomComponentProps = {
+
+  /**
+   * (prop1 information)
+   *
+   * @remarks
+   * @see {@link ...| ...} ...
+   *
+   * @defaultValue ...
+   */
+  prop1: type1;
+
+  /**
+   * (prop2 information)
+   */
+  prop2: type2;
+}
+
+/**
+ * (Brief summary)
+ * 
+ * @see {@link CustomComponentProps| Props for Custom Component} for more details.
+ * 
+ * {@label CustomComponent}
+ * 
+ */
+const CustomComponent: FC<CustomComponentProps> = ({ prop1, prop2 }) => {
+  return (<></>);
+}
+
+```
 
 # Architectural documentation
 
