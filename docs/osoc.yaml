@@ -490,6 +490,22 @@ components:
                     type: string
                 desc:
                     type: string
+        Communication:
+            type: object
+            required:
+                - id
+                - message
+                - type
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                message:
+                    type: string
+                type:
+                    allOf:
+                      - $ref: '#/components/schemas/Type'
         User:
             type: object
             required:
@@ -532,6 +548,9 @@ components:
                     enum: [Yes, Maybe, No]
                 motivation:
                     type: string
+        Type:
+            type: string
+            enum: [Email]
 
     securitySchemes:
         BasicAuth:
