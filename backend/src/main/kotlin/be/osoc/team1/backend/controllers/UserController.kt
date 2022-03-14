@@ -20,22 +20,39 @@ import javax.servlet.http.HttpServletResponse
 @RestController
 @RequestMapping("/users")
 class UserController(private val service: UserService) {
+    /**
+     * Get all [User] objects stored in the database.
+     */
     @GetMapping
     fun getAllUsers() = service.getAllUsers()
 
+    /**
+     * Get a [User] object using their [id]. If the user does not exist 404 will be returned.
+     */
     @GetMapping("/{id}")
     fun getUserById(@PathVariable id: UUID) = service.getUserById(id)
 
+    /**
+     * Update a user, if the user does not exist yet a 404 will be returned. The response will also contain a Location
+     * header containing the url to the updated resource.
+     */
     @PatchMapping("/{id}")
     fun patchUser(@PathVariable id: UUID, @RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse) {
-        responseHeader.addHeader("Location", request.requestURL.toString())
         service.patchUser(user)
+        responseHeader.addHeader("Location", request.requestURL.toString())
     }
 
+    /**
+     * Delete user with [id]. If the user does not exist a 404 will be returned.
+     */
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun deleteUser(@PathVariable id: UUID) = service.deleteUserById(id)
 
+    /**
+     * Save a new [User] object in the  database. The id of the user will be returned. The response will also contain a
+     * Location header containing the url to the newly created resource.
+     */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     fun postUser(@RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
@@ -43,6 +60,9 @@ class UserController(private val service: UserService) {
         return service.postUser(user)
     }
 
+    /**
+     * Change the role of a user with [id] to be [role]. If the user does not exist a 404 will be returned.
+     */
     @PostMapping("/{id}/role")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun postUserRole(@PathVariable id: UUID, @RequestBody role: Role) = service.changeRole(id, role)
