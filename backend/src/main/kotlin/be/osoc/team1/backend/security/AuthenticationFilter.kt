@@ -19,21 +19,28 @@ import kotlin.collections.HashMap
 class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
+    /**
+     * authenticate using username and password from request
+     */
     override fun attemptAuthentication(request: HttpServletRequest?, response: HttpServletResponse?): Authentication {
-        println(">>> pls >>>")
         val username: String = request!!.getParameter("username")
         val password: String = request.getParameter("password")
-        println(username + password)
         return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(username, password))
     }
 
+    /**
+     * add an accessToken and refreshToken to response
+     * this token should be used for authorization in following requests
+     */
     override fun successfulAuthentication(
         request: HttpServletRequest,
         response: HttpServletResponse,
         chain: FilterChain,
         authentication: Authentication
     ) {
+        // authenticated user
         val user: User = authentication.principal as User
+        // init tokens
         val accesToken: String = JWT.create()
             .withSubject(user.username)
             .withExpiresAt(Date(System.currentTimeMillis() + 5 * 60 * 1000))
@@ -44,6 +51,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
             .withExpiresAt(Date(System.currentTimeMillis() + 60 * 60 * 1000))
             .withClaim("roles", user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
             .sign(SecretUtil().algorithm)
+        // add tokens to response
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accesToken"] = accesToken
         tokens["refreshToken"] = refreshToken

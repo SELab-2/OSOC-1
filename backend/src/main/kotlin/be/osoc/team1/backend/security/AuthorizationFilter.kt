@@ -17,29 +17,38 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 class AuthorizationFilter : OncePerRequestFilter() {
+    /**
+     * check if request is authorized by token
+     */
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        // don't check authorization when url is {baseURL}/api/login
         if (request.servletPath.equals("/api/login")) {
+            // go to next filter
             filterChain.doFilter(request, response)
         } else {
             val authorizationHeader: String? = request.getHeader(AUTHORIZATION)
+            // authorizationHeader should start with "Bearer " followed by token
             if (authorizationHeader?.startsWith("Bearer ") == true) {
                 try {
+                    // verify token
                     val token: String = authorizationHeader.substring("Bearer ".length)
                     val verifier: JWTVerifier = JWT.require(SecretUtil().algorithm).build()
                     val decodedJWT: DecodedJWT = verifier.verify(token)
                     val username: String = decodedJWT.subject
+
                     val roles: Array<String> = decodedJWT.getClaim("roles").asArray(String::class.java)
                     val authorities: MutableList<SimpleGrantedAuthority> = mutableListOf()
                     stream(roles).forEach { role -> authorities.add(SimpleGrantedAuthority(role)) }
+
                     val authenticationToken = UsernamePasswordAuthenticationToken(username, null, authorities)
                     SecurityContextHolder.getContext().authentication = authenticationToken
                     filterChain.doFilter(request, response)
                 } catch (e: Exception) {
-                    println("MY ERROR: an error occured in AuthorizationFilter")
+                    println("MY ERROR: a nonexisting token was given in request")
                     response.setHeader("error", e.message)
                     response.status = HttpStatus.FORBIDDEN.value()
                     response.sendError(HttpStatus.FORBIDDEN.value())
