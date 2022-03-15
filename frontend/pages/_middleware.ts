@@ -17,8 +17,17 @@ export async function middleware(req: NextMiddlewareRequest) {
    *  - It is trying to make a request to the authentication point
    */
 
-  if (pathname.includes('/api/auth') || token) {
+  if (pathname.includes('/api/auth')) {
     return NextResponse.next();
+  }
+
+  if (token) {
+    // Check if the user account is disabled
+
+    // if disabled, redirect to wait page
+    const url = req.nextUrl.clone();
+    url.pathname = '/wait';
+    return NextResponse.redirect(url);
   }
 
   // clone the url to use in the redirect because NextJS 12.1 does not allow relative URLs anymore
@@ -26,7 +35,7 @@ export async function middleware(req: NextMiddlewareRequest) {
   url.pathname = '/login';
 
   // if the request is trying to access protected resources, we redirect them to the login
-  if (!token && !(pathname === '/login' || pathname === '/register')) {
+  if (!token && !(pathname === '/login' || pathname === '/register' || pathname === '/wait')) {
     return NextResponse.redirect(url);
   }
 }
