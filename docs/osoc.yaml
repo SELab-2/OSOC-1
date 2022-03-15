@@ -5,7 +5,7 @@ info:
     license:
         name: MIT
 servers:
-  - url: 'localhost:3000'
+  - url: 'localhost:8080'
 paths:
     /students:
         get:
@@ -706,12 +706,15 @@ components:
                     type: string
                     format: uuid
                     readOnly: true
-                student:
-                    $ref: '#/components/schemas/Student'
+                student: 
+                    type: string
+                    format: uuid
                 role:
-                    $ref: '#/components/schemas/StudentRole'
+                    type: string
+                    format: uuid
                 suggester:
-                    $ref: '#/components/schemas/User'
+                    type: string
+                    format: uuid
                 information:
                     type: string
 
