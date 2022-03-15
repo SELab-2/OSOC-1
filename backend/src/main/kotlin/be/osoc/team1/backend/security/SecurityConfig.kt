@@ -38,7 +38,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
         // basic html form, should be replaced with nextjs form
-        http.formLogin()
+        // http.formLogin()
 
         // permit following urls
         http.authorizeRequests().antMatchers("/", "/login", "/logout").permitAll()
