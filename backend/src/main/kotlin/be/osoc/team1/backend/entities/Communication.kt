@@ -18,7 +18,6 @@ enum class CommunicationTypeEnum {
 class Communication(
     val message: String,
     val type: CommunicationTypeEnum
-,
 ) {
     @Id
     @GeneratedValue(generator = "UUID")
