@@ -295,8 +295,8 @@ paths:
                 required: true
                 in: path
                 schema:
-                    type: integer
-                    format: int64
+                    type: string
+                    format: uuid
             responses:
                 '200':
                     description: |
@@ -321,13 +321,13 @@ paths:
                 required: true
                 in: path
                 schema:
-                    type: integer
-                    format: int64
-              - name: Communication
-                required: true
-                in: requestBody
-                schema:
-                    $ref: '#/components/schemas/Communication'
+                    type: string
+                    format: uuid
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Communication'
             responses:
                 '201':
                     description: | 
@@ -503,7 +503,7 @@ components:
                     type: string
                 type:
                     allOf:
-                      - $ref: '#/components/schemas/Type'
+                      - $ref: '#/components/schemas/CommunicationType'
         User:
             type: object
             required:
@@ -546,7 +546,7 @@ components:
                     enum: [Yes, Maybe, No]
                 motivation:
                     type: string
-        Type:
+        CommunicationType:
             type: string
             enum: [Email]
 
