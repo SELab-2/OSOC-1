@@ -150,8 +150,6 @@ class StudentServiceTests {
         assertThrows<InvalidCoachIdException> { service.deleteStudentStatusSuggestion(studentId, coachId) }
     }
 
-    // TODO: make test that fails when coach doesn't actually exist (requires TODO in deleteStudentStatusSuggestion)
-
     @Test
     fun `addCommunicationToStudent adds communication to list of student`() {
         val repository = getRepository(true)

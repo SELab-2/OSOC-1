@@ -73,7 +73,6 @@ class StudentService(private val repository: StudentRepository) {
      * or if the coach does exist, but he hasn't made a [StatusSuggestion] for this [Student].
      */
     fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID) {
-        // TODO: check if coach actually exists (need User endpoint for this)
         val student = getStudentById(studentId)
         val suggestion = student.statusSuggestions.find { it.coachId == coachId } ?: throw InvalidCoachIdException()
         student.statusSuggestions.remove(suggestion)
