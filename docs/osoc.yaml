@@ -287,28 +287,55 @@ paths:
     /communications/{studentId}:
         get:
             summary: Get all registered communications with a student
+            description:  |
+                    Returns all communications that belongs to the student with the corresponding student id.
+                    If no such student exists, returns a "404: Not Found" message instead.
             parameters:
               - name: studentId
                 required: true
                 in: path
                 schema:
-                    type: integer
-                    format: int64
+                    type: string
+                    format: uuid
             responses:
                 '200':
-                    description: successful operation
+                    description: |
+                        The response if there is a student in the database with the given id.
+                        Returns the array of communications in the response body.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Communication'
+                '404':
+                    description: |
+                        The response if there is no student in the database with the given id.
         post:
-            summary: Register communication with a student
+            summary: Add a new communication with a student
+            description: |
+                Add a communication to the database.
+                The reference for this communication is returned.
             parameters:
               - name: studentId
                 required: true
                 in: path
                 schema:
-                    type: integer
-                    format: int64
+                    type: string
+                    format: uuid
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Communication'
             responses:
-                '200':
-                    description: successful operation
+                '201':
+                    description: | 
+                        Successful operation. Returns a link to the newly added 
+                        communication in the location header.
+                '404':
+                    description: |
+                        The response if there is no student in the database with the given student id.
     /users:
         get:
             summary: Get list containing all users
@@ -461,6 +488,22 @@ components:
                     type: string
                 desc:
                     type: string
+        Communication:
+            type: object
+            required:
+                - id
+                - message
+                - type
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                message:
+                    type: string
+                type:
+                    allOf:
+                      - $ref: '#/components/schemas/CommunicationType'
         User:
             type: object
             required:
@@ -503,6 +546,9 @@ components:
                     enum: [Yes, Maybe, No]
                 motivation:
                     type: string
+        CommunicationType:
+            type: string
+            enum: [Email]
 
     securitySchemes:
         BasicAuth:

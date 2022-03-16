@@ -6,7 +6,7 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
-enum class TypeEnum {
+enum class CommunicationTypeEnum {
     Email
 }
 
@@ -17,7 +17,7 @@ enum class TypeEnum {
 @Entity
 class Communication(
     val message: String,
-    val type: TypeEnum,
+    val type: CommunicationTypeEnum
 ) {
     @Id
     @GeneratedValue(generator = "UUID")
