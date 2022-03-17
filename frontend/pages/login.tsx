@@ -3,6 +3,12 @@ import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import FormContainer from '../components/FormContainer';
 
+/**
+ * a Providers type to use in the OAuth2 buttons, this will eventually be removed when
+ * authentication is fixed
+ * 
+ * @see {@link https://next-auth.js.org/configuration/providers/oauth | NextAuth Providers}
+ */
 type Providers = {
   github: {
     name: string;
@@ -10,7 +16,22 @@ type Providers = {
   };
 };
 
-// before sending page, it will acquire the csrftoken
+/**
+ * NextJS SSR function to load required props into the React component
+ * {@label LoginSSR}
+ * 
+ * @remarks
+ * Before sending the page, it will acquire the csrftoken and the providers.
+ * The providers here are the OAuth2 providers, this will be removed eventually.
+ * The csrfToken is necessary for the credentials login form.
+ * 
+ * @see {@link https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props | GetServerSideProps function}
+ * @see {@link https://next-auth.js.org/configuration/providers/credentials | Credentials Login}
+ * @see {@link https://next-auth.js.org/configuration/providers/oauth | NextAuth Providers}
+ * 
+ * @param context - Next application context
+ * @returns server-side props csrfToken and providers
+ */
 export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
@@ -20,6 +41,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
+/**
+ * Login page for OSOC application
+ * 
+ * @see {@link LoginSSR | Login Server-Side Rendering props}
+ * @returns Login Page
+ */
 const Login = ({
   csrfToken,
   providers,
@@ -64,7 +91,7 @@ const Login = ({
               no account yet? <span className="block">register here!</span>
             </p>
           </Link>
-          {/* Add line styling like in Figma */}
+          {/* TODO: Add line styling like in Figma */}
           <p className="pt-4 pb-2 text-sm font-medium opacity-80 lg:pb-4">
             Or log in using
           </p>

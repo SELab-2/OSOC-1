@@ -1,16 +1,32 @@
 import type { FC, PropsWithChildren } from 'react';
 
+/**
+ * Parameters for FormContainer Component
+ * {@label FormContainerProps}
+ *  
+ * @see PropsWithChildren
+ */
 type FormContainerProps = PropsWithChildren<{
+  /**
+   * Title of the page that is being displayed
+   */
   pageTitle: string;
 }>;
 
+/**
+ * Container for register and login forms
+ * {@label FormContainer} 
+ * 
+ * @remarks
+ * 
+ * @see {@link FormContainerProps}
+ */
 const FormContainer: FC<FormContainerProps> = ({ pageTitle, children }) => {
   return (
     <>
       <div className="h-screen bg-[url('../public/img/login.png')] bg-center">
         {/* Left side images */}
         <div
-          id="login-base"
           className="lg:rounded-5xl relative top-1/2 m-auto flex w-11/12 max-w-md -translate-y-1/2 flex-col items-center
                       rounded-md bg-[#F3F3f3] px-4 py-4 text-center
                      md:w-11/12 lg:grid lg:w-10/12 lg:max-w-7xl lg:grid-cols-2 lg:gap-2 xl:grid-cols-3"
@@ -27,7 +43,7 @@ const FormContainer: FC<FormContainerProps> = ({ pageTitle, children }) => {
               className="object-scale-down shadow-sm shadow-gray-600"
             ></img>
           </div>
-          {/* Main login component */}
+          {/* Main form component */}
           <div className="flex max-h-full max-w-full flex-col items-center justify-center">
             <header className="flex flex-row items-center justify-center gap-4 pb-5 lg:align-top">
               <h1 className="float-left text-3xl font-bold text-osoc-blue sm:text-4xl">

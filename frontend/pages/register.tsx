@@ -1,6 +1,11 @@
 import FormContainer from '../components/FormContainer';
 import Link from 'next/link';
 
+/**
+ * Register page for OSOC application
+ * 
+ * @returns Register Page
+ */
 const register = () => {
   return (
     <>

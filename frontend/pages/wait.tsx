@@ -1,5 +1,14 @@
 import { Preloader, TailSpin } from 'react-preloader-icon';
 
+/**
+ * Waiting page for OSOC application
+ * 
+ * @remarks
+ * Users will be sent to this page when they have a valid account, but it isn't enabled yet
+ * by an administrator
+ * 
+ * @returns Waiting Page
+ */
 const WaitPage = () => {
   return (
     <div className="h-screen bg-[url('../public/img/login.png')] bg-center">
