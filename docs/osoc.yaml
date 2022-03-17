@@ -449,13 +449,15 @@ paths:
                     format: uuid
             responses:
                 '200':
-                    description: Return the corresponding StudentRole
+                    description: |
+                        Return the corresponding StudentRole
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/StudentRole'
                 '404':
-                    description: Not Found. No such StudentRoleId.
+                    description: |
+                        Not Found. No such StudentRoleId.
         delete:
             summary: Remove a specific student role by id.
             parameters:
@@ -467,9 +469,11 @@ paths:
                     format: uuid
             responses:
                 '204':
-                    description: Succesful operation.
+                    description: |
+                        Succesful operation.
                 '404':
-                    description: Not Found. No such StudentRoleId.
+                    description: |
+                        Not Found. No such StudentRoleId.
     /communications/{studentId}:
         get:
             summary: Get all registered communications with a student
