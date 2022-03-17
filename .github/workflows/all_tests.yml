@@ -47,6 +47,19 @@ jobs:
           cd /__w/OSOC-1/OSOC-1/temppath
           mvn -B -DfailIfNoTests=false test --file backend/pom.xml
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: /__w/OSOC-1/OSOC-1/temppath
+          working-directory: /__w/OSOC-1/OSOC-1/temppath
+          root_dir: /__w/OSOC-1/OSOC-1/temppath
+          fail_ci_if_error: true
+          files: /__w/OSOC-1/OSOC-1/temppath/backend/target/site/jacoco/jacoco.xml
+          flags: all_tests
+          name: codecov-umbrella
+          verbose: true
+
       - name: remove temppath
         if: always()
         run: |
