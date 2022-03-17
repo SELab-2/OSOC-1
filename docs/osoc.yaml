@@ -409,6 +409,67 @@ paths:
                     description: succesful operation
                 '404':
                     description: Not Found. No such projectId or assignmentId.
+    /studentRoles: 
+        get:
+            summary: Get all types of student Roles that are currently in the database.
+            responses:
+                '200':
+                    description: |
+                        Returns an array all different types of student dev roles that 
+                        are currently present in the database.
+                    content:
+                        application/json:
+                            schema: 
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/StudentRole'
+        post:
+            summary: Add a new student dev role
+            requestBody:
+                content:
+                    application/json:
+                        schema: 
+                            $ref: '#/components/schemas/StudentRole'
+            responses:
+                '201':
+                    description: | 
+                        Successful operation. Returns a link to the newly added 
+                        student role in the location header.
+                '400':
+                    description: Bad Request. 
+    /studentRoles/{studentRoleId}: 
+        get:
+            summary: Get a specific student role by id.
+            parameters:
+                - name: studentRoleId
+                  required: true
+                  in: path
+                  schema: 
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: Return the corresponding StudentRole
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StudentRole'
+                '404':
+                    description: Not Found. No such StudentRoleId.
+        delete:
+            summary: Remove a specific student role by id.
+            parameters:
+                - name: studentRoleId
+                  required: true
+                  in: path
+                  schema: 
+                    type: string
+                    format: uuid
+            responses:
+                '204':
+                    description: Succesful operation.
+                '404':
+                    description: Not Found. No such StudentRoleId.
     /communications/{studentId}:
         get:
             summary: Get all registered communications with a student
