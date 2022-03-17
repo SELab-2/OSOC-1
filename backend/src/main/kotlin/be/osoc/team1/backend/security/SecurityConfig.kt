@@ -22,7 +22,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     /**
      * UserDetailsService now just returns User Object, should be replaced by UserRepo
      */
-    private val userDetailsService: UserDetailsService = UserDetailsService { User("user", "pass", mutableListOf(SimpleGrantedAuthority("ROLE_USER"))) }
+    private val userDetailsService: UserDetailsService = UserDetailsService { User("user", passwordEncoder.encode("pass"), mutableListOf(SimpleGrantedAuthority("ROLE_USER"))) }
 
     /**
      * used to encode password, so it can't be read by outsiders
