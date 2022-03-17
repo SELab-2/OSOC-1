@@ -53,7 +53,133 @@ is an example of how you could document a class. From these comments, Dokka gene
 [this](https://kotlin.github.io/dokka/examples/dokka-gradle-example/html/-dokka%20-gradle%20-example/demo/index.html).
 
 
+## Typescript
 
+Typescript documentation comments start with `/**` and end in `*/`.
+For Typescript documentation we follow the [TSDoc](https://tsdoc.org/) standard syntax,
+which can then be automatically generated into JSON and eventually into Markdown using [API Extractor/Documenter](https://api-extractor.com/pages/setup/generating_docs/).
+
+For normal functions and classes we're going to rely on the standard TSDoc specs. Following below is an example of such documentation comments, containing some of the most important tags. A list of all tags can be found [here](https://tsdoc.org/pages/tags/alpha/).
+
+The general tags that can be used in every context are `@example`, `@label`, `@link`, `@remarks` and `@see`. The use of `@example` is pretty straight-forward, it describes an example of the function or class and should be used when the use of the item is non-trivial. The `@label` tag is to be used to define an identifier of the item so that it can be referenced in other docs. This can be done using the `@see` and `@link` tags. `@see` is used to build a list of references to an API item or other resource that may be related to the current item. The `@link` tag facilitates this by supporting a way to incorporate hyperlinks, because the use of this tag is non-trivial, it is advised to read the [exact documentation](https://tsdoc.org/pages/tags/link/) on this. Lastly we have the `@remarks` tag, this defines a clause where more information can be written that does not need to be part of the main summary section.
+
+```ts
+/**
+ * (Brief summary section)
+ * 
+ * {@label ITEM_IDENTIFIER}
+ * 
+ * @remarks
+ * 
+ * More information about the item:
+ * @see {@link ANOTHER_ITEM_IDENTIFIER | Another Item Preview Name}
+ * @see {@link https://some.url/} for more information about this item
+ */
+```
+
+For normal method documentation comments the extension is formed by the `@param`, `@throws` and `@returns` tags. The use of these tags is straight-forward and can be seen here.
+
+```ts
+/**
+ * (Brief summary section)
+ * 
+ * @param x - the first input variable
+ * @param y - the second input variable
+ * @returns the result of doing the operation on `x` and `y`
+ * 
+ * @throws {@link CustomErrorType}
+ * This exception is thrown when ...
+ */
+function doThing(x: type1, y:type2): type3 {
+  ...
+}
+```
+
+For classes and interfaces/types we also have a few extra tags: `@defaultValue`, `@readonly` and `@typeParam`.
+```ts
+enum WarningStyle {
+  DialogBox,
+  StatusMessage,
+  LogOnly
+}
+
+/**
+ * (Brief summary)
+ * 
+ * @typeParam T - Message type
+ */
+interface IWarningOptions<T> {
+
+  /**
+   * (id information)
+   * @readonly
+   */
+  id: string;
+
+  /**
+   * Determines how the warning will be displayed.
+   *
+   * @remarks
+   * @see {@link WarningStyle| the WarningStyle enum} for more details.
+   *
+   * @defaultValue `WarningStyle.DialogBox`
+   */
+  warningStyle: WarningStyle;
+
+  /**
+   * Whether the warning can interrupt a user's current activity.
+   * @defaultValue
+   * The default is `true` unless
+   *  `WarningStyle.StatusMessage` was requested.
+   */
+  cancellable?: boolean;
+
+  /**
+   * The warning message
+   */
+  message: T;
+}
+
+```
+
+Because there is no real React documentation standard, we are just going to adapt the above rules as such:
+
+```ts
+/**
+ * (Brief summary)
+ * 
+ */
+type CustomComponentProps = {
+
+  /**
+   * (prop1 information)
+   *
+   * @remarks
+   * @see {@link ...| ...} ...
+   *
+   * @defaultValue ...
+   */
+  prop1: type1;
+
+  /**
+   * (prop2 information)
+   */
+  prop2: type2;
+}
+
+/**
+ * (Brief summary)
+ * 
+ * @see {@link CustomComponentProps| Props for Custom Component} for more details.
+ * 
+ * {@label CustomComponent}
+ * 
+ */
+const CustomComponent: FC<CustomComponentProps> = ({ prop1, prop2 }) => {
+  return (<></>);
+}
+
+```
 
 # Architectural documentation
 
