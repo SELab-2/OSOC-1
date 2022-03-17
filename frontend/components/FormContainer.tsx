@@ -3,7 +3,7 @@ import type { FC, PropsWithChildren } from 'react';
 /**
  * Parameters for FormContainer Component
  * {@label FormContainerProps}
- *  
+ *
  * @see PropsWithChildren
  */
 type FormContainerProps = PropsWithChildren<{
@@ -15,10 +15,10 @@ type FormContainerProps = PropsWithChildren<{
 
 /**
  * Container for register and login forms
- * {@label FormContainer} 
- * 
+ * {@label FormContainer}
+ *
  * @remarks
- * 
+ *
  * @see {@link FormContainerProps}
  */
 const FormContainer: FC<FormContainerProps> = ({ pageTitle, children }) => {

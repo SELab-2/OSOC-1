@@ -2,6 +2,12 @@ import NextAuth from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
+/**
+ * NextAuth object for authentication settings [PLACEHOLDER SETTINGS]
+ *
+ * @see {@link https://next-auth.js.org/configuration/initialization}
+ */
+
 export default NextAuth({
   // configure one or more authentication providers
   providers: [

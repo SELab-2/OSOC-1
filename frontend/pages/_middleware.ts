@@ -9,7 +9,7 @@ type NextMiddlewareRequest = NextApiRequest & NextRequest;
 
 /**
  * Middleware for every Next request
- * 
+ *
  * @param req - the incoming Next request
  * @returns a NextResponse object containing the next step
  */
@@ -44,7 +44,10 @@ export async function middleware(req: NextMiddlewareRequest) {
 
   // if the request is trying to access protected resources, we redirect them to the login
   // TODO: remove /wait page filter when accounts are working
-  if (!token && !(pathname === '/login' || pathname === '/register' || pathname === '/wait')) {
+  if (
+    !token &&
+    !(pathname === '/login' || pathname === '/register' || pathname === '/wait')
+  ) {
     return NextResponse.redirect(url);
   }
 }
