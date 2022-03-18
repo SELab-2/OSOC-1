@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
           path: 'temppath'
 
-      - name: install yarn
+      - name: install yarn and dependencies
         run: |
           cd /__w/OSOC-1/OSOC-1/temppath/frontend
           npm install --global yarn
@@ -57,40 +57,6 @@ jobs:
           -filter-mode="nofilter" \
           -fail-on-error="true" \
           -level="error"
-
-#      This is the old action that will autofix code
-#      I left it here in case we do want to use it later
-#
-#      - name: install yarn
-#        run: |
-#          cd /__w/OSOC-1/OSOC-1/temppath/frontend
-#          npm install --global yarn
-#          yarn install --frozen-lockfile
-#
-#      - name: run eslint
-#        run: |
-#          cd /__w/OSOC-1/OSOC-1/temppath/frontend
-#          yarn run lint --fix -c /__w/OSOC-1/OSOC-1/temppath/frontend/.eslintrc.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.eslintignore
-#
-#      - name: manual prettify code and amend commit
-#        shell: bash
-#        run: |
-#          chmod +x "/__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettierscript.sh"
-#          /__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettierscript.sh
-#        env:
-#          INPUT_COMMIT_MESSAGE: "Prettified Code!"
-#          INPUT_COMMIT_DESCRIPTION: ""
-#          INPUT_SAME_COMMIT: false
-#          INPUT_COMMIT_OPTIONS: ""
-#          INPUT_FILE_PATTERN: "*"
-#          INPUT_PRETTIER_OPTIONS: "--config /__w/OSOC-1/OSOC-1/temppath/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.prettierignore"
-#          INPUT_DRY: false
-#          INPUT_PRETTIER_VERSION: false
-#          INPUT_ONLY_CHANGED: false
-#          INPUT_PRETTIER_PLUGINS: ""
-#          INPUT_WORKING_DIRECTORY: "/__w/OSOC-1/OSOC-1/temppath/frontend"
-#          INPUT_GITHUB_TOKEN: ${{ secrets.github_token }}
-#          GITHUB_ACTION_PATH: "/__w/OSOC-1/OSOC-1/temppath/frontend"
 
       - name: remove temppath
         if: always()
