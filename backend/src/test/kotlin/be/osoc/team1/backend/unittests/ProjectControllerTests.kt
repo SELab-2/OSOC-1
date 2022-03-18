@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -40,12 +41,14 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val jsonRepresentation = objectMapper.writeValueAsString(testProject)
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getAllProjects should not fail`() {
         every { projectService.getAllProjects() } returns emptyList()
         mockMvc.perform(get("/projects")).andExpect(status().isOk)
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getProjectById returns project if project with given id exists`() {
         every { projectService.getProjectById(testId) } returns testProject
         mockMvc.perform(get("/projects/$testId")).andExpect(status().isOk)
@@ -53,6 +56,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getProjectById returns 404 Not Found if project with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { projectService.getProjectById(differentId) }.throws(InvalidIdException())
@@ -61,6 +65,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteProjectById succeeds if project with given id exists`() {
         every { projectService.deleteProjectById(testId) } just Runs
         mockMvc.perform(delete("/projects/$testId"))
@@ -68,6 +73,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteProjectById returns 404 Not Found if project with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { projectService.deleteProjectById(differentId) }.throws(InvalidIdException())
@@ -76,6 +82,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `postProject should not fail`() {
         val databaseId = UUID.randomUUID()
         every { projectService.postProject(any()) } returns databaseId
@@ -87,6 +94,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getStudentsOfProject succeeds if project with given id exists`() {
         every { projectService.getProjectById(testId) } returns testProject
         mockMvc.perform(get("/projects/$testId/students"))
@@ -95,6 +103,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getStudentsOfProject returns 404 Not Found if project with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { projectService.getProjectById(differentId) }.throws(InvalidIdException())
@@ -103,6 +112,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `postStudentToProject succeeds if project with given id exists`() {
         val student = Student("Lars", "Van Cauter")
         every { projectService.addStudentToProject(testId, student) } just Runs
@@ -115,6 +125,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `postStudentToProject returns 404 Not Found if project with given id does not exist`() {
         val student = Student("Lars", "Van Cauter")
         val differentId = UUID.randomUUID()
@@ -128,6 +139,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteStudentOfProject succeeds if project with given id exists`() {
         val studentId = UUID.randomUUID()
         every { projectService.removeStudentFromProject(testId, studentId) } just Runs
@@ -136,6 +148,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteStudentOfProject returns 404 Not Found if project with given id does not exist`() {
         val studentId = UUID.randomUUID()
         val differentId = UUID.randomUUID()
@@ -145,6 +158,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteStudentOfProject returns 400 if coach with given id is not assigned to project`() {
         val not_assigned_studentId = UUID.randomUUID()
         every { projectService.removeStudentFromProject(testId, not_assigned_studentId) }.throws(
@@ -155,6 +169,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getCoachOfProject succeeds if project with given id exists`() {
         every { projectService.getProjectById(testId) } returns testProject
         mockMvc.perform(get("/projects/$testId/coaches"))
@@ -162,6 +177,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getCoachOfProject returns 404 Not Found if project with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { projectService.getProjectById(differentId) }.throws(InvalidIdException())
@@ -170,6 +186,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `postCoachOfProject succeeds if project with given id exists`() {
         val coach = Coach("Lars", "Van Cauter")
         every { projectService.addCoachToProject(testId, any()) } just Runs
@@ -181,6 +198,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `postCoachOfProject returns 404 Not Found if project with given id does not exist`() {
         val coach = Coach("Lars", "Van Cauter")
         val differentId = UUID.randomUUID()
@@ -193,6 +211,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteCoachOfProject succeeds if project with given id exists`() {
         val coachId = UUID.randomUUID()
         every { projectService.removeCoachFromProject(testId, coachId) } just Runs
@@ -201,6 +220,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteCoachOfProject returns 404 Not Found if project with given id does not exist`() {
         val coachId = UUID.randomUUID()
         val differentId = UUID.randomUUID()
@@ -210,6 +230,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteCoachOfProject returns 400 if coach with given id is not assigned to project`() {
         val not_assigned_coachId = UUID.randomUUID()
         every { projectService.removeCoachFromProject(testId, not_assigned_coachId) }.throws(FailedOperationException())
