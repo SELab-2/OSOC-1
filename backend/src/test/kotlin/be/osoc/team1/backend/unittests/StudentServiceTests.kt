@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.entities.Communication
+import be.osoc.team1.backend.entities.CommunicationTypeEnum
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
@@ -154,7 +155,7 @@ class StudentServiceTests {
     fun `addCommunicationToStudent adds communication to list of student`() {
         val repository = getRepository(true)
         val service = StudentService(repository)
-        val testCommunication = Communication("test message", TypeEnum.Email)
+        val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
         service.addCommunicationToStudent(studentId, testCommunication)
         testStudent.communications.add(testCommunication) // Bit of a hack
         verify { repository.save(testStudent) }
@@ -164,7 +165,7 @@ class StudentServiceTests {
     @Test
     fun `addCommunicationToStudent fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        val testCommunication = Communication("test message", TypeEnum.Email)
+        val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
         assertThrows<InvalidStudentIdException> { service.addCommunicationToStudent(studentId, testCommunication) }
     }
 }
