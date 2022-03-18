@@ -22,7 +22,7 @@ jobs:
 
       - name: install yarn
         run: |
-          cd /__w/OSOCTEST/OSOCTEST/temppath/frontend
+          cd /__w/OSOC-1/OSOC-1/temppath/frontend
           npm install --global yarn
           npm install --global eslint-formatter-rdjson
           yarn install --frozen-lockfile
@@ -35,16 +35,16 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd /__w/OSOCTEST/OSOCTEST/temppath/frontend
-          /__w/OSOCTEST/OSOCTEST/temppath/frontend/node_modules/.bin/eslint -f=rdjson . | reviewdog -f=rdjson -name="eslint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="true"
+          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+          /__w/OSOC-1/OSOC-1/temppath/frontend/node_modules/.bin/eslint -f=rdjson . | reviewdog -f=rdjson -name="eslint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="true"
 
       - name: prettier with reviewdog
         if: always()
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd /__w/OSOCTEST/OSOCTEST/temppath/frontend
-          /__w/OSOCTEST/OSOCTEST/temppath/frontend/node_modules/.bin/prettier --check --config /__w/OSOCTEST/OSOCTEST/temppath/frontend/prettier.config.js --ignore-path /__w/OSOCTEST/OSOCTEST/temppath/frontend/.prettierignore .  2>&1 | sed --regexp-extended 's/(\[warn\].*)$/\1 File is not properly formatted./' \
+          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+          /__w/OSOC-1/OSOC-1/temppath/frontend/node_modules/.bin/prettier --check --config /__w/OSOC-1/OSOC-1/temppath/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.prettierignore .  2>&1 | sed --regexp-extended 's/(\[warn\].*)$/\1 File is not properly formatted./' \
           | reviewdog \
           -efm="%-G[warn] Code style issues found in the above file(s). Forgot to run Prettier%. File is not properly formatted." \
           -efm="[%tarn] %f %m" \
