@@ -21,6 +21,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     /**
      * UserDetailsService now just returns User Object, should be replaced by UserRepo
+     * This is our very simple User database at the moment
      */
     private val userDetailsService: UserDetailsService = UserDetailsService { User("user", passwordEncoder.encode("pass"), mutableListOf(SimpleGrantedAuthority("ROLE_USER"))) }
 
@@ -36,9 +37,6 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
-        // basic html form, should be replaced with nextjs form
-        // http.formLogin()
 
         // permit following urls
         http.authorizeRequests().antMatchers("/", "/login", "/logout").permitAll()

@@ -31,11 +31,11 @@ class AuthorizationFilter : OncePerRequestFilter() {
             filterChain.doFilter(request, response)
         } else {
             val authorizationHeader: String? = request.getHeader(AUTHORIZATION)
-            // authorizationHeader should start with "Bearer " followed by token
-            if (authorizationHeader?.startsWith("Bearer ") == true) {
+            // authorizationHeader should start with "Basic " followed by token
+            if (authorizationHeader?.startsWith("Basic ") == true) {
                 try {
                     // verify token
-                    val token: String = authorizationHeader.substring("Bearer ".length)
+                    val token: String = authorizationHeader.substring("Basic ".length)
                     val verifier: JWTVerifier = JWT.require(SecretUtil().algorithm).build()
                     val decodedJWT: DecodedJWT = verifier.verify(token)
                     val username: String = decodedJWT.subject
