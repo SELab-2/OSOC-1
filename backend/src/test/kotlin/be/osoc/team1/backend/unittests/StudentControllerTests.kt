@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
@@ -73,7 +72,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @WithMockUser(roles = ["USER"])
     fun `deleteStudentById succeeds if student with given id exists`() {
         every { studentService.deleteStudentById(testId) } just Runs
-        mockMvc.perform(delete("/students/$testId")).andExpect(status().isOk)
+        mockMvc.perform(delete("/students/$testId")).andExpect(status().isNoContent)
     }
 
     @Test
@@ -86,14 +85,16 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     @WithMockUser(roles = ["USER"])
-    fun `putStudent should not fail`() {
+    fun `addStudent should not fail`() {
         val databaseId = UUID.randomUUID()
-        every { studentService.putStudent(any()) } returns databaseId
-        mockMvc.perform(
-            put("/students")
+        every { studentService.addStudent(any()) } returns databaseId
+        val mvcResult = mockMvc.perform(
+            post("/students")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
-        ).andExpect(status().isOk).andExpect(content().string("\"$databaseId\""))
+        ).andExpect(status().isCreated).andReturn()
+        val locationHeader = mvcResult.response.getHeader("Location")
+        assert(locationHeader!!.endsWith("/students/$databaseId"))
     }
 
     @Test
@@ -117,7 +118,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("/students/$testId/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(status))
-        ).andExpect(status().isOk)
+        ).andExpect(status().isNoContent)
     }
 
     @Test
@@ -144,7 +145,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("/students/$testId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(statusSuggestion))
-        ).andExpect(status().isOk)
+        ).andExpect(status().isNoContent)
     }
 
     @Test

@@ -1,5 +1,7 @@
 package be.osoc.team1.backend.unittests
 
+import be.osoc.team1.backend.entities.Communication
+import be.osoc.team1.backend.entities.CommunicationTypeEnum
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
@@ -12,9 +14,10 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
 
 class StudentServiceTests {
@@ -39,10 +42,10 @@ class StudentServiceTests {
         assertEquals(service.getStudentById(testId), testStudent)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test
     fun `getStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.getStudentById(testId)
+        assertThrows<InvalidIdException> { service.getStudentById(testId) }
     }
 
     @Test
@@ -53,24 +56,24 @@ class StudentServiceTests {
         verify { repository.deleteById(testId) }
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test
     fun `deleteStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.deleteStudentById(testId)
+        assertThrows<InvalidIdException> { service.deleteStudentById(testId) }
     }
 
     @Test
-    fun `putStudent saves student`() {
+    fun `addStudent saves student`() {
         val repository = getRepository(false)
         val service = StudentService(repository)
-        service.putStudent(testStudent)
+        service.addStudent(testStudent)
         verify { repository.save(testStudent) }
     }
 
     @Test
-    fun `putStudent returns some other id than what was passed`() {
+    fun `addStudent returns some other id than what was passed`() {
         val service = StudentService(getRepository(false))
-        assertNotEquals(service.putStudent(testStudent), testId)
+        assertNotEquals(service.addStudent(testStudent), testId)
     }
 
     @Test
@@ -83,10 +86,10 @@ class StudentServiceTests {
         testStudent.status = StatusEnum.Undecided
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test
     fun `setStudentStatus fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.setStudentStatus(testId, StatusEnum.Yes)
+        assertThrows<InvalidIdException> { service.setStudentStatus(testId, StatusEnum.Yes) }
     }
 
     @Test
@@ -100,9 +103,27 @@ class StudentServiceTests {
         testStudent.statusSuggestions.remove(testSuggestion)
     }
 
-    @Test(expected = InvalidIdException::class)
+    @Test
     fun `addStudentStatusSuggestion fails when no student with that id exists`() {
         val service = StudentService(getRepository(false))
-        service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "")
+        assertThrows<InvalidIdException> { service.addStudentStatusSuggestion(testId, SuggestionEnum.Yes, "") }
+    }
+
+    @Test
+    fun `addCommunicationToStudent adds communication to list of student`() {
+        val repository = getRepository(true)
+        val service = StudentService(repository)
+        val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
+        service.addCommunicationToStudent(testId, testCommunication)
+        testStudent.communications.add(testCommunication) // Bit of a hack
+        verify { repository.save(testStudent) }
+        testStudent.communications.remove(testCommunication)
+    }
+
+    @Test
+    fun `addCommunicationToStudent fails when no student with that id exists`() {
+        val service = StudentService(getRepository(false))
+        val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
+        assertThrows<InvalidIdException> { service.addCommunicationToStudent(testId, testCommunication) }
     }
 }
