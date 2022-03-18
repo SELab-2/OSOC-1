@@ -6,7 +6,6 @@ import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
-import be.osoc.team1.backend.entities.TypeEnum
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidCoachIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
