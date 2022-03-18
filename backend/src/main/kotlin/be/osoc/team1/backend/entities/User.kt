@@ -11,9 +11,8 @@ import javax.persistence.Table
  * of different [Role] enum types. Every role has permission to use everything with an equal or below [permissionLevel].
  */
 enum class Role(private val permissionLevel: Int) {
-    Admin(3),
-    Coach(2),
-    StudentCoach(1),
+    Admin(2),
+    Coach(1),
     Disabled(0);
 
     /**

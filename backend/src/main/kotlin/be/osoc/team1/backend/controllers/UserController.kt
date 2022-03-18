@@ -2,6 +2,7 @@ package be.osoc.team1.backend.controllers
 
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
+import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.services.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -38,6 +39,9 @@ class UserController(private val service: UserService) {
      */
     @PatchMapping("/{id}")
     fun patchUser(@PathVariable id: UUID, @RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse) {
+        if (id != user.id)
+            throw FailedOperationException("Request url id=\"$id\" did not match request body id=\"${user.id}\"")
+
         service.patchUser(user)
         responseHeader.addHeader("Location", request.requestURL.toString())
     }
@@ -56,8 +60,9 @@ class UserController(private val service: UserService) {
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     fun postUser(@RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
-        responseHeader.addHeader("Location", request.requestURL.toString())
-        return service.postUser(user)
+        val id = service.postUser(user)
+        responseHeader.addHeader("Location", request.requestURL.toString() + "/$id")
+        return id
     }
 
     /**
