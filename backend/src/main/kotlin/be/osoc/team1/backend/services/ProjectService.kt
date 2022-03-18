@@ -93,4 +93,27 @@ class ProjectService(private val repository: ProjectRepository) {
         }
         repository.save(project)
     }
+
+    /**
+     * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
+     * and returns the conflicts in the form of a hashmap,
+     * the keys are the students themselves and the values are a list of project ids
+     */
+    fun getConflicts(): MutableMap<Student, MutableList<UUID>> {
+        val projectList = getAllProjects()
+        val studentsMap = mutableMapOf<Student, MutableList<UUID>>()
+        for (project in projectList) {
+            for (student in project.students) {
+                // add project id to map with student as key
+                if (studentsMap.containsKey(student)) {
+                    // student is already added to the map so append to the entry
+                    studentsMap[student]?.add(project.id)
+                } else {
+                    // student isn't yet added to the map so make a new entry
+                    studentsMap[student] = mutableListOf(project.id)
+                }
+            }
+        }
+        return studentsMap
+    }
 }

@@ -121,21 +121,12 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      */
     @GetMapping("/conflicts")
     fun getProjectConflicts(): MutableList<MutableMap<String, Any>> {
-        val projectList = service.getAllProjects()
-        val studentsMap = mutableMapOf<Student, MutableCollection<UUID>>()
-        for (project in projectList) {
-            for (student in project.students) {
-                if (studentsMap.containsKey(student)) {
-                    studentsMap[student]?.add(project.id)
-                } else {
-                    studentsMap[student] = mutableListOf(project.id)
-                }
-            }
-        }
+        val studentsMap = service.getConflicts()
         val result = mutableListOf<MutableMap<String, Any>>()
         for (student in studentsMap.keys) {
             if (studentsMap[student]!!.size > 1) {
                 // this student has a conflict
+                // m behaves like a JSON object
                 val m = mutableMapOf<String, Any>()
                 m.put("student", student.id.toString())
                 m.put("projects", studentsMap[student]!!)
