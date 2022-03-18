@@ -41,7 +41,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         // authenticated user
         val user: User = authentication.principal as User
         // init tokens
-        val accesToken: String = JWT.create()
+        val accessToken: String = JWT.create()
             .withSubject(user.username)
             .withExpiresAt(Date(System.currentTimeMillis() + 5 * 60 * 1000))
             .withClaim("roles", user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
@@ -53,11 +53,9 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
             .sign(SecretUtil().algorithm)
         // add tokens to response
         val tokens: MutableMap<String, String> = HashMap()
-        tokens["accesToken"] = accesToken
+        tokens["accessToken"] = accessToken
         tokens["refreshToken"] = refreshToken
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(response.outputStream, tokens)
-        // response.setHeader("accesToken", accesToken)
-        // response.setHeader("refreshToken", refreshToken)
     }
 }
