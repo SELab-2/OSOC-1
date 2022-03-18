@@ -18,3 +18,10 @@ frontend/*
 !frontend/public/
 !frontend/src/
 !frontend/styles/
+
+# Ignores for manual runs
+/*
+!pages/
+!public/
+!src/
+!styles/
