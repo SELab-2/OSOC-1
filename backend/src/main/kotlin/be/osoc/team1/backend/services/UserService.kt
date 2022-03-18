@@ -42,8 +42,9 @@ class UserService(private val repository: UserRepository) {
      */
     fun changeRole(id: UUID, newRole: Role) {
         val user = getUserById(id)
-        if (user.role == Role.Admin && !newRole.hasPermissionLevel(Role.Admin)
-            && repository.findByRole(Role.Admin).size == 1) {
+        if (user.role == Role.Admin && !newRole.hasPermissionLevel(Role.Admin) &&
+            repository.findByRole(Role.Admin).size == 1
+        ) {
             throw ForbiddenOperationException("Cannot demote last remaining admin")
         }
         user.role = newRole
