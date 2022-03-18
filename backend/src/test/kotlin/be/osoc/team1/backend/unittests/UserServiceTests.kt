@@ -25,7 +25,14 @@ class UserServiceTests {
         every { repository.findByIdOrNull(testId) } returns if (userAlreadyExists) testUser else null
         every { repository.deleteById(testId) } just Runs
         every { repository.save(testUser) } returns testUser
+        every { repository.findAll() } returns listOf(testUser)
         return repository
+    }
+
+    @Test
+    fun `getAllUsers does not fail`() {
+        val service = UserService(getRepository(true))
+        assertEquals(service.getAllUsers(), listOf(testUser))
     }
 
     @Test
