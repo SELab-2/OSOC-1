@@ -21,15 +21,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.UUID
 
 @WebMvcTest(UserController::class)
 class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var userService: UserService
 
-    private val testId = UUID.randomUUID()
     private val testUser = User("Test", "test@email.com", Role.Admin, "password")
+    private val testId = testUser.id
     private val testUserJsonRepresentation = ObjectMapper().writeValueAsString(testUser)
 
     @Test
