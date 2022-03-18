@@ -5,9 +5,6 @@ import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.services.ProjectService
 import be.osoc.team1.backend.services.StudentService
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -18,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
+import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -110,7 +107,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
         service.removeCoachFromProject(projectId, coachId)
 
     @GetMapping("/conflicts")
-    fun getProjectConflicts(): MutableList<MutableMap<String,Any>> {
+    fun getProjectConflicts(): MutableList<MutableMap<String, Any>> {
         val projectList = service.getAllProjects()
         val studentsMap = mutableMapOf<Student, MutableCollection<UUID>>()
         for (project in projectList) {
