@@ -150,6 +150,6 @@ class ProjectServiceTests {
         every { repository.findAll() } returns mutableListOf(testProjectConflict, testProjectConflict2)
         val service = ProjectService(repository)
         val conflictlist = service.getConflicts()
-        assert(conflictlist[0] == ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id,testProjectConflict2.id)))
+        assert(conflictlist[0] == ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
     }
 }
