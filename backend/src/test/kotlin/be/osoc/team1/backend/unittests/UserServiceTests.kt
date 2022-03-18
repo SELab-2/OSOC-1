@@ -2,6 +2,7 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.services.UserService
@@ -72,11 +73,21 @@ class UserServiceTests {
     @Test
     fun `changeRole does not fail when a user with id exists and changes the role`() {
         val repository = getRepository(true)
+        val otherAdmin = User("Other admin", "otherAdmin@email.com", Role.Admin, "password")
+        every { repository.findByRole(Role.Admin) } returns listOf(testUser, otherAdmin)
         val service = UserService(repository)
         service.changeRole(testId, Role.Coach)
         verify { repository.save(testUser) }
         assertEquals(testUser.role, Role.Coach)
         service.changeRole(testId, Role.Admin)
+    }
+
+    @Test
+    fun `changeRole fails when demoting the last admin`() {
+        val repository = getRepository(true)
+        every { repository.findByRole(Role.Admin) } returns listOf(testUser)
+        val service = UserService(repository)
+        assertThrows<ForbiddenOperationException> { service.changeRole(testId, Role.Coach) }
     }
 
     @Test
