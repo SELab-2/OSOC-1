@@ -6,6 +6,7 @@ import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
+import javax.persistence.ManyToMany
 import javax.persistence.OneToMany
 
 /**
@@ -20,7 +21,7 @@ class Project(
 
     val description: String,
 
-    @OneToMany(cascade = [CascadeType.ALL])
+    @ManyToMany(cascade = [CascadeType.ALL])
     val students: MutableCollection<Student> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.ALL])
