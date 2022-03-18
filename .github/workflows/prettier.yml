@@ -22,34 +22,75 @@ jobs:
 
       - name: install yarn
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+          cd /__w/OSOCTEST/OSOCTEST/temppath/frontend
           npm install --global yarn
+          npm install --global eslint-formatter-rdjson
           yarn install --frozen-lockfile
 
-      - name: run eslint
+      - name: install reviewdog
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath/frontend
-          yarn run lint --fix -c /__w/OSOC-1/OSOC-1/temppath/frontend/.eslintrc.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.eslintignore
+          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b /usr/local/bin/ v0.13.0
 
-      - name: manual prettify code and amend commit
-        shell: bash
-        run: |
-          chmod +x "/__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettierscript.sh"
-          /__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettierscript.sh
+      - name: eslint with reviewdog
         env:
-          INPUT_COMMIT_MESSAGE: "Prettified Code!"
-          INPUT_COMMIT_DESCRIPTION: ""
-          INPUT_SAME_COMMIT: false
-          INPUT_COMMIT_OPTIONS: ""
-          INPUT_FILE_PATTERN: "*"
-          INPUT_PRETTIER_OPTIONS: "--config /__w/OSOC-1/OSOC-1/temppath/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.prettierignore"
-          INPUT_DRY: false
-          INPUT_PRETTIER_VERSION: false
-          INPUT_ONLY_CHANGED: false
-          INPUT_PRETTIER_PLUGINS: ""
-          INPUT_WORKING_DIRECTORY: "/__w/OSOC-1/OSOC-1/temppath/frontend"
-          INPUT_GITHUB_TOKEN: ${{ secrets.github_token }}
-          GITHUB_ACTION_PATH: "/__w/OSOC-1/OSOC-1/temppath/frontend"
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd /__w/OSOCTEST/OSOCTEST/temppath/frontend
+          /__w/OSOCTEST/OSOCTEST/temppath/frontend/node_modules/.bin/eslint -f=rdjson . | reviewdog -f=rdjson -name="eslint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="true"
+
+      - name: prettier with reviewdog
+        if: always()
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd /__w/OSOCTEST/OSOCTEST/temppath/frontend
+          /__w/OSOCTEST/OSOCTEST/temppath/frontend/node_modules/.bin/prettier --check --config /__w/OSOCTEST/OSOCTEST/temppath/frontend/prettier.config.js --ignore-path /__w/OSOCTEST/OSOCTEST/temppath/frontend/.prettierignore .  2>&1 | sed --regexp-extended 's/(\[warn\].*)$/\1 File is not properly formatted./' \
+          | reviewdog \
+          -efm="%-G[warn] Code style issues found in the above file(s). Forgot to run Prettier%. File is not properly formatted." \
+          -efm="[%tarn] %f %m" \
+          -efm="%E[%trror] %f: %m (%l:%c)" \
+          -efm="%C[error]%r" \
+          -efm="%Z[error]%r" \
+          -efm="%-G%r" \
+          -name="prettier" \
+          -reporter="github-pr-check" \
+          -filter-mode="nofilter" \
+          -fail-on-error="true" \
+          -level="error"
+
+#      This is the old action that will autofix code
+#      I left it here in case we do want to use it later
+#
+#      - name: install yarn
+#        run: |
+#          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+#          npm install --global yarn
+#          yarn install --frozen-lockfile
+#
+#      - name: run eslint
+#        run: |
+#          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+#          yarn run lint --fix -c /__w/OSOC-1/OSOC-1/temppath/frontend/.eslintrc.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.eslintignore
+#
+#      - name: manual prettify code and amend commit
+#        shell: bash
+#        run: |
+#          chmod +x "/__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettierscript.sh"
+#          /__w/OSOC-1/OSOC-1/temppath/.github/workflows/prettierscript.sh
+#        env:
+#          INPUT_COMMIT_MESSAGE: "Prettified Code!"
+#          INPUT_COMMIT_DESCRIPTION: ""
+#          INPUT_SAME_COMMIT: false
+#          INPUT_COMMIT_OPTIONS: ""
+#          INPUT_FILE_PATTERN: "*"
+#          INPUT_PRETTIER_OPTIONS: "--config /__w/OSOC-1/OSOC-1/temppath/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.prettierignore"
+#          INPUT_DRY: false
+#          INPUT_PRETTIER_VERSION: false
+#          INPUT_ONLY_CHANGED: false
+#          INPUT_PRETTIER_PLUGINS: ""
+#          INPUT_WORKING_DIRECTORY: "/__w/OSOC-1/OSOC-1/temppath/frontend"
+#          INPUT_GITHUB_TOKEN: ${{ secrets.github_token }}
+#          GITHUB_ACTION_PATH: "/__w/OSOC-1/OSOC-1/temppath/frontend"
 
       - name: remove temppath
         if: always()
