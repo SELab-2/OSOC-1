@@ -2,7 +2,6 @@ package be.osoc.team1.backend.entities
 
 import java.util.UUID
 import javax.persistence.Entity
-import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.Table
 
@@ -37,6 +36,5 @@ class User(
     val password: String
 ) {
     @Id
-    @GeneratedValue(generator = "UUID")
     val id: UUID = UUID.randomUUID()
 }
