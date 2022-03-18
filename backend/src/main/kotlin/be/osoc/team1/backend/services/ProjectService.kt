@@ -108,7 +108,7 @@ class ProjectService(private val repository: ProjectRepository) {
             }
         }
         val result = mutableListOf<Conflict>()
-        for ((student,projectIds) in studentsMap.entries) {
+        for ((student, projectIds) in studentsMap.entries) {
             if (projectIds.size > 1) {
                 // this student has a conflict
                 result.add(Conflict(student.id, projectIds))
