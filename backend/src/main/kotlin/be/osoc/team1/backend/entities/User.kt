@@ -24,14 +24,14 @@ enum class Role(private val permissionLevel: Int) {
 }
 
 /**
- * [User] object containing the [name] of the user their [email], the [role] of the user which uses an enum class [Role]
- * and a [password], this password is of type [String] but doesn't have to be the plain text password it could be the
+ * [User] object containing the [username] of the user their [email], the [role] of the user which uses an enum class [Role]
+ * and a [password]. This password is of type [String] but doesn't have to be the plain text password, it could be the
  * hashed value of the password.
  */
 @Entity
 @Table(name = "account")
 class User(
-    val name: String,
+    val username: String,
     val email: String,
     var role: Role,
     val password: String

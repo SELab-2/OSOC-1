@@ -76,6 +76,7 @@ class UserServiceTests {
         service.changeRole(testId, Role.Coach)
         verify { repository.save(testUser) }
         assertEquals(testUser.role, Role.Coach)
+        service.changeRole(testId, Role.Admin)
     }
 
     @Test

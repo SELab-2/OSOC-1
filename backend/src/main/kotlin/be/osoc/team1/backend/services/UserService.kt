@@ -2,7 +2,7 @@ package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
-import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.UserRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -14,16 +14,16 @@ class UserService(private val repository: UserRepository) {
     fun getAllUsers(): Iterable<User> = repository.findAll()
 
     /**
-     * Get a user using their [id]. Throws an [InvalidIdException] if no such user exists.
+     * Get a user using their [id]. Throws an [InvalidUserIdException] if no such user exists.
      */
-    fun getUserById(id: UUID) = repository.findByIdOrNull(id) ?: throw InvalidIdException()
+    fun getUserById(id: UUID) = repository.findByIdOrNull(id) ?: throw InvalidUserIdException()
 
     /**
-     * Delete the user with this [id]. Throws an [InvalidIdException] if such user exists.
+     * Delete the user with this [id]. Throws an [InvalidUserIdException] if no such user exists.
      */
     fun deleteUserById(id: UUID) {
         if (!repository.existsById(id))
-            throw InvalidIdException()
+            throw InvalidUserIdException()
 
         repository.deleteById(id)
     }
@@ -34,7 +34,7 @@ class UserService(private val repository: UserRepository) {
     fun postUser(user: User) = repository.save(user).id
 
     /**
-     * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidIdException] will
+     * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidUserIdException] will
      * be thrown.
      */
     fun changeRole(id: UUID, newRole: Role) {
@@ -45,11 +45,11 @@ class UserService(private val repository: UserRepository) {
 
     /**
      * Update a user object with the data defined in [updatedUser]. If the user we are trying to update doesn't exist
-     * then we will throw an [InvalidIdException].
+     * then we will throw an [InvalidUserIdException].
      */
     fun patchUser(updatedUser: User) {
         if (!repository.existsById(updatedUser.id))
-            throw InvalidIdException()
+            throw InvalidUserIdException()
 
         repository.save(updatedUser)
     }

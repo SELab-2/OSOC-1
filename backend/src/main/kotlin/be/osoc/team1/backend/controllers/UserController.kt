@@ -34,8 +34,8 @@ class UserController(private val service: UserService) {
     fun getUserById(@PathVariable id: UUID) = service.getUserById(id)
 
     /**
-     * Update a user, if the user does not exist yet a 404 will be returned. The response will also contain a Location
-     * header containing the url to the updated resource.
+     * Update a user, if the user does not exist yet a 404 will be returned. The response will contain a Location header
+     * containing the url to the updated resource.
      */
     @PatchMapping("/{id}")
     fun patchUser(@PathVariable id: UUID, @RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse) {
