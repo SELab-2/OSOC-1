@@ -2,7 +2,7 @@
 
 ### Bash Script
 Instead of manually running these commands you can run the bash script `rund`. To see all the commands run:
-```
+```shell
 ./rund help
 ```
 
@@ -10,20 +10,17 @@ Instead of manually running these commands you can run the bash script `rund`. T
 First create a docker image based upon the Dockerfile, this will also couple init.sql to the docker container.
 Changes to either the Dockerfile or init.sql means you will need to remove and then rebuild the container. \
 The following command assumes you are located in the folder where this readme is located.
+Also keep in mind these commands won't work on the server since all these docker names end in \_dev.
 ```shell
 docker build -t osoc_postgres_image_local_dev:latest .
 ```
 
 ### Run docker container
-First create a directory that will contain the database files, here named ```/some/placeholder``` in line 4.
-Make sure you use the absolute path to this folder! \
-Do not change ```:/var/lib/postgresql/data``` this is a fixed path inside the docker container itself. \
 After building the docker image you can run it as a container with the following command:
 ```shell
 docker run -d \
   --name osoc_postgres_container_local_dev \
-  -p 127.0.0.1:5432:5432 \
-  -v /some/placeholder:/var/lib/postgresql/data \
+  -p 5432:5432 \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=osoc \
