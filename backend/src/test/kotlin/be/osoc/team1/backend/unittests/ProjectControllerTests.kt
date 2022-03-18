@@ -221,11 +221,11 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
         val testStudent = Student("Lars", "Van Cauter")
-        val testProject2 = Project("Test", "a test project", mutableListOf(testStudent))
-        testProject.students.add(testStudent)
-        every { projectService.getAllProjects() } returns mutableListOf(testProject, testProject2)
+        val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
+        val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent))
+        every { projectService.getAllProjects() } returns mutableListOf(testProjectConflict, testProjectConflict)
         mockMvc.perform(get("/projects/conflicts"))
             .andExpect(status().isOk)
-            .andExpect(content().string("[{\"student\":\"${testStudent.id}\",\"projects\":[\"${testProject.id}\",\"${testProject2.id}\"]}]"))
+            .andExpect(content().string("[{\"student\":\"${testStudent.id}\",\"projects\":[\"${testProjectConflict.id}\",\"${testProjectConflict2.id}\"]}]"))
     }
 }
