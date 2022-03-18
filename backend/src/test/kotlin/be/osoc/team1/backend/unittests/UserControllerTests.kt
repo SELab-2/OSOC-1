@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.UUID
 
 @WebMvcTest(UserController::class)
 class UserControllerTests(@Autowired val mockMvc: MockMvc) {
@@ -73,6 +74,16 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
         ).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `patchUser should return 400 if the url id and request body id do not match`() {
+        every { userService.patchUser(any()) }.throws(InvalidIdException())
+        mockMvc.perform(
+            patch("/users/${UUID.randomUUID()}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(testUserJsonRepresentation)
+        ).andExpect(status().isBadRequest)
     }
 
     @Test
