@@ -227,6 +227,6 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { projectService.getConflicts() } returns result
         mockMvc.perform(get("/projects/conflicts"))
             .andExpect(status().isOk)
-            .andExpect(content().string("[{\"student\":\"${testStudent.id}\",\"projects\":[\"${testProjectConflict.id}\",\"${testProjectConflict2.id}\"]}]"))
+            .andExpect(content(objectMapper.writeValueAsString(result)))
     }
 }
