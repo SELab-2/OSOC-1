@@ -218,10 +218,6 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `can assign a student to multiple projects`() {
-    }
-
-    @Test
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
         val testStudent = Student("Lars", "Van Cauter")
