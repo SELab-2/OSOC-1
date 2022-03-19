@@ -1,8 +1,8 @@
 package be.osoc.team1.backend.services
 
-import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
@@ -75,7 +75,7 @@ class ProjectService(private val repository: ProjectRepository) {
      * Adds a coach to project based on [projectId],
      * if [projectId] is not in [repository] throw InvalidProjectIdException
      */
-    fun addCoachToProject(projectId: UUID, coach: Coach) {
+    fun addCoachToProject(projectId: UUID, coach: User) {
         val project: Project = getProjectById(projectId)
         project.coaches.add(coach)
         repository.save(project)

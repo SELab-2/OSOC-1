@@ -1,8 +1,9 @@
 package be.osoc.team1.backend.unittests
 
-import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
+import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
@@ -22,7 +23,7 @@ import java.util.UUID
 class ProjectServiceTests {
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Lars", "Van Cauter")
-    private val testCoach = Coach("Lars2", "Van Cauter")
+    private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
     private val testProject = Project("Test", "a test project", mutableListOf(testStudent), mutableListOf(testCoach))
     private val savedProject = Project("Saved", "a saved project", mutableListOf(testStudent), mutableListOf(testCoach))
 
@@ -101,16 +102,16 @@ class ProjectServiceTests {
     fun `addCoachToProject runs`() {
         val repository = getRepository(true)
         val service = ProjectService(repository)
-        val student = Coach("Lars", "Van Cauter")
-        service.addCoachToProject(testProject.id, student)
+        val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
+        service.addCoachToProject(testProject.id, coach)
         verify { repository.save(testProject) }
     }
 
     @Test
     fun `addCoachToProject fails when project doesnt exit`() {
         val service = ProjectService(getRepository(false))
-        val student = Coach("Lars", "Van Cauter")
-        assertThrows<InvalidProjectIdException> { service.addCoachToProject(testProject.id, student) }
+        val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
+        assertThrows<InvalidProjectIdException> { service.addCoachToProject(testProject.id, coach) }
     }
 
     @Test
