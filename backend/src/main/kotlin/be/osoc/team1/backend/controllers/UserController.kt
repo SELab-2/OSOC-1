@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.services.UserService
 import org.springframework.http.HttpStatus
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -20,7 +21,7 @@ import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/users")
-class UserController(private val service: UserService) {
+class UserController(private val service: UserService, private val passwordEncoder: PasswordEncoder) {
     /**
      * Get all [User] objects stored in the database.
      */
@@ -59,7 +60,9 @@ class UserController(private val service: UserService) {
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
+    fun postUser(@RequestBody requestUser: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
+        val user = User(requestUser.username, requestUser.email, Role.Disabled, passwordEncoder.encode(requestUser.password))
+
         val id = service.postUser(user)
         responseHeader.addHeader("Location", request.requestURL.toString() + "/$id")
         return id
