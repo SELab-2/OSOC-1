@@ -6,6 +6,7 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.FailedOperationException
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.services.StudentService
@@ -129,13 +130,13 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `addStudentStatusSuggestion returns 400 Bad Request if coach already made suggestion for student`() {
-        every { studentService.addStudentStatusSuggestion(studentId, any()) }.throws(FailedOperationException())
+    fun `addStudentStatusSuggestion returns 403 Forbidden if coach already made suggestion for student`() {
+        every { studentService.addStudentStatusSuggestion(studentId, any()) }.throws(ForbiddenOperationException())
         mockMvc.perform(
             post("/students/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
-        ).andExpect(status().isBadRequest)
+        ).andExpect(status().isForbidden)
     }
 
     @Test

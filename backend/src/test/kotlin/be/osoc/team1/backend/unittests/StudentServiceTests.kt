@@ -7,6 +7,7 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.FailedOperationException
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
@@ -121,7 +122,7 @@ class StudentServiceTests {
         every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
         every { repository.findByIdOrNull(studentId) } returns student
         val service = StudentService(repository)
-        assertThrows<FailedOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
+        assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
     }
 
     @Test
