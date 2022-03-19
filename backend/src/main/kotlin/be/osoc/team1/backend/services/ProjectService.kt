@@ -1,8 +1,8 @@
 package be.osoc.team1.backend.services
 
-import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
@@ -75,7 +75,7 @@ class ProjectService(private val repository: ProjectRepository) {
      * Adds a coach to project based on [projectId],
      * if [projectId] is not in [repository] throw InvalidProjectIdException
      */
-    fun addCoachToProject(projectId: UUID, coach: Coach) {
+    fun addCoachToProject(projectId: UUID, coach: User) {
         val project: Project = getProjectById(projectId)
         project.coaches.add(coach)
         repository.save(project)
@@ -93,4 +93,28 @@ class ProjectService(private val repository: ProjectRepository) {
         }
         repository.save(project)
     }
+
+    /**
+     * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
+     */
+    fun getConflicts(): MutableList<Conflict> {
+        val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
+        for (project in getAllProjects()) {
+            for (student in project.students) {
+                // add project id to map with student as key
+                studentsMap.putIfAbsent(student.id, mutableListOf())
+                studentsMap[student.id]?.add(project.id)
+            }
+        }
+        val conflicts = mutableListOf<Conflict>()
+        for ((studentId, projectIds) in studentsMap.entries) {
+            if (projectIds.size > 1) {
+                // this student has a conflict
+                conflicts.add(Conflict(studentId, projectIds))
+            }
+        }
+        return conflicts
+    }
+
+    data class Conflict(val student: UUID, val projects: MutableList<UUID> = mutableListOf())
 }
