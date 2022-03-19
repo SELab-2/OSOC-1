@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.security
 
+import be.osoc.team1.backend.exceptions.AuthException
 import com.auth0.jwt.JWT
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -21,10 +22,16 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
 
     /**
      * authenticate using username and password from request
+     * Throw an [AuthException] if the authentication process fails as described in the spring security docs:
+     * https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/web/authentication/UsernamePasswordAuthenticationFilter.html#attemptAuthentication(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+     * Currently this exception is only thrown if the request didn't contain the username or password parameters.
      */
-    override fun attemptAuthentication(request: HttpServletRequest?, response: HttpServletResponse?): Authentication {
-        val username: String = request!!.getParameter("username")
-        val password: String = request.getParameter("password")
+    override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
+        val username: String? = request.getParameter("username")
+        val password: String? = request.getParameter("password")
+        if (username == null || password == null) {
+            throw AuthException("The \"username\" and \"password\" parameters are required!")
+        }
         return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(username, password))
     }
 
