@@ -115,12 +115,7 @@ paths:
                         The response if there is a student in the database with the given id.
                 '404':
                     description: |
-                        The response if there is no student in the database with the given id.      
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/StatusSuggestion"
+                        The response if there is no student in the database with the given id.
     /students/{studentId}/suggestions/{coachId}:
         delete:
             summary: Delete student status suggestion
