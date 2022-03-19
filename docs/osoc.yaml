@@ -138,9 +138,13 @@ paths:
                 '204':
                     description: |
                         The response if the suggestion was successfully deleted.
+                '400':
+                    description: |
+                        The response if the given coach hasn't made a suggestion
+                        for the given student.
                 '404':
                     description: |
-                        The response if either the student or suggestion specified by the given id
+                        The response if the student specified by the given id
                         didn't exist in the database.
     /students/{studentId}/status:
         post:
