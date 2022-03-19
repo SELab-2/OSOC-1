@@ -55,13 +55,19 @@ class UserController(private val service: UserService, private val passwordEncod
     fun deleteUser(@PathVariable id: UUID) = service.deleteUserById(id)
 
     /**
-     * Save a new [User] object in the  database. The id of the user will be returned. The response will also contain a
-     * Location header containing the url to the newly created resource.
+     * Register a new [User]. The id of the new user will be returned. The response will also contain a
+     * Location header containing the url to the newly created resource. Newly created users have the [Role.Disabled]
+     * role by default.
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody requestUser: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
-        val user = User(requestUser.username, requestUser.email, Role.Disabled, passwordEncoder.encode(requestUser.password))
+    fun postUser(@RequestBody userRegistration: UserRegistration, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
+        val user = User(
+            userRegistration.username,
+            userRegistration.email,
+            Role.Disabled,
+            passwordEncoder.encode(userRegistration.password)
+        )
 
         val id = service.postUser(user)
         responseHeader.addHeader("Location", request.requestURL.toString() + "/$id")
@@ -74,4 +80,10 @@ class UserController(private val service: UserService, private val passwordEncod
     @PostMapping("/{id}/role")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun postUserRole(@PathVariable id: UUID, @RequestBody role: Role) = service.changeRole(id, role)
+
+    /**
+     * Data class used for registering a [User], we have an extra data class for this because newly created users
+     * shouldn't have to specify their role if it will be set to [Role.Disabled] anyway.
+     */
+    data class UserRegistration(val username: String, val email: String, val password: String)
 }
