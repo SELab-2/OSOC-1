@@ -26,6 +26,9 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
         // permit following urls
         http.authorizeRequests().antMatchers("/", "/login", "/logout").permitAll()
 
+        // allow registering a user without being authenticated
+        http.authorizeRequests().antMatchers(HttpMethod.POST, "/users").permitAll()
+
         // check if user has the right permissions
         http.authorizeRequests().antMatchers(HttpMethod.GET).hasAnyAuthority("ROLE_USER")
         http.authorizeRequests().antMatchers(HttpMethod.POST).hasAnyAuthority("ROLE_ADMIN")
