@@ -144,6 +144,15 @@ class StudentServiceTests {
     }
 
     @Test
+    fun `addStudentStatusSuggestion fails when user does not have coach role`() {
+        val disabledUser = User("", "", Role.Disabled, "")
+        val customUserService: UserService = mockk()
+        every { customUserService.getUserById(testSuggestion.coachId) } returns disabledUser
+        val service = StudentService(getRepository(true), customUserService)
+        assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
+    }
+
+    @Test
     fun `deleteStudentStatusSuggestion removes suggestion when student, suggestion and coach exist`() {
         val repository: StudentRepository = mockk()
         val student: Student = mockk()
