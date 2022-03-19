@@ -98,28 +98,22 @@ class ProjectService(private val repository: ProjectRepository) {
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
      */
     fun getConflicts(): MutableList<Conflict> {
-        val projectList = getAllProjects()
-        val studentsMap = mutableMapOf<Student, MutableList<UUID>>()
-        for (project in projectList) {
+        val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
+        for (project in getAllProjects()) {
             for (student in project.students) {
                 // add project id to map with student as key
-                if (studentsMap.containsKey(student)) {
-                    // student is already added to the map so append to the entry
-                    studentsMap[student]?.add(project.id)
-                } else {
-                    // student isn't yet added to the map so make a new entry
-                    studentsMap[student] = mutableListOf(project.id)
-                }
+                studentsMap.putIfAbsent(student.id, mutableListOf())
+                studentsMap[student.id]?.add(project.id)
             }
         }
-        val result = mutableListOf<Conflict>()
-        for (student in studentsMap.keys) {
-            if (studentsMap[student]!!.size > 1) {
+        val conflicts = mutableListOf<Conflict>()
+        for ((studentId, projectIds) in studentsMap.entries) {
+            if (projectIds.size > 1) {
                 // this student has a conflict
-                result.add(Conflict(student.id, studentsMap[student]!!))
+                conflicts.add(Conflict(studentId, projectIds))
             }
         }
-        return result
+        return conflicts
     }
 
     data class Conflict(val student: UUID, val projects: MutableList<UUID> = mutableListOf())
