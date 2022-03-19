@@ -105,4 +105,22 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID) =
         service.removeCoachFromProject(projectId, coachId)
+
+    /**
+     * Returns conflicts of students being assigned to multiple projects, format:
+     * ```
+     * [
+     *     {
+     *         "student": "(STUDENT 1 ID)",
+     *         "projects": ["(PROJECT 1 ID)", "(PROJECT 2 ID)"]
+     *     },
+     *     {
+     *         "student": "(STUDENT 2 ID)",
+     *         "projects": ["(PROJECT 1 ID)", "(PROJECT 2 ID)"]
+     *     }
+     * ]
+     * ```
+     */
+    @GetMapping("/conflicts")
+    fun getProjectConflicts(): MutableList<ProjectService.Conflict> = service.getConflicts()
 }

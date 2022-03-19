@@ -93,4 +93,28 @@ class ProjectService(private val repository: ProjectRepository) {
         }
         repository.save(project)
     }
+
+    /**
+     * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
+     */
+    fun getConflicts(): MutableList<Conflict> {
+        val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
+        for (project in getAllProjects()) {
+            for (student in project.students) {
+                // add project id to map with student as key
+                studentsMap.putIfAbsent(student.id, mutableListOf())
+                studentsMap[student.id]?.add(project.id)
+            }
+        }
+        val conflicts = mutableListOf<Conflict>()
+        for ((studentId, projectIds) in studentsMap.entries) {
+            if (projectIds.size > 1) {
+                // this student has a conflict
+                conflicts.add(Conflict(studentId, projectIds))
+            }
+        }
+        return conflicts
+    }
+
+    data class Conflict(val student: UUID, val projects: MutableList<UUID> = mutableListOf())
 }

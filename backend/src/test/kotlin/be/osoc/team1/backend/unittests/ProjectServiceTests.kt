@@ -141,4 +141,16 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(true))
         assertThrows<FailedOperationException> { service.removeCoachFromProject(testProject.id, UUID.randomUUID()) }
     }
+
+    @Test
+    fun `getConflicts returns the correct result`() {
+        val testStudent = Student("Lars", "Van Cauter")
+        val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
+        val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent))
+        val repository = getRepository(true)
+        every { repository.findAll() } returns mutableListOf(testProjectConflict, testProjectConflict2)
+        val service = ProjectService(repository)
+        val conflictlist = service.getConflicts()
+        assert(conflictlist[0] == ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
+    }
 }

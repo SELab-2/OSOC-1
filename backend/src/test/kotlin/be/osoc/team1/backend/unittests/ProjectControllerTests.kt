@@ -217,4 +217,17 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(delete("/projects/$testId/coaches/$not_assigned_coachId"))
             .andExpect(status().isBadRequest)
     }
+
+    @Test
+    fun `getProjectConflicts returns conflicts`() {
+        // create a conflict
+        val testStudent = Student("Lars", "Van Cauter")
+        val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
+        val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent))
+        val result = mutableListOf(ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
+        every { projectService.getConflicts() } returns result
+        mockMvc.perform(get("/projects/conflicts"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(objectMapper.writeValueAsString(result)))
+    }
 }
