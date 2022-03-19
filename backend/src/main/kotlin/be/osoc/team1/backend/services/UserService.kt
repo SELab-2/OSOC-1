@@ -52,8 +52,8 @@ class UserService(private val repository: UserRepository) {
     }
 
     /**
-     * Update a user object with the data defined in [updatedUser]. If the user we are trying to update doesn't exist
-     * then an [InvalidUserIdException] will be thrown.
+     * Update a user object with the data defined in [updatedUser]. If this user does not exist an
+     * [InvalidUserIdException] will be thrown.
      */
     fun patchUser(updatedUser: User) {
         if (!repository.existsById(updatedUser.id))
