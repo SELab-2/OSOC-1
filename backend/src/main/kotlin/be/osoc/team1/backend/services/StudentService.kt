@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.FailedOperationException
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -79,7 +80,7 @@ class StudentService(private val repository: StudentRepository) {
         val student = getStudentById(studentId)
         val suggestion = student.statusSuggestions.find { it.coachId == coachId }
         if (suggestion === null) {
-            throw FailedOperationException("This coach hasn't made a suggestion for the given student.")
+            throw ForbiddenOperationException("This coach hasn't made a suggestion for the given student.")
         }
         student.statusSuggestions.remove(suggestion)
         // See the comment at StatusSuggestion.student to understand why we have to do this.
