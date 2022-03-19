@@ -1,11 +1,15 @@
 package be.osoc.team1.backend.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.GenericGenerator
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 
 /**
@@ -42,17 +46,37 @@ enum class SuggestionEnum {
 
 /**
  * Represents the entry of a [status] suggestion in the database.
+ * Every [StatusSuggestion] is made by a [Coach]. The [coachId] of the [Coach] who made the suggestion
+ * is included in the object. A [Coach] can make multiple suggestions about different [Student]s, but
+ * it wouldn't make any sense for a [Coach] to make multiple suggestions about the same [Student].
+ * Therefore the combination of [coachId] and [student] must be unique.
+ * This constraint is checked when adding a new [StatusSuggestion] to a [Student].
+ * A [StatusSuggestion] always belongs to one particular [Student] in the database.
+ * This [Student] is included in the [StatusSuggestion] to verify the unique constraint,
+ * but when serializing the [StatusSuggestion] to a JSON object, this field is ignored.
+ * This is because the only way to get [StatusSuggestion]s is to GET a [Student] and read
+ * it's [Student.statusSuggestions] field. Therefore, it's already clear which [Student] is being referred to.
  * Apart from the suggested [status], a [motivation] for the suggestion should also be included.
- * A [StatusSuggestion] always belongs to one particular [Student] in the database, but this [Student]
- * is not stored in the [StatusSuggestion], as this is a unidirectional relation.
  */
 @Entity
-class StatusSuggestion(val status: SuggestionEnum, val motivation: String) {
+class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motivation: String) {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @JsonIgnore
+    // Only used as a primary key, ignored otherwise.
     val id: UUID = UUID.randomUUID()
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id")
+    @JsonIgnore
+    // Needs to be a nullable var for synchronization purposes. See
+    // https://vladmihalcea.com/the-best-way-to-map-a-onetomany-association-with-jpa-and-hibernate/
+    // (Bidirectional @OneToMany) for more information. I didn't implement the most efficient option
+    // in this article, because I couldn't get the code to work when the mappedBy attribute was added
+    // to the @OneToMany side of the relation.
+    var student: Student? = null
 }
 
 /**

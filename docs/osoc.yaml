@@ -116,8 +116,38 @@ paths:
                 '404':
                     description: |
                         The response if there is no student in the database with the given id.
+    /students/{studentId}/suggestions/{coachId}:
+        delete:
+            summary: Delete student status suggestion
+            description: |
+                Deletes the statusSuggestion made by the coach identified by the given coachId 
+                from the student with the given studentId. If either the student or the suggestion doesn't exist,
+                the method returns a "404: Not Found" message instead.
+            parameters:
+              - name: studentId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+              - name: coachId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+            responses:
+                '204':
+                    description: |
+                        The response if the suggestion was successfully deleted.
                 '400':
-                    description: Bad Request.
+                    description: |
+                        The response if the given coach hasn't made a suggestion
+                        for the given student.
+                '404':
+                    description: |
+                        The response if the student specified by the given id
+                        didn't exist in the database.
     /students/{studentId}/status:
         post:
             summary: Set student status
@@ -756,14 +786,13 @@ components:
         StatusSuggestion:
             type: object
             required:
-                - id
+                - coachId
                 - status
                 - motivation
             properties:
-                id:
+                coachId:
                     type: string
                     format: uuid
-                    readOnly: true
                 status:
                     type: string
                     enum: [Yes, Maybe, No]
