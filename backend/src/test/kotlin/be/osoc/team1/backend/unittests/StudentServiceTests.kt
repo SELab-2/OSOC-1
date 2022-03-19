@@ -34,7 +34,6 @@ class StudentServiceTests {
     private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
     private val userService = mockk<UserService>()
 
-
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
         every { repository.existsById(studentId) } returns studentAlreadyExists
