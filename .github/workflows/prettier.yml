@@ -1,0 +1,65 @@
+name: Run prettier and eslint
+
+on:
+  push:
+    branches: [ master, development ]
+  pull_request:
+    branches: [ master, development ]
+
+jobs:
+  container-job:
+
+    runs-on: self-hosted
+    container:
+      image: mikxox/maven-test-action:latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          path: 'temppath'
+
+      - name: install yarn and dependencies
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+          npm install --global yarn
+          npm install --global eslint-formatter-rdjson
+          yarn install --frozen-lockfile
+
+      - name: install reviewdog
+        run: |
+          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b /usr/local/bin/ v0.13.0
+
+      - name: eslint with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+          /__w/OSOC-1/OSOC-1/temppath/frontend/node_modules/.bin/eslint -f=rdjson . | reviewdog -f=rdjson -name="eslint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="true"
+
+      - name: prettier with reviewdog
+        if: always()
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath/frontend
+          /__w/OSOC-1/OSOC-1/temppath/frontend/node_modules/.bin/prettier --check --config /__w/OSOC-1/OSOC-1/temppath/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.prettierignore .  2>&1 | sed --regexp-extended 's/(\[warn\].*)$/\1 File is not properly formatted./' \
+          | reviewdog \
+          -efm="%-G[warn] Code style issues found in the above file(s). Forgot to run Prettier%. File is not properly formatted." \
+          -efm="[%tarn] %f %m" \
+          -efm="%E[%trror] %f: %m (%l:%c)" \
+          -efm="%C[error]%r" \
+          -efm="%Z[error]%r" \
+          -efm="%-G%r" \
+          -name="prettier" \
+          -reporter="github-pr-check" \
+          -filter-mode="nofilter" \
+          -fail-on-error="true" \
+          -level="error"
+
+      - name: remove temppath
+        if: always()
+        run: |
+          cd /__w/OSOC-1/OSOC-1
+          sudo rm -rf temppath
