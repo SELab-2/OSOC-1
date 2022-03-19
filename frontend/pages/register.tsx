@@ -1,8 +1,10 @@
 import FormContainer from '../components/FormContainer';
 import Link from 'next/link';
-import { FormEventHandler, useEffect } from 'react';
+import { FormEventHandler } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { nameState, emailState, passwordState, repeatPasswordState, validNameState, validEmailState, validPasswordState, validRepeatPasswordState } from '../atoms/registerAtoms';
+
+// BUG: for some reason, state gets saved after a refresh, until one of the states change
 
 /**
  * Register page for OSOC application
@@ -21,11 +23,31 @@ const register = () => {
   const validPassword = useRecoilValue(validPasswordState);
   const validRepeatPassword = useRecoilValue(validRepeatPasswordState);
 
-  useEffect(() => console.log(name, email, password, repeatPassword), [name, email, password, repeatPassword]);
-
-  const registerUser: FormEventHandler<HTMLFormElement> = (e) => {
+  const registerUser: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    
+    if (!(validName && validEmail && validPassword && validRepeatPassword)) return;
+
+    const reqBody = {
+      name,
+      email,
+      'role': 'disabled', // TODO: NEEDS TO BE MADE DEFAULT IN BE
+      password
+    };
+
+    const url = (process.env.API_ENDPOINT as string || "http://localhost:8080/api") + '/users';
+    console.log(url);
+    const req = fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify(reqBody),
+    });
+
+    console.log(req);
+    const res = await req;
+    console.log(res);
   }
 
   return (
@@ -79,7 +101,7 @@ const register = () => {
             Register
           </button>
           <Link href="/login">
-            <p className="text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+            <p className="text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer w-fit m-auto">
               back to login
             </p>
           </Link>
