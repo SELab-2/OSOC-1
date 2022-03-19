@@ -61,7 +61,7 @@ class StudentService(private val repository: StudentRepository) {
         val student = getStudentById(studentId)
         val sameCoachSuggestion = student.statusSuggestions.find { it.coachId == statusSuggestion.coachId }
         if (sameCoachSuggestion !== null) {
-            throw FailedOperationException("This coach has already made a suggestion for this student.")
+            throw ForbiddenOperationException("This coach has already made a suggestion for this student.")
         }
         student.statusSuggestions.add(statusSuggestion)
         // See the comment at StatusSuggestion.student to understand why we have to do this.
@@ -80,7 +80,7 @@ class StudentService(private val repository: StudentRepository) {
         val student = getStudentById(studentId)
         val suggestion = student.statusSuggestions.find { it.coachId == coachId }
         if (suggestion === null) {
-            throw ForbiddenOperationException("This coach hasn't made a suggestion for the given student.")
+            throw FailedOperationException("This coach hasn't made a suggestion for the given student.")
         }
         student.statusSuggestions.remove(suggestion)
         // See the comment at StatusSuggestion.student to understand why we have to do this.
