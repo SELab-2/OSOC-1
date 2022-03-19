@@ -1,8 +1,8 @@
 package be.osoc.team1.backend.controllers
 
-import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.services.ProjectService
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.beans.factory.annotation.Autowired
@@ -87,7 +87,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      * Gets all coaches of a project, if this [projectId] doesn't exist the service will return a 404
      */
     @GetMapping("/{projectId}/coaches")
-    fun getCoachesOfProject(@PathVariable projectId: UUID): Collection<Coach> =
+    fun getCoachesOfProject(@PathVariable projectId: UUID): Collection<User> =
         service.getProjectById(projectId).coaches
 
     /**
@@ -95,7 +95,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      */
     @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coach: Coach) =
+    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coach: User) =
         service.addCoachToProject(projectId, coach)
 
     /**
