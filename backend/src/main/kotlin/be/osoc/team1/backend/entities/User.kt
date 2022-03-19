@@ -6,7 +6,7 @@ import javax.persistence.Id
 import javax.persistence.Table
 
 /**
- * The [Role] enum contains on integer allowing us to define permission levels and compare the security permissions
+ * The [Role] enum contains an integer allowing us to define permission levels and compare the security permissions
  * of different [Role] enum types. Every role has permission to use everything with an equal or below [permissionLevel].
  */
 enum class Role(private val permissionLevel: Int) {
@@ -23,7 +23,7 @@ enum class Role(private val permissionLevel: Int) {
 }
 
 /**
- * [User] object containing the [username] of the user their [email], the [role] of the user which uses an enum class [Role]
+ * [User] object containing the [username] of the user, their [email], the [role] of the user which uses an enum class [Role]
  * and a [password]. This password is of type [String] but doesn't have to be the plain text password, it could be the
  * hashed value of the password.
  */

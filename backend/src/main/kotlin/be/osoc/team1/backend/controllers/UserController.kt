@@ -31,7 +31,7 @@ class UserController(private val service: UserService) {
      * Get a [User] object using their [id]. If the user does not exist 404 will be returned.
      */
     @GetMapping("/{id}")
-    fun getUserById(@PathVariable id: UUID) = service.getUserById(id)
+    fun getUserById(@PathVariable id: UUID): User = service.getUserById(id)
 
     /**
      * Update a user, if the user does not exist yet a 404 will be returned. The response will contain a Location header

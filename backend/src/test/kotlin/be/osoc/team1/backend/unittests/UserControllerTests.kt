@@ -35,7 +35,9 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `getAllUsers should not fail`() {
         every { userService.getAllUsers() } returns emptyList()
-        mockMvc.perform(get("/users")).andExpect(status().isOk)
+        mockMvc.perform(get("/users"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(ObjectMapper().writeValueAsString(emptyList<User>())))
     }
 
     @Test

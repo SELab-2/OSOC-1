@@ -32,7 +32,7 @@ class UserService(private val repository: UserRepository) {
     /**
      * Save [user] in the [repository]. Returns the id of the newly saved user object.
      */
-    fun postUser(user: User) = repository.save(user).id
+    fun postUser(user: User): UUID = repository.save(user).id
 
     /**
      * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidUserIdException]
@@ -53,7 +53,7 @@ class UserService(private val repository: UserRepository) {
 
     /**
      * Update a user object with the data defined in [updatedUser]. If the user we are trying to update doesn't exist
-     * then we will throw an [InvalidUserIdException].
+     * then an [InvalidUserIdException] will be thrown.
      */
     fun patchUser(updatedUser: User) {
         if (!repository.existsById(updatedUser.id))
