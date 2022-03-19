@@ -17,9 +17,7 @@ import io.mockk.every
 import io.mockk.just
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -29,7 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
-@WebMvcTest(StudentController::class)
+@UnsecuredWebMvcTest(StudentController::class)
 class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @MockkBean
@@ -43,7 +41,6 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val testSuggestion = StatusSuggestion(UUID.randomUUID(), SuggestionEnum.Yes, "test motivation")
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getAllStudents should not fail`() {
         every { studentService.getAllStudents() } returns emptyList()
         mockMvc.perform(get("/students"))
@@ -51,7 +48,6 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getStudentById returns student if student with given id exists`() {
         every { studentService.getStudentById(studentId) } returns testStudent
         mockMvc.perform(get("/students/$studentId")).andExpect(status().isOk)
@@ -59,7 +55,6 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `getStudentById returns 404 Not Found if student with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { studentService.getStudentById(differentId) }.throws(InvalidIdException())
@@ -67,14 +62,12 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteStudentById succeeds if student with given id exists`() {
         every { studentService.deleteStudentById(studentId) } just Runs
         mockMvc.perform(delete("/students/$studentId")).andExpect(status().isNoContent)
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `deleteStudentById returns 404 Not Found if student with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { studentService.deleteStudentById(differentId) }.throws(InvalidIdException())
@@ -82,7 +75,6 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `addStudent should not fail`() {
         val databaseId = UUID.randomUUID()
         every { studentService.addStudent(any()) } returns databaseId
@@ -96,7 +88,6 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `setStudentStatus succeeds when student with given id exists`() {
         val status = StatusEnum.Yes
         every { studentService.setStudentStatus(studentId, status) } just Runs
@@ -108,7 +99,6 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `setStudentStatus returns 404 Not Found if student with given id does not exist`() {
         val status = StatusEnum.Yes
         every { studentService.setStudentStatus(studentId, status) }.throws(InvalidIdException())
@@ -120,7 +110,6 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `addStudentStatusSuggestion succeeds when student with given id exists`() {
         every { studentService.addStudentStatusSuggestion(studentId, any()) } just Runs
         mockMvc.perform(
@@ -131,7 +120,6 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    @WithMockUser(roles = ["USER", "ADMIN"])
     fun `addStudentStatusSuggestion returns 404 Not Found if student with given id does not exist`() {
         every { studentService.addStudentStatusSuggestion(studentId, any()) }.throws(InvalidStudentIdException())
         mockMvc.perform(

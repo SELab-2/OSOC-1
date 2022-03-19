@@ -4,6 +4,7 @@ import be.osoc.team1.backend.controllers.UserController
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.security.PasswordEncoderConfig
 import be.osoc.team1.backend.services.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -12,8 +13,8 @@ import io.mockk.every
 import io.mockk.just
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -23,8 +24,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
-@WebMvcTest(UserController::class)
+@UnsecuredWebMvcTest(UserController::class, PasswordEncoderConfig::class)
 class UserControllerTests(@Autowired val mockMvc: MockMvc) {
+    @MockkBean
+    private lateinit var passwordEncoder: PasswordEncoder
+
     @MockkBean
     private lateinit var userService: UserService
 
@@ -102,6 +106,8 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `postUser should not fail`() {
+        // This is a hack but password encoding really doesn't matter for what this is testing
+        every { passwordEncoder.encode("password") } returns ""
         every { userService.postUser(any()) } returns testUser.id
         mockMvc.perform(
             post("/users")
