@@ -46,17 +46,16 @@ module.exports = {
   plugins: [
     '@typescript-eslint',
     'react',
-    'eslint-plugin-tsdoc'
+    'eslint-plugin-tsdoc',
   ],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react/jsx-runtime',
-    'plugin:react-hooks/recommended',
     'prettier'
   ],
   rules: {
-    'tsdoc/syntax': 'warn'
+    'tsdoc/syntax': 'warn',
   }
 };
