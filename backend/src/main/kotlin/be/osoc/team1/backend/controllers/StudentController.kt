@@ -114,8 +114,9 @@ class StudentController(private val service: StudentService) {
 
     /**
      * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId]
-     * from the [Student] with the given [studentId]. If either the [Student] or the [StatusSuggestion]
-     * doesn't exist, the method returns a "404: Not Found" message instead.
+     * from the [Student] with the given [studentId]. If the student doesn't exist, a
+     * "404: Not Found" message is returned instead. Additionally, if the student does exist, but
+     * the coach hasn't made a suggestion for this student, a "400: Bad Request" message will be returned.
      */
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
