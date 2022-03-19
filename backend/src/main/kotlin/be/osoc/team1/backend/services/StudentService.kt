@@ -51,7 +51,11 @@ class StudentService(private val repository: StudentRepository) {
     /**
      * Retrieve the [Student] with the specified [studentId], then create a new [StatusSuggestion] based
      * on the information in the given [statusSuggestion] and add it to the [Student]'s list.
-     * Throws an [InvalidStudentIdException] if no student with that [studentId] exists.
+     * A coach is only allowed to make one [StatusSuggestion] for one particular [Student].
+     * If the coach making this [statusSuggestion] has already made one for this [Student],
+     * the method will throw a [FailedOperationException]. If a coach wants to change their suggestion,
+     * the API caller should first delete the original suggestion with the [deleteStudentStatusSuggestion] method,
+     * and then call this method. Throws an [InvalidStudentIdException] if no student with that [studentId] exists.
      */
     fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion) {
         val student = getStudentById(studentId)
