@@ -5,7 +5,6 @@ import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.FailedOperationException
-import be.osoc.team1.backend.exceptions.InvalidCoachIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -73,12 +72,15 @@ class StudentService(private val repository: StudentRepository) {
      * Retrieve the [Student] with the specified [studentId], then get the [StatusSuggestion]
      * that was made by the coach identified by the given [coachId] and delete it.
      * Throws an [InvalidStudentIdException] if no [Student] with that [studentId] exists,
-     * or an [InvalidCoachIdException] if either no coach exists with that [coachId],
-     * or if the coach does exist, but he hasn't made a [StatusSuggestion] for this [Student].
+     * or a [FailedOperationException] if the student and the coach exist, but the coach
+     * hasn't made a [StatusSuggestion] for this student.
      */
     fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID) {
         val student = getStudentById(studentId)
-        val suggestion = student.statusSuggestions.find { it.coachId == coachId } ?: throw InvalidCoachIdException()
+        val suggestion = student.statusSuggestions.find { it.coachId == coachId }
+        if (suggestion === null) {
+            throw FailedOperationException("This coach hasn't made a suggestion for the given student.")
+        }
         student.statusSuggestions.remove(suggestion)
         // See the comment at StatusSuggestion.student to understand why we have to do this.
         suggestion.student = null
