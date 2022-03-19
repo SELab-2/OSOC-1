@@ -29,19 +29,19 @@ class StudentController(private val service: StudentService) {
     fun getAllStudents(): Iterable<Student> = service.getAllStudents()
 
     /**
-     * Returns the student with the corresponding [id]. If no such student exists,
+     * Returns the student with the corresponding [studentId]. If no such student exists,
      * returns a "404: Not Found" message instead.
      */
-    @GetMapping("/{id}")
-    fun getStudentById(@PathVariable id: UUID): Student = service.getStudentById(id)
+    @GetMapping("/{studentId}")
+    fun getStudentById(@PathVariable studentId: UUID): Student = service.getStudentById(studentId)
 
     /**
-     * Deletes the student with the corresponding [id]. If no such student exists,
+     * Deletes the student with the corresponding [studentId]. If no such student exists,
      * returns a "404: Not Found" message instead.
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    fun deleteStudentById(@PathVariable id: UUID) = service.deleteStudentById(id)
+    fun deleteStudentById(@PathVariable studentId: UUID) = service.deleteStudentById(studentId)
 
     /**
      * Add a student to the database. The student should be passed in the request body
@@ -70,7 +70,7 @@ class StudentController(private val service: StudentService) {
     }
 
     /**
-     * Set the [status] of the student with the given [id]. If no such student exists,
+     * Set the [status] of the student with the given [studentId]. If no such student exists,
      * returns a "404: Not Found" message instead. The [status] should be passed in the request body
      * as a JSON string and can have the following values:
      *
@@ -84,12 +84,13 @@ class StudentController(private val service: StudentService) {
      *
      * Any other input value will result in a "400: Bad Request" response. These values are also case-sensitive.
      */
-    @PostMapping("/{id}/status")
+    @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    fun setStudentStatus(@PathVariable id: UUID, @RequestBody status: StatusEnum) = service.setStudentStatus(id, status)
+    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum) =
+        service.setStudentStatus(studentId, status)
 
     /**
-     * Add a [statusSuggestion] to the student with the given [id]. The coachId field should be equal to the id
+     * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should be equal to the id
      * of the coach who is making this suggestion. If either of these id's do not have a matching record
      * in the database, a "404: Not Found" message is returned to the caller instead. The [statusSuggestion] should be
      * passed in the request body as a JSON object and should have the following format:
@@ -106,10 +107,10 @@ class StudentController(private val service: StudentService) {
      * Importantly, this includes the "Undecided" value, which is a valid value in other endpoints.
      * This is because a user cannot suggest to change the status of a student to "Undecided".
      */
-    @PostMapping("/{id}/suggestions")
+    @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    fun addStudentStatusSuggestion(@PathVariable id: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
-        service.addStudentStatusSuggestion(id, statusSuggestion)
+    fun addStudentStatusSuggestion(@PathVariable studentId: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
+        service.addStudentStatusSuggestion(studentId, statusSuggestion)
 
     /**
      * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId]

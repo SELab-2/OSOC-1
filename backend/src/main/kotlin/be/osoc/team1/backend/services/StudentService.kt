@@ -18,19 +18,19 @@ class StudentService(private val repository: StudentRepository) {
     fun getAllStudents(): Iterable<Student> = repository.findAll()
 
     /**
-     * Get a student by their [id]. Throws an [InvalidStudentIdException] if no such student exists.
+     * Get a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student exists.
      */
-    fun getStudentById(id: UUID) = repository.findByIdOrNull(id) ?: throw InvalidStudentIdException()
+    fun getStudentById(studentId: UUID) = repository.findByIdOrNull(studentId) ?: throw InvalidStudentIdException()
 
     /**
-     * Delete a student by their [id]. Throws an [InvalidStudentIdException] if no such student existed
+     * Delete a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student existed
      * in the database in the first place.
      */
-    fun deleteStudentById(id: UUID) {
-        if (!repository.existsById(id))
+    fun deleteStudentById(studentId: UUID) {
+        if (!repository.existsById(studentId))
             throw InvalidStudentIdException()
 
-        repository.deleteById(id)
+        repository.deleteById(studentId)
     }
 
     /**
@@ -39,22 +39,22 @@ class StudentService(private val repository: StudentRepository) {
     fun addStudent(student: Student) = repository.save(student).id
 
     /**
-     * Retrieve the student with the specified [id], then set his status to [newStatus].
-     * Throws an [InvalidStudentIdException] if no student with that [id] exists.
+     * Retrieve the student with the specified [studentId], then set his status to [newStatus].
+     * Throws an [InvalidStudentIdException] if no student with that [studentId] exists.
      */
-    fun setStudentStatus(id: UUID, newStatus: StatusEnum) {
-        val student = getStudentById(id)
+    fun setStudentStatus(studentId: UUID, newStatus: StatusEnum) {
+        val student = getStudentById(studentId)
         student.status = newStatus
         repository.save(student)
     }
 
     /**
-     * Retrieve the [Student] with the specified [id], then create a new [StatusSuggestion] based
+     * Retrieve the [Student] with the specified [studentId], then create a new [StatusSuggestion] based
      * on the information in the given [statusSuggestion] and add it to the [Student]'s list.
-     * Throws an [InvalidStudentIdException] if no student with that [id] exists.
+     * Throws an [InvalidStudentIdException] if no student with that [studentId] exists.
      */
-    fun addStudentStatusSuggestion(id: UUID, statusSuggestion: StatusSuggestion) {
-        val student = getStudentById(id)
+    fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion) {
+        val student = getStudentById(studentId)
         val sameCoachSuggestion = student.statusSuggestions.find { it.coachId == statusSuggestion.coachId }
         if (sameCoachSuggestion !== null) {
             throw FailedOperationException("This coach has already made a suggestion for this student.")
