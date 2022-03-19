@@ -7,7 +7,6 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.FailedOperationException
-import be.osoc.team1.backend.exceptions.InvalidCoachIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
@@ -147,7 +146,7 @@ class StudentServiceTests {
     @Test
     fun `deleteStudentStatusSuggestion fails when given coach hasn't made a suggestion for this student`() {
         val service = StudentService(getRepository(true))
-        assertThrows<InvalidCoachIdException> { service.deleteStudentStatusSuggestion(studentId, coachId) }
+        assertThrows<FailedOperationException> { service.deleteStudentStatusSuggestion(studentId, coachId) }
     }
 
     @Test

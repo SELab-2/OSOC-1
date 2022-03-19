@@ -6,7 +6,6 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.FailedOperationException
-import be.osoc.team1.backend.exceptions.InvalidCoachIdException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.services.StudentService
@@ -152,8 +151,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `deleteStudentStatusSuggestion returns 404 Not Found if coach or suggestion doesn't exist`() {
-        every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }.throws(InvalidCoachIdException())
-        mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isNotFound)
+    fun `deleteStudentStatusSuggestion returns 400 Bad Request if suggestion doesn't exist`() {
+        every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }.throws(FailedOperationException())
+        mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isBadRequest)
     }
 }
