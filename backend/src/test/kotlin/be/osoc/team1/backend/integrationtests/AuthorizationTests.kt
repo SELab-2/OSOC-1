@@ -115,6 +115,24 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         return authHeaders
     }
 
+    // Token will stay valid through multiple tests unless you logout
+    fun logoutToken(response: ResponseEntity<String>) {
+        val accessToken: String = JSONObject(response.body).get("accessToken") as String
+        val request = HttpEntity(null, createAuthHeaders(accessToken))
+        restTemplate.exchange(URI("${baseUrl}/logout"), HttpMethod.POST, request, String::class.java)
+    }
+
+    @Test
+    fun `login with no credentials returns 401`() {
+        val input = ""
+        val loginHeaders = HttpHeaders()
+        loginHeaders.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        val loginRequest = HttpEntity(input, loginHeaders)
+
+        val loginResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/login"), HttpMethod.POST, loginRequest, String::class.java)
+        assert(loginResponse.statusCodeValue == 401)
+    }
+
     @Test
     fun `login works as admin`() {
         val loginResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
@@ -122,6 +140,8 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
         assert(JSONObject(loginResponse.body).has("refreshToken"))
+
+        logoutToken(loginResponse)
     }
 
     @Test
@@ -131,6 +151,8 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
         assert(JSONObject(loginResponse.body).has("refreshToken"))
+
+        logoutToken(loginResponse)
     }
 
     // This should probably be changed to check for whatever is supposed to happen
@@ -141,17 +163,22 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
         assert(JSONObject(loginResponse.body).has("refreshToken"))
+
+        logoutToken(loginResponse)
     }
 
     @Test
     fun `access token can be used after login`() {
         val loginResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken: String = JSONObject(loginResponse.body).get("accessToken") as String
+        println(accessToken)
         val getRequest = HttpEntity(null, createAuthHeaders(accessToken))
 
         val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("${baseUrl}/students"), HttpMethod.GET, getRequest, String::class.java)
 
         assert(getResponse.statusCodeValue == 200)
+
+        logoutToken(loginResponse)
     }
 
     @Test
@@ -173,6 +200,8 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         assert(getResponse.statusCodeValue == 200)
         assert(JSONArray(getResponse.body).getJSONObject(0).get("firstName") == testStudent.firstName)
         assert(JSONArray(getResponse.body).getJSONObject(0).get("lastName") == testStudent.lastName)
+
+        logoutToken(loginResponse)
     }
 
     @Test
@@ -188,6 +217,8 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         assert(getResponse.statusCodeValue == 200)
         assert(JSONArray(getResponse.body).getJSONObject(0).get("firstName") == testStudent.firstName)
         assert(JSONArray(getResponse.body).getJSONObject(0).get("lastName") == testStudent.lastName)
+
+        logoutToken(loginResponse)
     }
 
     @Test
@@ -201,6 +232,27 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("${baseUrl}/students"), HttpMethod.GET, getRequest, String::class.java)
 
         assert(getResponse.statusCodeValue == 403)
+
+        logoutToken(loginResponse)
+    }
+
+    @Test
+    fun `Authentication with expired access token returns 401`() {
+        // Test using an actual admin access token
+        val accessToken: String = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJyb2xlcyI6WyJST0xFX0FETUlOIiwiUk9MRV9DT0FDSCIsIlJPTEVfRElTQUJMRUQiXSwiZXhwIjoxNjQ3ODE2OTEwfQ.26FNKdqV9OCotTMQRj2fB_HPuKti_YMKFlyTtRbkvDY"
+        val getRequest = HttpEntity(null, createAuthHeaders(accessToken))
+
+        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("${baseUrl}/students"), HttpMethod.GET, getRequest, String::class.java)
+        assert(getResponse.statusCodeValue == 401)
+    }
+
+    @Test
+    fun `Authentication with invalid access token returns 401`() {
+        val accessToken: String = "in.val.id"
+        val getRequest = HttpEntity(null, createAuthHeaders(accessToken))
+
+        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("${baseUrl}/students"), HttpMethod.GET, getRequest, String::class.java)
+        assert(getResponse.statusCodeValue == 401)
     }
 
     // These are the old tests, we will need to discuss how far we want to go with security testing

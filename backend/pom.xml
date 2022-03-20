@@ -93,6 +93,7 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
+			<version>5.6.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -100,10 +101,11 @@
 			<artifactId>java-jwt</artifactId>
 			<version>3.18.3</version>
 		</dependency>
+		<!--This dependency is needed to allow spring testing to handle 401 server authentication retry errors-->
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-			<version>5.6.2</version>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
@@ -152,7 +154,7 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.7</version>
 				<configuration>
-					<formats>XML</formats>
+					<formats>XML,HTML</formats>
 				</configuration>
 				<executions>
 					<execution>
