@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.UserRepository
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -32,7 +33,13 @@ class UserService(private val repository: UserRepository) {
     /**
      * Save [user] in the [repository]. Returns the id of the newly saved user object.
      */
-    fun postUser(user: User): UUID = repository.save(user).id
+    fun postUser(user: User): UUID {
+        try {
+            return repository.save(user).id
+        } catch(dbe: DataIntegrityViolationException) {
+            throw ForbiddenOperationException("User creation failed due to a DataIntegrityViolationException!")
+        }
+    }
 
     /**
      * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidUserIdException]

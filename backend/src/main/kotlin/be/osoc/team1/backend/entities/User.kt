@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.entities
 
 import java.util.UUID
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.Table
@@ -31,6 +32,7 @@ enum class Role(private val permissionLevel: Int) {
 @Table(name = "account")
 class User(
     val username: String,
+    @Column(unique=true)
     val email: String,
     var role: Role,
     val password: String
