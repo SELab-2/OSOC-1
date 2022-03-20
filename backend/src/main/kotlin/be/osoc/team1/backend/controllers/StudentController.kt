@@ -7,6 +7,7 @@ import be.osoc.team1.backend.services.StudentService
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,6 +27,7 @@ class StudentController(private val service: StudentService) {
      * Get a list of all students in the database. This request cannot fail.
      */
     @GetMapping
+    @Secured("ROLE_COACH")
     fun getAllStudents(): Iterable<Student> = service.getAllStudents()
 
     /**
@@ -33,6 +35,7 @@ class StudentController(private val service: StudentService) {
      * returns a "404: Not Found" message instead.
      */
     @GetMapping("/{studentId}")
+    @Secured("ROLE_COACH")
     fun getStudentById(@PathVariable studentId: UUID): Student = service.getStudentById(studentId)
 
     /**
@@ -41,6 +44,7 @@ class StudentController(private val service: StudentService) {
      */
     @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_ADMIN")
     fun deleteStudentById(@PathVariable studentId: UUID) = service.deleteStudentById(studentId)
 
     /**
@@ -59,6 +63,7 @@ class StudentController(private val service: StudentService) {
      * This verification is the responsibility of the caller.
      */
     @PostMapping
+    @Secured("ROLE_COACH")
     fun addStudent(@RequestBody student: Student): ResponseEntity<Void> {
         val id = service.addStudent(student)
         val location = ServletUriComponentsBuilder
@@ -86,6 +91,7 @@ class StudentController(private val service: StudentService) {
      */
     @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_ADMIN")
     fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum) =
         service.setStudentStatus(studentId, status)
 
@@ -109,6 +115,7 @@ class StudentController(private val service: StudentService) {
      */
     @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_COACH")
     fun addStudentStatusSuggestion(@PathVariable studentId: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
         service.addStudentStatusSuggestion(studentId, statusSuggestion)
 
@@ -120,6 +127,7 @@ class StudentController(private val service: StudentService) {
      */
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_COACH")
     fun deleteStudentStatusSuggestion(@PathVariable studentId: UUID, @PathVariable coachId: UUID) =
         service.deleteStudentStatusSuggestion(studentId, coachId)
 }
