@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.services
 
+import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.UserRepository
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -20,12 +21,17 @@ class OsocUserDetailService(val userRepository: UserRepository, val passwordEnco
         val osocUsers: List<User> = userRepository.findByEmail(email)
         if (osocUsers.isEmpty())
             throw UsernameNotFoundException("User with email=\"$email\" not found!")
-
         val osocUser = osocUsers[0]
+        val authorities = mutableListOf<SimpleGrantedAuthority>()
+        for(role in Role.values()) {
+            if(osocUser.role.hasPermissionLevel(role)) {
+                authorities.add(SimpleGrantedAuthority("ROLE_${role.toString().uppercase()}"))
+            }
+        }
         return org.springframework.security.core.userdetails.User(
             osocUser.email,
             osocUser.password,
-            mutableListOf(SimpleGrantedAuthority("ROLE_USER"))
+            authorities
         )
     }
 }

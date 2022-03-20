@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
@@ -14,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true)
 class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurityConfigurerAdapter() {
     /**
      * handles all incoming requests
@@ -29,10 +31,8 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
         // allow registering a user without being authenticated
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/users").permitAll()
 
-        // check if user has the right permissions
-        http.authorizeRequests().antMatchers(HttpMethod.GET).hasAnyAuthority("ROLE_USER")
-        http.authorizeRequests().antMatchers(HttpMethod.POST).hasAnyAuthority("ROLE_ADMIN")
-        http.authorizeRequests().anyRequest().authenticated()
+        // Minimum security permission for any other route is the coach role
+        http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_COACH")
 
         // ask to authenticate if not already authorized
         val authenticationFilter = AuthenticationFilter(authenticationManagerBean())
