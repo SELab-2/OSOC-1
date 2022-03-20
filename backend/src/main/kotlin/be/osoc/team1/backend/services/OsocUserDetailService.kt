@@ -11,8 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
-class OsocUserDetailService(val userRepository: UserRepository, val passwordEncoder: PasswordEncoder)
-    : UserDetailsService {
+class OsocUserDetailService(val userRepository: UserRepository, val passwordEncoder: PasswordEncoder) :
+    UserDetailsService {
     /**
      * Get [UserDetails] for a specific user identified by in our case their [email]. The function name might be
      * confusing at first, but we cannot change it as we are implementing this function from UserDetailService.
@@ -23,8 +23,8 @@ class OsocUserDetailService(val userRepository: UserRepository, val passwordEnco
             throw UsernameNotFoundException("User with email=\"$email\" not found!")
         val osocUser = osocUsers[0]
         val authorities = mutableListOf<SimpleGrantedAuthority>()
-        for(role in Role.values()) {
-            if(osocUser.role.hasPermissionLevel(role)) {
+        for (role in Role.values()) {
+            if (osocUser.role.hasPermissionLevel(role)) {
                 authorities.add(SimpleGrantedAuthority("ROLE_${role.toString().uppercase()}"))
             }
         }

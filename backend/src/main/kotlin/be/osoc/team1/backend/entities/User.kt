@@ -32,7 +32,7 @@ enum class Role(private val permissionLevel: Int) {
 @Table(name = "account")
 class User(
     val username: String,
-    @Column(unique=true)
+    @Column(unique = true)
     val email: String,
     var role: Role,
     val password: String

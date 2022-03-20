@@ -36,7 +36,7 @@ class UserService(private val repository: UserRepository) {
     fun postUser(user: User): UUID {
         try {
             return repository.save(user).id
-        } catch(dbe: DataIntegrityViolationException) {
+        } catch (dbe: DataIntegrityViolationException) {
             throw ForbiddenOperationException("User creation failed due to a DataIntegrityViolationException!")
         }
     }
