@@ -29,3 +29,6 @@ To remove old reports and force a rebuild you can run
 ```
 ./mvnw clean
 ```
+#### Note on integration tests
+Integration tests (using testcontainers) will not use /api in request paths.
+They ignore ```server.servlet.context-path=/api```.
