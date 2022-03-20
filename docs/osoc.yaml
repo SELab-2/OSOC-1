@@ -7,6 +7,17 @@ info:
 servers:
   - url: 'localhost:8080'
 paths:
+    /edition/new:
+        post:
+            summary: (Dangerous operation!!) Create a new edition of OSOC
+            description: |
+                (Watch out! Calling this endpoint will nuke the database!)
+                Create a new edition of OSOC. Due to GDPR related concerns, this
+                means that all students, coaches and projects will be removed from
+                the database. Only admin users and StudentRoles will remain in the database.
+            responses:
+                '204':
+                    description: Successful operation
     /students:
         get:
             summary: Get a list containing all Student objects
