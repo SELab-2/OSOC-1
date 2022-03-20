@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service
 class EditionService(
     private val studentService: StudentService,
     private val projectService: ProjectService,
-    private val userService: UserService) {
+    private val userService: UserService
+) {
 
     fun createNewEdition() {
         deleteStudents()

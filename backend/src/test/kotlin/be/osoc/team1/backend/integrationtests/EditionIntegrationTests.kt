@@ -83,7 +83,7 @@ class EditionIntegrationTests {
         val noProjects = projectService.getAllProjects().count() == 0
         val onlyAdminUserRemaining =
             userService.getAllUsers().count() == 1 &&
-            userService.getAllUsers().first().role == Role.Admin
+                userService.getAllUsers().first().role == Role.Admin
         return noStudents && noProjects && onlyAdminUserRemaining
     }
 
