@@ -24,7 +24,7 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
         // permit following urls
-        http.authorizeRequests().antMatchers("/", "/login", "/logout").permitAll()
+        http.authorizeRequests().antMatchers("/", "/login", "/logout", "/error").permitAll()
 
         // allow registering a user without being authenticated
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/users").permitAll()
