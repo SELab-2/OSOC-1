@@ -46,9 +46,9 @@ enum class SuggestionEnum {
 
 /**
  * Represents the entry of a [status] suggestion in the database.
- * Every [StatusSuggestion] is made by a [Coach]. The [coachId] of the [Coach] who made the suggestion
- * is included in the object. A [Coach] can make multiple suggestions about different [Student]s, but
- * it wouldn't make any sense for a [Coach] to make multiple suggestions about the same [Student].
+ * Every [StatusSuggestion] is made by a coach of type [User]. The [coachId] of the [User] who made the suggestion
+ * is included in the object. A coach can make multiple suggestions about different [Student]s, but
+ * it wouldn't make any sense for a coach to make multiple suggestions about the same [Student].
  * Therefore the combination of [coachId] and [student] must be unique.
  * This constraint is checked when adding a new [StatusSuggestion] to a [Student].
  * A [StatusSuggestion] always belongs to one particular [Student] in the database.
