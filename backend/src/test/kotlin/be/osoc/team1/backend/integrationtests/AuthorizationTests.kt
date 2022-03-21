@@ -139,7 +139,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
 
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
-        assert(JSONObject(loginResponse.body).has("refreshToken"))
+        // assert(JSONObject(loginResponse.body).has("refreshToken"))
 
         logoutToken(loginResponse)
     }
@@ -150,7 +150,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
 
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
-        assert(JSONObject(loginResponse.body).has("refreshToken"))
+        // assert(JSONObject(loginResponse.body).has("refreshToken"))
 
         logoutToken(loginResponse)
     }
@@ -162,7 +162,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
 
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
-        assert(JSONObject(loginResponse.body).has("refreshToken"))
+        // assert(JSONObject(loginResponse.body).has("refreshToken"))
 
         logoutToken(loginResponse)
     }
@@ -171,7 +171,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     fun `access token can be used after login`() {
         val loginResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken: String = JSONObject(loginResponse.body).get("accessToken") as String
-        println(accessToken)
+
         val getRequest = HttpEntity(null, createAuthHeaders(accessToken))
 
         val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("${baseUrl}/students"), HttpMethod.GET, getRequest, String::class.java)
@@ -254,6 +254,11 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("${baseUrl}/students"), HttpMethod.GET, getRequest, String::class.java)
         assert(getResponse.statusCodeValue == 401)
     }
+
+    // Extra test to check if you can use refresh token to renew access token
+
+    // Extra test to check if refresh token gets cycled
+
 
     // These are the old tests, we will need to discuss how far we want to go with security testing
     // @Test
