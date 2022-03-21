@@ -12,6 +12,8 @@ import {
   validPasswordState,
   validRepeatPasswordState,
 } from '../atoms/registerAtoms';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/router';
 
 // BUG: for some reason, state gets saved after a refresh, until one of the states change
 
@@ -32,6 +34,8 @@ const register = () => {
   const validPassword = useRecoilValue(validPasswordState);
   const validRepeatPassword = useRecoilValue(validRepeatPasswordState);
 
+  const router = useRouter();
+
   const registerUser: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (!(validName && validEmail && validPassword && validRepeatPassword))
@@ -47,7 +51,7 @@ const register = () => {
     const url =
       ((process.env.API_ENDPOINT as string) || 'http://localhost:8080/api') +
       '/users';
-    console.log(url);
+
     const req = fetch(url, {
       method: 'POST',
       headers: {
@@ -56,9 +60,30 @@ const register = () => {
       body: JSON.stringify(reqBody),
     });
 
-    console.log(req);
     const res = await req;
-    console.log(res);
+
+    if (res.ok) {
+      const timeout = 1000;
+      toast.success('Succesfully registered\nReturning to login...', {
+        duration: timeout,
+      });
+
+      setTimeout(() => {
+        setName('');
+        setEmail('');
+        setPassword('');
+        setRepeatPassword('');
+        router.push('/login');
+      }, timeout);
+    } else {
+      setName('');
+      setEmail('');
+      setPassword('');
+      setRepeatPassword('');
+      toast.error(
+        'Unknown error while trying to create Account. Please try again later'
+      );
+    }
   };
 
   return (

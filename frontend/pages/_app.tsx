@@ -12,9 +12,7 @@ function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
         {/* Sessionprovider exposes the whole app to next-auth session object (using useSession hook) */}
         <SessionProvider session={session}>
           <Component {...pageProps} />
-          <Toaster
-            position='top-right'
-          />
+          <Toaster position="top-right" />
         </SessionProvider>
       </RecoilRoot>
     </>
