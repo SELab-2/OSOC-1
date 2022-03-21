@@ -15,9 +15,12 @@ type FormContainerProps = PropsWithChildren<{
 
 /**
  * Container for register and login forms
- * {@label FormContainer}
- *
+ * 
  * @remarks
+ * This is a container with 2 colums with 2 images on either side of a central form,
+ * which is passed as a child component.
+ * 
+ * {@label FormContainer}
  *
  * @see {@link FormContainerProps}
  */
@@ -36,12 +39,12 @@ const FormContainer: FC<FormContainerProps> = ({ pageTitle, children }) => {
               src="https://osoc.be/img/pictures/osoc17-1.jpg"
               alt="image of 4 people posing in front of a wall with post-its"
               className="object-scale-down shadow-sm shadow-gray-600 xl:mb-4"
-            ></img>
+            />
             <img
               src="https://i0.wp.com/blog.okfn.org/files/2018/08/image3.jpg?fit=1200%2C800&ssl=1"
               alt="Group of people cheering on OSOC"
               className="object-scale-down shadow-sm shadow-gray-600"
-            ></img>
+            />
           </div>
           {/* Main form component */}
           <div className="flex max-h-full max-w-full flex-col items-center justify-center">
@@ -52,6 +55,7 @@ const FormContainer: FC<FormContainerProps> = ({ pageTitle, children }) => {
               <img
                 src="https://osoc.be/img/logo/logo-osoc-color.svg"
                 className="hidden h-16 w-16 sm:inline-block md:h-24 md:w-24 lg:h-32 lg:w-32"
+                alt="The OSOC logo"
               />
             </header>
 
@@ -63,12 +67,12 @@ const FormContainer: FC<FormContainerProps> = ({ pageTitle, children }) => {
               src="https://osoc.be/img/pictures/osoc17-2.jpg"
               alt="image of 4 people standing around a wall with post-its"
               className="object-scale-down shadow-sm shadow-gray-600 lg:mb-4"
-            ></img>
+            />
             <img
               src="https://osoc.be/img/pictures/osoc17-3.jpg"
               alt="image of someone trying to give you a fistbump"
               className="object-scale-down shadow-sm shadow-gray-600"
-            ></img>
+            />
           </div>
         </div>
       </div>

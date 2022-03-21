@@ -3,7 +3,7 @@ import GithubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 /**
- * NextAuth object for authentication settings [PLACEHOLDER SETTINGS]
+ * NextAuth object for authentication settings (placeholder settings)
  *
  * @see {@link https://next-auth.js.org/configuration/initialization}
  */

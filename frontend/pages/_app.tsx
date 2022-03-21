@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/line.css';
 import type { AppProps } from 'next/app';
 import { SessionProvider } from 'next-auth/react';
 import { RecoilRoot } from 'recoil';
