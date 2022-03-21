@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 class InvalidStudentIdException(
-    message: String? = "Wrong student id given",
+    message: String = "Wrong student id given",
     cause: Throwable? = null
-) : InvalidIdException(message, cause) {
-    constructor(cause: Throwable) : this(null, cause)
-}
+) : InvalidIdException(message, cause)
