@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
+import java.util.*
 
 class StudentServiceTests {
 
@@ -47,7 +48,7 @@ class StudentServiceTests {
 
     @Test
     fun `getAllStudents does not fail`() {
-        val service = StudentService(getRepository(true))
+        val service = StudentService(getRepository(true), userService)
         assertEquals(service.getAllStudents(), listOf(testStudent))
     }
 
