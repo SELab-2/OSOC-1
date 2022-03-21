@@ -11,12 +11,15 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import java.util.Date
-import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.collections.HashMap
 
+/**
+ * When the user is not yet authorized the AuthenticationFilter tries to authenticate the user
+ * If the authentication is successful, then this class creates an access token.
+ */
 class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
@@ -36,7 +39,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     }
 
     /**
-     * add an accessToken and refreshToken to response
+     * add an access token and refreshToken to response
      * this token should be used for authorization in following requests
      */
     override fun successfulAuthentication(
@@ -47,22 +50,26 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     ) {
         // authenticated user
         val user: User = authentication.principal as User
-        // init tokens
-        val accessToken: String = JWT.create()
-            .withSubject(user.username)
-            .withExpiresAt(Date(System.currentTimeMillis() + 5 * 60 * 1000))
-            .withClaim("roles", user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-            .sign(SecretUtil().algorithm)
-        val refreshToken: String = JWT.create()
-            .withSubject(user.username)
-            .withExpiresAt(Date(System.currentTimeMillis() + 60 * 60 * 1000))
-            .withClaim("roles", user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-            .sign(SecretUtil().algorithm)
+        // create tokens
+        val accessToken: String = createToken(user, 5)
+        val refreshToken: String = createToken(user, 60)
         // add tokens to response
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken
         tokens["refreshToken"] = refreshToken
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(response.outputStream, tokens)
+    }
+
+    /**
+     * create tokens used for authorization
+     * the token contains username, expiration date and roles of user
+     */
+    private fun createToken(user: User, minutesToLive: Int): String {
+        return JWT.create()
+            .withSubject(user.username)
+            .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))
+            .withClaim("roles", user.authorities.toString())
+            .sign(SecretUtil.algorithm)
     }
 }
