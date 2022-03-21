@@ -147,7 +147,7 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.7</version>
 				<configuration>
-					<formats>XML</formats>
+					<formats>XML,HTML</formats>
 				</configuration>
 				<executions>
 					<execution>
