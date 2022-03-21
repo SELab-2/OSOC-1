@@ -38,10 +38,10 @@ const register = () => {
       return;
 
     const reqBody = {
-      name,
-      email,
-      role: 'disabled', // TODO: NEEDS TO BE MADE DEFAULT IN BE
-      password,
+      username: name,
+      email: email,
+      role: 'Disabled', // TODO: NEEDS TO BE MADE DEFAULT IN BE
+      password: password,
     };
 
     const url =
