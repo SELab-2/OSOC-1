@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 class InvalidProjectIdException(
-    message: String? = "Wrong project id given",
+    message: String = "Wrong project id given",
     cause: Throwable? = null
-) : InvalidIdException(message, cause) {
-    constructor(cause: Throwable) : this(null, cause)
-}
+) : InvalidIdException(message, cause)

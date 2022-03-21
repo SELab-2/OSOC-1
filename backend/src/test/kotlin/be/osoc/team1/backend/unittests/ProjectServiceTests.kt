@@ -5,11 +5,9 @@ import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
-import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
 import be.osoc.team1.backend.services.ProjectService
-import be.osoc.team1.backend.services.StudentService
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -20,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import java.lang.Exception
 import java.util.UUID
 
 class ProjectServiceTests {

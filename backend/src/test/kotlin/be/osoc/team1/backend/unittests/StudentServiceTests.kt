@@ -11,7 +11,6 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
-import be.osoc.team1.backend.services.UserService
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -114,7 +113,10 @@ class StudentServiceTests {
         every { repository.save(student) } returns student
         val service = StudentService(repository)
         service.addStudentStatusSuggestion(studentId, testSuggestion)
+        val suggestionId = testSuggestion.id
         verify { student.statusSuggestions.add(testSuggestion) }
+        assert(testSuggestion.id == suggestionId)
+        assert(testSuggestion.student == student)
     }
 
     @Test

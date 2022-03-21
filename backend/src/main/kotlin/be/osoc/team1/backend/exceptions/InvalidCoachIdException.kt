@@ -8,7 +8,5 @@ import org.springframework.web.bind.annotation.ResponseStatus
  * in the database.
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
-class InvalidCoachIdException(message: String? = "Wrong coach id given", cause: Throwable? = null) :
-    InvalidIdException(message, cause) {
-    constructor(cause: Throwable) : this(null, cause)
-}
+class InvalidCoachIdException(message: String = "Wrong coach id given", cause: Throwable? = null) :
+    InvalidIdException(message, cause)
