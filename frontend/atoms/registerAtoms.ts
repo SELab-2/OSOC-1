@@ -1,5 +1,5 @@
 import { uniqueAtom, uniqueSelector } from '.';
-import { emailRegex, nameRegex, passwordRegex1 } from '../lib/regex';
+import { customPasswordRegex, emailRegex, nameRegex } from '../lib/regex';
 
 export const nameState = uniqueAtom({
   name: 'registerNameState',
@@ -42,7 +42,7 @@ export const validPasswordState = uniqueSelector({
     const password = get(passwordState);
 
     // we use a password Regex to check if we are dealing with a valid password
-    return passwordRegex1.test(password);
+    return customPasswordRegex.test(password);
   },
 });
 
@@ -58,6 +58,8 @@ export const validRepeatPasswordState = uniqueSelector({
     const repeatPassword = get(repeatPasswordState);
 
     // check if it's a valid password and the same as the first password
-    return passwordRegex1.test(repeatPassword) && password === repeatPassword;
+    return (
+      customPasswordRegex.test(repeatPassword) && password === repeatPassword
+    );
   },
 });
