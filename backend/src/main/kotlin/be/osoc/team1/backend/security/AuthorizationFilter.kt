@@ -57,7 +57,7 @@ class AuthorizationFilter : OncePerRequestFilter() {
     }
 
     /**
-     * Explain to frontend and backend what went wrong
+     * When an error occurs, send a response containing that error
      */
     private fun respondException(response: HttpServletResponse, exception: Exception) {
         response.setHeader("error", exception.message)

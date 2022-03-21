@@ -23,15 +23,16 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
      */
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
+        // don't use cookies
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
-        // permit following urls
-        http.authorizeRequests().antMatchers("/", "/login", "/logout", "/error").permitAll()
+        // everyone has access to following urls (no auth needed)
+        http.authorizeRequests().antMatchers(*ConfigUtil.urlsOpenToAll).permitAll()
 
         // allow registering a user without being authenticated
-        http.authorizeRequests().antMatchers(HttpMethod.POST, "/users").permitAll()
+        http.authorizeRequests().antMatchers(HttpMethod.POST, *ConfigUtil.urlsOpenToAllToPostTo).permitAll()
 
-        // Minimum security permission for any other route is the coach role
+        // Minimum security permission needed for any other route is the coach role
         http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_COACH")
 
         val authenticationFilter = AuthenticationFilter(authenticationManagerBean())

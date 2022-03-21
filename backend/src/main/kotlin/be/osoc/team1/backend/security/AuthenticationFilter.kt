@@ -7,7 +7,6 @@ import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import java.util.Date
@@ -39,7 +38,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     }
 
     /**
-     * add an access token and refreshToken to response
+     * add an access token to the response
      * this token should be used for authorization in following requests
      */
     override fun successfulAuthentication(
@@ -52,11 +51,9 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         val user: User = authentication.principal as User
         // create tokens
         val accessToken: String = createToken(user, 5)
-        val refreshToken: String = createToken(user, 60)
         // add tokens to response
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken
-        tokens["refreshToken"] = refreshToken
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(response.outputStream, tokens)
     }
