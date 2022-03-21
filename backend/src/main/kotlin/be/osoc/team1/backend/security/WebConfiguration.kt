@@ -1,3 +1,4 @@
+/* ktlint-disable filename */
 package be.osoc.team1.backend.security
 
 import org.springframework.context.annotation.Configuration
@@ -7,7 +8,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 @Configuration
 @EnableWebSecurity
-/* ktlint-disable */
 class SecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         http.authorizeRequests().anyRequest().permitAll()
