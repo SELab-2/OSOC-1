@@ -55,3 +55,5 @@ TODO
 - Hoe zouden we best data van vorige edities opslaan?
   1. Alle logica/data in de huidige database steken waardoor deze volledig gebloat wordt met informatie die eigenlijk niet langer van toepassing is.
   2. Verschillende databases gebruiken per editie, waardoor er een soort plug&play is met elke database.
+- Horen we aan de backend filters te gebruiken (filteren op naam etc.) of mag dit ook in de frontend gebeuren.
+- Is het de bedoeling dat we voorbereiden op een grote hoeveelheid data en hierdoor pagination implementeren of blijft de hoeveelheid data beperkt genoeg om dit niet te moeten doen?
