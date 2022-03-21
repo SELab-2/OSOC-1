@@ -1,4 +1,3 @@
-/* ktlint-disable filename */
 package be.osoc.team1.backend.security
 
 import org.springframework.context.annotation.Configuration
