@@ -11,6 +11,7 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.UserService
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -37,7 +38,14 @@ class StudentServiceTests {
         every { repository.deleteById(studentId) } just Runs
         val differentIdTestStudent = Student("Tom", "Alard")
         every { repository.save(testStudent) } returns differentIdTestStudent
+        every { repository.findAll() } returns listOf(testStudent)
         return repository
+    }
+
+    @Test
+    fun `getAllStudents does not fail`() {
+        val service = StudentService(getRepository(true))
+        assertEquals(service.getAllStudents(), listOf(testStudent))
     }
 
     @Test
@@ -119,7 +127,9 @@ class StudentServiceTests {
     fun `addStudentStatusSuggestion fails when coach already made suggestion for student`() {
         val repository: StudentRepository = mockk()
         val student: Student = mockk()
-        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
+        val coachId2 = UUID.randomUUID()
+        val testSuggestion2 = StatusSuggestion(coachId2, SuggestionEnum.No, "test motivation2")
+        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion2, testSuggestion).iterator()
         every { repository.findByIdOrNull(studentId) } returns student
         val service = StudentService(repository)
         assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
@@ -129,8 +139,10 @@ class StudentServiceTests {
     fun `deleteStudentStatusSuggestion removes suggestion when student, suggestion and coach exist`() {
         val repository: StudentRepository = mockk()
         val student: Student = mockk()
+        val coachId2 = UUID.randomUUID()
+        val testSuggestion2 = StatusSuggestion(coachId2, SuggestionEnum.No, "test motivation2")
         every { student.statusSuggestions.remove(testSuggestion) } returns true
-        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
+        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion2, testSuggestion).iterator()
         every { repository.findByIdOrNull(studentId) } returns student
         every { repository.save(student) } returns student
         val service = StudentService(repository)
