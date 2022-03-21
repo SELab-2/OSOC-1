@@ -66,7 +66,7 @@ class StudentService(private val repository: StudentRepository, private val user
     fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion) {
         val coach = userService.getUserById(statusSuggestion.coachId)
         if (!coach.role.hasPermissionLevel(Role.Coach)) {
-            throw ForbiddenOperationException("Only users with the coach role can make status suggestions.")
+            throw ForbiddenOperationException("Only coaches and admins can make status suggestions.")
         }
         val student = getStudentById(studentId)
         val sameCoachSuggestion = student.statusSuggestions.find { it.coachId == coach.id }
