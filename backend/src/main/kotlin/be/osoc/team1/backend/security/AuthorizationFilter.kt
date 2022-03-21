@@ -28,39 +28,46 @@ class AuthorizationFilter : OncePerRequestFilter() {
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
-        // authorizationHeader should start with "Basic " followed by access token
-        // if there is no authorization header, then move on to AuthenticationFilter
-        if (authorizationHeader?.startsWith("Basic ") == true) {
-            try {
-                val accessToken: String = authorizationHeader.substring("Basic ".length)
+        // don't check authorization when url is {baseURL}/api/login so everyone can try to log in
+        if (request.servletPath.equals("/api/login")) {
+            // go to next filter
+            filterChain.doFilter(request, response)
+        } else {
+            val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
+            // authorizationHeader should start with "Basic " followed by token
+            if (authorizationHeader?.startsWith("Basic ") == true) {
+                try {
+                    // extract access token from authorization header
+                    val accessToken: String = authorizationHeader.substring("Basic ".length)
 
-                // verify and decode given access token
-                val verifier: JWTVerifier = JWT.require(SecretUtil.algorithm).build()
-                val decodedJWT: DecodedJWT = verifier.verify(accessToken)
-                // extract username from token
-                val username: String = decodedJWT.subject
+                    // verify and decode given access token
+                    val verifier: JWTVerifier = JWT.require(SecretUtil.algorithm).build()
+                    val decodedJWT: DecodedJWT = verifier.verify(accessToken)
+                    // extract username from token
+                    val username: String = decodedJWT.subject
 
-                // extract roles from token
-                val roles: Array<String> = decodedJWT.getClaim("roles").asArray(String::class.java)
-                val authorities: MutableList<SimpleGrantedAuthority> = mutableListOf()
-                roles.forEach { role -> authorities.add(SimpleGrantedAuthority(role)) }
+                    // extract roles from token
+                    val roles: Array<String> = decodedJWT.getClaim("roles").asArray(String::class.java)
+                    val authorities: MutableList<SimpleGrantedAuthority> = mutableListOf()
+                    roles.forEach { role -> authorities.add(SimpleGrantedAuthority(role)) }
 
-                // Spring security handles auth using an UsernamePasswordAuthenticationToken
-                SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(username, null, authorities)
-            } catch (exception: Exception) {
-                respondException(response, exception)
+                    // Spring security handles auth using an UsernamePasswordAuthenticationToken
+                    SecurityContextHolder.getContext().authentication =
+                        UsernamePasswordAuthenticationToken(username, null, authorities)
+                    filterChain.doFilter(request, response)
+                } catch (exception: Exception) {
+                    respondException(response, exception)
+                }
+            } else {
+                filterChain.doFilter(request, response)
             }
         }
-        // AuthorizationFilter is finished, the command below tells Spring Security to move on to the next filter
-        filterChain.doFilter(request, response)
     }
 
     /**
      * When an error occurs, send a response containing that error
      */
     private fun respondException(response: HttpServletResponse, exception: Exception) {
-        response.setHeader("error", exception.message)
         response.status = HttpStatus.UNAUTHORIZED.value()
         response.sendError(HttpStatus.UNAUTHORIZED.value())
         val errors: MutableMap<String, String> = HashMap()
