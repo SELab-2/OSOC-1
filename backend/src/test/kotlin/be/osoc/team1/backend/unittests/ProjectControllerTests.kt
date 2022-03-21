@@ -1,9 +1,10 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.ProjectController
-import be.osoc.team1.backend.entities.Coach
 import be.osoc.team1.backend.entities.Project
+import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.ProjectService
@@ -171,7 +172,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `postCoachOfProject succeeds if project with given id exists`() {
-        val coach = Coach("Lars", "Van Cauter")
+        val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
         every { projectService.addCoachToProject(testId, any()) } just Runs
         mockMvc.perform(
             post("/projects/$testId/coaches/")
@@ -182,7 +183,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `postCoachOfProject returns 404 Not Found if project with given id does not exist`() {
-        val coach = Coach("Lars", "Van Cauter")
+        val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
         val differentId = UUID.randomUUID()
         every { projectService.addCoachToProject(differentId, any()) }.throws(InvalidIdException())
         mockMvc.perform(
@@ -215,5 +216,18 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { projectService.removeCoachFromProject(testId, not_assigned_coachId) }.throws(FailedOperationException())
         mockMvc.perform(delete("/projects/$testId/coaches/$not_assigned_coachId"))
             .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `getProjectConflicts returns conflicts`() {
+        // create a conflict
+        val testStudent = Student("Lars", "Van Cauter")
+        val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
+        val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent))
+        val result = mutableListOf(ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
+        every { projectService.getConflicts() } returns result
+        mockMvc.perform(get("/projects/conflicts"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(objectMapper.writeValueAsString(result)))
     }
 }
