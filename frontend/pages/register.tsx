@@ -42,7 +42,6 @@ const register = () => {
     const reqBody = {
       username: name,
       email: email,
-      role: 'Disabled',
       password: password,
     };
 
