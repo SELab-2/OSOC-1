@@ -70,7 +70,9 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
      * the token contains username, expiration date and roles of user
      */
     private fun createToken(user: User, minutesToLive: Int): String {
-        val roles = user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
+        // get roles of logged in user as Strings
+        val roles: List<String> =
+            user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
         return JWT.create()
             .withSubject(user.username)
             .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))

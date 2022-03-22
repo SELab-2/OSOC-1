@@ -30,42 +30,62 @@ class AuthorizationFilter : OncePerRequestFilter() {
     ) {
         // don't check authorization when url is {baseURL}/api/login so everyone can try to log in
         if (request.servletPath.equals("/api/login")) {
-            // go to next filter
+            // work here is done, go to next filter
             filterChain.doFilter(request, response)
         } else {
             val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
             // authorizationHeader should start with "Basic " followed by token
             if (authorizationHeader?.startsWith("Basic ") == true) {
-                try {
-                    // extract access token from authorization header
-                    val accessToken: String = authorizationHeader.substring("Basic ".length)
-
-                    // verify and decode given access token
-                    val verifier: JWTVerifier = JWT.require(SecretUtil.algorithm).build()
-                    val decodedJWT: DecodedJWT = verifier.verify(accessToken)
-                    // extract username from token
-                    val username: String = decodedJWT.subject
-
-                    // extract roles from token
-                    val roles: Array<String> = decodedJWT.getClaim("roles").asArray(String::class.java)
-                    val authorities: MutableList<SimpleGrantedAuthority> = mutableListOf()
-                    roles.forEach { role -> authorities.add(SimpleGrantedAuthority(role)) }
-
-                    // Spring security handles auth using an UsernamePasswordAuthenticationToken
-                    SecurityContextHolder.getContext().authentication =
-                        UsernamePasswordAuthenticationToken(username, null, authorities)
-                    filterChain.doFilter(request, response)
-                } catch (exception: Exception) {
-                    respondException(response, exception)
-                }
+                // extract access token from authorization header
+                val accessToken: String = authorizationHeader.substring("Basic ".length)
+                interpretAccessToken(accessToken, request, response, filterChain)
             } else {
+                // work here is done, go to next filter
                 filterChain.doFilter(request, response)
             }
         }
     }
 
     /**
+     * Interpret access token, extract all useful information and verify its validity
+     */
+    private fun interpretAccessToken(
+        accessToken: String,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    ) {
+        try {
+            // verify and decode given access token
+            val verifier: JWTVerifier = JWT.require(SecretUtil.algorithm).build()
+            val decodedJWT: DecodedJWT = verifier.verify(accessToken)
+            // extract username from token
+            val username: String = decodedJWT.subject
+
+            // Spring security handles auth using an UsernamePasswordAuthenticationToken
+            SecurityContextHolder.getContext().authentication =
+                UsernamePasswordAuthenticationToken(username, null, getAuthorities(decodedJWT))
+            // work here is done, go to next filter
+            filterChain.doFilter(request, response)
+        } catch (exception: Exception) {
+            respondException(response, exception)
+        }
+    }
+
+    /**
+     * extract the roles of the logged-in user from the token
+     * return the roles as SimpleGrantedAuthority as they need to be to work with UsernamePasswordAuthenticationToken
+     */
+    private fun getAuthorities(decodedJWT: DecodedJWT): List<SimpleGrantedAuthority> {
+        val roles: Array<String> = decodedJWT.getClaim("roles").asArray(String::class.java)
+        val authorities: MutableList<SimpleGrantedAuthority> = mutableListOf()
+        roles.forEach { role -> authorities.add(SimpleGrantedAuthority(role)) }
+        return authorities
+    }
+
+    /**
      * When an error occurs, send a response containing that error
+     * This function gets called when a token is passed, but it is invalid
      */
     private fun respondException(response: HttpServletResponse, exception: Exception) {
         response.status = HttpStatus.UNAUTHORIZED.value()
