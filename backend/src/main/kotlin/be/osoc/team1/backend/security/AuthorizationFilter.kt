@@ -31,17 +31,14 @@ class AuthorizationFilter : OncePerRequestFilter() {
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        if (request.servletPath.equals("/api/login")) {
-            filterChain.doFilter(request, response)
-        } else {
-            val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
-            if (authorizationHeader?.startsWith("Basic ") == true) {
-                val accessToken: String = authorizationHeader.substring("Basic ".length)
-                interpretAccessToken(accessToken, request, response, filterChain)
-            } else {
-                filterChain.doFilter(request, response)
-            }
+        val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
+        if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
+            val accessToken: String = authorizationHeader.substring("Basic ".length)
+            interpretAccessToken(accessToken, request, response, filterChain)
+            return
         }
+
+        filterChain.doFilter(request, response)
     }
 
     /**
