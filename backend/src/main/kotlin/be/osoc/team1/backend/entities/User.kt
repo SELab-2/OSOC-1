@@ -34,7 +34,7 @@ class User(
     val username: String,
     @Column(unique = true)
     val email: String,
-    var role: Role,
+    var role: Role = Role.Disabled,
     val password: String
 ) {
     @Id

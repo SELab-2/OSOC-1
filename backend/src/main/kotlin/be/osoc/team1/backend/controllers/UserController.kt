@@ -6,7 +6,6 @@ import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.services.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.annotation.Secured
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -22,7 +21,7 @@ import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/users")
-class UserController(private val service: UserService, private val passwordEncoder: PasswordEncoder) {
+class UserController(private val service: UserService) {
     /**
      * Get all [User] objects stored in the database.
      */
@@ -61,20 +60,12 @@ class UserController(private val service: UserService, private val passwordEncod
 
     /**
      * Register a new [User]. The id of the new user will be returned. The response will also contain a
-     * Location header containing the url to the newly created resource. Newly created users have the [Role.Disabled]
-     * role by default.
+     * Location header containing the url to the newly created resource.
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody userRegistration: UserRegistration, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
-        val user = User(
-            userRegistration.username,
-            userRegistration.email,
-            Role.Disabled,
-            passwordEncoder.encode(userRegistration.password)
-        )
-
-        val id = service.postUser(user)
+    fun postUser(@RequestBody userRegistration: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
+        val id = service.registerUser(userRegistration.username, userRegistration.email, userRegistration.password)
         responseHeader.addHeader("Location", request.requestURL.toString() + "/$id")
         return id
     }
@@ -86,10 +77,4 @@ class UserController(private val service: UserService, private val passwordEncod
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun postUserRole(@PathVariable id: UUID, @RequestBody role: Role) = service.changeRole(id, role)
-
-    /**
-     * Data class used for registering a [User], we have an extra data class for this because newly created users
-     * shouldn't have to specify their role if it will be set to [Role.Disabled] anyway.
-     */
-    data class UserRegistration(val username: String, val email: String, val password: String)
 }

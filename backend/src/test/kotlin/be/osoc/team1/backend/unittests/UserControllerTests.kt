@@ -108,7 +108,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     fun `postUser should not fail`() {
         // This is a hack but password encoding really doesn't matter for what this is testing
         every { passwordEncoder.encode("password") } returns ""
-        every { userService.postUser(any()) } returns testUser.id
+        every { userService.registerUser(any(), any(), any()) } returns testUser.id
         mockMvc.perform(
             post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
