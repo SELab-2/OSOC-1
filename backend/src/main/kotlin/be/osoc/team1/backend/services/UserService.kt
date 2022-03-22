@@ -31,13 +31,15 @@ class UserService(private val repository: UserRepository) {
     }
 
     /**
-     * Save [user] in the [repository]. Returns the id of the newly saved user object.
+     * Save [user] in the [repository]. Returns the id of the newly saved user object. A [ForbiddenOperationException]
+     * will be thrown if a constraint on the user is violated. The most likely case of this happening is if there
+     * already exists another user with the specified email address.
      */
     fun postUser(user: User): UUID {
         try {
             return repository.save(user).id
         } catch (dbe: DataIntegrityViolationException) {
-            throw ForbiddenOperationException("User creation failed due to a DataIntegrityViolationException!")
+            throw ForbiddenOperationException("User creation failed due to a DataIntegrityViolationException! Details: ${dbe.message}")
         }
     }
 

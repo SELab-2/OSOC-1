@@ -9,7 +9,12 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import be.osoc.team1.backend.security.SecurityConfig
 
+/**
+ * This service implements the [UserDetailsService] interface used by [SecurityConfig]. This allows the authentication
+ * system to lookup users and get their authorities.
+ */
 @Service
 class OsocUserDetailService(val userRepository: UserRepository, val passwordEncoder: PasswordEncoder) :
     UserDetailsService {
