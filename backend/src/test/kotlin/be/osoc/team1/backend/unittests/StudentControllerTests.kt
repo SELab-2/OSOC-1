@@ -9,6 +9,7 @@ import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
+import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.services.StudentService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -140,6 +141,16 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `addStudentStatusSuggestion returns 404 Not Found if coach doesn't exist`() {
+        every { studentService.addStudentStatusSuggestion(studentId, any()) }.throws(InvalidUserIdException())
+        mockMvc.perform(
+            post("/students/$studentId/suggestions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testSuggestion))
+        ).andExpect(status().isNotFound)
+    }
+
+    @Test
     fun `deleteStudentStatusSuggestion succeeds when student, suggestion and coach exist`() {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) } just Runs
         mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isNoContent)
@@ -155,5 +166,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `deleteStudentStatusSuggestion returns 400 Bad Request if suggestion doesn't exist`() {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }.throws(FailedOperationException())
         mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `deleteStudentStatusSuggestion returns 404 Not Found if coach doesn't exist`() {
+        every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }.throws(InvalidUserIdException())
+        mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isNotFound)
     }
 }

@@ -18,6 +18,8 @@ frontend/*
 !frontend/public/
 !frontend/src/
 !frontend/styles/
+!frontend/lib/
+!frontend/atoms/
 
 # Ignores for manual runs
 /*
@@ -25,3 +27,5 @@ frontend/*
 !public/
 !src/
 !styles/
+!lib/
+!atoms/
