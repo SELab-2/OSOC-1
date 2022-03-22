@@ -21,33 +21,33 @@ import javax.servlet.http.HttpServletResponse
  */
 class AuthorizationFilter : OncePerRequestFilter() {
     /**
-     * check if request is authorized by token
+     * check if request is authorized by access token
+     * Don't check authorization when the url is {baseurl}/api/login
+     * extract access token from authorization header in request, and process the access token
+     * when this function is finished, just pass the request and response to the next filter (AuthenticationFilter)
      */
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        // don't check authorization when url is {baseURL}/api/login so everyone can try to log in
         if (request.servletPath.equals("/api/login")) {
-            // work here is done, go to next filter
             filterChain.doFilter(request, response)
         } else {
             val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
-            // authorizationHeader should start with "Basic " followed by token
             if (authorizationHeader?.startsWith("Basic ") == true) {
-                // extract access token from authorization header
                 val accessToken: String = authorizationHeader.substring("Basic ".length)
                 interpretAccessToken(accessToken, request, response, filterChain)
             } else {
-                // work here is done, go to next filter
                 filterChain.doFilter(request, response)
             }
         }
     }
 
     /**
-     * Interpret access token, extract all useful information and verify its validity
+     * Interpret access token and verify its validity
+     * extract the username and the authorities/roles from the token
+     * Catch the error if the given access token is invalid, and add error to response instead
      */
     private fun interpretAccessToken(
         accessToken: String,
@@ -56,16 +56,12 @@ class AuthorizationFilter : OncePerRequestFilter() {
         filterChain: FilterChain
     ) {
         try {
-            // verify and decode given access token
             val verifier: JWTVerifier = JWT.require(SecretUtil.algorithm).build()
             val decodedJWT: DecodedJWT = verifier.verify(accessToken)
-            // extract username from token
             val username: String = decodedJWT.subject
 
-            // Spring security handles auth using an UsernamePasswordAuthenticationToken
             SecurityContextHolder.getContext().authentication =
                 UsernamePasswordAuthenticationToken(username, null, getAuthorities(decodedJWT))
-            // work here is done, go to next filter
             filterChain.doFilter(request, response)
         } catch (exception: Exception) {
             respondException(response, exception)
@@ -84,8 +80,8 @@ class AuthorizationFilter : OncePerRequestFilter() {
     }
 
     /**
-     * When an error occurs, send a response containing that error
-     * This function gets called when a token is passed, but it is invalid
+     * When an error occurs, don't throw it, send a response containing that error instead
+     * This function gets called when a token is passed, but it is invalid and therefor an error occurs
      */
     private fun respondException(response: HttpServletResponse, exception: Exception) {
         response.status = HttpStatus.UNAUTHORIZED.value()

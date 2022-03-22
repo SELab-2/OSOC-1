@@ -45,8 +45,8 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     }
 
     /**
-     * add an access token to the response
-     * this token should be used for authorization in following requests
+     * add an access token to the response when authentication is successful
+     * this token can be used by the user to authorise itself in the following requests
      */
     override fun successfulAuthentication(
         request: HttpServletRequest,
@@ -54,11 +54,9 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         chain: FilterChain,
         authentication: Authentication
     ) {
-        // authenticated user
-        val user: User = authentication.principal as User
-        // create tokens
-        val accessToken: String = createToken(user, 5)
-        // add tokens to response
+        val authenticatedUser: User = authentication.principal as User
+        val accessToken: String = createToken(authenticatedUser, 5)
+
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken
         response.contentType = APPLICATION_JSON_VALUE
@@ -66,11 +64,11 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     }
 
     /**
-     * create tokens used for authorization
+     * create a JSON web token
      * the token contains username, expiration date and roles of user
+     * this function can be used for making an access token or even a refresh token
      */
     private fun createToken(user: User, minutesToLive: Int): String {
-        // get roles of logged in user as Strings
         val roles: List<String> =
             user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
         return JWT.create()

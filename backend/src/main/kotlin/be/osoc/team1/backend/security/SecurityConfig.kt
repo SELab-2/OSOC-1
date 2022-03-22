@@ -13,37 +13,36 @@ import org.springframework.security.config.http.SessionCreationPolicy
 
 /**
  * configuration of which urls require which authorizations
+ * configuration of how authentication and authorization are handled
  */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true)
 class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurityConfigurerAdapter() {
     /**
-     * handles all incoming requests
+     * set configuration to handle all incoming requests
+     * authentication and authorization are configured to work stateless and thus to use tokens instead of cookies
+     * Because we do not use cookies, there is no room for CSRF attacks, and no reason to put in CSRF protection
+     * First add AuthorizationFilter to check if user is authorized, if not, try to authenticate with the AuthenticationFilter
      */
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
-        // allow only 1 session per user
+
         http.sessionManagement().maximumSessions(1)
-        // don't use cookies
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
-        // everyone has access to following urls (no auth needed)
         http.authorizeRequests().antMatchers(*ConfigUtil.urlsOpenToAll).permitAll()
-
-        // allow registering a user without being authenticated
         http.authorizeRequests().antMatchers(HttpMethod.POST, *ConfigUtil.urlsOpenToAllToPostTo).permitAll()
-
-        // Minimum security permission needed for any other route is the coach role
         http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_COACH")
 
         val authenticationFilter = AuthenticationFilter(authenticationManagerBean())
-        // check first if authorized using accessToken
         http.addFilterBefore(AuthorizationFilter(), AuthenticationFilter::class.java)
-        // if not authorized yet, try to authenticate
         http.addFilter(authenticationFilter)
     }
 
+    /**
+     * configure the right userDetailsService to work with our user database
+     */
     @Autowired
     protected fun configureGlobal(auth: AuthenticationManagerBuilder) {
         auth.userDetailsService(userDetailsService).passwordEncoder(userDetailsService.passwordEncoder)
