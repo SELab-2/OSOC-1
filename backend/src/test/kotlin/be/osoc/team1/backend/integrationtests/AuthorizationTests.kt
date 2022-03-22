@@ -156,6 +156,24 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     }
 
     @Test
+    fun `login with only email returns 401`() {
+        val loginHeaders = HttpHeaders()
+        loginHeaders.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        val loginRequest = HttpEntity("email=admin@admin.com", loginHeaders)
+        val loginResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/login"), HttpMethod.POST, loginRequest, String::class.java)
+        assert(loginResponse.statusCodeValue == 401)
+    }
+
+    @Test
+    fun `login with only password returns 401`() {
+        val loginHeaders = HttpHeaders()
+        loginHeaders.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        val loginRequest = HttpEntity("password=adminPassword", loginHeaders)
+        val loginResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/login"), HttpMethod.POST, loginRequest, String::class.java)
+        assert(loginResponse.statusCodeValue == 401)
+    }
+
+    @Test
     fun `login works as admin`() {
         val loginResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         assert(loginResponse.statusCodeValue == 200)
@@ -177,6 +195,18 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val loginResponse: ResponseEntity<String> = loginUser(disabledEmail, disabledPassword)
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
+        logoutResponse(loginResponse)
+    }
+
+    @Test
+    fun `wrong authorization header returns 403`() {
+        val loginResponse: ResponseEntity<String> = loginUser(disabledEmail, disabledPassword)
+        val accessToken: String = JSONObject(loginResponse.body).get("accessToken") as String
+        val authHeaders = HttpHeaders()
+        authHeaders.add("Authorization", "Invalid $accessToken")
+        val getRequest = HttpEntity(null, authHeaders)
+        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, getRequest, String::class.java)
+        assert(getResponse.statusCodeValue == 403)
         logoutResponse(loginResponse)
     }
 
