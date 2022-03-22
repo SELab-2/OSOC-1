@@ -3,13 +3,13 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.UserRepository
+import be.osoc.team1.backend.security.SecurityConfig
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import be.osoc.team1.backend.security.SecurityConfig
 
 /**
  * This service implements the [UserDetailsService] interface used by [SecurityConfig]. This allows the authentication
