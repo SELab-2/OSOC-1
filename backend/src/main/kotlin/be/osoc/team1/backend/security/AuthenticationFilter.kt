@@ -8,9 +8,11 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import java.util.Date
+import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -68,10 +70,11 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
      * the token contains username, expiration date and roles of user
      */
     private fun createToken(user: User, minutesToLive: Int): String {
+        val roles = user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
         return JWT.create()
             .withSubject(user.username)
             .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))
-            .withClaim("roles", user.authorities.toString())
+            .withClaim("roles", roles)
             .sign(SecretUtil.algorithm)
     }
 }
