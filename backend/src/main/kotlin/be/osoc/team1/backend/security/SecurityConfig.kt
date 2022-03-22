@@ -22,6 +22,7 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
      * handles all incoming requests
      */
     override fun configure(http: HttpSecurity) {
+        http.csrf().disable()
         // allow only 1 session per user
         http.sessionManagement().maximumSessions(1)
         // don't use cookies
