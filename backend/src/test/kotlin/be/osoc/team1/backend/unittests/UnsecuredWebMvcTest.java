@@ -13,8 +13,7 @@ import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import java.lang.annotation.*;
 
 
-// I will forever be deeply grateful to skubski at https://stackoverflow.com/questions/47593537/disable-spring-security-config-class-for-webmvctest-in-spring-boot
-
+// Taken from https://stackoverflow.com/a/65504089/15516306
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @WebMvcTest(excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = WebSecurityConfigurer.class)},
