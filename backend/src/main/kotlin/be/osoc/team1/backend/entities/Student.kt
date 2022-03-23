@@ -9,6 +9,7 @@ import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 
@@ -87,7 +88,12 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
  * Finally, each student keeps a [MutableList] of [StatusSuggestion]s.
  */
 @Entity
-class Student(val firstName: String, val lastName: String) {
+class Student(
+    val firstName: String,
+    val lastName: String,
+    @ManyToMany(cascade = [CascadeType.ALL])
+    val skills: Set<Skill> = emptySet()
+) {
 
     @Id
     @GeneratedValue(generator = "UUID")
