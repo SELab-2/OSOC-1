@@ -120,8 +120,8 @@ class ProjectService(private val repository: ProjectRepository, private val role
         return conflicts
     }
 
-    fun getRoleRequirementById(roleId: UUID): RoleRequirement = roleRepository.findByIdOrNull(roleId) ?:
-        throw InvalidRoleRequirementIdException("Role not found")
+    fun getRoleRequirementById(roleId: UUID): RoleRequirement = roleRepository.findByIdOrNull(roleId)
+        ?: throw InvalidRoleRequirementIdException("Role not found")
 
     fun assignStudentToRole(student: Student, roleId: UUID, projectId: UUID) {
         if (getProjectById(projectId).requiredRoles.find { it.id == roleId } == null)
@@ -139,7 +139,7 @@ class ProjectService(private val repository: ProjectRepository, private val role
 
     fun removeStudentFromRole(student: Student, roleId: UUID, projectId: UUID) {
         if (getProjectById(projectId).requiredRoles.find { it.id == roleId } == null)
-           throw InvalidRoleRequirementIdException("The specified role is not part of the specified project.")
+            throw InvalidRoleRequirementIdException("The specified role is not part of the specified project.")
 
         val role = getRoleRequirementById(roleId)
         role.remove(student)
