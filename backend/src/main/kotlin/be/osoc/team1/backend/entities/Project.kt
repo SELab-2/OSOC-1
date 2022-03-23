@@ -8,6 +8,16 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.ManyToMany
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
+
+@Entity
+class RoleRequirement(
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    val skill: Skill,
+    val amount: Int) {
+    @Id
+    val id: UUID = UUID.randomUUID()
+}
 
 /**
  * Represents a project in the database. A project is constructed with a [name]
@@ -27,7 +37,10 @@ class Project(
     val students: MutableCollection<Student> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.ALL])
-    val coaches: MutableCollection<User> = mutableListOf()
+    val coaches: MutableCollection<User> = mutableListOf(),
+
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    val requiredRoles: List<RoleRequirement> = mutableListOf()
 ) {
     @Id
     @GeneratedValue(generator = "UUID")
