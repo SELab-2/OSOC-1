@@ -16,12 +16,10 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
- * Add the [AuthorizationFilter] and [AuthenticationFilter] to the filter-chain (this is done in [SecurityConfig]).
- * When a request comes in, the filter-chain will intercept it and the [AuthorizationFilter] will attempt to authorize
- * the request.
+ * This filter gets called by the filter-chain (see [SecurityConfig] for more info)
+ *
  * Authorization will only succeed when the request contains an Authorization header with a valid access token.
  * This access token says which user is logged in and what permissions he has.
- * If authorization fails, then the filter-chain will proceed to the next filter (in this case [AuthenticationFilter])
  */
 class AuthorizationFilter : OncePerRequestFilter() {
     /**

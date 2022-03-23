@@ -12,8 +12,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy
 
 /**
- * configuration of which urls require which authorizations
- * configuration of how authentication and authorization are handled
+ * [SecurityConfig] sets the configuration of how requests are handled, how users are authenticated and authorized.
+ *
+ * Authentication is verifying the identity of a user (using an email and a password). Authorization is verifying which
+ * resources this user has access to.
+ *
+ * Every incoming request will be handled by our [SecurityConfig] class. Some urls will be set to be accessible to all,
+ * other urls will require authorization to be accessed. Those requests that need authorization will get processed by
+ * the filter-chain.
+ * The first filter in the filter-chain is the [AuthorizationFilter] and tries to authorize the request. If that fails,
+ * then the filter-chain proceeds to the next filter, the [AuthenticationFilter] which tries to authenticate the request.
  */
 @Configuration
 @EnableWebSecurity
