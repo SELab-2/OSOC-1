@@ -49,7 +49,8 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
     }
 
     /**
-     * configure the right [userDetailsService] to work with our user database
+     * configure [AuthenticationManagerBuilder] to use our [OsocUserDetailService]
+     * This configuration allows to easily log in users from our database using email and password
      */
     @Autowired
     protected fun configureGlobal(auth: AuthenticationManagerBuilder) {

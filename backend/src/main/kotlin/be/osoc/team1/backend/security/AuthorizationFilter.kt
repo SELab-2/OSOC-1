@@ -23,8 +23,6 @@ import javax.servlet.http.HttpServletResponse
  */
 class AuthorizationFilter : OncePerRequestFilter() {
     /**
-     * check if request is authorized by access token
-     * Don't check authorization when the url is {baseurl}/api/login
      * extract access token from authorization header in request, and process the access token
      * when this function is finished, just pass the request and response to the next filter ([AuthenticationFilter])
      */
@@ -68,8 +66,8 @@ class AuthorizationFilter : OncePerRequestFilter() {
     }
 
     /**
-     * extract the roles of the logged-in user from the token
-     * return the roles as [SimpleGrantedAuthority] as they need to be to work with [UsernamePasswordAuthenticationToken]
+     * extract the roles of the logged in user from the token
+     * return the roles as [SimpleGrantedAuthority] as they need to be, to work with [UsernamePasswordAuthenticationToken]
      */
     private fun getAuthorities(decodedJWT: DecodedJWT): List<SimpleGrantedAuthority> {
         val roles: Array<String> = decodedJWT.getClaim("roles").asArray(String::class.java)
@@ -79,8 +77,8 @@ class AuthorizationFilter : OncePerRequestFilter() {
     }
 
     /**
-     * When an error occurs, don't throw it, send a response containing that error instead
-     * This function gets called when a token is passed, but it is invalid and therefor an error occurs
+     * This function gets called when an invalid token is passed, and therefor an error occurs
+     * When that error occurs, don't throw it, send a response containing that error instead
      */
     private fun respondException(response: HttpServletResponse, exception: Exception) {
         response.status = HttpStatus.UNAUTHORIZED.value()

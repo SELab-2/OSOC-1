@@ -6,7 +6,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 
 /**
- * passwords get encoded before sent over the network
+ * passwords get encoded before being sent over the network
  * Here we use BCryptPasswordEncoder with no arguments, so it uses default argument 10 as strength
  * The BCryptPasswordEncoder takes roughly 1 second to verify a password when strength 10 is used
  * BCryptPasswordEncoder is currently the most used password encoder
