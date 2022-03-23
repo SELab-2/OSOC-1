@@ -2,7 +2,7 @@ name: Run backend all tests with maven
 
 on:
   push:
-    branches: [ master, development ]
+    branches: [ master, development, spring-auth ]
   pull_request:
     branches: [ master, development ]
 
