@@ -7,6 +7,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
+import be.osoc.team1.backend.repositories.RoleRequirementRepository
 import be.osoc.team1.backend.services.ProjectService
 import io.mockk.Runs
 import io.mockk.every
@@ -49,62 +50,66 @@ class ProjectServiceTests {
         return repository
     }
 
+    private fun getRoleRepository(): RoleRequirementRepository {
+        return mockk()
+    }
+
     @Test
     fun `getAllProjects does not fail`() {
-        val service = ProjectService(getRepository(true))
+        val service = ProjectService(getRepository(true), getRoleRepository())
         assertEquals(service.getAllProjects(), listOf(testProject))
     }
 
     @Test
     fun `getProjectById succeeds when project with id exists`() {
-        val service = ProjectService(getRepository(true))
+        val service = ProjectService(getRepository(true), getRoleRepository())
         assertEquals(service.getProjectById(testId), testProject)
     }
 
     @Test
     fun `getProjectById fails when no project with that id exists`() {
-        val service = ProjectService(getRepository(false))
+        val service = ProjectService(getRepository(false), getRoleRepository())
         assertThrows<InvalidProjectIdException> { service.getProjectById(testId) }
     }
 
     @Test
     fun `deleteProjectById succeeds when project with id exists`() {
         val repo = getRepository(true)
-        val service = ProjectService(repo)
+        val service = ProjectService(repo, getRoleRepository())
         service.deleteProjectById(testId)
         verify { repo.deleteById(testId) }
     }
 
     @Test
     fun `deleteProjectById fails when no project with that id exists`() {
-        val service = ProjectService(getRepository(false))
+        val service = ProjectService(getRepository(false), getRoleRepository())
         assertThrows<InvalidProjectIdException> { service.deleteProjectById(testId) }
     }
 
     @Test
     fun `postProject returns some other id than what was passed`() {
-        val service = ProjectService(getRepository(false))
+        val service = ProjectService(getRepository(false), getRoleRepository())
         Assertions.assertNotEquals(service.postProject(testProject), testId)
     }
 
     @Test
     fun `patchProject updates project when project with same id exists`() {
         val repository = getRepository(true)
-        val service = ProjectService(repository)
+        val service = ProjectService(repository, getRoleRepository())
         service.patchProject(testProject)
         verify { repository.save(testProject) }
     }
 
     @Test
     fun `patchProject fails when no project with same id exists`() {
-        val service = ProjectService(getRepository(false))
+        val service = ProjectService(getRepository(false), getRoleRepository())
         assertThrows<InvalidProjectIdException> { service.patchProject(testProject) }
     }
 
     @Test
     fun `addStudentToProject runs`() {
         val repository = getRepository(true)
-        val service = ProjectService(repository)
+        val service = ProjectService(repository, getRoleRepository())
         val student = Student("Lars", "Van Cauter")
         service.addStudentToProject(testProject.id, student)
         verify { repository.save(testProject) }
@@ -112,7 +117,7 @@ class ProjectServiceTests {
 
     @Test
     fun `addStudentToProject fails when project doesnt exist`() {
-        val service = ProjectService(getRepository(false))
+        val service = ProjectService(getRepository(false), getRoleRepository())
         val student = Student("Lars", "Van Cauter")
         assertThrows<InvalidProjectIdException> { service.addStudentToProject(testProject.id, student) }
     }
@@ -120,7 +125,7 @@ class ProjectServiceTests {
     @Test
     fun `addCoachToProject runs`() {
         val repository = getRepository(true)
-        val service = ProjectService(repository)
+        val service = ProjectService(repository, getRoleRepository())
         val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
         service.addCoachToProject(testProject.id, coach)
         verify { repository.save(testProject) }
@@ -128,7 +133,7 @@ class ProjectServiceTests {
 
     @Test
     fun `addCoachToProject fails when project doesnt exit`() {
-        val service = ProjectService(getRepository(false))
+        val service = ProjectService(getRepository(false), getRoleRepository())
         val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
         assertThrows<InvalidProjectIdException> { service.addCoachToProject(testProject.id, coach) }
     }
@@ -136,28 +141,28 @@ class ProjectServiceTests {
     @Test
     fun `removeStudentFromProject succeeds when student is in project`() {
         val repository = getRepository(true)
-        val service = ProjectService(repository)
+        val service = ProjectService(repository, getRoleRepository())
         service.removeStudentFromProject(testProject.id, testStudent.id)
         verify { repository.save(testProject) }
     }
 
     @Test
     fun `removeStudentFromProject fails when student is not in project`() {
-        val service = ProjectService(getRepository(true))
+        val service = ProjectService(getRepository(true), getRoleRepository())
         assertThrows<FailedOperationException> { service.removeStudentFromProject(testProject.id, UUID.randomUUID()) }
     }
 
     @Test
     fun `removeCoachFromProject succeeds when coach is in project`() {
         val repository = getRepository(true)
-        val service = ProjectService(repository)
+        val service = ProjectService(repository, getRoleRepository())
         service.removeCoachFromProject(testProject.id, testCoach.id)
         verify { repository.save(testProject) }
     }
 
     @Test
     fun `removeCoachFromProject fails when coach is not in project`() {
-        val service = ProjectService(getRepository(true))
+        val service = ProjectService(getRepository(true), getRoleRepository())
         assertThrows<FailedOperationException> { service.removeCoachFromProject(testProject.id, UUID.randomUUID()) }
     }
 
@@ -176,7 +181,7 @@ class ProjectServiceTests {
         )
         val repository = getRepository(true)
         every { repository.findAll() } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
-        val service = ProjectService(repository)
+        val service = ProjectService(repository, getRoleRepository())
         val conflictlist = service.getConflicts()
         assert(conflictlist[0] == ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
         assert(conflictlist[1] == ProjectService.Conflict(testStudent2.id, mutableListOf(testProjectConflict2.id, testProjectConflict3.id)))

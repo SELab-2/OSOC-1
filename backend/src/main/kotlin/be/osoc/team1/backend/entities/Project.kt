@@ -1,5 +1,7 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import org.hibernate.annotations.GenericGenerator
 import java.util.UUID
 import javax.persistence.CascadeType
@@ -14,9 +16,27 @@ import javax.persistence.OneToOne
 class RoleRequirement(
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     val skill: Skill,
-    val amount: Int) {
+    val amount: Int,
+    @ManyToMany(cascade = [CascadeType.ALL])
+    val assignees: MutableSet<Student> = mutableSetOf()
+) {
     @Id
     val id: UUID = UUID.randomUUID()
+
+    fun assign(student: Student) {
+        if (assignees.size >= amount)
+            throw ForbiddenOperationException("This role already has enough assignees!")
+
+        if (!student.skills.contains(skill))
+            throw ForbiddenOperationException("This student doesn't have the required skill to be assigned this role.")
+
+        assignees.add(student)
+    }
+
+    fun remove(student: Student) {
+        if (!assignees.remove(student))
+            throw InvalidUserIdException("The specified user is not assigned to this role!")
+    }
 }
 
 /**

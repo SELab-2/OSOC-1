@@ -1,17 +1,21 @@
 package be.osoc.team1.backend.services
 
+import InvalidRoleRequirementIdException
 import be.osoc.team1.backend.entities.Project
+import be.osoc.team1.backend.entities.RoleRequirement
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
+import be.osoc.team1.backend.repositories.RoleRequirementRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class ProjectService(private val repository: ProjectRepository) {
+class ProjectService(private val repository: ProjectRepository, private val roleRepository: RoleRequirementRepository) {
     /**
      * Get all projects
      */
@@ -114,6 +118,32 @@ class ProjectService(private val repository: ProjectRepository) {
             }
         }
         return conflicts
+    }
+
+    fun getRoleRequirementById(roleId: UUID): RoleRequirement = roleRepository.findByIdOrNull(roleId) ?:
+        throw InvalidRoleRequirementIdException("Role not found")
+
+    fun assignStudentToRole(student: Student, roleId: UUID, projectId: UUID) {
+        if (getProjectById(projectId).requiredRoles.find { it.id == roleId } == null)
+            throw InvalidRoleRequirementIdException("The specified role is not part of the specified project.")
+
+        for (requiredRole in getProjectById(projectId).requiredRoles) {
+            if (requiredRole.assignees.contains(student))
+                throw ForbiddenOperationException("This student was already assigned a role on this project!")
+        }
+
+        val role = getRoleRequirementById(roleId)
+        role.assign(student)
+        roleRepository.save(role)
+    }
+
+    fun removeStudentFromRole(student: Student, roleId: UUID, projectId: UUID) {
+        if (getProjectById(projectId).requiredRoles.find { it.id == roleId } == null)
+           throw InvalidRoleRequirementIdException("The specified role is not part of the specified project.")
+
+        val role = getRoleRequirementById(roleId)
+        role.remove(student)
+        roleRepository.save(role)
     }
 
     data class Conflict(val student: UUID, val projects: MutableList<UUID> = mutableListOf())
