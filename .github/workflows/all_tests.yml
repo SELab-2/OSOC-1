@@ -2,7 +2,7 @@ name: Run backend all tests with maven
 
 on:
   push:
-    branches: [ master, development, test-actions ]
+    branches: [ master, development ]
   pull_request:
     branches: [ master, development ]
 
@@ -45,7 +45,7 @@ jobs:
         # -B: run in non-interactive (batch) mode
         run: |
           cd /__w/OSOC-1/OSOC-1/temppath/backend
-          ./mvnw -e -X -B -DfailIfNoTests=false test --file pom.xml
+          mvn -e -X -B -DfailIfNoTests=false test --file pom.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
