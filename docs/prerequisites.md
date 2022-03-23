@@ -1,5 +1,9 @@
 # Prerequisites for development
 
+## Documentation
+
+A detailed explanation on how this project is being documented is available [here](documentation_standards.md).
+
 ## Setting up Husky and commit linting
 
 Husky is dependent on NodeJS, for this we use version 16.14.0 as it's the latest stable version. Make sure it's installed on your system, or do so like this:
