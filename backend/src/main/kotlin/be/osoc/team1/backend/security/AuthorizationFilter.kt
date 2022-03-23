@@ -20,6 +20,10 @@ import javax.servlet.http.HttpServletResponse
  *
  * Authorization will only succeed when the request contains an Authorization header with a valid access token.
  * This access token says which user is logged in and what permissions he has.
+ *
+ * The difference between [AuthenticationFilter] and this class([AuthorizationFilter]) is that [AuthorizationFilter]
+ * manages the authorities of users, or in other words what they are allowed to do. The [AuthenticationFilter] on the
+ * other hand is meant to verify the identity of a user by checking their credentials.
  */
 class AuthorizationFilter : OncePerRequestFilter() {
     /**
