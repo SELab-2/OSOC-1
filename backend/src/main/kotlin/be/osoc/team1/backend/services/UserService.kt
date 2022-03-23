@@ -47,8 +47,8 @@ class UserService(private val repository: UserRepository, private val passwordEn
 
         try {
             return repository.save(user).id
-        } catch (dbe: DataIntegrityViolationException) {
-            throw ForbiddenOperationException("User creation failed due to a DataIntegrityViolationException! Details: ${dbe.message}")
+        } catch (_: DataIntegrityViolationException) {
+            throw ForbiddenOperationException("User with email = '$email' already exists!")
         }
     }
 
