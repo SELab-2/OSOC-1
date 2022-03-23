@@ -33,9 +33,9 @@ class UserService(private val repository: UserRepository, private val passwordEn
 
     /**
      * Register a new [User] in the [repository]. Returns the id of the newly created user object. A
-     * [ForbiddenOperationException] will be thrown if a constraint on the user is violated. The most likely case of
-     * this happening is if there already exists another user with the specified email address. The newly created user
-     * will have the [Role.Disabled] role by default.
+     * [ForbiddenOperationException] will be thrown if a constraint on the user is violated. This should only happen if
+     * there already exists another user with the specified email address. The newly created user will have the
+     * [Role.Disabled] role by default.
      */
     fun registerUser(username: String, email: String, password: String): UUID {
         val user = User(
