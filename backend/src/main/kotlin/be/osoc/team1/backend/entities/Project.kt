@@ -19,6 +19,8 @@ import javax.persistence.OneToMany
 class Project(
     val name: String,
 
+    val clientName: String,
+
     val description: String,
 
     @ManyToMany(cascade = [CascadeType.ALL])

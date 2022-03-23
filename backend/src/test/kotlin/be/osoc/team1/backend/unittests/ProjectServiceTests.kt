@@ -24,8 +24,20 @@ class ProjectServiceTests {
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Lars", "Van Cauter")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
-    private val testProject = Project("Test", "a test project", mutableListOf(testStudent), mutableListOf(testCoach))
-    private val savedProject = Project("Saved", "a saved project", mutableListOf(testStudent), mutableListOf(testCoach))
+    private val testProject = Project(
+        "Test",
+        "Client",
+        "a test project",
+        mutableListOf(testStudent),
+        mutableListOf(testCoach)
+    )
+    private val savedProject = Project(
+        "Saved",
+        "Client",
+        "a saved project",
+        mutableListOf(testStudent),
+        mutableListOf(testCoach)
+    )
 
     private fun getRepository(projectAlreadyExists: Boolean): ProjectRepository {
         val repository: ProjectRepository = mockk()
@@ -154,9 +166,14 @@ class ProjectServiceTests {
         val testStudent = Student("Lars", "Van Cauter")
         val testStudent2 = Student("Lars2", "Van Cauter2")
         val testStudent3 = Student("Lars3", "Van Cauter3")
-        val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
-        val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent, testStudent2))
-        val testProjectConflict3 = Project("Test", "a test project", mutableListOf(testStudent2, testStudent3))
+        val testProjectConflict = Project("Test", "Client", "a test project", mutableListOf(testStudent))
+        val testProjectConflict2 = Project("Test", "Client", "a test project", mutableListOf(testStudent, testStudent2))
+        val testProjectConflict3 = Project(
+            "Test",
+            "Client",
+            "a test project",
+            mutableListOf(testStudent2, testStudent3)
+        )
         val repository = getRepository(true)
         every { repository.findAll() } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
         val service = ProjectService(repository)

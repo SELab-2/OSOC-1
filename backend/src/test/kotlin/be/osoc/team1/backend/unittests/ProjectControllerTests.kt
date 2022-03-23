@@ -36,7 +36,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var studentService: StudentService
 
     private val testId = UUID.randomUUID()
-    private val testProject = Project("Proj", "desc")
+    private val testProject = Project("Proj", "Client", "desc")
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testProject)
 
@@ -222,8 +222,8 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
         val testStudent = Student("Lars", "Van Cauter")
-        val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
-        val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent))
+        val testProjectConflict = Project("Test", "Client", "a test project", mutableListOf(testStudent))
+        val testProjectConflict2 = Project("Test", "Client", "a test project", mutableListOf(testStudent))
         val result = mutableListOf(ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
         every { projectService.getConflicts() } returns result
         mockMvc.perform(get("/projects/conflicts"))
