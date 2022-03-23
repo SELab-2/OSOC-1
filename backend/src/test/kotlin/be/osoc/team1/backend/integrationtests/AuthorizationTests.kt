@@ -136,7 +136,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     }
 
     /**
-     * Create a header that can be used for further requests based upon given credentials
+     * Create a header that can be used for further requests based upon given credentials 
      */
     fun getAuthenticatedHeader(email: String, password: String): HttpHeaders {
         val response: ResponseEntity<String> = loginUser(email, password)
