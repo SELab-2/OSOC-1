@@ -16,15 +16,19 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
- * Check if user passed a valid access token, and if user has right permissions.
- * If a valid access token is found, there is no more need for authentication.
+ * Add the [AuthorizationFilter] and [AuthenticationFilter] to the filter-chain (this is done in [SecurityConfig]).
+ * When a request comes in, the filter-chain will intercept it and the [AuthorizationFilter] will attempt to authorize
+ * the request.
+ * Authorization will only succeed when the request contains an Authorization header with a valid access token.
+ * This access token says which user is logged in and what permissions he has.
+ * If authorization fails, then the filter-chain will proceed to the next filter (in this case [AuthenticationFilter])
  */
 class AuthorizationFilter : OncePerRequestFilter() {
     /**
      * check if request is authorized by access token
      * Don't check authorization when the url is {baseurl}/api/login
      * extract access token from authorization header in request, and process the access token
-     * when this function is finished, just pass the request and response to the next filter (AuthenticationFilter)
+     * when this function is finished, just pass the request and response to the next filter ([AuthenticationFilter])
      */
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -70,7 +74,7 @@ class AuthorizationFilter : OncePerRequestFilter() {
 
     /**
      * extract the roles of the logged-in user from the token
-     * return the roles as SimpleGrantedAuthority as they need to be to work with UsernamePasswordAuthenticationToken
+     * return the roles as [SimpleGrantedAuthority] as they need to be to work with [UsernamePasswordAuthenticationToken]
      */
     private fun getAuthorities(decodedJWT: DecodedJWT): List<SimpleGrantedAuthority> {
         val roles: Array<String> = decodedJWT.getClaim("roles").asArray(String::class.java)

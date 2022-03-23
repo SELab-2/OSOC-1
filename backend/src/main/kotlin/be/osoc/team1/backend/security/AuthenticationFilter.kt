@@ -19,8 +19,15 @@ import javax.servlet.http.HttpServletResponse
 import kotlin.collections.HashMap
 
 /**
- * When the user is not yet authorized the AuthenticationFilter tries to authenticate the user
- * If the authentication is successful, then this class creates an access token.
+ * Add the [AuthorizationFilter] and [AuthenticationFilter] to the filter-chain (this is done in [SecurityConfig]).
+ * when a request comes in, the filter-chain will intercept it and the [AuthorizationFilter] will attempt to authorize
+ * the request.
+ * If authorization fails, then the filter-chain will proceed to the next filter which is [AuthenticationFilter]
+ * [AuthenticationFilter] will attempt to authenticate the request.
+ *
+ * Authentication will only succeed when the request contains valid user credentials (email and password).
+ * If the authentication is successful, then a response gets send with a new access token.
+ * The now authenticated user can use this access token to authorize himself in the following requests.
  */
 class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {

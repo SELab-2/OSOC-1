@@ -23,7 +23,7 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
      * set configuration to handle all incoming requests
      * authentication and authorization are configured to work stateless and thus to use tokens instead of cookies
      * Because we do not use cookies, there is no room for CSRF attacks, and no reason to put in CSRF protection
-     * First add AuthorizationFilter to check if user is authorized, if not, try to authenticate with the AuthenticationFilter
+     * First add [AuthorizationFilter] to check if user is authorized, if not, try to authenticate with the [AuthenticationFilter]
      */
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
@@ -41,7 +41,7 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
     }
 
     /**
-     * configure the right userDetailsService to work with our user database
+     * configure the right [userDetailsService] to work with our user database
      */
     @Autowired
     protected fun configureGlobal(auth: AuthenticationManagerBuilder) {
