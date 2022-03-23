@@ -15,6 +15,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 
@@ -76,7 +77,7 @@ class UserServiceTests {
         val service = UserService(repository, getPasswordEncoder())
 
         val slot = slot<User>()
-        every { repository.save(capture(slot)) } returns User("username", "password", Role.Disabled, "password")
+        every { repository.save(capture(slot)) } returns User("username", "email", Role.Disabled, "password")
 
         service.registerUser("username", "email", "password")
 
@@ -86,6 +87,16 @@ class UserServiceTests {
         assertEquals(capturedUser.email, "email")
         assertEquals(capturedUser.role, Role.Disabled)
         assertEquals(capturedUser.password, "Encoded password")
+    }
+
+    @Test
+    fun `registerUser fails if there is already a user with the same email in the database`() {
+        val repository = getRepository(true)
+        val service = UserService(repository, getPasswordEncoder())
+
+        every { repository.save(any()) }.throws(DataIntegrityViolationException("Duplicate email"))
+
+        assertThrows<ForbiddenOperationException> { service.registerUser("username", "email", "password") }
     }
 
     @Test
