@@ -189,7 +189,6 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         logoutResponse(loginResponse)
     }
 
-    // This should probably be changed to check for whatever is supposed to happen
     @Test
     fun `login works as disabled`() {
         val loginResponse: ResponseEntity<String> = loginUser(disabledEmail, disabledPassword)
@@ -204,19 +203,19 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val accessToken: String = JSONObject(loginResponse.body).get("accessToken") as String
         val authHeaders = HttpHeaders()
         authHeaders.add("Authorization", "Invalid $accessToken")
-        val getRequest = HttpEntity(null, authHeaders)
-        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, getRequest, String::class.java)
-        assert(getResponse.statusCodeValue == 403)
+        val request = HttpEntity(null, authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 403)
         logoutResponse(loginResponse)
     }
 
     @Test
     fun `access token can be used after login`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
-        val getRequest = HttpEntity(null, authHeaders)
-        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, getRequest, String::class.java)
+        val request = HttpEntity(null, authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
 
-        assert(getResponse.statusCodeValue == 200)
+        assert(response.statusCodeValue == 200)
         logoutHeader(authHeaders)
     }
 
@@ -229,44 +228,44 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     @Test
     fun `GET students works when logged in as admin`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
-        val getRequest = HttpEntity(null, authHeaders)
-        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, getRequest, String::class.java)
+        val request = HttpEntity(null, authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
 
-        assert(getResponse.statusCodeValue == 200)
-        assert(JSONArray(getResponse.body).getJSONObject(0).get("firstName") == testStudent.firstName)
-        assert(JSONArray(getResponse.body).getJSONObject(0).get("lastName") == testStudent.lastName)
+        assert(response.statusCodeValue == 200)
+        assert(JSONArray(response.body).getJSONObject(0).get("firstName") == testStudent.firstName)
+        assert(JSONArray(response.body).getJSONObject(0).get("lastName") == testStudent.lastName)
         logoutHeader(authHeaders)
     }
 
     @Test
     fun `GET students works when logged in as coach`() {
         val authHeaders = getAuthenticatedHeader(coachEmail, coachPassword)
-        val getRequest = HttpEntity(null, authHeaders)
-        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, getRequest, String::class.java)
+        val request = HttpEntity(null, authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
 
-        assert(getResponse.statusCodeValue == 200)
-        assert(JSONArray(getResponse.body).getJSONObject(0).get("firstName") == testStudent.firstName)
-        assert(JSONArray(getResponse.body).getJSONObject(0).get("lastName") == testStudent.lastName)
+        assert(response.statusCodeValue == 200)
+        assert(JSONArray(response.body).getJSONObject(0).get("firstName") == testStudent.firstName)
+        assert(JSONArray(response.body).getJSONObject(0).get("lastName") == testStudent.lastName)
         logoutHeader(authHeaders)
     }
 
     @Test
     fun `GET students returns 403 when logged in as disabled`() {
         val authHeaders = getAuthenticatedHeader(disabledEmail, disabledPassword)
-        val getRequest = HttpEntity(null, authHeaders)
-        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, getRequest, String::class.java)
+        val request = HttpEntity(null, authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
 
-        assert(getResponse.statusCodeValue == 403)
+        assert(response.statusCodeValue == 403)
         logoutHeader(authHeaders)
     }
 
     @Test
     fun `Authentication with invalid access token returns 401`() {
         val accessToken: String = "in.val.id"
-        val getRequest = HttpEntity(null, createAuthHeaders(accessToken))
+        val request = HttpEntity(null, createAuthHeaders(accessToken))
 
-        val getResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, getRequest, String::class.java)
-        assert(getResponse.statusCodeValue == 401)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 401)
     }
 
     @Test
@@ -274,10 +273,10 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val userId = coachUser.id
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         authHeaders.add("Content-Type", "application/json")
-        val postRequest = HttpEntity("\"Disabled\"", authHeaders)
-        val postResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, postRequest, String::class.java)
+        val request = HttpEntity("\"Disabled\"", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
-        assert(postResponse.statusCodeValue == 204)
+        assert(response.statusCodeValue == 204)
         assert(userRepository.findByEmail(coachUser.email).get(0).role == Role.Disabled)
         logoutHeader(authHeaders)
     }
@@ -287,10 +286,10 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val userId = disabledUser.id
         val authHeaders = getAuthenticatedHeader(coachEmail, coachPassword)
         authHeaders.add("Content-Type", "application/json")
-        val postRequest = HttpEntity("\"Coach\"", authHeaders)
-        val postResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, postRequest, String::class.java)
+        val request = HttpEntity("\"Coach\"", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
-        assert(postResponse.statusCodeValue == 403)
+        assert(response.statusCodeValue == 403)
         assert(userRepository.findByEmail(disabledUser.email).get(0).role == Role.Disabled)
         logoutHeader(authHeaders)
     }
@@ -300,10 +299,10 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val userId = coachUser.id
         val authHeaders = getAuthenticatedHeader(disabledEmail, disabledPassword)
         authHeaders.add("Content-Type", "application/json")
-        val postRequest = HttpEntity("\"Disabled\"", authHeaders)
-        val postResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, postRequest, String::class.java)
+        val request = HttpEntity("\"Disabled\"", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
-        assert(postResponse.statusCodeValue == 403)
+        assert(response.statusCodeValue == 403)
         assert(userRepository.findByEmail(coachUser.email).get(0).role == Role.Coach)
         logoutHeader(authHeaders)
     }
@@ -313,10 +312,10 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val userId = adminUser.id
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         authHeaders.add("Content-Type", "application/json")
-        val postRequest = HttpEntity("\"Disabled\"", authHeaders)
-        val postResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, postRequest, String::class.java)
+        val request = HttpEntity("\"Disabled\"", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
-        assert(postResponse.statusCodeValue == 403)
+        assert(response.statusCodeValue == 403)
         assert(userRepository.findByEmail(adminUser.email).get(0).role == Role.Admin)
         logoutHeader(authHeaders)
     }

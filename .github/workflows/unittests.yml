@@ -50,8 +50,8 @@ jobs:
       - name: Test with Maven
         # -B: run in non-interactive (batch) mode
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath
-          mvn -B -Dtest="unittests.**" -DfailIfNoTests=false test --file backend/pom.xml
+          cd /__w/OSOC-1/OSOC-1/temppath/backend
+          ./mvnw -B -Dtest="unittests.**" -DfailIfNoTests=false test --file pom.xml
 
       - name: remove temppath
         if: always()

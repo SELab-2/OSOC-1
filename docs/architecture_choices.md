@@ -1,6 +1,6 @@
 # Architectural choices
 
-This document explains why the technologies in the [c4 container diagram](docs/C4_container_diagram.png) were chosen.
+This document explains why the technologies in the [c4 container diagram](C4_container_diagram.png) were chosen.
 
 ## Frontend
 

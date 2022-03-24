@@ -16,32 +16,33 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
- * Check if user passed a valid access token, and if user has right permissions.
- * If a valid access token is found, there is no more need for authentication.
+ * This filter gets called by the filter-chain (see [SecurityConfig] for more info)
+ *
+ * Authorization will only succeed when the request contains an Authorization header with a valid access token.
+ * This access token says which user is logged in and what permissions he has.
+ *
+ * The difference between [AuthenticationFilter] and this class([AuthorizationFilter]) is that [AuthorizationFilter]
+ * manages the authorities of users, or in other words what they are allowed to do. The [AuthenticationFilter] on the
+ * other hand is meant to verify the identity of a user by checking their credentials.
  */
 class AuthorizationFilter : OncePerRequestFilter() {
     /**
-     * check if request is authorized by access token
-     * Don't check authorization when the url is {baseurl}/api/login
      * extract access token from authorization header in request, and process the access token
-     * when this function is finished, just pass the request and response to the next filter (AuthenticationFilter)
+     * when this function is finished, just pass the request and response to the next filter ([AuthenticationFilter])
      */
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        if (request.servletPath.equals("/api/login")) {
-            filterChain.doFilter(request, response)
-        } else {
-            val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
-            if (authorizationHeader?.startsWith("Basic ") == true) {
-                val accessToken: String = authorizationHeader.substring("Basic ".length)
-                interpretAccessToken(accessToken, request, response, filterChain)
-            } else {
-                filterChain.doFilter(request, response)
-            }
+        val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
+        if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
+            val accessToken: String = authorizationHeader.substring("Basic ".length)
+            interpretAccessToken(accessToken, request, response, filterChain)
+            return
         }
+
+        filterChain.doFilter(request, response)
     }
 
     /**
@@ -69,8 +70,8 @@ class AuthorizationFilter : OncePerRequestFilter() {
     }
 
     /**
-     * extract the roles of the logged-in user from the token
-     * return the roles as SimpleGrantedAuthority as they need to be to work with UsernamePasswordAuthenticationToken
+     * extract the roles of the logged in user from the token
+     * return the roles as [SimpleGrantedAuthority] as they need to be, to work with [UsernamePasswordAuthenticationToken]
      */
     private fun getAuthorities(decodedJWT: DecodedJWT): List<SimpleGrantedAuthority> {
         val roles: Array<String> = decodedJWT.getClaim("roles").asArray(String::class.java)
@@ -80,8 +81,8 @@ class AuthorizationFilter : OncePerRequestFilter() {
     }
 
     /**
-     * When an error occurs, don't throw it, send a response containing that error instead
-     * This function gets called when a token is passed, but it is invalid and therefor an error occurs
+     * This function gets called when an invalid token is passed, and therefor an error occurs
+     * When that error occurs, don't throw it, send a response containing that error instead
      */
     private fun respondException(response: HttpServletResponse, exception: Exception) {
         response.status = HttpStatus.UNAUTHORIZED.value()

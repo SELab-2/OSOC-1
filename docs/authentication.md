@@ -1,7 +1,7 @@
 ### Authenticate with username and password
 
 Send a POST request with the user's email and password to the api. The api will return an accessToken and a refreshToken(not implemented yet). \
-The accessToken is used for authorization, the refreshToken is used to renew the accessToken without having to re-enter your username and password. \
+The accessToken is used for authorization, the refreshToken is used to renew the accessToken without having to re-enter your email and password. \
 At this moment the refreshToken isn't implemented yet.
 ```bash
 curl --location --request POST 'http://localhost:8080/api/login' \

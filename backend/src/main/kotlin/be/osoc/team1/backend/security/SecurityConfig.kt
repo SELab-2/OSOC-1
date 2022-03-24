@@ -12,8 +12,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy
 
 /**
- * configuration of which urls require which authorizations
- * configuration of how authentication and authorization are handled
+ * [SecurityConfig] sets the configuration of how requests are handled, how users are authenticated and authorized.
+ *
+ * Authentication is verifying the identity of a user (using an email and a password). Authorization is verifying which
+ * resources this user has access to.
+ *
+ * Every incoming request will be handled by our [SecurityConfig] class. Some urls will be set to be accessible to all,
+ * other urls will require authorization to be accessed. Those requests that need authorization will get processed by
+ * the filter-chain. The filter-chain is just a list of filters that get called in a pre-configured order.
+ * The first filter in the filter-chain is the [AuthorizationFilter] and tries to authorize the request. If that fails,
+ * then the filter-chain proceeds to the next filter, the [AuthenticationFilter] which tries to authenticate the request.
  */
 @Configuration
 @EnableWebSecurity
@@ -23,7 +31,7 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
      * set configuration to handle all incoming requests
      * authentication and authorization are configured to work stateless and thus to use tokens instead of cookies
      * Because we do not use cookies, there is no room for CSRF attacks, and no reason to put in CSRF protection
-     * First add AuthorizationFilter to check if user is authorized, if not, try to authenticate with the AuthenticationFilter
+     * First add [AuthorizationFilter] to check if user is authorized, if not, try to authenticate with the [AuthenticationFilter]
      */
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
@@ -44,7 +52,8 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
     }
 
     /**
-     * configure the right userDetailsService to work with our user database
+     * configure [AuthenticationManagerBuilder] to use our [OsocUserDetailService]
+     * This configuration allows to easily log in users from our database using email and password
      */
     @Autowired
     protected fun configureGlobal(auth: AuthenticationManagerBuilder) {

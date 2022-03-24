@@ -8,6 +8,4 @@ import org.springframework.web.bind.annotation.ResponseStatus
  * (like removing a student from a project when that project doesn't have that student)
  */
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-class FailedOperationException(message: String? = "Failed operation", cause: Throwable? = null) : Exception(message, cause) {
-    constructor(cause: Throwable) : this(null, cause)
-}
+class FailedOperationException(message: String = "Failed operation", cause: Throwable? = null) : Exception(message, cause)

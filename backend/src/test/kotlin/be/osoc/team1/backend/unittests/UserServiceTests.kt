@@ -15,6 +15,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 
@@ -76,7 +77,7 @@ class UserServiceTests {
         val service = UserService(repository, getPasswordEncoder())
 
         val slot = slot<User>()
-        every { repository.save(capture(slot)) } returns User("username", "password", Role.Disabled, "password")
+        every { repository.save(capture(slot)) } returns User("username", "email", Role.Disabled, "password")
 
         service.registerUser("username", "email", "password")
 
@@ -89,7 +90,17 @@ class UserServiceTests {
     }
 
     @Test
-    fun `changeRole does not fail when a user with id exists and changes the role`() {
+    fun `registerUser fails if there is already a user with the same email in the database`() {
+        val repository = getRepository(true)
+        val service = UserService(repository, getPasswordEncoder())
+
+        every { repository.save(any()) }.throws(DataIntegrityViolationException("Duplicate email"))
+
+        assertThrows<ForbiddenOperationException> { service.registerUser("username", "email", "password") }
+    }
+
+    @Test
+    fun `changeRole does not fail when a user with id exists and admin changes the role`() {
         val repository = getRepository(true)
         val otherAdmin = User("Other admin", "otherAdmin@email.com", Role.Admin, "password")
         every { repository.findByRole(Role.Admin) } returns listOf(testUser, otherAdmin)
@@ -112,6 +123,25 @@ class UserServiceTests {
     fun `changeRole fails when no user with id exists`() {
         val service = UserService(getRepository(false), getPasswordEncoder())
         assertThrows<InvalidIdException> { service.changeRole(testId, Role.Coach) }
+    }
+
+    @Test
+    fun `changeRole does not fail even when changing to same role`() {
+        val repository = getRepository(true)
+        val testCoachUser = User("Coach", "coach@email.com", Role.Coach, "password")
+        val testCoachId = testCoachUser.id
+        every { repository.findByIdOrNull(testCoachId) } returns testCoachUser
+        every { repository.save(testCoachUser) } returns testCoachUser
+        val service = UserService(repository, getPasswordEncoder())
+        service.changeRole(testCoachId, Role.Disabled)
+        verify { repository.save(testCoachUser) }
+        assertEquals(testCoachUser.role, Role.Disabled)
+        service.changeRole(testCoachId, Role.Admin)
+        verify { repository.save(testCoachUser) }
+        assertEquals(testCoachUser.role, Role.Admin)
+        service.changeRole(testCoachId, Role.Admin)
+        verify { repository.save(testCoachUser) }
+        assertEquals(testCoachUser.role, Role.Admin)
     }
 
     @Test

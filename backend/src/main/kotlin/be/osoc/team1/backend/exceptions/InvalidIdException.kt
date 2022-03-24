@@ -8,7 +8,5 @@ import org.springframework.web.bind.annotation.ResponseStatus
  * the database.
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
-open class InvalidIdException(message: String? = "Invalid id", cause: Throwable? = null) :
-    Exception(message, cause) {
-    constructor(cause: Throwable) : this(null, cause)
-}
+open class InvalidIdException(message: String = "Invalid id", cause: Throwable? = null) :
+    Exception(message, cause)
