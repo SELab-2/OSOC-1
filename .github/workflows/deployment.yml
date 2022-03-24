@@ -31,6 +31,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Add env file to frontend directory
+        run: ln /home/selab2/.env .
+        working-directory: ./frontend
       - name: Install and update yarn
         run: npm install -g yarn
       - name: Install yarn dependencies
