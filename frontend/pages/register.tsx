@@ -14,6 +14,7 @@ import {
 } from '../atoms/registerAtoms';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/router';
+import Endpoints from '../lib/endpoints';
 
 /**
  * Register page for OSOC application
@@ -45,11 +46,7 @@ const register = () => {
       password: password,
     };
 
-    const url =
-      ((process.env.API_ENDPOINT as string) || 'http://localhost:8080/api') +
-      '/users';
-
-    const req = fetch(url, {
+    const req = fetch(Endpoints.USERS, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -91,7 +88,9 @@ const register = () => {
             Name
             <input
               className={`mt-1 box-border block h-8 w-full border-2 ${
-                validName || name.length === 0 ? 'border-[#C4C4C4]' : 'border-red-500'
+                validName || name.length === 0
+                  ? 'border-[#C4C4C4]'
+                  : 'border-red-500'
               } p-1 text-sm`}
               name="name"
               type="text"
@@ -103,7 +102,9 @@ const register = () => {
             Email Address
             <input
               className={`mt-1 box-border block h-8 w-full border-2 ${
-                validEmail|| email.length === 0 ? 'border-[#C4C4C4]' : 'border-red-500'
+                validEmail || email.length === 0
+                  ? 'border-[#C4C4C4]'
+                  : 'border-red-500'
               } p-1 text-sm`}
               name="email"
               type="email"
@@ -115,7 +116,9 @@ const register = () => {
             Password
             <input
               className={`mt-1 box-border block h-8 w-full border-2 ${
-                validPassword || password.length === 0 ? 'border-[#C4C4C4]' : 'border-red-500'
+                validPassword || password.length === 0
+                  ? 'border-[#C4C4C4]'
+                  : 'border-red-500'
               } p-1 text-sm`}
               name="password"
               type="password"
@@ -129,7 +132,9 @@ const register = () => {
             Repeat Password
             <input
               className={`mt-1 box-border block h-8 w-full border-2 ${
-                validRepeatPassword || repeatPassword.length === 0 ? 'border-[#C4C4C4]' : 'border-red-500'
+                validRepeatPassword || repeatPassword.length === 0
+                  ? 'border-[#C4C4C4]'
+                  : 'border-red-500'
               } p-1 text-sm`}
               name="repeatPassword"
               type="password"

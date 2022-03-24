@@ -1,5 +1,4 @@
 import { NextApiRequest } from 'next';
-import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 
 /*
@@ -15,28 +14,15 @@ type NextMiddlewareRequest = NextApiRequest & NextRequest;
  */
 export async function middleware(req: NextMiddlewareRequest) {
   // Token will exist if user is logged in
-  const token = await getToken({ req, secret: process.env.JWT_SECRET });
+  const token = '';
+  console.log(req);
 
   const { pathname } = req.nextUrl;
 
   /**
    *  We allow the request to be made if:
    *  - It contains a valid token (which means the user is logged in)
-   *  - It is trying to make a request to the authentication point
    */
-
-  if (pathname.includes('/api/auth')) {
-    return NextResponse.next();
-  }
-
-  if (token) {
-    // Check if the user account is disabled
-
-    // if disabled, redirect to wait page
-    const url = req.nextUrl.clone();
-    url.pathname = '/wait';
-    return NextResponse.redirect(url);
-  }
 
   // clone the url to use in the redirect because NextJS 12.1 does not allow relative URLs anymore
   const url = req.nextUrl.clone();

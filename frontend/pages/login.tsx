@@ -1,75 +1,62 @@
-import { getCsrfToken, getProviders, signIn } from 'next-auth/react';
-import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { FormEventHandler, useState } from 'react';
+import toast from 'react-hot-toast';
 import FormContainer from '../components/FormContainer';
-
-/**
- * a Providers type to use in the OAuth2 buttons, this will eventually be removed when
- * authentication is fixed
- *
- * @see {@link https://next-auth.js.org/configuration/providers/oauth | NextAuth Providers}
- */
-type Providers = {
-  github: {
-    name: string;
-    id: string;
-  };
-};
-
-/**
- * NextJS SSR function to load required props into the React component
- * {@label LoginSSR}
- *
- * @remarks
- * Before sending the page, it will acquire the csrftoken and the providers.
- * The providers here are the OAuth2 providers, this will be removed eventually.
- * The csrfToken is necessary for the credentials login form.
- *
- * @see {@link https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props | GetServerSideProps function}
- * @see {@link https://next-auth.js.org/configuration/providers/credentials | Credentials Login}
- * @see {@link https://next-auth.js.org/configuration/providers/oauth | NextAuth Providers}
- *
- * @param context - Next application context
- * @returns server-side props csrfToken and providers
- */
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  return {
-    props: {
-      csrfToken: await getCsrfToken(context),
-      providers: await getProviders(),
-    },
-  };
-};
+import Endpoints from '../lib/endpoints';
 
 /**
  * Login page for OSOC application
  *
- * @see {@link LoginSSR | Login Server-Side Rendering props}
  * @returns Login Page
  */
-const Login = ({
-  csrfToken,
-  providers,
-}: {
-  csrfToken: string | undefined;
-  providers: Providers;
-}) => {
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const router = useRouter();
+
+  const loginUser: FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+
+    if (email && password) {
+      const params = new URLSearchParams({
+        email,
+        password,
+      });
+
+      const request = fetch(Endpoints.LOGIN, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params,
+      });
+
+      const response = await request;
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        router.push('/wait');
+      } else {
+        toast.error('An error occurred while trying to log in.');
+      }
+    }
+  };
+
   return (
     <>
       <FormContainer pageTitle="LOGIN">
-        <form
-          className="mb-1 w-11/12 max-w-md"
-          method="post"
-          action="/api/auth/callback/credentials"
-        >
-          {/* Necessary for next-auth credentials login */}
-          <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+        <form className="mb-1 w-11/12 max-w-md" onSubmit={loginUser}>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             Email Address
             <input
               className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
               name="email"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
@@ -78,9 +65,10 @@ const Login = ({
               className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
               name="password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </label>
-          {/* This button doesn't do anything right now because the login flow isn't implemented yet */}
           <button
             className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
             type="submit"
@@ -88,8 +76,8 @@ const Login = ({
             Log in
           </button>
           <Link href="/register">
-            <p className="text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer mt-2">
-              no account yet? <br/> register here!
+            <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+              no account yet? <br /> register here!
             </p>
           </Link>
           <p className="hr-sect pt-4 pb-2 text-sm font-medium opacity-80 lg:pb-4">
@@ -98,10 +86,10 @@ const Login = ({
           {/* Github provider. Right now, this doesn't work*/}
           <button
             className="bg-[#302727] px-4 py-1 text-white shadow-sm shadow-gray-300"
-            onClick={() => signIn(providers.github.id)}
+            onClick={() => 'click'}
             disabled={true}
           >
-            <p className="text-right">{providers.github.name}</p>
+            <p className="text-right">Github</p>
           </button>
         </form>
       </FormContainer>
