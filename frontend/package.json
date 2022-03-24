@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
+    "build": "next build",
     "start": "next start",
     "lint": "yarn run eslint . --ext .js,.jsx,.ts,.tsx",
     "prettier:check": "yarn prettier --check .",
