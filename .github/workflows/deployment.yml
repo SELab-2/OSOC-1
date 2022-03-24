@@ -42,9 +42,10 @@ jobs:
       - name: Build react frontend with yarn
         run: yarn build
         working-directory: ./frontend
-      - name: Copy react build files to production folder
-        run: cp -R out/ /home/selab2/production/
-        working-directory: ./frontend
+      - name: Copy react files to production folder
+        run: cp -R frontend/ /home/selab2/production/
+      - name: Run the react app
+        run: sudo -E /home/selab2/production/start_frontend.sh
 
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v2
