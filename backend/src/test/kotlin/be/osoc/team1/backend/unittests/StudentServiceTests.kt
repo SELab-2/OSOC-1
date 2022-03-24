@@ -42,7 +42,14 @@ class StudentServiceTests {
         every { repository.deleteById(studentId) } just Runs
         val differentIdTestStudent = Student("Tom", "Alard")
         every { repository.save(testStudent) } returns differentIdTestStudent
+        every { repository.findAll() } returns listOf(testStudent)
         return repository
+    }
+
+    @Test
+    fun `getAllStudents does not fail`() {
+        val service = StudentService(getRepository(true), userService)
+        assertEquals(service.getAllStudents(), listOf(testStudent))
     }
 
     @Test
@@ -113,7 +120,10 @@ class StudentServiceTests {
         every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
         val service = StudentService(repository, customUserService)
         service.addStudentStatusSuggestion(studentId, testSuggestion)
+        val suggestionId = testSuggestion.id
         verify { student.statusSuggestions.add(testSuggestion) }
+        assert(testSuggestion.id == suggestionId)
+        assert(testSuggestion.student == student)
     }
 
     @Test
@@ -128,7 +138,9 @@ class StudentServiceTests {
     fun `addStudentStatusSuggestion fails when coach already made suggestion for student`() {
         val repository: StudentRepository = mockk()
         val student: Student = mockk()
-        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
+        val coachId2 = UUID.randomUUID()
+        val testSuggestion2 = StatusSuggestion(coachId2, SuggestionEnum.No, "test motivation2")
+        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion2, testSuggestion).iterator()
         every { repository.findByIdOrNull(studentId) } returns student
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
@@ -157,8 +169,10 @@ class StudentServiceTests {
     fun `deleteStudentStatusSuggestion removes suggestion when student, suggestion and coach exist`() {
         val repository: StudentRepository = mockk()
         val student: Student = mockk()
+        val coachId2 = UUID.randomUUID()
+        val testSuggestion2 = StatusSuggestion(coachId2, SuggestionEnum.No, "test motivation2")
         every { student.statusSuggestions.remove(testSuggestion) } returns true
-        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion).iterator()
+        every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion2, testSuggestion).iterator()
         every { repository.findByIdOrNull(studentId) } returns student
         every { repository.save(student) } returns student
         val customUserService: UserService = mockk()
