@@ -58,7 +58,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         authentication: Authentication
     ) {
         val authenticatedUser: User = authentication.principal as User
-        val accessToken: String = createToken(authenticatedUser, 5)
+        val accessToken: String = createToken(authenticatedUser, 30)
 
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken
