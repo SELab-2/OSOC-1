@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/gh/SELab-2/OSOC-1/branch/development/graph/badge.svg?token=MMQ3O47UXB)](https://codecov.io/gh/SELab-2/OSOC-1)
 
 ## Understanding this project
-The `docs/` folder contains a lot of useful documentation to help you understand the project. [This](docs/C4_container_diagram.png) diagram shows the high level overview of the application, while [this](docs/endpoint_structure.png) diagram zooms in on the structure used in the backend. [This](docs/architecture_choices.md) document justifies the chosen technologies for the entire tech stack. Finally, The domain model is available [here](docs/domain_model.png).
+The `docs/` folder contains a lot of useful documentation to help you understand the project. [This](docs/C4_container_diagram.png) diagram shows the high level overview of the application, while [this](docs/endpoint_structure.png) diagram zooms in on the structure used in the backend. [This](docs/architecture_choices.md) document justifies the chosen technologies for the entire tech stack. Finally, the domain model is available [here](docs/domain_model.png).
 
 ## Installation
 
