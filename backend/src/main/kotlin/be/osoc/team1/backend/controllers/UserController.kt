@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.services.UserService
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -25,12 +26,14 @@ class UserController(private val service: UserService) {
      * Get all [User] objects stored in the database.
      */
     @GetMapping
+    @Secured("ROLE_COACH")
     fun getAllUsers() = service.getAllUsers()
 
     /**
      * Get a [User] object using their [id]. If the user does not exist 404 will be returned.
      */
     @GetMapping("/{id}")
+    @Secured("ROLE_COACH")
     fun getUserById(@PathVariable id: UUID): User = service.getUserById(id)
 
     /**
@@ -38,6 +41,7 @@ class UserController(private val service: UserService) {
      * containing the url to the updated resource.
      */
     @PatchMapping("/{id}")
+    @Secured("ROLE_ADMIN")
     fun patchUser(@PathVariable id: UUID, @RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse) {
         if (id != user.id)
             throw FailedOperationException("Request url id=\"$id\" did not match request body id=\"${user.id}\"")
@@ -51,16 +55,17 @@ class UserController(private val service: UserService) {
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_ADMIN")
     fun deleteUser(@PathVariable id: UUID) = service.deleteUserById(id)
 
     /**
-     * Save a new [User] object in the  database. The id of the user will be returned. The response will also contain a
+     * Register a new [User]. The id of the new user will be returned. The response will also contain a
      * Location header containing the url to the newly created resource.
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody user: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
-        val id = service.postUser(user)
+    fun postUser(@RequestBody userRegistration: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
+        val id = service.registerUser(userRegistration.username, userRegistration.email, userRegistration.password)
         responseHeader.addHeader("Location", request.requestURL.toString() + "/$id")
         return id
     }
@@ -70,5 +75,6 @@ class UserController(private val service: UserService) {
      */
     @PostMapping("/{id}/role")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_ADMIN")
     fun postUserRole(@PathVariable id: UUID, @RequestBody role: Role) = service.changeRole(id, role)
 }

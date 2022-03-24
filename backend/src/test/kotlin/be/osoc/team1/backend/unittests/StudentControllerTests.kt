@@ -18,7 +18,6 @@ import io.mockk.every
 import io.mockk.just
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
@@ -29,7 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
-@WebMvcTest(StudentController::class)
+@UnsecuredWebMvcTest(StudentController::class)
 class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @MockkBean
@@ -45,7 +44,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents should not fail`() {
         every { studentService.getAllStudents() } returns emptyList()
-        mockMvc.perform(get("/students")).andExpect(status().isOk)
+        mockMvc.perform(get("/students"))
+            .andExpect(status().isOk)
     }
 
     @Test

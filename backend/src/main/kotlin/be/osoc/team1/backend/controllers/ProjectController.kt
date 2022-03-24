@@ -7,6 +7,7 @@ import be.osoc.team1.backend.services.ProjectService
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,12 +28,14 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      * Get all projects from service
      */
     @GetMapping
+    @Secured("ROLE_COACH")
     fun getAllProjects(): Iterable<Project> = service.getAllProjects()
 
     /**
      * Get a project by its [projectId], if this id doesn't exist the service will return a 404
      */
     @GetMapping("/{projectId}")
+    @Secured("ROLE_COACH")
     fun getProjectById(@PathVariable projectId: UUID): Project = service.getProjectById(projectId)
 
     /**
@@ -40,6 +43,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      */
     @DeleteMapping("/{projectId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_ADMIN")
     fun deleteProjectById(@PathVariable projectId: UUID) = service.deleteProjectById(projectId)
 
     /**
@@ -48,6 +52,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
+    @Secured("ROLE_ADMIN")
     fun postProject(
         @RequestBody project: Project,
         request: HttpServletRequest,
@@ -61,6 +66,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
      */
     @GetMapping("/{projectId}/students")
+    @Secured("ROLE_COACH")
     fun getStudentsOfProject(@PathVariable projectId: UUID): Collection<Student> =
         service.getProjectById(projectId).students
 
@@ -70,6 +76,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      */
     @PostMapping("/{projectId}/students")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_COACH")
     fun postStudentToProject(@PathVariable projectId: UUID, @RequestBody studentId: UUID) {
         val student = studentService.getStudentById(studentId)
         service.addStudentToProject(projectId, student)
@@ -80,6 +87,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      */
     @DeleteMapping("/{projectId}/students/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_COACH")
     fun deleteStudentFromProject(@PathVariable projectId: UUID, @PathVariable studentId: UUID) =
         service.removeStudentFromProject(projectId, studentId)
 
@@ -87,6 +95,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      * Gets all coaches of a project, if this [projectId] doesn't exist the service will return a 404
      */
     @GetMapping("/{projectId}/coaches")
+    @Secured("ROLE_COACH")
     fun getCoachesOfProject(@PathVariable projectId: UUID): Collection<User> =
         service.getProjectById(projectId).coaches
 
@@ -95,6 +104,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      */
     @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_ADMIN")
     fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coach: User) =
         service.addCoachToProject(projectId, coach)
 
@@ -103,6 +113,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      */
     @DeleteMapping("/{projectId}/coaches/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_ADMIN")
     fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID) =
         service.removeCoachFromProject(projectId, coachId)
 
@@ -122,6 +133,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      * ```
      */
     @GetMapping("/conflicts")
+    @Secured("ROLE_COACH")
     fun getProjectConflicts(): MutableList<ProjectService.Conflict> = service.getConflicts()
 
     @PostMapping("/{projectId}/roles/{roleId}")

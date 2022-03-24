@@ -5,12 +5,14 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.UserRepository
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class UserService(private val repository: UserRepository) {
+class UserService(private val repository: UserRepository, private val passwordEncoder: PasswordEncoder) {
 
     fun getAllUsers(): Iterable<User> = repository.findAll()
 
@@ -30,9 +32,25 @@ class UserService(private val repository: UserRepository) {
     }
 
     /**
-     * Save [user] in the [repository]. Returns the id of the newly saved user object.
+     * Register a new [User] in the [repository]. Returns the id of the newly created user object. A
+     * [ForbiddenOperationException] will be thrown if a constraint on the user is violated. This should only happen if
+     * there already exists another user with the specified email address. The newly created user will have the
+     * [Role.Disabled] role by default.
      */
-    fun postUser(user: User): UUID = repository.save(user).id
+    fun registerUser(username: String, email: String, password: String): UUID {
+        val user = User(
+            username,
+            email,
+            Role.Disabled,
+            passwordEncoder.encode(password)
+        )
+
+        try {
+            return repository.save(user).id
+        } catch (_: DataIntegrityViolationException) {
+            throw ForbiddenOperationException("User with email = '$email' already exists!")
+        }
+    }
 
     /**
      * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidUserIdException]
