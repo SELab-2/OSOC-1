@@ -1,0 +1,27 @@
+# don't ever lint node_modules
+node_modules/
+# don't lint build output
+.next/
+
+# other js config files
+.eslintrc.js
+next-env.d.ts
+next.config.js
+postcss.config.js
+prettier.config.js
+tailwind.config.js
+
+# Ignore main frontend directory
+frontend/*
+# Include subdirectories in frontend
+!frontend/pages/
+!frontend/public/
+!frontend/src/
+!frontend/styles/
+
+# Ignores for manual runs
+/*
+!pages/
+!public/
+!src/
+!styles/

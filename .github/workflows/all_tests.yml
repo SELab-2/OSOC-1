@@ -1,0 +1,68 @@
+name: Run backend all tests with maven
+
+on:
+  push:
+    branches: [ master, development ]
+  pull_request:
+    branches: 
+      - '**'
+
+jobs:
+  container-job:
+
+    runs-on: self-hosted
+    container:
+      image: mikxox/maven-test-action:latest
+    env:
+      GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      # Need to actually run a postgres container to allow app to build
+      postgres:
+        image: postgres
+        ports:
+          - 5432
+
+        env:
+          POSTGRES_USER: ${{ secrets.database_username }}
+          POSTGRES_PASSWORD: ${{ secrets.database_password }}
+          POSTGRES_DB: ${{ secrets.database_name }}
+
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: 'temppath'
+
+      - name: Test with Maven
+        # -B: run in non-interactive (batch) mode
+        run: |
+          cd /__w/OSOC-1/OSOC-1/temppath/backend
+          ./mvnw -B -DfailIfNoTests=false test --file pom.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: /__w/OSOC-1/OSOC-1/temppath
+          working-directory: /__w/OSOC-1/OSOC-1/temppath
+          root_dir: /__w/OSOC-1/OSOC-1/temppath
+          fail_ci_if_error: true
+          files: /__w/OSOC-1/OSOC-1/temppath/backend/target/site/jacoco/jacoco.xml
+          flags: all_tests
+          name: codecov-umbrella
+          verbose: true
+
+      - name: remove temppath
+        if: always()
+        run: |
+          cd /__w/OSOC-1/OSOC-1/
+          sudo rm -rf temppath
