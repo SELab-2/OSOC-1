@@ -132,7 +132,7 @@ class UserServiceTests {
         val testCoachId = testCoachUser.id
         every { repository.findByIdOrNull(testCoachId) } returns testCoachUser
         every { repository.save(testCoachUser) } returns testCoachUser
-        val service = UserService(repository)
+        val service = UserService(repository, getPasswordEncoder())
         service.changeRole(testCoachId, Role.Disabled)
         verify { repository.save(testCoachUser) }
         assertEquals(testCoachUser.role, Role.Disabled)
