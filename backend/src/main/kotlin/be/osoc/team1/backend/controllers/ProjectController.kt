@@ -73,6 +73,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     /**
      * Assign a student to a project, [studentId] is placed in the request body,
      * if this [projectId] doesn't exist the service will return a 404
+     * if the student is already assigned to the project nothing will change
      */
     @PostMapping("/{projectId}/students")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
