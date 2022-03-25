@@ -6,8 +6,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 
 /**
- * Passwords need to get encoded before being sent over the network, otherwise they can be read when an authentication
- * request would get intercepted.
+ * Passwords need to be encoded before being saved in the database, otherwise anyone accessing a user database on a
+ * company's servers (including hackers) could easily view any stored passwords.
  *
  * In this project we use the [BCryptPasswordEncoder] to encode the passwords. [BCryptPasswordEncoder] is currently the
  * most popular password encoder. The [BCryptPasswordEncoder] implementation uses the widely supported bcrypt algorithm
@@ -25,9 +25,9 @@ import org.springframework.security.crypto.password.PasswordEncoder
  * increment it you double the amount of work needed, and the time your app will take to check a password. Here, the
  * strength parameter is set to 10, this is tuned to take about 1 second to verify a password.
  *
+ * Below is discussed why [BCryptPasswordEncoder] is chosen above the three other most popular password encoders.
  * Pbkdf2PasswordEncoder is a good choice if FIPS certification would be required, but Pbkdf2 is not memory hard and
  * thus is weaker than bcrypt.
- *
  * SCryptPasswordEncoder is a good alternative to [BCryptPasswordEncoder], but use more memory.
  * Argon2PasswordEncoder also uses more memory then [BCryptPasswordEncoder]. Argon is also stronger than bcrypt but
  * only when runtimes exceed 1 second. Finally, we want something that does not need specific tuning a client might not
