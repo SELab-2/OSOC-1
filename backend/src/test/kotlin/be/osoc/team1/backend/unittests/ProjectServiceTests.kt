@@ -172,4 +172,17 @@ class ProjectServiceTests {
         assert(conflict.student == testStudent.id)
         assert(conflict.projects == mutableListOf<UUID>())
     }
+
+    @Test
+    fun `adding student twice to a project should fail`(){
+        val testStudent = Student("Lars", "Van Cauter")
+        val testProject = Project("Test", "a test project")
+        val repository = getRepository(false)
+        every { repository.findAll() } returns mutableListOf(testProject)
+        every { repository.findByIdOrNull(any()) } returns testProject
+        val service = ProjectService(repository)
+        service.addStudentToProject(testProject.id,testStudent)
+        service.addStudentToProject(testProject.id,testStudent)
+        assert(testProject.students == mutableListOf(testStudent))
+    }
 }
