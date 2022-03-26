@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.unittests
 
+import InvalidAssignmentIdException
 import InvalidRoleRequirementIdException
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
@@ -11,6 +12,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.repositories.ProjectRepository
 import be.osoc.team1.backend.repositories.RoleRequirementRepository
 import be.osoc.team1.backend.services.ProjectService
@@ -285,6 +287,25 @@ class ProjectServiceTests {
         val assignment = Assignment(differentStudent, testProject.requiredRoles[0], suggester, "reason")
         testProject.assignments.add(assignment)
         assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
+        testProject.assignments.remove(assignment)
+    }
+
+    @Test
+    fun `deleteAssignment fails if the assignment is not part of the project`() {
+        val service = ProjectService(getRepository(true), getRoleRepository(), mockk(), getStudentService(true), getUserService(suggester))
+        assertThrows<InvalidAssignmentIdException> { service.deleteAssignment(testProject.id, UUID.randomUUID()) }
+    }
+
+    @Test
+    fun `deleteAssignment does not fail if the assignment is part of the project`() {
+        val assignmentRepository: AssignmentRepository = mockk()
+        val service = ProjectService(getRepository(true), getRoleRepository(), assignmentRepository, getStudentService(true), getUserService(suggester))
+
+        val assignment = Assignment(testStudent, testProject.requiredRoles[0], suggester, "reason")
+        every  { assignmentRepository.findByIdOrNull(assignment.id) } returns assignment
+
+        testProject.assignments.add(assignment)
+        service.deleteAssignment(testProject.id, assignment.id)
         testProject.assignments.remove(assignment)
     }
 }
