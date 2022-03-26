@@ -28,10 +28,18 @@ import org.springframework.security.config.http.SessionCreationPolicy
 @EnableGlobalMethodSecurity(securedEnabled = true)
 class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurityConfigurerAdapter() {
     /**
-     * set configuration to handle all incoming requests
-     * authentication and authorization are configured to work stateless and thus to use tokens instead of cookies
-     * Because we do not use cookies, there is no room for CSRF attacks, and no reason to put in CSRF protection
-     * First add [AuthorizationFilter] to check if user is authorized, if not, try to authenticate with the [AuthenticationFilter]
+     * Set configuration to handle all incoming requests.
+     * Authentication and authorization are configured to work stateless and don't use any cookies.
+     *
+     * Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted actions on a web
+     * application in which they’re currently authenticated. With a little help of social engineering (such as sending a
+     * link via email or chat), an attacker may trick the users of a web application into executing actions of the
+     * attacker’s choosing. CSRF could compromise the entire web application. Luckily, these attacks rely on
+     * cookie-based session handling. Because we do not use cookies for authentication or authorization, there is no
+     * room for CSRF attacks, so we can safely disable CSRF protection.
+     *
+     * First add [AuthorizationFilter] to check if user is authorized, if not, try to authenticate with the
+     * [AuthenticationFilter].
      */
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
