@@ -1,9 +1,7 @@
 package be.osoc.team1.backend.entities
 
-import org.hibernate.annotations.GenericGenerator
 import java.util.UUID
 import javax.persistence.Entity
-import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 enum class CommunicationTypeEnum {
@@ -20,7 +18,5 @@ class Communication(
     val type: CommunicationTypeEnum
 ) {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     var id: UUID = UUID.randomUUID()
 }
