@@ -47,8 +47,8 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     fun deleteProjectById(@PathVariable projectId: UUID) = service.deleteProjectById(projectId)
 
     /**
-     * Creates a project from the request body, this can also override an already existing project
-     * returns the id of the project
+     * Creates a project from the request body, this can also override an already existing project.
+     * Returns the created project.
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
@@ -57,9 +57,10 @@ class ProjectController(private val service: ProjectService, @Autowired private 
         @RequestBody project: Project,
         request: HttpServletRequest,
         responseHeader: HttpServletResponse
-    ) {
-        val projectId = service.postProject(project)
-        responseHeader.addHeader("Location", request.requestURL.toString() + "/$projectId")
+    ): Project {
+        val createdProject = service.postProject(project)
+        responseHeader.addHeader("Location", request.requestURL.toString() + "/${createdProject.id}")
+        return createdProject
     }
 
     /**

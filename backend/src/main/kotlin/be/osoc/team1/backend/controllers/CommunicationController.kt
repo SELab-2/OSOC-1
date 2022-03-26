@@ -49,15 +49,17 @@ class CommunicationController(
     @PostMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun createCommunication(@PathVariable studentId: UUID, @RequestBody communication: Communication): ResponseEntity<Void> {
-        val id = communicationService.createCommunication(communication)
-        communication.id = id
+    fun createCommunication(@PathVariable studentId: UUID, @RequestBody communication: Communication): ResponseEntity<Communication> {
+        val createdCommunication = communicationService.createCommunication(communication)
         studentService.addCommunicationToStudent(studentId, communication)
         val location = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(id)
+            .buildAndExpand(createdCommunication.id)
             .toUriString()
-        return ResponseEntity.status(HttpStatus.CREATED).header(HttpHeaders.LOCATION, location).build()
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .header(HttpHeaders.LOCATION, location)
+            .body(createdCommunication)
     }
 }

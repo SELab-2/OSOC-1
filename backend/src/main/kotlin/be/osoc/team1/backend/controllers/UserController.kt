@@ -59,15 +59,15 @@ class UserController(private val service: UserService) {
     fun deleteUser(@PathVariable id: UUID) = service.deleteUserById(id)
 
     /**
-     * Register a new [User]. The id of the new user will be returned. The response will also contain a
+     * Register a new [User]. The created user will be returned. The response will also contain a
      * Location header containing the url to the newly created resource.
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody userRegistration: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
-        val id = service.registerUser(userRegistration.username, userRegistration.email, userRegistration.password)
-        responseHeader.addHeader("Location", request.requestURL.toString() + "/$id")
-        return id
+    fun postUser(@RequestBody userRegistration: User, request: HttpServletRequest, responseHeader: HttpServletResponse): User {
+        val createdUser = service.registerUser(userRegistration.username, userRegistration.email, userRegistration.password)
+        responseHeader.addHeader("Location", request.requestURL.toString() + "/${createdUser.id}")
+        return createdUser
     }
 
     /**

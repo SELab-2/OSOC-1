@@ -64,14 +64,17 @@ class StudentController(private val service: StudentService) {
      */
     @PostMapping
     @Secured("ROLE_COACH")
-    fun addStudent(@RequestBody student: Student): ResponseEntity<Void> {
-        val id = service.addStudent(student)
+    fun addStudent(@RequestBody student: Student): ResponseEntity<Student> {
+        val createdStudent = service.addStudent(student)
         val location = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(id)
+            .buildAndExpand(createdStudent.id)
             .toUriString()
-        return ResponseEntity.status(HttpStatus.CREATED).header(HttpHeaders.LOCATION, location).build()
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .header(HttpHeaders.LOCATION, location)
+            .body(createdStudent)
     }
 
     /**
