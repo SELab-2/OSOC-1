@@ -302,7 +302,7 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(true), getRoleRepository(), assignmentRepository, getStudentService(true), getUserService(suggester))
 
         val assignment = Assignment(testStudent, testProject.requiredRoles[0], suggester, "reason")
-        every  { assignmentRepository.findByIdOrNull(assignment.id) } returns assignment
+        every { assignmentRepository.findByIdOrNull(assignment.id) } returns assignment
 
         testProject.assignments.add(assignment)
         service.deleteAssignment(testProject.id, assignment.id)
