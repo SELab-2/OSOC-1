@@ -1,14 +1,21 @@
 package be.osoc.team1.backend.unittests
 
+import InvalidRoleRequirementIdException
+import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.RoleRequirement
+import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
 import be.osoc.team1.backend.repositories.RoleRequirementRepository
 import be.osoc.team1.backend.services.ProjectService
+import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.UserService
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -25,12 +32,14 @@ class ProjectServiceTests {
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Lars", "Van Cauter")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
+    private val testSkill = Skill("Backend")
     private val testProject = Project(
         "Test",
         "Client",
         "a test project",
         mutableListOf(testStudent),
-        mutableListOf(testCoach)
+        mutableListOf(testCoach),
+        listOf(RoleRequirement(testSkill, 1))
     )
     private val savedProject = Project(
         "Saved",
@@ -39,6 +48,7 @@ class ProjectServiceTests {
         mutableListOf(testStudent),
         mutableListOf(testCoach)
     )
+    private val suggester = User("username", "email", Role.Coach, "password")
 
     private fun getRepository(projectAlreadyExists: Boolean): ProjectRepository {
         val repository: ProjectRepository = mockk()
@@ -52,6 +62,21 @@ class ProjectServiceTests {
 
     private fun getRoleRepository(): RoleRequirementRepository {
         return mockk()
+    }
+
+    private fun getStudentService(hasSkill: Boolean): StudentService {
+        val service = mockk<StudentService>()
+        val skills = mutableSetOf<Skill>()
+        if (hasSkill) skills.add(testSkill)
+        val student = Student("firstname", "lastname", skills)
+        every { service.getStudentById(any()) } returns student
+        return service
+    }
+
+    fun getUserService(user: User): UserService {
+        val service = mockk<UserService>()
+        every { service.getUserById(user.id) } returns user
+        return service
     }
 
     @Test
@@ -193,5 +218,73 @@ class ProjectServiceTests {
         val conflict = ProjectService.Conflict(testStudent.id)
         assert(conflict.student == testStudent.id)
         assert(conflict.projects == mutableListOf<UUID>())
+    }
+
+    @Test
+    fun `postAssignment succeeds if everything is correct`() {
+        val service = ProjectService(getRepository(true), getRoleRepository(), mockk(), getStudentService(true), getUserService(suggester))
+        val assignmentPost = ProjectService.AssignmentPost(
+            testStudent.id,
+            testProject.requiredRoles[0].id,
+            suggester.id,
+            "reason"
+        )
+        service.postAssignment(testProject.id, assignmentPost)
+    }
+
+    @Test
+    fun `postAssignment fails if role is not part of project`() {
+        val repository = getRepository(true)
+        val service = ProjectService(repository, getRoleRepository(), mockk(), mockk(), mockk())
+        val assignmentPost = ProjectService.AssignmentPost(
+            testStudent.id,
+            UUID.randomUUID(),
+            suggester.id,
+            "reason"
+        )
+        assertThrows<InvalidRoleRequirementIdException> { service.postAssignment(testProject.id, assignmentPost) }
+    }
+
+    @Test
+    fun `postAssignment fails if the student doesn't have the required skill`() {
+        val service = ProjectService(getRepository(true), getRoleRepository(), mockk(), getStudentService(false), getUserService(suggester))
+        val assignmentPost = ProjectService.AssignmentPost(
+            testStudent.id,
+            testProject.requiredRoles[0].id,
+            suggester.id,
+            "reason"
+        )
+        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
+    }
+
+    @Test
+    fun `postAssignment fails if the student was already assigned a role on this project`() {
+        val service = ProjectService(getRepository(true), getRoleRepository(), mockk(), getStudentService(true), getUserService(suggester))
+        val assignmentPost = ProjectService.AssignmentPost(
+            testStudent.id,
+            testProject.requiredRoles[0].id,
+            suggester.id,
+            "reason"
+        )
+        val assignment = Assignment(testStudent, testProject.requiredRoles[0], suggester, "reason")
+        testProject.assignments.add(assignment)
+        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
+        testProject.assignments.remove(assignment)
+    }
+
+    @Test
+    fun `postAssignment fails if the role already has enough assignees`() {
+        val service = ProjectService(getRepository(true), getRoleRepository(), mockk(), getStudentService(true), getUserService(suggester))
+        val assignmentPost = ProjectService.AssignmentPost(
+            testStudent.id,
+            testProject.requiredRoles[0].id,
+            suggester.id,
+            "reason"
+        )
+        val differentStudent = Student("Maarten", "Steevens")
+        val assignment = Assignment(differentStudent, testProject.requiredRoles[0], suggester, "reason")
+        testProject.assignments.add(assignment)
+        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
+        testProject.assignments.remove(assignment)
     }
 }
