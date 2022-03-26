@@ -33,11 +33,9 @@ class ProjectService(private val repository: ProjectRepository) {
     }
 
     /**
-     * Creates a new project based on [project]
+     * Creates a new project based on [project]. Returns the created project.
      */
-    fun postProject(project: Project): UUID {
-        return repository.save(project).id
-    }
+    fun postProject(project: Project): Project = repository.save(project)
 
     /**
      * Updates a project based on [project], if [project] is not in [repository] throw InvalidProjectIdException
