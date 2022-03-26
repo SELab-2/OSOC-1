@@ -1,12 +1,10 @@
 package be.osoc.team1.backend.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import org.hibernate.annotations.GenericGenerator
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
@@ -62,8 +60,6 @@ enum class SuggestionEnum {
 class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motivation: String) {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @JsonIgnore
     // Only used as a primary key, ignored otherwise.
     val id: UUID = UUID.randomUUID()
@@ -90,8 +86,6 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
 class Student(val firstName: String, val lastName: String) {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     val id: UUID = UUID.randomUUID()
 
     var status: StatusEnum = StatusEnum.Undecided
