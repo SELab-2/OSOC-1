@@ -1,6 +1,8 @@
 package be.osoc.team1.backend.services
 
+import InvalidAssignmentIdException
 import InvalidRoleRequirementIdException
+import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.RoleRequirement
 import be.osoc.team1.backend.entities.Student
@@ -8,6 +10,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.repositories.ProjectRepository
 import be.osoc.team1.backend.repositories.RoleRequirementRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -15,7 +18,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class ProjectService(private val repository: ProjectRepository, private val roleRepository: RoleRequirementRepository) {
+class ProjectService(private val repository: ProjectRepository, private val roleRepository: RoleRequirementRepository, private val assignmentRepository: AssignmentRepository, private val studentService: StudentService, private val userService: UserService) {
     /**
      * Get all projects
      */
@@ -123,28 +126,42 @@ class ProjectService(private val repository: ProjectRepository, private val role
     fun getRoleRequirementById(roleId: UUID): RoleRequirement = roleRepository.findByIdOrNull(roleId)
         ?: throw InvalidRoleRequirementIdException("Role not found")
 
-    fun assignStudentToRole(student: Student, roleId: UUID, projectId: UUID) {
-        if (getProjectById(projectId).requiredRoles.find { it.id == roleId } == null)
-            throw InvalidRoleRequirementIdException("The specified role is not part of the specified project.")
-
-        for (requiredRole in getProjectById(projectId).requiredRoles) {
-            if (requiredRole.assignees.contains(student))
-                throw ForbiddenOperationException("This student was already assigned a role on this project!")
-        }
-
-        val role = getRoleRequirementById(roleId)
-        role.assign(student)
-        roleRepository.save(role)
+    fun getAssignmentById(assignmentId: UUID): Assignment {
+        return assignmentRepository.findByIdOrNull(assignmentId) ?: throw InvalidAssignmentIdException()
     }
 
-    fun removeStudentFromRole(student: Student, roleId: UUID, projectId: UUID) {
-        if (getProjectById(projectId).requiredRoles.find { it.id == roleId } == null)
-            throw InvalidRoleRequirementIdException("The specified role is not part of the specified project.")
+    fun postAssignment(projectId: UUID, assignmentForm: AssignmentPost) {
+        val project = getProjectById(projectId)
+        val role = project.requiredRoles.find { it.id == assignmentForm.role }
+            ?: throw InvalidRoleRequirementIdException("The specified role is not part of the specified project.")
 
-        val role = getRoleRequirementById(roleId)
-        role.remove(student)
-        roleRepository.save(role)
+        if (project.assignments.find { it.student.id == assignmentForm.student } != null)
+            throw ForbiddenOperationException("This student was already assigned a role on this project!")
+
+        val amount = project.assignments.count { it.roleRequirement == role }
+        if (amount >= role.amount)
+            throw ForbiddenOperationException("This role already has enough assignees!")
+
+        val student = studentService.getStudentById(assignmentForm.student)
+        if (!student.skills.contains(role.skill))
+            throw ForbiddenOperationException("This student doesn't have the required skill to be assigned this role.")
+
+        val suggester = userService.getUserById(assignmentForm.suggester)
+        val assignment = Assignment(student, role, suggester, assignmentForm.reason)
+        project.assignments.add(assignment)
+        repository.save(project)
+    }
+
+    fun deleteAssignment(projectId: UUID, assignmentId: UUID) {
+        val project = getProjectById(projectId)
+        project.assignments.find { it.id == assignmentId }
+            ?: throw InvalidAssignmentIdException("The specified assignment is not part of the specified project!")
+
+        val assignment = getAssignmentById(assignmentId)
+        project.assignments.remove(assignment)
+        repository.save(project)
     }
 
     data class Conflict(val student: UUID, val projects: MutableList<UUID> = mutableListOf())
+    data class AssignmentPost(val student: UUID, val role: UUID, val suggester: UUID, val reason: String)
 }

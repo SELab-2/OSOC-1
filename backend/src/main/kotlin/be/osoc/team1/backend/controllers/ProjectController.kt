@@ -136,19 +136,13 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     @Secured("ROLE_COACH")
     fun getProjectConflicts(): MutableList<ProjectService.Conflict> = service.getConflicts()
 
-    @PostMapping("/{projectId}/roles/{roleId}")
-    fun postProjectRole(@PathVariable projectId: UUID, @PathVariable roleId: UUID, @RequestBody studentId: UUID) {
-        val student = studentService.getStudentById(studentId)
-        service.assignStudentToRole(student, roleId, projectId)
+    @PostMapping("/{projectId}/assignments")
+    fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) {
+        service.postAssignment(projectId, assignment)
     }
 
-    @DeleteMapping("/{projectId}/roles/{roleId}/{studentId}")
-    fun deleteStudentFromRole(
-        @PathVariable projectId: UUID,
-        @PathVariable roleId: UUID,
-        @PathVariable studentId: UUID
-    ) {
-        val student = studentService.getStudentById(studentId)
-        service.removeStudentFromRole(student, roleId, projectId)
+    @DeleteMapping("/{projectId}/assignments/{assignmentId}")
+    fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) {
+        service.deleteAssignment(projectId, assignmentId)
     }
 }
