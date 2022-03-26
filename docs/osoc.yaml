@@ -441,7 +441,7 @@ paths:
                     description: Not Found. No such projectId or assignmentId.
     /projects/conflicts:
         get:
-          summary: Get all project-conflicts (a conflict occurs when a student is assigned to 2 projects at the same time)
+          summary: Get all project-conflicts (a conflict occurs when a student is assigned to multiple projects at the same time)
           responses:
                 '200':
                     description: successful operation
