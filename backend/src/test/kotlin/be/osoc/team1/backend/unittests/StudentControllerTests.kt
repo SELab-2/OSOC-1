@@ -43,7 +43,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents should not fail`() {
-        every { studentService.getAllStudents() } returns emptyList()
+        every { studentService.getAllStudents(0,50,"id") } returns emptyList()
         mockMvc.perform(get("/students"))
             .andExpect(status().isOk)
     }

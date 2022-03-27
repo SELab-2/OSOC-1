@@ -49,7 +49,7 @@ class StudentServiceTests {
     @Test
     fun `getAllStudents does not fail`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(service.getAllStudents(), listOf(testStudent))
+        assertEquals(service.getAllStudents(0,50,"id"), listOf(testStudent))
     }
 
     @Test

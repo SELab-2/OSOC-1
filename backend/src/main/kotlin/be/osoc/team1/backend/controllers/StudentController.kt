@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
@@ -28,7 +29,13 @@ class StudentController(private val service: StudentService) {
      */
     @GetMapping
     @Secured("ROLE_COACH")
-    fun getAllStudents(): Iterable<Student> = service.getAllStudents()
+    fun getAllStudents(
+        @RequestParam(defaultValue = "0") pageNo: Int,
+        @RequestParam(defaultValue = "50") pageSize: Int,
+        @RequestParam(defaultValue = "id") sortBy: String
+    ): Iterable<Student> {
+        return service.getAllStudents(pageNo, pageSize, sortBy)
+    }
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists,
