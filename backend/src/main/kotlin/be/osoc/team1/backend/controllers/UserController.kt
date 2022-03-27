@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.services.UserService
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -64,10 +65,9 @@ class UserController(private val service: UserService) {
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody userRegistration: User, request: HttpServletRequest, responseHeader: HttpServletResponse): User {
+    fun postUser(@RequestBody userRegistration: User): ResponseEntity<User> {
         val createdUser = service.registerUser(userRegistration.username, userRegistration.email, userRegistration.password)
-        responseHeader.addHeader("Location", request.requestURL.toString() + "/${createdUser.id}")
-        return createdUser
+        return getObjectCreatedResponse(createdUser.id, createdUser)
     }
 
     /**

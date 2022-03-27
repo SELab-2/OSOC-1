@@ -7,6 +7,7 @@ import be.osoc.team1.backend.services.ProjectService
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/projects")
@@ -51,16 +50,10 @@ class ProjectController(private val service: ProjectService, @Autowired private 
      * Returns the created project.
      */
     @PostMapping
-    @ResponseStatus(value = HttpStatus.CREATED)
     @Secured("ROLE_ADMIN")
-    fun postProject(
-        @RequestBody project: Project,
-        request: HttpServletRequest,
-        responseHeader: HttpServletResponse
-    ): Project {
+    fun postProject(@RequestBody project: Project): ResponseEntity<Project> {
         val createdProject = service.postProject(project)
-        responseHeader.addHeader("Location", request.requestURL.toString() + "/${createdProject.id}")
-        return createdProject
+        return getObjectCreatedResponse(createdProject.id, createdProject)
     }
 
     /**
