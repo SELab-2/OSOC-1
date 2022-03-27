@@ -5,7 +5,7 @@ info:
     license:
         name: MIT
 servers:
-  - url: 'localhost:8080'
+  - url: 'http://localhost:8080/api'
 paths:
     /students:
         get:
@@ -439,6 +439,21 @@ paths:
                     description: succesful operation
                 '404':
                     description: Not Found. No such projectId or assignmentId.
+    /projects/conflicts:
+        get:
+          summary: Get all project-conflicts (a conflict occurs when a student is assigned to multiple projects at the same time)
+          responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Conflict'
+                            example:
+                                student: "abb97568-ac54-11ec-b909-0242ac120002"
+                                projects: ["afc1e1cc-ac54-11ec-b909-0242ac120002","b6a81d12-ac54-11ec-b909-0242ac120002"]
     /studentRoles: 
         get:
             summary: Get all types of student Roles that are currently in the database.
@@ -842,7 +857,20 @@ components:
         CommunicationType:
             type: string
             enum: [Email]
-
+        Conflict:
+            type: object
+            required:
+                - student
+                - projects
+            properties:
+                student:
+                    type: string
+                    format: uuid
+                projects:
+                    type: array
+                    items:
+                        type: string
+                        format: uuid
     securitySchemes:
         BasicAuth:
             type: http
