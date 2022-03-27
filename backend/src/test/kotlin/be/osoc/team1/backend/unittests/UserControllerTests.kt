@@ -105,15 +105,15 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `postUser should not fail`() {
+    fun `postUser should return created user`() {
         // This is a hack but password encoding really doesn't matter for what this is testing
         every { passwordEncoder.encode("password") } returns ""
-        every { userService.registerUser(any(), any(), any()) } returns testUser.id
+        every { userService.registerUser(any(), any(), any()) } returns testUser
         mockMvc.perform(
             post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
-        ).andExpect(status().isCreated)
+        ).andExpect(status().isCreated).andExpect(content().string(testUserJsonRepresentation))
     }
 
     @Test

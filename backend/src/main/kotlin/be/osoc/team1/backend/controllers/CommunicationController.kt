@@ -3,7 +3,6 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.services.CommunicationService
 import be.osoc.team1.backend.services.StudentService
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.UUID
 
 @RestController
@@ -49,15 +47,9 @@ class CommunicationController(
     @PostMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun createCommunication(@PathVariable studentId: UUID, @RequestBody communication: Communication): ResponseEntity<Void> {
-        val id = communicationService.createCommunication(communication)
-        communication.id = id
+    fun createCommunication(@PathVariable studentId: UUID, @RequestBody communication: Communication): ResponseEntity<Communication> {
+        val createdCommunication = communicationService.createCommunication(communication)
         studentService.addCommunicationToStudent(studentId, communication)
-        val location = ServletUriComponentsBuilder
-            .fromCurrentRequest()
-            .path("/{id}")
-            .buildAndExpand(id)
-            .toUriString()
-        return ResponseEntity.status(HttpStatus.CREATED).header(HttpHeaders.LOCATION, location).build()
+        return getObjectCreatedResponse(createdCommunication.id, createdCommunication)
     }
 }

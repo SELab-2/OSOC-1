@@ -23,8 +23,7 @@ paths:
         post:
             summary: Add a new student to the database
             description: |
-                Add a student to the database.
-                The id for this student chosen by the database is returned.
+                Add a student to the database. The created student object is returned.
                 Note that no checking is done to see if firstName or lastName qualify as valid 'names',
                 this verification is the responsibility of the caller.
             requestBody:
@@ -34,15 +33,19 @@ paths:
                             $ref: '#/components/schemas/Student'
             responses:
                 '201':
-                    description: successful operation, returns the assigned id of the newly added student.
+                    description: Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Student'
                     headers:
                         Location:
+                            description: url to the newly created student object
                             schema:
-                                description: url to the newly created student object
                                 type: string
                                 format: url
                 '400':
-                    description: Bad Request. Content contains invalid user or user already exists.
+                    description: Bad Request.
     /students/{studentId}:
         get:
             summary: Get Student by id
@@ -193,7 +196,7 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Project'
         post:
-            summary: Add new project
+            summary: Create a new project. Returns the created project object.
             requestBody:
                 content:
                     application/json:
@@ -201,11 +204,16 @@ paths:
                             $ref: '#/components/schemas/Project'
             responses:
                 '201': 
-                    description: successful operation
+                    description: |
+                        Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Project'
                     headers:
                         Location:
+                            description: url to the newly created project
                             schema:
-                                description: url to the newly created project
                                 type: string
                                 format: url
                 '400':
@@ -550,7 +558,7 @@ paths:
             summary: Add a new communication with a student
             description: |
                 Add a communication to the database.
-                The reference for this communication is returned.
+                The created communication object is returned.
             parameters:
               - name: studentId
                 required: true
@@ -565,9 +573,17 @@ paths:
                             $ref: '#/components/schemas/Communication'
             responses:
                 '201':
-                    description: | 
-                        Successful operation. Returns a link to the newly added 
-                        communication in the location header.
+                    description: Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Communication'
+                    headers:
+                        Location:
+                            description: url to the newly created communication
+                            schema:
+                                type: string
+                                format: url
                 '404':
                     description: |
                         The response if there is no student in the database with the given student id.
@@ -584,7 +600,7 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/User'
         post:
-            summary: add new user to database
+            summary: Add a new user to database
             requestBody:
                 content:
                     application/json:
@@ -592,15 +608,15 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '201':
-                    description: succesful operation
+                    description: Succesful operation.
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/User'
                     headers:
                         Location:
-                            schema: 
-                                description: url to the newly created User
+                            description: url to the newly created User
+                            schema:
                                 type: string
                                 format: url
     /users/{userId}:

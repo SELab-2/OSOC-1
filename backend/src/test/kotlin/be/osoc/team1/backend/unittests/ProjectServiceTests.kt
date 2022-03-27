@@ -13,8 +13,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
@@ -72,7 +72,7 @@ class ProjectServiceTests {
     @Test
     fun `postProject returns some other id than what was passed`() {
         val service = ProjectService(getRepository(false))
-        Assertions.assertNotEquals(service.postProject(testProject), testId)
+        assertNotEquals(service.postProject(testProject).id, testId)
     }
 
     @Test
