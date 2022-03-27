@@ -31,7 +31,6 @@ class StudentService(private val repository: StudentRepository, private val user
         } else {
             ArrayList()
         }
-        //return repository.findAll()
     }
 
     /**
