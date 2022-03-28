@@ -22,14 +22,16 @@ import java.util.*
 @Service
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
-    fun getAllStudents(pageNo: Int, pageSize: Int, sortBy: String): Iterable<Student> {
-        val paging: Pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy))
+    /**
+     * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
+     */
+    fun getAllStudents(pageNumber: Int, pageSize: Int, sortBy: String): Iterable<Student> {
+        val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
         val pagedResult: Page<Student> = repository.findAll(paging)
-
         return if (pagedResult.hasContent()) {
             pagedResult.content
         } else {
-            ArrayList()
+            mutableListOf()
         }
     }
 

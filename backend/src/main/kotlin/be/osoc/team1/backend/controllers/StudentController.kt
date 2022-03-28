@@ -26,15 +26,17 @@ class StudentController(private val service: StudentService) {
 
     /**
      * Get a list of all students in the database. This request cannot fail.
+     * There are default values applied for paging ([pageNumber], [pageSize] and [sortBy]),
+     * these can be modified by adding request parameters to the url.
      */
     @GetMapping
     @Secured("ROLE_COACH")
     fun getAllStudents(
-        @RequestParam(defaultValue = "0") pageNo: Int,
+        @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
         @RequestParam(defaultValue = "id") sortBy: String
     ): Iterable<Student> {
-        return service.getAllStudents(pageNo, pageSize, sortBy)
+        return service.getAllStudents(pageNumber, pageSize, sortBy)
     }
 
     /**
