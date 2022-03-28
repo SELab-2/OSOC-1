@@ -26,16 +26,15 @@ import org.springframework.security.crypto.password.PasswordEncoder
  *
  * When we need to verify the password without a password encoder enabled, the verification takes about 0.10 seconds.
  * When we use [BCryptPasswordEncoder] while the strength parameter is set to 13 or 14, verification will take about
- * 0.75 or 1.30 seconds respectively. The strength parameter is currently set to 13, to not slow down the login process
- * too much.
+ * 0.75 or 1.30 seconds respectively. The strength parameter is currently set to 13, because that is the nearest to 1
+ * second and does not slow down the login process too much.
  *
  * Below is discussed why [BCryptPasswordEncoder] is chosen above the three other most popular password encoders.
  * Pbkdf2PasswordEncoder is a good choice if FIPS certification would be required, but Pbkdf2 is not memory hard and
  * thus weaker than bcrypt.
  * SCryptPasswordEncoder is a good alternative to [BCryptPasswordEncoder], but uses more memory.
- * Argon2PasswordEncoder also uses more memory then [BCryptPasswordEncoder]. Argon is also stronger than bcrypt but
- * only when runtimes exceed 1 second. Finally, we want something that does not need specific tuning a client might not
- * be knowledgeable enough for, so bcrypt is the better choice.
+ * Argon2PasswordEncoder also uses more memory then [BCryptPasswordEncoder]. Argon is stronger than bcrypt but only
+ * when runtimes exceed 1 second and argon is also harder to configure correctly.
  *
  * above information is partially based on following link:
  * https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html#authentication-password-storage-bcrypt
