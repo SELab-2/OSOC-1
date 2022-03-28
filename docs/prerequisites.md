@@ -59,7 +59,7 @@ Please make sure a user had been created using the register page or using the PO
 This is to create the first admin in the database since there is no other admin that can grant a user the admin role.
 
 Note: Editing the database this way should only be done to create the first admin. 
-If you want to anything else, please use the frontend or use the different endpoints.
+If you want to edit anything else, please use the frontend or use the different endpoints.
 
 ### Development
 It is also possible to follow the [production](#production) instructions for this, as the terminal is used for that.
@@ -78,7 +78,7 @@ Change the role of the correct row to 0 and the submit using ctrl+enter or using
 
 ### Production
 #### Without docker
-If you are just using postgresql, then you should run and only follow the [lasts few steps](#postgresql-statements).
+If you are just using postgresql, then you should run the following and only follow the [last few steps](#postgresql-statements).
 ```shell 
 psql -U $OSOC_DB_USERNAME $OSOC_DB_DBNAME -W
 ```
@@ -90,14 +90,14 @@ sudo docker ps
 ```
 
 Then we want to go into the psql cli.
-If you have setup environment variables, then you should only enter the container name. 
-Otherwise you need to enter the default values. This should only be done in development since we highly recommend using environment variables in production.
+**If you have setup environment variables, then you should only enter the container name. 
+Otherwise you need to enter the default values. This should only be done in development since we highly recommend using environment variables in production.**
 The username default is postgres, the password default is postgres and the database name default is osoc.
 ```shell
 sudo docker exec -it <container-name> psql -U $OSOC_DB_USERNAME $OSOC_DB_DBNAME -W
 ```
 #### PostgreSQL statements
-After that, we want to list the users and then assign it the admin role.
+After that, we want to list all the users to get their ids and assign the admin role to the correct user using the corresponding id.
 ```shell
 SELECT * FROM account;
 UPDATE account SET role=0 WHERE id='<id>';
