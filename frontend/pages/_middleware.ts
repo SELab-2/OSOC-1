@@ -14,7 +14,7 @@ type NextMiddlewareRequest = NextApiRequest & NextRequest;
  */
 export async function middleware(req: NextMiddlewareRequest) {
   // Token will exist if user is logged in
-  const token = '';
+  const token = 'blab';
   console.log(req);
 
   const { pathname } = req.nextUrl;
@@ -32,7 +32,7 @@ export async function middleware(req: NextMiddlewareRequest) {
   // TODO: remove /wait page filter when accounts are working
   if (
     !token &&
-    !(pathname === '/login' || pathname === '/register' || pathname === '/wait')
+    !(pathname === '/login' || pathname === '/register' || pathname === '/wait' || pathname === '/users')
   ) {
     return NextResponse.redirect(url);
   }
