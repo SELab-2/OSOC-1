@@ -26,10 +26,7 @@ import kotlin.collections.HashMap
  * If the authentication is successful, then a response gets send with a new access token.
  * The now authenticated user can use this access token to authorize himself in the following requests.
  */
-class AuthenticationFilter(
-    authenticationManager: AuthenticationManager?,
-    private var calendar: Calendar? = null
-) :
+class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     /**
@@ -48,7 +45,6 @@ class AuthenticationFilter(
         if (email == null || password == null) {
             throw AuthenticationCredentialsNotFoundException("The \"email\" and \"password\" parameters are required!")
         }
-        calendar = Calendar.getInstance()
         return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(email, password))
     }
 
@@ -62,7 +58,6 @@ class AuthenticationFilter(
         chain: FilterChain,
         authentication: Authentication
     ) {
-        println(((Calendar.getInstance().timeInMillis - calendar!!.timeInMillis).toDouble() / 1000).toString() + " seconds")
         val authenticatedUser: User = authentication.principal as User
         val accessToken: String = createToken(authenticatedUser, 5)
 
