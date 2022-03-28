@@ -31,8 +31,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
  *
  * Below is discussed why [BCryptPasswordEncoder] is chosen above the three other most popular password encoders.
  * Pbkdf2PasswordEncoder is a good choice if FIPS certification would be required, but Pbkdf2 is not memory hard and
- * thus is weaker than bcrypt.
- * SCryptPasswordEncoder is a good alternative to [BCryptPasswordEncoder], but use more memory.
+ * thus weaker than bcrypt.
+ * SCryptPasswordEncoder is a good alternative to [BCryptPasswordEncoder], but uses more memory.
  * Argon2PasswordEncoder also uses more memory then [BCryptPasswordEncoder]. Argon is also stronger than bcrypt but
  * only when runtimes exceed 1 second. Finally, we want something that does not need specific tuning a client might not
  * be knowledgeable enough for, so bcrypt is the better choice.
