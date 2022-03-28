@@ -78,7 +78,7 @@ Change the role of the correct row to 0 and the submit using ctrl+enter or using
 
 ### Production
 #### Without docker
-If you are just using postgresql, then you should run and only follow the [lasts few steps](#postgres-statements).
+If you are just using postgresql, then you should run and only follow the [lasts few steps](#postgresql-statements).
 ```shell 
 psql -U $OSOC_DB_USERNAME $OSOC_DB_DBNAME -W
 ```
@@ -96,7 +96,7 @@ The username default is postgres, the password default is postgres and the datab
 ```shell
 sudo docker exec -it <container-name> psql -U $OSOC_DB_USERNAME $OSOC_DB_DBNAME -W
 ```
-#### Postgres statements
+#### PostgreSQL statements
 After that, we want to list the users and then assign it the admin role.
 ```shell
 SELECT * FROM account;
