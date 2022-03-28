@@ -6,7 +6,6 @@ type LoginResponse = {
   accessToken: string;
 };
 
-
 class OSOCWebApi {
   _accessToken: AuthToken;
   _refreshToken: AuthToken;
