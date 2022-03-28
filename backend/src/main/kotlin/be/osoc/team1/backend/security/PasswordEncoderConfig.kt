@@ -3,6 +3,7 @@ package be.osoc.team1.backend.security
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.NoOpPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 
 /**
@@ -22,8 +23,11 @@ import org.springframework.security.crypto.password.PasswordEncoder
  *
  * [BCryptPasswordEncoder] takes an argument between 4 and 31. This argument decides how 'strong' your password encoder
  * is and thus how long it takes to verify a password. This parameter is logarithmic, and defaults to 10. Each time you
- * increment it you double the amount of work needed, and the time your app will take to check a password. Here, the
- * strength parameter is set to 10, this is tuned to take about 1 second to verify a password.
+ * increment it you double the amount of work needed, and the time your app will take to check a password.
+ *
+ * When we need to verify the password without a password encoder enabled, the verification takes about 0.10 seconds.
+ * When we use [BCryptPasswordEncoder] while the strength parameter is set to 13 or 14, verification will take about
+ * 0.75 or 1.30 seconds respectively.
  *
  * Below is discussed why [BCryptPasswordEncoder] is chosen above the three other most popular password encoders.
  * Pbkdf2PasswordEncoder is a good choice if FIPS certification would be required, but Pbkdf2 is not memory hard and
@@ -40,6 +44,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 class PasswordEncoderConfig {
     @Bean
     fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder(10)
+        // return BCryptPasswordEncoder(13)
+        return NoOpPasswordEncoder.getInstance()
     }
 }

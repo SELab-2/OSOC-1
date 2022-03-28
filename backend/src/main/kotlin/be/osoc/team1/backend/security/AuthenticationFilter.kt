@@ -11,6 +11,7 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import java.util.Calendar
 import java.util.Date
 import java.util.stream.Collectors
 import javax.servlet.FilterChain
@@ -25,7 +26,10 @@ import kotlin.collections.HashMap
  * If the authentication is successful, then a response gets send with a new access token.
  * The now authenticated user can use this access token to authorize himself in the following requests.
  */
-class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
+class AuthenticationFilter(
+    authenticationManager: AuthenticationManager?,
+    private var calendar: Calendar? = null
+) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     /**
@@ -44,6 +48,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         if (email == null || password == null) {
             throw AuthenticationCredentialsNotFoundException("The \"email\" and \"password\" parameters are required!")
         }
+        calendar = Calendar.getInstance()
         return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(email, password))
     }
 
@@ -57,6 +62,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         chain: FilterChain,
         authentication: Authentication
     ) {
+        println(((Calendar.getInstance().timeInMillis - calendar!!.timeInMillis).toDouble() / 1000).toString() + " seconds")
         val authenticatedUser: User = authentication.principal as User
         val accessToken: String = createToken(authenticatedUser, 5)
 
