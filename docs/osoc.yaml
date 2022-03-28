@@ -792,7 +792,7 @@ components:
             type: object
             required:
                 - id
-                - name
+                - username
                 - email
                 - password
                 - role
