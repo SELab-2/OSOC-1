@@ -801,7 +801,7 @@ components:
                     type: string
                     format: uuid
                     readOnly: true
-                name:
+                username:
                     type: string
                 email:
                     type: string
