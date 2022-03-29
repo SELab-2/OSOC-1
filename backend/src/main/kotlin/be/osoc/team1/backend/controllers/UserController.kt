@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.services.UserService
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -59,15 +60,14 @@ class UserController(private val service: UserService) {
     fun deleteUser(@PathVariable id: UUID) = service.deleteUserById(id)
 
     /**
-     * Register a new [User]. The id of the new user will be returned. The response will also contain a
+     * Register a new [User]. The created user will be returned. The response will also contain a
      * Location header containing the url to the newly created resource.
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody userRegistration: User, request: HttpServletRequest, responseHeader: HttpServletResponse): UUID {
-        val id = service.registerUser(userRegistration.username, userRegistration.email, userRegistration.password)
-        responseHeader.addHeader("Location", request.requestURL.toString() + "/$id")
-        return id
+    fun postUser(@RequestBody userRegistration: User): ResponseEntity<User> {
+        val createdUser = service.registerUser(userRegistration.username, userRegistration.email, userRegistration.password)
+        return getObjectCreatedResponse(createdUser.id, createdUser)
     }
 
     /**

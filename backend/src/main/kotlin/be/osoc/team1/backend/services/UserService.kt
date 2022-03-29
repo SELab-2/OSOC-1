@@ -32,12 +32,12 @@ class UserService(private val repository: UserRepository, private val passwordEn
     }
 
     /**
-     * Register a new [User] in the [repository]. Returns the id of the newly created user object. A
+     * Register a new [User] in the [repository]. Returns the newly created user object. A
      * [ForbiddenOperationException] will be thrown if a constraint on the user is violated. This should only happen if
      * there already exists another user with the specified email address. The newly created user will have the
      * [Role.Disabled] role by default.
      */
-    fun registerUser(username: String, email: String, password: String): UUID {
+    fun registerUser(username: String, email: String, password: String): User {
         val user = User(
             username,
             email,
@@ -46,7 +46,7 @@ class UserService(private val repository: UserRepository, private val passwordEn
         )
 
         try {
-            return repository.save(user).id
+            return repository.save(user)
         } catch (_: DataIntegrityViolationException) {
             throw ForbiddenOperationException("User with email = '$email' already exists!")
         }

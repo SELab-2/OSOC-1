@@ -76,16 +76,15 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `addStudent should not fail`() {
-        val databaseId = UUID.randomUUID()
-        every { studentService.addStudent(any()) } returns databaseId
+    fun `addStudent should return created student`() {
+        every { studentService.addStudent(any()) } returns testStudent
         val mvcResult = mockMvc.perform(
             post("/students")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isCreated).andReturn()
         val locationHeader = mvcResult.response.getHeader("Location")
-        assert(locationHeader!!.endsWith("/students/$databaseId"))
+        assert(locationHeader!!.endsWith("/students/${testStudent.id}"))
     }
 
     @Test

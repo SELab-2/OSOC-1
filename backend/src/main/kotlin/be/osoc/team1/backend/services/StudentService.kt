@@ -52,9 +52,9 @@ class StudentService(private val repository: StudentRepository, private val user
     }
 
     /**
-     * Add the given [student] entity to the database. Returns the student's new id as decided by the database.
+     * Add the given [student] entity to the database. Returns the created student.
      */
-    fun addStudent(student: Student) = repository.save(student).id
+    fun addStudent(student: Student): Student = repository.save(student)
 
     /**
      * Retrieve the student with the specified [studentId], then set his status to [newStatus].

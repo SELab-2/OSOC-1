@@ -91,9 +91,9 @@ class StudentServiceTests {
     }
 
     @Test
-    fun `addStudent returns some other id than what was passed`() {
+    fun `addStudent returns student with some other id than what was passed`() {
         val service = StudentService(getRepository(false), userService)
-        assertNotEquals(service.addStudent(testStudent), studentId)
+        assertNotEquals(service.addStudent(testStudent).id, studentId)
     }
 
     @Test
