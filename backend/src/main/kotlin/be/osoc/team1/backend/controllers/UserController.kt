@@ -91,9 +91,9 @@ class UserController(private val service: UserService) {
             if (refreshToken != null) {
                 val decodedToken = decodeAndVerifyToken(refreshToken)
                 val email: String = decodedToken.subject
-                val role: String = decodedToken.getClaim("role").asString()
+                val authorities = decodedToken.getClaim("roles").asList(String::class.java)
 
-                createAccessAndRefreshToken(response, email, role, refreshToken)
+                createAccessAndRefreshToken(response, email, authorities, refreshToken)
             }
         } catch (exception: Exception) {
             throw exception

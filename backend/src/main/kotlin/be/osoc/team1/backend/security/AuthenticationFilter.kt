@@ -6,8 +6,10 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -53,8 +55,9 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     ) {
         val authenticatedUser: User = authentication.principal as User
         val email: String = authenticatedUser.username
-        val role: String = authenticatedUser.authorities.first().toString()
+        val authorities: List<String> =
+            authenticatedUser.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
 
-        createAccessAndRefreshToken(response, email, role)
+        createAccessAndRefreshToken(response, email, authorities)
     }
 }

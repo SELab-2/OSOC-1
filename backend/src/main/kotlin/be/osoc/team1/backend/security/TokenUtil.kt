@@ -39,13 +39,13 @@ object TokenUtil {
      * refresh token. Access tokens are valid for 5 minutes, while refresh tokens stay valid for 12 hours.
      * The created token gets signed using above hashing algorithm and secret.
      */
-    fun createToken(email: String, role: String, isAccessToken: Boolean): String {
-        val minutesToLive: Int = if (isAccessToken) 5 else 60*12
+    private fun createToken(email: String, authorities: List<String>, isAccessToken: Boolean): String {
+        val minutesToLive: Int = if (isAccessToken) 5 else 60 * 12
         return JWT.create()
             .withSubject(email)
             .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))
             .withClaim("isAccessToken", isAccessToken)
-            .withClaim("role", role)
+            .withClaim("authorities", authorities)
             .sign(hashingAlgorithm)
     }
 
@@ -62,7 +62,6 @@ object TokenUtil {
 
     /**
      * Interpret token and verify its validity
-     * extract the username and the authorities/roles from the token
      * Catch the error if the given access token is invalid, and add error to response instead
      */
     fun decodeAndVerifyToken(token: String): DecodedJWT {
@@ -79,34 +78,37 @@ object TokenUtil {
      */
     fun authenticateWithToken(decodedToken: DecodedJWT) {
         val username: String = decodedToken.subject
-        val authority = SimpleGrantedAuthority(decodedToken.getClaim("role").asString())
+        val authorities = getAuthoritiesFromToken(decodedToken)
         if (decodedToken.getClaim("isAccessToken").asBoolean()) {
             SecurityContextHolder.getContext().authentication =
-                UsernamePasswordAuthenticationToken(username, null, listOf(authority))
+                UsernamePasswordAuthenticationToken(username, null, authorities)
         } else {
             throw InvalidTokenException("You cannot authenticate with a refresh token")
         }
     }
 
     /**
-     * extract the roles of the logged in user from the token
-     * return the roles as [SimpleGrantedAuthority] as they need to be, to work with [UsernamePasswordAuthenticationToken]
+     * extract the authorities of the logged in user from the token
+     * return the authorities as [SimpleGrantedAuthority] as they need to be, to work with [UsernamePasswordAuthenticationToken]
      */
     private fun getAuthoritiesFromToken(decodedToken: DecodedJWT): List<SimpleGrantedAuthority> {
-        val roles: Array<String> = decodedToken.getClaim("roles").asArray(String::class.java)
-        val authorities: MutableList<SimpleGrantedAuthority> = mutableListOf()
-        roles.forEach { role -> authorities.add(SimpleGrantedAuthority(role)) }
-        return authorities
+        val authorities: Array<String> = decodedToken.getClaim("authorities").asArray(String::class.java)
+        val grantedAuthorities: MutableList<SimpleGrantedAuthority> = mutableListOf()
+        authorities.forEach { role -> grantedAuthorities.add(SimpleGrantedAuthority(role)) }
+        return grantedAuthorities
     }
 
+    /**
+     * TODOC
+     */
     fun createAccessAndRefreshToken(
         response: HttpServletResponse,
         email: String,
-        role: String,
+        authorities: List<String>,
         oldRefreshToken: String? = null
     ) {
-        val accessToken: String = createToken(email, role, true)
-        val refreshToken: String = oldRefreshToken ?: createToken(email, role, false)
+        val accessToken: String = createToken(email, authorities, true)
+        val refreshToken: String = oldRefreshToken ?: createToken(email, authorities, false)
 
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken
@@ -116,7 +118,3 @@ object TokenUtil {
         ObjectMapper().writeValue(response.outputStream, tokens)
     }
 }
-
-
-
-
