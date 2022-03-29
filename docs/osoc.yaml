@@ -9,6 +9,22 @@ servers:
 paths:
     /students:
         get:
+            parameters:
+              - in: query
+                name: pageNumber
+                schema:
+                  type: integer
+                description: The page number for pagination
+              - in: query
+                name: pageSize
+                schema:
+                  type: integer
+                description: The page size for pagination
+              - in: query
+                name: sortBy
+                schema:
+                  type: string
+                description: The parameter to sort by
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -792,7 +808,7 @@ components:
             type: object
             required:
                 - id
-                - name
+                - username
                 - email
                 - password
                 - role
@@ -801,7 +817,7 @@ components:
                     type: string
                     format: uuid
                     readOnly: true
-                name:
+                username:
                     type: string
                 email:
                     type: string
