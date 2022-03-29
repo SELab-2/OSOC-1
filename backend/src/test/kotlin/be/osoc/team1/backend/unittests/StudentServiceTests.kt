@@ -46,14 +46,40 @@ class StudentServiceTests {
         val differentIdTestStudent = Student("Tom", "Alard")
         every { repository.save(testStudent) } returns differentIdTestStudent
         every { repository.findAll() } returns listOf(testStudent)
-        every { repository.findAll(PageRequest.of(0, 50, Sort.by("id"))) } returns PageImpl(mutableListOf(testStudent)) // for pagination
+        every {
+            repository.findAll(
+                PageRequest.of(
+                    0,
+                    50,
+                    Sort.by("id")
+                )
+            )
+        } returns PageImpl(mutableListOf(testStudent)) // for pagination
         return repository
     }
 
     @Test
     fun `getAllStudents does not fail`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(service.getAllStudents(0,50,"id"), listOf(testStudent))
+        assertEquals(service.getAllStudents(0, 50, "id"), listOf(testStudent))
+    }
+
+    @Test
+    fun `paging returns the correct amount`() {
+        val repository: StudentRepository = mockk()
+        val testStudent2 = Student("Test", "Dummie")
+        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(mutableListOf(testStudent))
+        every {
+            repository.findAll(
+                PageRequest.of(
+                    0,
+                    2,
+                    Sort.by("id")
+                )
+            )
+        } returns PageImpl(mutableListOf(testStudent, testStudent2))
+        val service = StudentService(repository, userService)
+        assertEquals(service.getAllStudents(0, 1, "id"), listOf(testStudent))
     }
 
     @Test
