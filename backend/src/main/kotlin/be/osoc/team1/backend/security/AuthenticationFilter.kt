@@ -1,8 +1,6 @@
 package be.osoc.team1.backend.security
 
-import be.osoc.team1.backend.security.TokenUtil.createToken
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -13,7 +11,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import kotlin.collections.HashMap
 
 /**
  * This filter gets called by the filter-chain (see [SecurityConfig] for more info)
@@ -55,13 +52,9 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         authentication: Authentication
     ) {
         val authenticatedUser: User = authentication.principal as User
-        val accessToken: String = createToken(authenticatedUser, 5)
-        val refreshToken: String = createToken(authenticatedUser, 60*24)
+        val email: String = authenticatedUser.username
+        val role: String = authenticatedUser.authorities.first().toString()
 
-        val tokens: MutableMap<String, String> = HashMap()
-        tokens["accessToken"] = accessToken
-        tokens["refreshToken"] = refreshToken
-        response.contentType = APPLICATION_JSON_VALUE
-        ObjectMapper().writeValue(response.outputStream, tokens)
+        createAccessAndRefreshToken(response, email, role)
     }
 }
