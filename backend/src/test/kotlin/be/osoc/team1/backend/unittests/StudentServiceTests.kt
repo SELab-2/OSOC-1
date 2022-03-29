@@ -65,7 +65,7 @@ class StudentServiceTests {
     }
 
     @Test
-    fun `paging returns the correct amount`() {
+    fun `getAllSTudents paging returns the correct amount`() {
         val repository: StudentRepository = mockk()
         val testStudent2 = Student("Test", "Dummie")
         every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(mutableListOf(testStudent))
