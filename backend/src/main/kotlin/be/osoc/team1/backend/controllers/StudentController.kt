@@ -25,7 +25,7 @@ class StudentController(private val service: StudentService) {
      * Get a list of all students in the database. This request cannot fail.
      */
     @GetMapping
-    @Secured("ROLE_COACH")
+    @Secured("ROLE_DISABLED")
     fun getAllStudents(): Iterable<Student> = service.getAllStudents()
 
     /**

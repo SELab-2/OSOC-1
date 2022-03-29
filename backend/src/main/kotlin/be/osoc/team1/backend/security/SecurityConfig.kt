@@ -44,7 +44,7 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
 
         http.authorizeRequests().antMatchers(*ConfigUtil.urlsOpenToAll).permitAll()
         http.authorizeRequests().antMatchers(HttpMethod.POST, *ConfigUtil.urlsOpenToAllToPostTo).permitAll()
-        http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_COACH")
+        http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_DISABLED")
 
         val authenticationFilter = AuthenticationFilter(authenticationManagerBean())
         http.addFilterBefore(AuthorizationFilter(), AuthenticationFilter::class.java)
