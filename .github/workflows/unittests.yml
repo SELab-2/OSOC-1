@@ -6,11 +6,15 @@ on:
       - '**'        # matches every branch
       - '!master'   # excludes master
       - '!development'   # excludes development
+    paths:
+      - 'backend/**'
   pull_request:
     branches:
       - '**'        # matches every branch
       - '!master'   # excludes master
       - '!development'   # excludes development
+    paths:
+      - 'backend/**'
 
 jobs:
   container-job:
