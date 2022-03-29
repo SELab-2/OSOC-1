@@ -212,6 +212,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     @Test
     fun `access token can be used after login`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
+        println(authHeaders)
         val request = HttpEntity(null, authHeaders)
         val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
 
@@ -261,6 +262,15 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
 
     @Test
     fun `Authentication with invalid access token returns 401`() {
+        val accessToken: String = "in.val.id"
+        val request = HttpEntity(null, createAuthHeaders(accessToken))
+
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 401)
+    }
+
+    @Test
+    fun `Authentication with refresh token returns 401`() {
         val accessToken: String = "in.val.id"
         val request = HttpEntity(null, createAuthHeaders(accessToken))
 

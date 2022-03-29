@@ -3,16 +3,11 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
-import be.osoc.team1.backend.security.TokenUtil
 import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
-import be.osoc.team1.backend.security.TokenUtil.createToken
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import be.osoc.team1.backend.security.TokenUtil.getTokenFromRequest
 import be.osoc.team1.backend.services.UserService
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -24,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.util.HashMap
 import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
