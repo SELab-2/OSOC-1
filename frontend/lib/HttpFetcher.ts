@@ -18,7 +18,7 @@ export type PostJSONProps = {
   /**
    * The body for the request
    */
-  body: Record<string, unknown>;
+  body: Record<string, unknown> | unknown;
 };
 
 export type PostURLEProps = {
@@ -41,6 +41,22 @@ export type PostURLEProps = {
    */
   body: Record<string, string>;
 };
+
+export type getProps = {
+  /**
+   * The endpoint to make the request to
+   * @see {@link ENDPOINT_ENUM | The Endpoint Enum} for available options
+   */
+   endpoint: Endpoints;
+
+   /**
+    * An optional access token to make authenticated requests
+    *
+    * @remarks
+    * More information can be found in the authentication docs
+    */
+   accessToken?: string;
+}
 
 class NamedError extends Error {
   get name() {
@@ -73,31 +89,22 @@ export class WebApiError extends NamedError {
  * to instantiate this class
  */
 class HttpFetcher {
-  /**
-   * Helper function to make post requests
-   *
-   * @param endpoint - the endpoint to make a request to
-   * @param body - the body to use in the POST request
-   * @param contentType - the content type header
-   * @param accessToken - the access token for the Basic authorization header
-   * @returns the response from a POST request
-   *
-   * @throws {@link WEB_API_ERROR}
-   * This error is thrown when the request fails
-   */
-  static async _postRequest({
+
+  static async _makeBodyRequest({
     endpoint,
     body,
     contentType,
+    method,
     ...props
   }: {
     endpoint: Endpoints;
-    body: BodyInit;
+    body: BodyInit,
     contentType: string;
+    method: string;
     accessToken?: string;
   }): Promise<Response> {
     const options: RequestInit = {
-      method: 'POST',
+      method,
       headers: {
         'Content-Type': contentType,
       },
@@ -121,7 +128,59 @@ class HttpFetcher {
         response.status
       );
 
-    return response;
+    return response;    
+  }
+
+  /**
+   * Helper function to make post requests
+   *
+   * @param endpoint - the endpoint to make a request to
+   * @param body - the body to use in the POST request
+   * @param contentType - the content type header
+   * @param accessToken - the access token for the Basic authorization header
+   * @returns the response from a POST request
+   *
+   * @throws {@link WEB_API_ERROR}
+   * This error is thrown when the request fails
+   */
+  static async _postRequest({
+    endpoint,
+    body,
+    contentType,
+    accessToken
+  }: {
+    endpoint: Endpoints;
+    body: BodyInit;
+    contentType: string;
+    accessToken?: string;
+  }): Promise<Response> {
+    return await this._makeBodyRequest({
+      endpoint,
+      body,
+      contentType,
+      method: 'POST',
+      accessToken
+    });
+  }
+
+  static async _patchRequest({
+    endpoint,
+    body,
+    contentType,
+    accessToken
+  }: {
+    endpoint: Endpoints;
+    body: BodyInit;
+    contentType: string;
+    accessToken?: string;
+  }): Promise<Response> {
+    return await this._makeBodyRequest({
+      endpoint,
+      body,
+      contentType,
+      method: 'PATCH',
+      accessToken
+    });
   }
 
   /**
@@ -174,6 +233,86 @@ class HttpFetcher {
       contentType: 'application/x-www-form-urlencoded',
       ...props,
     });
+
+    return response;
+  }
+
+  /**
+   * Helper function to make GET requests
+   *
+   * @param endpoint - the endpoint to make a request to
+   * @param accessToken - the access token for the Basic authorization header
+   * @returns the response from a GET request
+   *
+   * @throws {@link WebApiError}
+   * This error is thrown when the request fails
+   */  
+  static async get({
+    endpoint,
+    ...props
+  }: getProps): Promise<Response> {
+    const options: RequestInit = {
+      method: 'GET'
+    };
+
+    if (props.accessToken) {
+      options.headers = {
+        Authorization: `Basic ${props.accessToken}`,
+      };
+    }
+
+    const request = fetch(endpoint, options);
+
+    const response = await request;
+
+    if (!response.ok)
+      throw new WebApiError(
+        (await response.json()) || response.statusText,
+        response.status
+      );
+
+    return response;
+  }
+
+  static async patchJSON({
+    endpoint,
+    body,
+    accessToken
+  }: PostJSONProps): Promise<Response> {
+    return await this._patchRequest({
+      endpoint,
+      body: JSON.stringify(body),
+      contentType: 'application/json',
+      accessToken
+    });
+  }
+
+  static async delete({
+    endpoint,
+    accessToken
+  }: {
+    endpoint: Endpoints;
+    accessToken?: string;
+  }): Promise<Response> {
+    const options: RequestInit = {
+      method: 'DELETE'
+    };
+
+    if (accessToken) {
+      options.headers = {
+        Authorization: `Basic ${accessToken}`,
+      };
+    }
+
+    const request = fetch(endpoint, options);
+
+    const response = await request;
+
+    if (!response.ok)
+      throw new WebApiError(
+        (await response.json()) || response.statusText,
+        response.status
+      );
 
     return response;
   }
