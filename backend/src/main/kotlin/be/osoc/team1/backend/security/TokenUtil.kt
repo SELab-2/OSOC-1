@@ -1,6 +1,5 @@
 package be.osoc.team1.backend.security
 
-import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidTokenException
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
@@ -10,11 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import java.util.*
-import java.util.stream.Collectors
+import java.util.Date
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.random.Random.Default.nextBytes
@@ -37,14 +34,17 @@ object TokenUtil {
     private val hashingAlgorithm: Algorithm = Algorithm.HMAC256(secret)
 
     /**
-     * Create a JSON web token. The token contains username, expiration date and roles of user. In the end, the token
-     * gets signed using above hashing algorithm.
-     * this function can be used for making an access token or even a refresh token.
+     * Create a JSON web token. The token contains email, expiration date of token, whether the token is an access token
+     * and the role of the user. Set isAccessToken to true when making an access token, set it to false when creating a
+     * refresh token. Access tokens are valid for 5 minutes, while refresh tokens stay valid for 12 hours.
+     * The created token gets signed using above hashing algorithm and secret.
      */
-    fun createToken(email: String, role: String, minutesToLive: Int): String {
+    fun createToken(email: String, role: String, isAccessToken: Boolean): String {
+        val minutesToLive: Int = if (isAccessToken) 5 else 60*12
         return JWT.create()
             .withSubject(email)
             .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))
+            .withClaim("isAccessToken", isAccessToken)
             .withClaim("role", role)
             .sign(hashingAlgorithm)
     }
@@ -80,8 +80,12 @@ object TokenUtil {
     fun authenticateWithToken(decodedToken: DecodedJWT) {
         val username: String = decodedToken.subject
         val authority = SimpleGrantedAuthority(decodedToken.getClaim("role").asString())
-        SecurityContextHolder.getContext().authentication =
-            UsernamePasswordAuthenticationToken(username, null, listOf(authority))
+        if (decodedToken.getClaim("isAccessToken").asBoolean()) {
+            SecurityContextHolder.getContext().authentication =
+                UsernamePasswordAuthenticationToken(username, null, listOf(authority))
+        } else {
+            throw InvalidTokenException("You cannot authenticate with a refresh token")
+        }
     }
 
     /**
@@ -101,8 +105,8 @@ object TokenUtil {
         role: String,
         oldRefreshToken: String? = null
     ) {
-        val accessToken: String = createToken(email, role, 5)
-        val refreshToken: String = oldRefreshToken ?: createToken(email, role, 60 * 24)
+        val accessToken: String = createToken(email, role, true)
+        val refreshToken: String = oldRefreshToken ?: createToken(email, role, false)
 
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken

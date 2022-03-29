@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
 /**
- * This exception is thrown by TokenUtil when a token is signed incorrectly.
+ * This exception is thrown by TokenUtil
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 class InvalidTokenException(
