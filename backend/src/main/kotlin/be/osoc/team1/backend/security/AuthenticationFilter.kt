@@ -1,6 +1,6 @@
 package be.osoc.team1.backend.security
 
-import com.auth0.jwt.JWT
+import be.osoc.team1.backend.security.TokenUtil.createToken
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
@@ -8,11 +8,8 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import java.util.Date
-import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -59,25 +56,12 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     ) {
         val authenticatedUser: User = authentication.principal as User
         val accessToken: String = createToken(authenticatedUser, 5)
+        val refreshToken: String = createToken(authenticatedUser, 60*24)
 
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken
+        tokens["refreshToken"] = refreshToken
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(response.outputStream, tokens)
-    }
-
-    /**
-     * create a JSON web token
-     * the token contains username, expiration date and roles of user
-     * this function can be used for making an access token or even a refresh token
-     */
-    private fun createToken(user: User, minutesToLive: Int): String {
-        val roles: List<String> =
-            user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
-        return JWT.create()
-            .withSubject(user.username)
-            .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))
-            .withClaim("roles", roles)
-            .sign(SecretUtil.algorithm)
     }
 }

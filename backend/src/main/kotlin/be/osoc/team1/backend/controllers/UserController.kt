@@ -77,4 +77,12 @@ class UserController(private val service: UserService) {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun postUserRole(@PathVariable id: UUID, @RequestBody role: Role) = service.changeRole(id, role)
+
+    /**
+     * Get a new access token using your refresh token
+     */
+    @PostMapping("/refresh")
+    fun renewAccessToken(request: HttpServletRequest, response: HttpServletResponse) {
+    
+    }
 }

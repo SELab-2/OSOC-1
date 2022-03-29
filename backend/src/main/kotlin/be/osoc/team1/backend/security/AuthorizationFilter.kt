@@ -57,7 +57,7 @@ class AuthorizationFilter : OncePerRequestFilter() {
         filterChain: FilterChain
     ) {
         try {
-            val verifier: JWTVerifier = JWT.require(SecretUtil.algorithm).build()
+            val verifier: JWTVerifier = JWT.require(TokenUtil.hashingAlgorithm).build()
             val decodedJWT: DecodedJWT = verifier.verify(accessToken)
             val username: String = decodedJWT.subject
 
