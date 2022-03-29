@@ -792,7 +792,7 @@ components:
             type: object
             required:
                 - id
-                - name
+                - username
                 - email
                 - password
                 - role
@@ -801,7 +801,7 @@ components:
                     type: string
                     format: uuid
                     readOnly: true
-                name:
+                username:
                     type: string
                 email:
                     type: string
