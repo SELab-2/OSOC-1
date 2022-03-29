@@ -612,8 +612,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: string
-                                format: uuid
+                                $ref: '#/components/schemas/User'
                     headers:
                         Location:
                             description: url to the newly created User
