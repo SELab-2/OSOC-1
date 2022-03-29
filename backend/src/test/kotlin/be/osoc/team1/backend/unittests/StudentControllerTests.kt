@@ -43,15 +43,15 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents should not fail`() {
-        every { studentService.getAllStudents(0,50,"id") } returns emptyList()
+        every { studentService.getAllStudents(0, 50, "id") } returns emptyList()
         mockMvc.perform(get("/students"))
             .andExpect(status().isOk)
     }
 
     @Test
-    fun `getAllStudents paging returns the correct amount`(){
-        every { studentService.getAllStudents(0,1,"id") } returns mutableListOf(testStudent)
-        every { studentService.getAllStudents(0,2,"id") } returns mutableListOf(testStudent, Student("test","dummie"))
+    fun `getAllStudents paging returns the correct amount`() {
+        every { studentService.getAllStudents(0, 1, "id") } returns mutableListOf(testStudent)
+        every { studentService.getAllStudents(0, 2, "id") } returns mutableListOf(testStudent, Student("test", "dummie"))
         mockMvc.perform(get("/students?pageNumber=0&pageSize=1"))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(mutableListOf(testStudent))))

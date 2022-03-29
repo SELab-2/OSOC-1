@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
