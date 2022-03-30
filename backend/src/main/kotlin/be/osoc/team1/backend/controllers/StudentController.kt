@@ -33,9 +33,7 @@ class StudentController(private val service: StudentService) {
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
         @RequestParam(defaultValue = "id") sortBy: String
-    ): Iterable<Student> {
-        return service.getAllStudents(pageNumber, pageSize, sortBy)
-    }
+    ): Iterable<Student> = service.getAllStudents(pageNumber, pageSize, sortBy)
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists,

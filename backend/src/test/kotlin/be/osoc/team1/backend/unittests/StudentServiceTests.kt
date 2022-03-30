@@ -48,13 +48,9 @@ class StudentServiceTests {
         every { repository.findAll() } returns listOf(testStudent)
         every {
             repository.findAll(
-                PageRequest.of(
-                    0,
-                    50,
-                    Sort.by("id")
-                )
+                PageRequest.of(0, 50, Sort.by("id"))
             )
-        } returns PageImpl(mutableListOf(testStudent)) // for pagination
+        } returns PageImpl(mutableListOf(testStudent))
         return repository
     }
 
@@ -67,17 +63,7 @@ class StudentServiceTests {
     @Test
     fun `getAllSTudents paging returns the correct amount`() {
         val repository: StudentRepository = mockk()
-        val testStudent2 = Student("Test", "Dummie")
         every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(mutableListOf(testStudent))
-        every {
-            repository.findAll(
-                PageRequest.of(
-                    0,
-                    2,
-                    Sort.by("id")
-                )
-            )
-        } returns PageImpl(mutableListOf(testStudent, testStudent2))
         val service = StudentService(repository, userService)
         assertEquals(service.getAllStudents(0, 1, "id"), listOf(testStudent))
     }
