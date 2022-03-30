@@ -6,6 +6,7 @@ import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.ProjectService
 import be.osoc.team1.backend.services.StudentService
@@ -228,5 +229,53 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(get("/projects/conflicts"))
             .andExpect(status().isOk)
             .andExpect(content().string(objectMapper.writeValueAsString(result)))
+    }
+
+    @Test
+    fun `postAssignment succeeds if everything is correct`() {
+        val assignmentPost = ProjectService.AssignmentPost(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "reason"
+        )
+        every { projectService.postAssignment(any(), any()) } just Runs
+        mockMvc.perform(
+            post("/projects/$testId/assignments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(assignmentPost))
+        ).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `postAssignment returns 404 if an invalid id is used`() {
+        val assignmentPost = ProjectService.AssignmentPost(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "reason"
+        )
+        every { projectService.postAssignment(any(), any()) } throws InvalidIdException()
+        mockMvc.perform(
+            post("/projects/$testId/assignments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(assignmentPost))
+        ).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `postAssignment returns 403 if some of the required conditions are not met`() {
+        val assignmentPost = ProjectService.AssignmentPost(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "reason"
+        )
+        every { projectService.postAssignment(any(), any()) } throws ForbiddenOperationException()
+        mockMvc.perform(
+            post("/projects/$testId/assignments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(assignmentPost))
+        ).andExpect(status().isForbidden)
     }
 }
