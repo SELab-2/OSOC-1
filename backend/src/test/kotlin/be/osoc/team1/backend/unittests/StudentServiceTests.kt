@@ -63,9 +63,18 @@ class StudentServiceTests {
     @Test
     fun `getAllStudents paging returns the correct amount`() {
         val repository: StudentRepository = mockk()
-        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(mutableListOf(testStudent))
+        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(listOf(testStudent))
         val service = StudentService(repository, userService)
         assertEquals(service.getAllStudents(0, 1, "id"), listOf(testStudent))
+    }
+
+    @Test
+    fun `getAllStudents paging should not fail when list is empty`() {
+        val repository: StudentRepository = mockk()
+        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(listOf())
+        val service = StudentService(repository, userService)
+        assertEquals(service.getAllStudents(0, 1, "id"), listOf(testStudent))
+
     }
 
     @Test

@@ -28,11 +28,7 @@ class StudentService(private val repository: StudentRepository, private val user
     fun getAllStudents(pageNumber: Int, pageSize: Int, sortBy: String): Iterable<Student> {
         val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
         val pagedResult: Page<Student> = repository.findAll(paging)
-        return if (pagedResult.hasContent()) {
-            pagedResult.content
-        } else {
-            mutableListOf()
-        }
+        return pagedResult.content
     }
 
     /**

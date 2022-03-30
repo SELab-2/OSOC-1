@@ -53,7 +53,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(0, 1, "id") } returns mutableListOf(testStudent)
         mockMvc.perform(get("/students?pageNumber=0&pageSize=1"))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(mutableListOf(testStudent))))
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent))))
     }
 
     @Test
