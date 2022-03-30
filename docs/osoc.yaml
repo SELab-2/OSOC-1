@@ -14,17 +14,17 @@ paths:
                 name: pageNumber
                 schema:
                   type: integer
-                description: The page number for pagination
+                description: The page number for pagination, using offset pagination (see https://developer.box.com/guides/api-calls/pagination/offset-based/)
               - in: query
                 name: pageSize
                 schema:
                   type: integer
-                description: The page size for pagination
+                description: The page size for pagination. For example, if you pass 50 as value, there will be 50 students on one page
               - in: query
                 name: sortBy
                 schema:
                   type: string
-                description: The parameter to sort by
+                description: The parameter to sort by, sorting is done alphabetically and can be done on any parameter but sorting on communications will be nonsensical
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:

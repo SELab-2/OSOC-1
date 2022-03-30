@@ -50,10 +50,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents paging returns the correct amount`() {
-        every { studentService.getAllStudents(0, 1, "id") } returns mutableListOf(testStudent)
+        val testList = listOf(testStudent)
+        every { studentService.getAllStudents(0, 1, "id") } returns testList
         mockMvc.perform(get("/students?pageNumber=0&pageSize=1"))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent))))
+            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
 
     @Test
