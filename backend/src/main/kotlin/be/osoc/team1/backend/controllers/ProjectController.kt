@@ -142,6 +142,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     }
 
     @DeleteMapping("/{projectId}/assignments/{assignmentId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) {
         service.deleteAssignment(projectId, assignmentId)
     }

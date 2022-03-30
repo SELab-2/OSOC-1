@@ -278,4 +278,16 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
                 .content(objectMapper.writeValueAsString(assignmentPost))
         ).andExpect(status().isForbidden)
     }
+
+    @Test
+    fun `deleteAssignment succeeds if everything is correct`() {
+        every { projectService.deleteAssignment(any(), any()) } just Runs
+        mockMvc.perform(delete("/projects/$testId/assignments/$testId")).andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `deleteAssignment returns 404 if an invalid id is used`() {
+        every { projectService.deleteAssignment(any(), any()) } throws InvalidIdException()
+        mockMvc.perform(delete("/projects/$testId/assignments/$testId")).andExpect(status().isNotFound)
+    }
 }
