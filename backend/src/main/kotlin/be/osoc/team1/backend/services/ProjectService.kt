@@ -61,28 +61,6 @@ class ProjectService(
     }
 
     /**
-     * Adds a student to project based on [projectId], if [projectId] is not in [repository] throw InvalidProjectIdException
-     */
-    fun addStudentToProject(projectId: UUID, student: Student) {
-        val project: Project = getProjectById(projectId)
-        project.students.add(student)
-        repository.save(project)
-    }
-
-    /**
-     * removes a student from project based on [projectId] and [studentId],
-     * if [projectId] is not in [repository] throw InvalidProjectIdException
-     * if [studentId] not assigned to project throw FailedOperationException
-     */
-    fun removeStudentFromProject(projectId: UUID, studentId: UUID) {
-        val project: Project = getProjectById(projectId)
-        if (!project.students.removeIf { it.id == studentId }) {
-            throw FailedOperationException("Given student is not assigned to project")
-        }
-        repository.save(project)
-    }
-
-    /**
      * Adds a coach to project based on [projectId],
      * if [projectId] is not in [repository] throw InvalidProjectIdException
      */
@@ -105,13 +83,25 @@ class ProjectService(
         repository.save(project)
     }
 
+    fun getStudents(projectId: UUID): List<Student> {
+        return getStudents(getProjectById(projectId))
+    }
+
+    fun getStudents(project: Project): List<Student> {
+        val students = mutableListOf<Student>()
+        for (assignment in project.assignments) {
+            students.add(assignment.student)
+        }
+        return students
+    }
+
     /**
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
      */
     fun getConflicts(): MutableList<Conflict> {
         val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
         for (project in getAllProjects()) {
-            for (student in project.students) {
+            for (student in getStudents(project)) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())
                 studentsMap[student.id]?.add(project.id)

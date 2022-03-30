@@ -38,7 +38,6 @@ class ProjectServiceTests {
         "Test",
         "Client",
         "a test project",
-        mutableListOf(testStudent),
         mutableListOf(testCoach),
         listOf(RoleRequirement(testSkill, 1))
     )
@@ -46,7 +45,6 @@ class ProjectServiceTests {
         "Saved",
         "Client",
         "a saved project",
-        mutableListOf(testStudent),
         mutableListOf(testCoach)
     )
     private val suggester = User("username", "email", Role.Coach, "password")
@@ -129,22 +127,6 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `addStudentToProject runs`() {
-        val repository = getRepository(true)
-        val service = ProjectService(repository, mockk(), mockk(), mockk())
-        val student = Student("Lars", "Van Cauter")
-        service.addStudentToProject(testProject.id, student)
-        verify { repository.save(testProject) }
-    }
-
-    @Test
-    fun `addStudentToProject fails when project doesnt exist`() {
-        val service = ProjectService(getRepository(false), mockk(), mockk(), mockk())
-        val student = Student("Lars", "Van Cauter")
-        assertThrows<InvalidProjectIdException> { service.addStudentToProject(testProject.id, student) }
-    }
-
-    @Test
     fun `addCoachToProject runs`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), mockk(), mockk())
@@ -158,20 +140,6 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(false), mockk(), mockk(), mockk())
         val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
         assertThrows<InvalidProjectIdException> { service.addCoachToProject(testProject.id, coach) }
-    }
-
-    @Test
-    fun `removeStudentFromProject succeeds when student is in project`() {
-        val repository = getRepository(true)
-        val service = ProjectService(repository, mockk(), mockk(), mockk())
-        service.removeStudentFromProject(testProject.id, testStudent.id)
-        verify { repository.save(testProject) }
-    }
-
-    @Test
-    fun `removeStudentFromProject fails when student is not in project`() {
-        val service = ProjectService(getRepository(true), mockk(), mockk(), mockk())
-        assertThrows<FailedOperationException> { service.removeStudentFromProject(testProject.id, UUID.randomUUID()) }
     }
 
     @Test
@@ -193,13 +161,18 @@ class ProjectServiceTests {
         val testStudent = Student("Lars", "Van Cauter")
         val testStudent2 = Student("Lars2", "Van Cauter2")
         val testStudent3 = Student("Lars3", "Van Cauter3")
-        val testProjectConflict = Project("Test", "Client", "a test project", mutableListOf(testStudent))
-        val testProjectConflict2 = Project("Test", "Client", "a test project", mutableListOf(testStudent, testStudent2))
+        val role = RoleRequirement(Skill("backend"), 2)
+        val suggester = User("suggester", "email",  Role.Coach, "password")
+        val testProjectConflict = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, role, suggester, "reason")))
+        val testProjectConflict2 = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, role, suggester, "reason"), Assignment(testStudent2, role, suggester, "reason")))
         val testProjectConflict3 = Project(
             "Test",
             "Client",
             "a test project",
-            mutableListOf(testStudent2, testStudent3)
+            assignments = mutableListOf(
+                Assignment(testStudent2, role, suggester, "reason"),
+                Assignment(testStudent3, role, suggester, "reason")
+            )
         )
         val repository = getRepository(true)
         every { repository.findAll() } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
