@@ -73,8 +73,7 @@ class StudentServiceTests {
         val repository: StudentRepository = mockk()
         every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(listOf())
         val service = StudentService(repository, userService)
-        assertEquals(service.getAllStudents(0, 1, "id"), listOf(testStudent))
-
+        assertEquals(service.getAllStudents(0, 1, "id"), listOf<Student>())
     }
 
     @Test
