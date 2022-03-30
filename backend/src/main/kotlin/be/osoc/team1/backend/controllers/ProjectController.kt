@@ -136,11 +136,28 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     @Secured("ROLE_COACH")
     fun getProjectConflicts(): MutableList<ProjectService.Conflict> = service.getConflicts()
 
+    /**
+     * Assigns a student to a role in the project, format:
+     * ```
+     * {
+     *     "student": "STUDENT(Student) ID",
+     *     "role": "ROLE(RoleRequirement) ID",
+     *     "suggester": "SUGGESTER(User) ID",
+     *     "reason": "REASON(String)"
+     * }
+     * ```
+     * Will return a 404 if any of the ids are invalid. Will throw a 403 if the required conditions for assignment are
+     * not met. These conditions are described in the documentation for [ProjectService.postAssignment].
+     */
     @PostMapping("/{projectId}/assignments")
     fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) {
         service.postAssignment(projectId, assignment)
     }
 
+    /**
+     * Removes assignment with [assignmentId] of a student to a role on project with [projectId]. Will return a 404 if
+     * the specified [assignmentId] is not actually part of this project or if [assignmentId] outright doesn't exist.
+     */
     @DeleteMapping("/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) {

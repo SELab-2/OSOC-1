@@ -4,21 +4,25 @@ import InvalidAssignmentIdException
 import InvalidRoleRequirementIdException
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
-import be.osoc.team1.backend.entities.RoleRequirement
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.repositories.ProjectRepository
-import be.osoc.team1.backend.repositories.RoleRequirementRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class ProjectService(private val repository: ProjectRepository, private val roleRepository: RoleRequirementRepository, private val assignmentRepository: AssignmentRepository, private val studentService: StudentService, private val userService: UserService) {
+class ProjectService(
+    private val repository: ProjectRepository,
+    private val assignmentRepository: AssignmentRepository,
+    private val studentService: StudentService,
+    private val userService: UserService
+) {
     /**
      * Get all projects
      */
@@ -123,13 +127,20 @@ class ProjectService(private val repository: ProjectRepository, private val role
         return conflicts
     }
 
-    fun getRoleRequirementById(roleId: UUID): RoleRequirement = roleRepository.findByIdOrNull(roleId)
-        ?: throw InvalidRoleRequirementIdException("Role not found")
-
+    /**
+     * Get an assignment by its [assignmentId], if it doesn't exist a [InvalidAssignmentIdException] will be thrown.
+     */
     fun getAssignmentById(assignmentId: UUID): Assignment {
         return assignmentRepository.findByIdOrNull(assignmentId) ?: throw InvalidAssignmentIdException()
     }
 
+    /**
+     * Assigns a student to a specific role on the project with [projectId]. A [ForbiddenOperationException] will be
+     * thrown if the student was already assigned on this project, if the role already has enough assignees or if the
+     * specified student doesn't actually have the required skill to be given the specified role. A
+     * [InvalidAssignmentIdException] will be thrown if specified role is not part of the specified project. If the
+     * specified student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
+     */
     fun postAssignment(projectId: UUID, assignmentForm: AssignmentPost) {
         val project = getProjectById(projectId)
         val role = project.requiredRoles.find { it.id == assignmentForm.role }
@@ -152,6 +163,11 @@ class ProjectService(private val repository: ProjectRepository, private val role
         repository.save(project)
     }
 
+    /**
+     * Unassign a student by removing the assignment with [assignmentId] from the project with [projectId]. If this
+     * assignment is not part of the project, or it just outright doesn't exist then an [InvalidAssignmentIdException]
+     * will be thrown.
+     */
     fun deleteAssignment(projectId: UUID, assignmentId: UUID) {
         val project = getProjectById(projectId)
         project.assignments.find { it.id == assignmentId }
