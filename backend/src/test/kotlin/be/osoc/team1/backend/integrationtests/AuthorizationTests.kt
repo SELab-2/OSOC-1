@@ -349,6 +349,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+        Thread.sleep(1000)
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(refreshResponse.statusCodeValue == 200)
@@ -357,6 +358,15 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val newRefreshToken: String = JSONObject(refreshResponse.body).get("refreshToken") as String
         assert(accessToken != newAccessToken)
         assert(refreshToken == newRefreshToken)
+    }
+
+    @Test
+    fun `use access token to renew access token returns 404`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
+
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(accessToken)
+        assert(refreshResponse.statusCodeValue == 404)
     }
 
     @Test

@@ -107,15 +107,11 @@ object TokenUtil {
         authorities: List<String>,
         oldRefreshToken: String? = null
     ) {
-        println("he")
         val accessToken: String = createToken(email, authorities, true)
         val refreshToken: String = oldRefreshToken ?: createToken(email, authorities, false)
-        println("he")
-
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken
         tokens["refreshToken"] = refreshToken
-        println("he")
 
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(response.outputStream, tokens)

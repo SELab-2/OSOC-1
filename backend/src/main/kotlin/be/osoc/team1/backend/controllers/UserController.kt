@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import kotlin.time.Duration.Companion.milliseconds
 
 @RestController
 @RequestMapping("/users")
@@ -89,14 +90,13 @@ class UserController(private val service: UserService) {
         val refreshToken: String? = request.getParameter("refreshToken")
         if (refreshToken != null) {
             try {
-                println("yo")
                 val decodedToken = decodeAndVerifyToken(refreshToken)
-                println("no")
+                if (decodedToken.getClaim("isAccessToken").asBoolean()) {
+                    throw InvalidTokenException("Expected a refresh token, got an access token.")
+                }
                 val email: String = decodedToken.subject
                 val authorities: List<String> = decodedToken.getClaim("authorities").asList(String::class.java)
-                println("bro? $email, $authorities")
                 createAccessAndRefreshToken(response, email, authorities, refreshToken)
-                println("go")
             } catch (exception: Exception) {
                 throw InvalidTokenException()
             }
