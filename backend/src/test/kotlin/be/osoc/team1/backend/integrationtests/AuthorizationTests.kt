@@ -120,6 +120,17 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     }
 
     /**
+     * Create the correct header for an access token to perform an authenticated request
+     */
+    fun requestNewAccessToken(refreshToken: String): ResponseEntity<String> {
+        val input = "refreshToken=$refreshToken"
+        val refreshHeaders = HttpHeaders()
+        refreshHeaders.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        val refreshRequest = HttpEntity(input, refreshHeaders)
+        return restTemplate.exchange(URI("$baseUrl/users/refresh"), HttpMethod.POST, refreshRequest, String::class.java)
+    }
+
+    /**
      * Logout to avoid influencing other tests
      */
     fun logoutResponse(response: ResponseEntity<String>) {
@@ -339,8 +350,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
 
-        val refreshRequest = HttpEntity(null, createAuthHeaders(refreshToken))
-        val refreshResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/refresh"), HttpMethod.POST, refreshRequest, String::class.java)
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(refreshResponse.statusCodeValue == 200)
 
         val newAccessToken: String = JSONObject(refreshResponse.body).get("accessToken") as String
@@ -354,8 +364,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
 
-        val refreshRequest = HttpEntity(null, createAuthHeaders(refreshToken))
-        val refreshResponse: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/refresh"), HttpMethod.POST, refreshRequest, String::class.java)
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(refreshResponse.statusCodeValue == 200)
         val newAccessToken: String = JSONObject(refreshResponse.body).get("accessToken") as String
 

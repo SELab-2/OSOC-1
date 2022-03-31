@@ -83,7 +83,7 @@ object TokenUtil {
             SecurityContextHolder.getContext().authentication =
                 UsernamePasswordAuthenticationToken(username, null, authorities)
         } else {
-            throw InvalidTokenException("You cannot authenticate with a refresh token")
+            throw InvalidTokenException("You cannot authenticate with a refresh token.")
         }
     }
 

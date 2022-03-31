@@ -3,6 +3,7 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
+import be.osoc.team1.backend.exceptions.InvalidTokenException
 import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import be.osoc.team1.backend.security.TokenUtil.getTokenFromRequest
@@ -86,17 +87,22 @@ class UserController(private val service: UserService) {
      */
     @PostMapping("/refresh")
     fun renewAccessToken(request: HttpServletRequest, response: HttpServletResponse) {
-        try {
-            val refreshToken: String? = getTokenFromRequest(request)
-            if (refreshToken != null) {
+        val refreshToken: String? = request.getParameter("refreshToken")
+        if (refreshToken != null) {
+            try {
+                println("yo")
                 val decodedToken = decodeAndVerifyToken(refreshToken)
+                println("no")
                 val email: String = decodedToken.subject
                 val authorities = decodedToken.getClaim("roles").asList(String::class.java)
-
+                println("bro? $email, $authorities")
                 createAccessAndRefreshToken(response, email, authorities, refreshToken)
+                println("go")
+            } catch (exception: Exception) {
+                throw InvalidTokenException()
             }
-        } catch (exception: Exception) {
-            throw exception
+        } else {
+            throw InvalidTokenException("No refresh token found.")
         }
     }
 }
