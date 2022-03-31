@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository
 import java.util.UUID
 
 interface UserRepository : CrudRepository<User, UUID> {
-    fun findByRole(role: Role): Collection<User>
-    fun findByEmail(email: String): List<User>
+    fun findByOrganization(organization: String): Collection<User>
+    fun findByEmail(email: String): List<User> // TODO: should be Collection
+    fun findByOrganizationAndRole(organization: String, role: Role): Collection<User>
 }
