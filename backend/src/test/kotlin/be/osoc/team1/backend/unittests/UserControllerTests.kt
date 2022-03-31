@@ -32,7 +32,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var userService: UserService
 
-    private val testOrganization = "test organization"
+    private val testOrganization = "test_organization"
     private val testUser = User("Test", "test@email.com", Role.Admin, "password", testOrganization)
     private val testId = testUser.id
     private val testUserJsonRepresentation = ObjectMapper().writeValueAsString(testUser)

@@ -81,7 +81,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
 
     private var baseUrl: String = ""
 
-    private val testOrganization = "test organization"
+    private val testOrganization = "test_organization"
 
     private val adminPassword = "adminPassword"
     private val adminEmail = "admin@admin.com"
