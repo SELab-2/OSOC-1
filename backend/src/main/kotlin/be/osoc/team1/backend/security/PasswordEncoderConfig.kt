@@ -6,8 +6,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 
 /**
- * Passwords need to be encoded before being saved in the database, otherwise anyone accessing a user database on a
- * company's servers (including hackers) could easily view any stored passwords.
+ * This class is used to encrypt passwords before storing them in the database.
  *
  * In this project we use the [BCryptPasswordEncoder] to encode the passwords. [BCryptPasswordEncoder] is currently the
  * most popular password encoder. The [BCryptPasswordEncoder] implementation uses the widely supported bcrypt algorithm
@@ -15,10 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
  *
  * The recommendation is that the password encoder should be tuned, so it takes about 1 second to verify a password on
  * your system. This trade-off is to make it difficult for attackers to crack the password using brute-force attacks,
- * but not so costly it puts an excessive burden on your system. A brute-force attack is an attempt to discover a
- * password by systematically trying every possible combination of letters, numbers and symbols until you discover the
- * one correct combination that works. Brute-force attacks obviously lose their effectiveness when it takes a second to
- * check the validity of the password.
+ * but not so costly it puts an excessive burden on your system.
+ * More on brute-force attacks can be read on: https://owasp.org/www-community/controls/Blocking_Brute_Force_Attacks
  *
  * [BCryptPasswordEncoder] takes an argument between 4 and 31. This argument decides how 'strong' your password encoder
  * is and thus how long it takes to verify a password. This parameter is logarithmic, and defaults to 10. Each time you
@@ -33,7 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
  * Pbkdf2PasswordEncoder is a good choice if FIPS certification would be required, but Pbkdf2 is not memory hard and
  * thus weaker than bcrypt.
  * SCryptPasswordEncoder is a good alternative to [BCryptPasswordEncoder], but uses more memory.
- * Argon2PasswordEncoder also uses more memory then [BCryptPasswordEncoder]. Argon is stronger than bcrypt but only
+ * Argon2PasswordEncoder also uses more memory than [BCryptPasswordEncoder]. Argon is stronger than bcrypt but only
  * when runtimes exceed 1 second and argon is also harder to configure correctly.
  *
  * above information is partially based on following link:

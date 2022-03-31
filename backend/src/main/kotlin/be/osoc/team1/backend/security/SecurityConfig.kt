@@ -31,12 +31,9 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
      * Set configuration to handle all incoming requests.
      * Authentication and authorization are configured to work stateless and don't use any cookies.
      *
-     * Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted actions on a web
-     * application in which they’re currently authenticated. With a little help of social engineering (such as sending a
-     * link via email or chat), an attacker may trick the users of a web application into executing actions of the
-     * attacker’s choosing. CSRF could compromise the entire web application. Luckily, these attacks rely on
-     * cookie-based session handling. Because we do not use cookies for authentication or authorization, there is no
-     * room for CSRF attacks, so we can safely disable CSRF protection.
+     * We can safely disable CSRF protection, because CSRF attacks rely on cookie-based session handling. Because we do
+     * not use cookies for authentication or authorization, there is no room for CSRF attacks.
+     * More on CSRF attacks can be read on: https://owasp.org/www-community/attacks/csrf
      *
      * First add [AuthorizationFilter] to check if user is authorized, if not, try to authenticate with the
      * [AuthenticationFilter].
