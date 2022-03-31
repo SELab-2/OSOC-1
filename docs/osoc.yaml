@@ -603,9 +603,15 @@ paths:
                 '404':
                     description: |
                         The response if there is no student in the database with the given student id.
-    /users:
+    /{organization}/users:
         get:
             summary: Get list containing all users
+            parameters:
+                - name: organization
+                  required: true
+                  in: path
+                  schema:
+                      type: string
             responses:
                 '200':
                     description: OK
@@ -617,6 +623,12 @@ paths:
                                     $ref: '#/components/schemas/User'
         post:
             summary: Add a new user to database
+            parameters:
+                -   name: organization
+                    required: true
+                    in: path
+                    schema:
+                        type: string
             requestBody:
                 content:
                     application/json:
@@ -635,7 +647,7 @@ paths:
                             schema:
                                 type: string
                                 format: url
-    /users/{userId}:
+    /{organization}/users/{userId}:
         get:
             summary: get User by id
             parameters:
@@ -645,6 +657,11 @@ paths:
                   schema:
                     type: string
                     format: uuid
+                - name: organization
+                  required: true
+                  in: path
+                  schema:
+                      type: string
             responses:
                 '200':
                     description: OK
@@ -663,6 +680,11 @@ paths:
                   schema:
                     type: string
                     format: uuid
+                - name: organization
+                  required: true
+                  in: path
+                  schema:
+                      type: string
             requestBody:
                 content:
                     application/json:
@@ -695,12 +717,17 @@ paths:
                   schema:
                     type: string
                     format: uuid
+                - name: organization
+                  required: true
+                  in: path
+                  schema:
+                      type: string
             responses:
                 '204':
                     description: OK
                 '404':
                     description: NOT FOUND
-    /users/{userId}/role:
+    /{organization}/users/{userId}/role:
         post:
             summary: change role of user
             parameters:
@@ -709,7 +736,12 @@ paths:
                   in: path
                   schema:
                     type: string
-                    format: uuid            
+                    format: uuid
+                - name: organization
+                  required: true
+                  in: path
+                  schema:
+                      type: string
             requestBody:
                 content:
                     application/json:
