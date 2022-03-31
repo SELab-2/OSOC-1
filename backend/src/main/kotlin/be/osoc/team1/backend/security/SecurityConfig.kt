@@ -29,10 +29,9 @@ import org.springframework.security.config.http.SessionCreationPolicy
 class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurityConfigurerAdapter() {
     /**
      * Set configuration to handle all incoming requests.
-     * Authentication and authorization are configured to work stateless and don't use any cookies.
      *
-     * In this function, we configure Spring Security to only work stateless and thus not work with cookies. This means
-     * we can safely disable CSRF protection, because CSRF attacks rely on cookie-based authentication.
+     * In this function, we configure Spring Security to only work stateless and thus not use any cookies. This means
+     * we can safely disable CSRF protection, since CSRF attacks rely on cookie-based authentication.
      * More on CSRF attacks can be read on: https://owasp.org/www-community/attacks/csrf
      *
      * First add [AuthorizationFilter] to check if user is authorized, if not, try to authenticate with the
