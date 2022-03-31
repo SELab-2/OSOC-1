@@ -6,7 +6,6 @@ import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidTokenException
 import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
-import be.osoc.team1.backend.security.TokenUtil.getTokenFromRequest
 import be.osoc.team1.backend.services.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -94,7 +93,7 @@ class UserController(private val service: UserService) {
                 val decodedToken = decodeAndVerifyToken(refreshToken)
                 println("no")
                 val email: String = decodedToken.subject
-                val authorities = decodedToken.getClaim("roles").asList(String::class.java)
+                val authorities: List<String> = decodedToken.getClaim("authorities").asList(String::class.java)
                 println("bro? $email, $authorities")
                 createAccessAndRefreshToken(response, email, authorities, refreshToken)
                 println("go")
