@@ -18,11 +18,16 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
+/**
+ * [User]s are associated with an organization, but not an edition.
+ * See the documentation of [User] for more information. A couple of the methods do not actually use
+ * the organization [PathVariable]. This was done to have a consistent base URL for the caller.
+ */
 @RestController
 @RequestMapping("{organization}/users")
 class UserController(private val service: UserService) {
     /**
-     * Get all [User] objects stored in the database.
+     * Get all [User] objects stored in the database who are a part of the given [organization].
      */
     @GetMapping
     @Secured("ROLE_COACH")
@@ -37,7 +42,7 @@ class UserController(private val service: UserService) {
 
     /**
      * Update a user, if the user does not exist yet a 404 will be returned. The response will contain a Location header
-     * containing the url to the updated resource.
+     * containing the url to the updated resource and the created object in the body.
      */
     @PatchMapping("/{id}")
     @Secured("ROLE_ADMIN")
@@ -71,6 +76,7 @@ class UserController(private val service: UserService) {
 
     /**
      * Change the role of a user with [id] to be [role]. If the user does not exist a 404 will be returned.
+     * Attempting to demote the last remaining [Role.Admin] [User] of an [organization] will result in a 403.
      */
     @PostMapping("/{id}/role")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
