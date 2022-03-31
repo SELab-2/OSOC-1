@@ -281,7 +281,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         )
 
         assert(response.statusCodeValue == 204)
-        assert(userRepository.findByEmail(coachUser.email)[0].role == Role.Disabled)
+        assert(userRepository.findByEmail(coachUser.email).first().role == Role.Disabled)
         logoutHeader(authHeaders)
     }
 
@@ -296,7 +296,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         )
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(disabledUser.email)[0].role == Role.Disabled)
+        assert(userRepository.findByEmail(disabledUser.email).first().role == Role.Disabled)
         logoutHeader(authHeaders)
     }
 
@@ -311,7 +311,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         )
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(coachUser.email)[0].role == Role.Coach)
+        assert(userRepository.findByEmail(coachUser.email).first().role == Role.Coach)
         logoutHeader(authHeaders)
     }
 
@@ -326,7 +326,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         )
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(adminUser.email)[0].role == Role.Admin)
+        assert(userRepository.findByEmail(adminUser.email).first().role == Role.Admin)
         logoutHeader(authHeaders)
     }
 

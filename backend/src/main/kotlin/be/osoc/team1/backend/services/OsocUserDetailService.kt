@@ -1,7 +1,6 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.Role
-import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.SecurityConfig
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -23,10 +22,10 @@ class OsocUserDetailService(val userRepository: UserRepository, val passwordEnco
      * confusing at first, but we cannot change it as we are implementing this function from UserDetailService.
      */
     override fun loadUserByUsername(email: String): UserDetails {
-        val osocUsers: List<User> = userRepository.findByEmail(email)
+        val osocUsers = userRepository.findByEmail(email)
         if (osocUsers.isEmpty())
             throw UsernameNotFoundException("User with email=\"$email\" not found!")
-        val osocUser = osocUsers[0]
+        val osocUser = osocUsers.first()
         val authorities = mutableListOf<SimpleGrantedAuthority>()
         for (role in Role.values()) {
             if (osocUser.role.hasPermissionLevel(role)) {
