@@ -33,7 +33,6 @@ class StudentService(private val repository: StudentRepository, private val user
         name: String,
         includeSuggested: Boolean
     ): Iterable<Student> {
-        //TODO Remove default values for compilation of tests
         val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
         val pagedResult: Page<Student> = repository.findAll(paging)
         val studentList = mutableListOf<Student>()
