@@ -21,7 +21,7 @@ class OsocUserDetailService(val userRepository: UserRepository, val passwordEnco
     UserDetailsService {
     private val emailUserMap = mutableMapOf<String, User>()
 
-    fun getUserFromPrincipal(principal: Principal) : User {
+    fun getUserFromPrincipal(principal: Principal): User {
         return emailUserMap[principal.name]!!
     }
 
