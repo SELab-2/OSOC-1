@@ -17,19 +17,18 @@ import javax.servlet.http.HttpServletResponse
 import kotlin.random.Random.Default.nextBytes
 
 /**
- * everything needed to create and process a token
+ * Every function needed to create and process a token. This object is used for both access and refresh tokens.
  */
 object TokenUtil {
     /**
-     * nextBytes generates a random ByteArray each time TokenUtil initialises. This ByteArray is used in the hashing
-     * algorithm below. 16 bytes or 128 bits is the perfect length for this ByteArray according to:
+     * nextBytes generates a random ByteArray. This ByteArray is used in the hashing algorithm below. The perfect length
+     * for this ByteArray is 16 bytes or 128 bits according to:
      * https://security.stackexchange.com/questions/95972/what-are-requirements-for-hmac-secret-key
      */
     private val secret: ByteArray = nextBytes(16)
 
     /**
-     * We use the HMAC-SHA256 algorithm to hash our token, so we can test the token's integrity. The hashing algorithm
-     * is configured to use
+     * We use the HMAC-SHA256 algorithm to sign/hash our token, this is done to test the token's integrity.
      */
     private val hashingAlgorithm: Algorithm = Algorithm.HMAC256(secret)
 
@@ -50,19 +49,20 @@ object TokenUtil {
     }
 
     /**
-     * TODOC
+     * Get access token from request header. Throw an [InvalidTokenException] when the Authentication header is absent
+     * or invalid.
      */
-    fun getTokenFromRequest(request: HttpServletRequest): String? {
+    fun getAccessTokenFromRequest(request: HttpServletRequest): String {
         val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
-        if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
-            return authorizationHeader.substring("Basic ".length)
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Basic ")) {
+            throw InvalidTokenException("No access token found. Please append it to \"Authentication: Basic \" header")
         }
-        return null
+        return authorizationHeader.substring("Basic ".length)
     }
 
     /**
-     * Interpret token and verify its validity
-     * Catch the error if the given access token is invalid, and add error to response instead
+     * Interpret token and verify its validity and integrity. Throw an [InvalidTokenException] when the given token is
+     * invalid.
      */
     fun decodeAndVerifyToken(token: String): DecodedJWT {
         try {
@@ -74,22 +74,21 @@ object TokenUtil {
     }
 
     /**
-     * // TODOC
+     * Interpret access token to authenticate the user. Throw an [InvalidTokenException] when a refresh token is given.
      */
-    fun authenticateWithToken(decodedToken: DecodedJWT) {
-        val username: String = decodedToken.subject
-        val authorities = getAuthoritiesFromToken(decodedToken)
-        if (decodedToken.getClaim("isAccessToken").asBoolean()) {
-            SecurityContextHolder.getContext().authentication =
-                UsernamePasswordAuthenticationToken(username, null, authorities)
-        } else {
+    fun authenticateWithAccessToken(decodedToken: DecodedJWT) {
+        if (!decodedToken.getClaim("isAccessToken").asBoolean()) {
             throw InvalidTokenException("You cannot authenticate with a refresh token.")
         }
+        val username: String = decodedToken.subject
+        val authorities = getAuthoritiesFromToken(decodedToken)
+        SecurityContextHolder.getContext().authentication =
+            UsernamePasswordAuthenticationToken(username, null, authorities)
     }
 
     /**
-     * extract the authorities of the logged in user from the token
-     * return the authorities as [SimpleGrantedAuthority] as they need to be, to work with [UsernamePasswordAuthenticationToken]
+     * extract the authorities of the logged in user from the token. Return the authorities as [SimpleGrantedAuthority]
+     * as they need to be, to work with [UsernamePasswordAuthenticationToken].
      */
     private fun getAuthoritiesFromToken(decodedToken: DecodedJWT): List<SimpleGrantedAuthority> {
         val authorities: Array<String> = decodedToken.getClaim("authorities").asArray(String::class.java)
@@ -99,7 +98,8 @@ object TokenUtil {
     }
 
     /**
-     * TODOC
+     * Create an access and refresh token and add these tokens to the [response]. When this function gets called to
+     * renew an access token using a refresh token, the function passes a new access token with the old refresh token.
      */
     fun createAccessAndRefreshToken(
         response: HttpServletResponse,

@@ -1,8 +1,8 @@
 package be.osoc.team1.backend.security
 
-import be.osoc.team1.backend.security.TokenUtil.authenticateWithToken
+import be.osoc.team1.backend.security.TokenUtil.authenticateWithAccessToken
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
-import be.osoc.team1.backend.security.TokenUtil.getTokenFromRequest
+import be.osoc.team1.backend.security.TokenUtil.getAccessTokenFromRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -32,11 +32,9 @@ class AuthorizationFilter : OncePerRequestFilter() {
         filterChain: FilterChain
     ) {
         try {
-            val accessToken: String? = getTokenFromRequest(request)
-            if (accessToken != null) {
-                val decodedToken = decodeAndVerifyToken(accessToken)
-                authenticateWithToken(decodedToken)
-            }
+            val accessToken: String = getAccessTokenFromRequest(request)
+            val decodedToken = decodeAndVerifyToken(accessToken)
+            authenticateWithAccessToken(decodedToken)
             filterChain.doFilter(request, response)
         } catch (exception: Exception) {
             respondException(response, exception)
