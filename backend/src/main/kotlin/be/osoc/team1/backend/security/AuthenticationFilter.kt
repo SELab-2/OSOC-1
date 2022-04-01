@@ -1,6 +1,6 @@
 package be.osoc.team1.backend.security
 
-import be.osoc.team1.backend.entities.Views
+import be.osoc.team1.backend.entities.EntityViews
 import be.osoc.team1.backend.services.OsocUserDetailService
 import com.auth0.jwt.JWT
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -64,7 +64,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
         val osocUser = userDetailsService.emailUserMap[authenticatedUser.username]!!
         val authResponse = AuthResponse(accessToken, osocUser)
         response.contentType = APPLICATION_JSON_VALUE
-        ObjectMapper().writerWithView(Views.Public::class.java).writeValue(response.outputStream, authResponse)
+        ObjectMapper().writerWithView(EntityViews.Public::class.java).writeValue(response.outputStream, authResponse)
     }
 
     /**

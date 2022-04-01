@@ -32,25 +32,20 @@ enum class Role(private val permissionLevel: Int) {
 @Entity
 @Table(name = "account")
 class User(
-    @field:JsonView(Views.Public::class)
+    @field:JsonView(EntityViews.Public::class)
     val username: String,
 
     @Column(unique = true)
-    @field:JsonView(Views.Public::class)
+    @field:JsonView(EntityViews.Public::class)
     val email: String,
 
-    @field:JsonView(Views.Public::class)
+    @field:JsonView(EntityViews.Public::class)
     var role: Role = Role.Disabled,
 
-    @field:JsonView(Views.Hidden::class)
+    @field:JsonView(EntityViews.Hidden::class)
     val password: String
 ) {
     @Id
-    @field:JsonView(Views.Public::class)
+    @field:JsonView(EntityViews.Public::class)
     val id: UUID = UUID.randomUUID()
-}
-
-class Views {
-    open class Public
-    open class Hidden : Public()
 }
