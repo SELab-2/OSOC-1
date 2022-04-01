@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/{organization}/{editionName}/students")
 class StudentController(private val service: StudentService) {
 
     /**
@@ -32,8 +32,10 @@ class StudentController(private val service: StudentService) {
     fun getAllStudents(
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
-        @RequestParam(defaultValue = "id") sortBy: String
-    ): Iterable<Student> = service.getAllStudents(pageNumber, pageSize, sortBy)
+        @RequestParam(defaultValue = "id") sortBy: String,
+        @PathVariable organization: String,
+        @PathVariable editionName: String
+    ): Iterable<Student> = service.getAllStudents(pageNumber, pageSize, sortBy, organization, editionName)
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists,
@@ -41,7 +43,11 @@ class StudentController(private val service: StudentService) {
      */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
-    fun getStudentById(@PathVariable studentId: UUID): Student = service.getStudentById(studentId)
+    fun getStudentById(
+        @PathVariable studentId: UUID,
+        @PathVariable organization: String,
+        @PathVariable editionName: String
+    ): Student = service.getStudentById(studentId)
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists,
@@ -50,7 +56,11 @@ class StudentController(private val service: StudentService) {
     @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun deleteStudentById(@PathVariable studentId: UUID) = service.deleteStudentById(studentId)
+    fun deleteStudentById(
+        @PathVariable studentId: UUID,
+        @PathVariable organization: String,
+        @PathVariable editionName: String
+    ) = service.deleteStudentById(studentId)
 
     /**
      * Add a student to the database. The student should be passed in the request body
@@ -69,10 +79,17 @@ class StudentController(private val service: StudentService) {
      */
     @PostMapping
     @Secured("ROLE_COACH")
-    fun addStudent(@RequestBody student: Student): ResponseEntity<Student> {
+    fun addStudent(
+        @RequestBody studentRegistration: StudentRegistration,
+        @PathVariable organization: String,
+        @PathVariable editionName: String
+    ): ResponseEntity<Student> {
+        val student = Student(studentRegistration.firstName, studentRegistration.lastName, organization, editionName)
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
+
+    data class StudentRegistration(val firstName: String, val lastName: String)
 
     /**
      * Set the [status] of the student with the given [studentId]. If no such student exists,
@@ -92,8 +109,12 @@ class StudentController(private val service: StudentService) {
     @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum) =
-        service.setStudentStatus(studentId, status)
+    fun setStudentStatus(
+        @PathVariable studentId: UUID,
+        @RequestBody status: StatusEnum,
+        @PathVariable organization: String,
+        @PathVariable editionName: String
+    ) = service.setStudentStatus(studentId, status)
 
     /**
      * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should be equal to the id
@@ -116,8 +137,12 @@ class StudentController(private val service: StudentService) {
     @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun addStudentStatusSuggestion(@PathVariable studentId: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
-        service.addStudentStatusSuggestion(studentId, statusSuggestion)
+    fun addStudentStatusSuggestion(
+        @PathVariable studentId: UUID,
+        @RequestBody statusSuggestion: StatusSuggestion,
+        @PathVariable organization: String,
+        @PathVariable editionName: String
+    ) = service.addStudentStatusSuggestion(studentId, statusSuggestion)
 
     /**
      * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId]
@@ -128,6 +153,10 @@ class StudentController(private val service: StudentService) {
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun deleteStudentStatusSuggestion(@PathVariable studentId: UUID, @PathVariable coachId: UUID) =
-        service.deleteStudentStatusSuggestion(studentId, coachId)
+    fun deleteStudentStatusSuggestion(
+        @PathVariable studentId: UUID,
+        @PathVariable coachId: UUID,
+        @PathVariable organization: String,
+        @PathVariable editionName: String
+    ) = service.deleteStudentStatusSuggestion(studentId, coachId)
 }
