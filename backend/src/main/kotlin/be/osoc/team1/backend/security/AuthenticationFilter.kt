@@ -67,9 +67,11 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     }
 
     /**
-     * create a JSON web token
-     * the token contains username, expiration date and roles of user
-     * this function can be used for making an access token or even a refresh token
+     * Create a JSON web token. The token contains email, expiration date and roles of the authenticated user. The
+     * authenticated user passed as an argument here is of class [User] from Spring Security which is different from our
+     * own User class. This user object stores the email of a user in the username field and the role of a user in the
+     * authorities field using [GrantedAuthority] objects.
+     * this function can be used for making an access token or a refresh token.
      */
     private fun createToken(user: User, minutesToLive: Int): String {
         val roles: List<String> =

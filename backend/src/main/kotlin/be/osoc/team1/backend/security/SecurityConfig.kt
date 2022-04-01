@@ -17,9 +17,9 @@ import org.springframework.security.config.http.SessionCreationPolicy
  * Authentication is verifying the identity of a user (using an email and a password). Authorization is verifying which
  * resources this user has access to.
  *
- * Every incoming request will be handled by our [SecurityConfig] class. Some urls will be set to be accessible to all,
- * other urls will require authorization to be accessed. Those requests that need authorization will get processed by
- * the filter-chain. The filter-chain is just a list of filters that get called in a pre-configured order.
+ * Every incoming request will be handled by our [SecurityConfig] class. Urls defined in [ConfigUtil] will be open to
+ * non-authenticated users. All other urls require authorization. Those requests that need authorization will get
+ * processed by the filter-chain. The filter-chain is a list of filters that get called in a pre-configured order.
  * The first filter in the filter-chain is the [AuthorizationFilter] and tries to authorize the request. If that fails,
  * then the filter-chain proceeds to the next filter, the [AuthenticationFilter] which tries to authenticate the request.
  */
