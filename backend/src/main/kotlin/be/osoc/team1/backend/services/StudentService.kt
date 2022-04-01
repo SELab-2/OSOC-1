@@ -23,7 +23,8 @@ import java.util.UUID
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
     /**
-     * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
+     * Get all students of the edition [editionName] from the given [organization],
+     * who are within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
      */
     fun getAllStudents(
         pageNumber: Int,

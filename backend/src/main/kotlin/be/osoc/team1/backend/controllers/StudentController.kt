@@ -18,12 +18,17 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
+/**
+ * [Student]s are associated with an organization and an edition. Note that a lot of these methods
+ * don't use these path variables. This was done to keep the base URL consistent for the caller.
+ */
 @RestController
 @RequestMapping("/{organization}/{editionName}/students")
 class StudentController(private val service: StudentService) {
 
     /**
-     * Get a list of all students in the database. This request cannot fail.
+     * Get a list of all students in the database who are a part of the OSOC edition
+     * named [editionName] by the given [organization]. This request cannot fail.
      * There are default values applied for paging ([pageNumber], [pageSize] and [sortBy]),
      * these can be modified by adding request parameters to the url.
      */
@@ -89,6 +94,7 @@ class StudentController(private val service: StudentService) {
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
 
+    // Needed to avoid the caller having to pass the organization/editionName in the URL and the request body.
     data class StudentRegistration(val firstName: String, val lastName: String)
 
     /**
