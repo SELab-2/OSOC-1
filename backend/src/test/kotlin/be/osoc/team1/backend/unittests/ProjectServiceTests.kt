@@ -162,7 +162,7 @@ class ProjectServiceTests {
         val testStudent2 = Student("Lars2", "Van Cauter2")
         val testStudent3 = Student("Lars3", "Van Cauter3")
         val role = RoleRequirement(Skill("backend"), 2)
-        val suggester = User("suggester", "email",  Role.Coach, "password")
+        val suggester = User("suggester", "email", Role.Coach, "password")
         val testProjectConflict = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, role, suggester, "reason")))
         val testProjectConflict2 = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, role, suggester, "reason"), Assignment(testStudent2, role, suggester, "reason")))
         val testProjectConflict3 = Project(
