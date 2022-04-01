@@ -61,7 +61,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
         val authenticatedUser: User = authentication.principal as User
         val accessToken: String = createToken(authenticatedUser, 5)
 
-        val osocUser = userDetailsService.emailUserMap[authenticatedUser.username]!!
+        val osocUser = userDetailsService.getUserFromPrincipal(authentication)
         val authResponse = AuthResponse(accessToken, osocUser)
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writerWithView(EntityViews.Public::class.java).writeValue(response.outputStream, authResponse)

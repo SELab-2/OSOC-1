@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.security.Principal
 
 /**
  * This service implements the [UserDetailsService] interface used by [SecurityConfig]. This allows the authentication
@@ -18,7 +19,11 @@ import org.springframework.stereotype.Service
 @Service
 class OsocUserDetailService(val userRepository: UserRepository, val passwordEncoder: PasswordEncoder) :
     UserDetailsService {
-    val emailUserMap = mutableMapOf<String, User>()
+    private val emailUserMap = mutableMapOf<String, User>()
+
+    fun getUserFromPrincipal(principal: Principal) : User {
+        return emailUserMap[principal.name]!!
+    }
 
     /**
      * Get [UserDetails] for a specific user identified by in our case their [email]. The function name might be
