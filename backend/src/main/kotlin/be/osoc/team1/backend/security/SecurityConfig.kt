@@ -36,6 +36,9 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
 
+        // THIS IS A TEMPORARY FIX SOMEBODY SHOULD LOOK UP HOW CORS SHOULD BE ENABLED CORRECTLY
+        http.cors().disable()
+
         http.sessionManagement().maximumSessions(1)
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 

@@ -4,7 +4,6 @@ import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.services.StudentService
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -14,9 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.UUID
 
 @RestController
@@ -25,10 +24,16 @@ class StudentController(private val service: StudentService) {
 
     /**
      * Get a list of all students in the database. This request cannot fail.
+     * There are default values applied for paging ([pageNumber], [pageSize] and [sortBy]),
+     * these can be modified by adding request parameters to the url.
      */
     @GetMapping
     @Secured("ROLE_COACH")
-    fun getAllStudents(): Iterable<Student> = service.getAllStudents()
+    fun getAllStudents(
+        @RequestParam(defaultValue = "0") pageNumber: Int,
+        @RequestParam(defaultValue = "50") pageSize: Int,
+        @RequestParam(defaultValue = "id") sortBy: String
+    ): Iterable<Student> = service.getAllStudents(pageNumber, pageSize, sortBy)
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists,
@@ -64,14 +69,9 @@ class StudentController(private val service: StudentService) {
      */
     @PostMapping
     @Secured("ROLE_COACH")
-    fun addStudent(@RequestBody student: Student): ResponseEntity<Void> {
-        val id = service.addStudent(student)
-        val location = ServletUriComponentsBuilder
-            .fromCurrentRequest()
-            .path("/{id}")
-            .buildAndExpand(id)
-            .toUriString()
-        return ResponseEntity.status(HttpStatus.CREATED).header(HttpHeaders.LOCATION, location).build()
+    fun addStudent(@RequestBody student: Student): ResponseEntity<Student> {
+        val createdStudent = service.addStudent(student)
+        return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
 
     /**

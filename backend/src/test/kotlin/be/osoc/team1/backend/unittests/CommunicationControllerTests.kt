@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.ArrayList
 import java.util.UUID
 
 @UnsecuredWebMvcTest(CommunicationController::class)
@@ -57,20 +56,19 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `createCommunication succeeds if student with given id exists`() {
-        val databaseId = UUID.randomUUID()
-        every { communicationService.createCommunication(any()) } returns databaseId
+        every { communicationService.createCommunication(any()) } returns testCommunication
         every { studentService.addCommunicationToStudent(testId, any()) } just Runs
         mockMvc.perform(
             post("/communications/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
-        ).andExpect(status().isCreated)
+        ).andExpect(status().isCreated).andExpect(content().string(jsonRepresentation))
     }
 
     @Test
     fun `createCommunication returns 404 Not Found if student with given id does not exist`() {
+        every { communicationService.createCommunication(any()) } returns testCommunication
         val differentId = UUID.randomUUID()
-        every { communicationService.createCommunication(any()) } returns differentId
         every { studentService.addCommunicationToStudent(differentId, any()) }.throws(InvalidIdException())
         mockMvc.perform(
             post("/communications/$differentId")

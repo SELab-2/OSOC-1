@@ -2,20 +2,26 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
+    "build": "next build",
     "start": "next start",
     "lint": "yarn run eslint . --ext .js,.jsx,.ts,.tsx",
     "prettier:check": "yarn prettier --check .",
     "prettier:write": "yarn prettier --write ."
   },
   "dependencies": {
+    "@heroicons/react": "^1.0.6",
     "next": "latest",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "react-hot-toast": "^2.2.0",
+    "react-preloader-icon": "^1.0.0",
+    "recoil": "^0.6.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "17.0.4",
     "@types/react": "17.0.38",
+    "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
     "autoprefixer": "^10.4.0",

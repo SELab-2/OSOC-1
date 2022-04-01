@@ -73,14 +73,13 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `postProject should not fail`() {
-        val databaseId = UUID.randomUUID()
-        every { projectService.postProject(any()) } returns databaseId
+    fun `postProject should return created project`() {
+        every { projectService.postProject(any()) } returns testProject
         mockMvc.perform(
             post("/projects")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
-        ).andExpect(status().isCreated)
+        ).andExpect(status().isCreated).andExpect(content().string(jsonRepresentation))
     }
 
     @Test
@@ -156,9 +155,9 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `deleteCoachOfProject returns 400 if coach with given id is not assigned to project`() {
-        val not_assigned_coachId = UUID.randomUUID()
-        every { projectService.removeCoachFromProject(testId, not_assigned_coachId) }.throws(FailedOperationException())
-        mockMvc.perform(delete("/projects/$testId/coaches/$not_assigned_coachId"))
+        val notAssignedCoachId = UUID.randomUUID()
+        every { projectService.removeCoachFromProject(testId, notAssignedCoachId) }.throws(FailedOperationException())
+        mockMvc.perform(delete("/projects/$testId/coaches/$notAssignedCoachId"))
             .andExpect(status().isBadRequest)
     }
 

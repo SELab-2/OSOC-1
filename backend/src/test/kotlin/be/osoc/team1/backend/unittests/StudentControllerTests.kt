@@ -43,9 +43,18 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents should not fail`() {
-        every { studentService.getAllStudents() } returns emptyList()
+        every { studentService.getAllStudents(0, 50, "id") } returns emptyList()
         mockMvc.perform(get("/students"))
             .andExpect(status().isOk)
+    }
+
+    @Test
+    fun `getAllStudents paging returns the correct amount`() {
+        val testList = listOf(testStudent)
+        every { studentService.getAllStudents(0, 1, "id") } returns testList
+        mockMvc.perform(get("/students?pageNumber=0&pageSize=1"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
 
     @Test
@@ -76,16 +85,15 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `addStudent should not fail`() {
-        val databaseId = UUID.randomUUID()
-        every { studentService.addStudent(any()) } returns databaseId
+    fun `addStudent should return created student`() {
+        every { studentService.addStudent(any()) } returns testStudent
         val mvcResult = mockMvc.perform(
             post("/students")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isCreated).andReturn()
         val locationHeader = mvcResult.response.getHeader("Location")
-        assert(locationHeader!!.endsWith("/students/$databaseId"))
+        assert(locationHeader!!.endsWith("/students/${testStudent.id}"))
     }
 
     @Test

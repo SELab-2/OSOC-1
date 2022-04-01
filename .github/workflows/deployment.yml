@@ -31,6 +31,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Add env file to frontend directory
+        run: ln /home/selab2/.env .
+        working-directory: ./frontend
       - name: Install and update yarn
         run: npm install -g yarn
       - name: Install yarn dependencies
@@ -39,9 +42,10 @@ jobs:
       - name: Build react frontend with yarn
         run: yarn build
         working-directory: ./frontend
-      - name: Copy react build files to production folder
-        run: cp -R out/ /home/selab2/production/
-        working-directory: ./frontend
+      - name: Copy react files to production folder
+        run: cp -R frontend/ /home/selab2/production/
+      - name: Run the react app
+        run: sudo -E /home/selab2/production/start_frontend.sh
 
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v2

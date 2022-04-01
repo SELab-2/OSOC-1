@@ -11,6 +11,10 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -18,7 +22,14 @@ import java.util.UUID
 @Service
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
-    fun getAllStudents(): Iterable<Student> = repository.findAll()
+    /**
+     * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
+     */
+    fun getAllStudents(pageNumber: Int, pageSize: Int, sortBy: String): Iterable<Student> {
+        val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
+        val pagedResult: Page<Student> = repository.findAll(paging)
+        return pagedResult.content
+    }
 
     /**
      * Get a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student exists.
@@ -37,9 +48,9 @@ class StudentService(private val repository: StudentRepository, private val user
     }
 
     /**
-     * Add the given [student] entity to the database. Returns the student's new id as decided by the database.
+     * Add the given [student] entity to the database. Returns the created student.
      */
-    fun addStudent(student: Student) = repository.save(student).id
+    fun addStudent(student: Student): Student = repository.save(student)
 
     /**
      * Retrieve the student with the specified [studentId], then set his status to [newStatus].

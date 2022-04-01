@@ -1,10 +1,8 @@
 package be.osoc.team1.backend.entities
 
-import org.hibernate.annotations.GenericGenerator
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
-import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
@@ -56,7 +54,5 @@ class Project(
     val assignments: MutableCollection<Assignment> = mutableListOf()
 ) {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     val id: UUID = UUID.randomUUID()
 }
