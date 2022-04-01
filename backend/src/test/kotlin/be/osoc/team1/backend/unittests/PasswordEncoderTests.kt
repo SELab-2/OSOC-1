@@ -10,6 +10,6 @@ class PasswordEncoderTests {
         BCryptPasswordEncoder(14).encode("Password.test1")
         val passedTimeMillis = System.currentTimeMillis() - startTimeMillis
         assert(passedTimeMillis > 700)
-        assert(passedTimeMillis < 1300)
+        assert(passedTimeMillis < 2000)
     }
 }
