@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -35,6 +36,7 @@ class User(
     @Column(unique = true)
     val email: String,
     var role: Role = Role.Disabled,
+    @JsonIgnore
     val password: String
 ) {
     @Id

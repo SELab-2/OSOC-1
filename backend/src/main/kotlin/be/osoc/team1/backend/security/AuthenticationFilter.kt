@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.security
 
+import be.osoc.team1.backend.services.OsocUserDetailService
 import com.auth0.jwt.JWT
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -25,7 +26,7 @@ import kotlin.collections.HashMap
  * If the authentication is successful, then a response gets send with a new access token.
  * The now authenticated user can use this access token to authorize himself in the following requests.
  */
-class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
+class AuthenticationFilter(authenticationManager: AuthenticationManager?, val userDetailsService: OsocUserDetailService) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     /**
@@ -60,8 +61,9 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         val authenticatedUser: User = authentication.principal as User
         val accessToken: String = createToken(authenticatedUser, 5)
 
-        val tokens: MutableMap<String, String> = HashMap()
+        val tokens: MutableMap<String, Any> = HashMap()
         tokens["accessToken"] = accessToken
+        tokens["user"] = userDetailsService.emailUserMap[authenticatedUser.username]!!
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(response.outputStream, tokens)
     }
