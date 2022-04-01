@@ -320,15 +320,6 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         logoutHeader(authHeaders)
     }
 
-    @Test
-    fun `encoding password should take around 1 second`() {
-        val start = System.currentTimeMillis()
-        BCryptPasswordEncoder(14).encode(adminPassword)
-        val passedTimeMillis = System.currentTimeMillis() - start
-        assert(passedTimeMillis > 700)
-        assert(passedTimeMillis < 1300)
-    }
-
     // Test to check if you can use refresh token to renew access token
 
     // Test to check if refresh token gets cycled
