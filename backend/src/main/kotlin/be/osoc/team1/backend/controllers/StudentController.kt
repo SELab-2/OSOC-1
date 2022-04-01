@@ -35,9 +35,10 @@ class StudentController(private val service: StudentService) {
         @RequestParam(defaultValue = "50") pageSize: Int,
         @RequestParam(defaultValue = "id") sortBy: String,
         @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
+        @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         @RequestParam(defaultValue = "") name: String,
     ): Iterable<Student> {
-        return service.getAllStudents(pageNumber, pageSize, sortBy, status, name)
+        return service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested)
     }
 
     /**

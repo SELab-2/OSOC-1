@@ -29,8 +29,9 @@ class StudentService(private val repository: StudentRepository, private val user
         pageNumber: Int,
         pageSize: Int,
         sortBy: String,
-        statusFilter: List<StatusEnum> = listOf(),
-        name: String = ""
+        statusFilter: List<StatusEnum>,
+        name: String,
+        includeSuggested: Boolean
     ): Iterable<Student> {
         //TODO Remove default values for compilation of tests
         val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
@@ -41,7 +42,8 @@ class StudentService(private val repository: StudentRepository, private val user
             // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
             val studentHasMatchingName = (student.firstName + student.lastName).lowercase().replace(" ", "")
                 .contains(name.lowercase().replace(" ", ""))
-            if (studentHasStatus && studentHasMatchingName) {
+            val studentBeenSuggestedByUser = true //student.statusSuggestions.any{it.coachId==TODO USERID}
+            if (studentHasStatus && studentHasMatchingName &&(includeSuggested || !studentBeenSuggestedByUser)) {
                 studentList.add(student)
             }
         }
