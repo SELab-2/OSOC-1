@@ -30,7 +30,7 @@ class DataSourceConfig {
     @Bean
     fun getDataSource(): DataSource {
         val dataSourceBuilder = DataSourceBuilder.create()
-        dataSourceBuilder.driverClassName("org.postgresql.Driver")
+        // dataSourceBuilder.driverClassName("org.postgresql.Driver")
         dataSourceBuilder.url(getProperty("OSOC_DB_URL", "spring.datasource.url"))
         dataSourceBuilder.username(getProperty("OSOC_DB_USERNAME", "spring.datasource.username"))
         dataSourceBuilder.password(getProperty("OSOC_DB_PASSWORD", "spring.datasource.password"))
