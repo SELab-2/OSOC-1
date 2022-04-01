@@ -25,9 +25,15 @@ class StudentService(private val repository: StudentRepository, private val user
     /**
      * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
      */
-    fun getAllStudents(pageNumber: Int, pageSize: Int, sortBy: String): Iterable<Student> {
+    fun getAllStudents(
+        pageNumber: Int,
+        pageSize: Int,
+        sortBy: String,
+        organization: String,
+        editionName: String
+    ): Iterable<Student> {
         val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
-        val pagedResult: Page<Student> = repository.findAll(paging)
+        val pagedResult: Page<Student> = repository.findByOrganizationAndEditionName(organization, editionName, paging)
         return pagedResult.content
     }
 
