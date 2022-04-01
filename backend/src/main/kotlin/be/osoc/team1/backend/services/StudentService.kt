@@ -29,13 +29,19 @@ class StudentService(private val repository: StudentRepository, private val user
         pageNumber: Int,
         pageSize: Int,
         sortBy: String,
-        statusFilter: List<String> = listOf("yes", "no", "maybe", "undecided")
+        statusFilter: List<StatusEnum> = listOf(),
+        name: String = ""
     ): Iterable<Student> {
+        //TODO Remove default values for compilation of tests
         val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
         val pagedResult: Page<Student> = repository.findAll(paging)
         val studentList = mutableListOf<Student>()
         for (student in pagedResult.content) {
-            if (statusFilter.contains(student.status.toString().lowercase())) {
+            val studentHasStatus = statusFilter.contains(student.status)
+            // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
+            val studentHasMatchingName = (student.firstName + student.lastName).lowercase().replace(" ", "")
+                .contains(name.lowercase().replace(" ", ""))
+            if (studentHasStatus && studentHasMatchingName) {
                 studentList.add(student)
             }
         }

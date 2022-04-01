@@ -3,6 +3,7 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.exceptions.BadFilterException
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -33,13 +34,10 @@ class StudentController(private val service: StudentService) {
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
         @RequestParam(defaultValue = "id") sortBy: String,
-        @RequestParam(defaultValue = "yes,no,maybe,undecided") status: List<String>
+        @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
+        @RequestParam(defaultValue = "") name: String,
     ): Iterable<Student> {
-        if (status.size > 4 || status.all { listOf("yes", "no", "undecided", "maybe").contains(it) }) {
-            // illegal input
-            // TODO MAKE EXCEPTION
-        }
-        return service.getAllStudents(pageNumber, pageSize, sortBy, status)
+        return service.getAllStudents(pageNumber, pageSize, sortBy, status, name)
     }
 
     /**
