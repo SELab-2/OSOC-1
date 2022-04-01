@@ -1,6 +1,6 @@
 package be.osoc.team1.backend.entities
 
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonView
 import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -32,13 +32,25 @@ enum class Role(private val permissionLevel: Int) {
 @Entity
 @Table(name = "account")
 class User(
+    @field:JsonView(Views.Public::class)
     val username: String,
+
     @Column(unique = true)
+    @field:JsonView(Views.Public::class)
     val email: String,
+
+    @field:JsonView(Views.Public::class)
     var role: Role = Role.Disabled,
-    @JsonIgnore
+
+    @field:JsonView(Views.Hidden::class)
     val password: String
 ) {
     @Id
+    @field:JsonView(Views.Public::class)
     val id: UUID = UUID.randomUUID()
+}
+
+class Views {
+    open class Public
+    open class Hidden : Public()
 }
