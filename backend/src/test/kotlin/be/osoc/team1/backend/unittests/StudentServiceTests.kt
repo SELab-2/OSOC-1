@@ -100,6 +100,34 @@ class StudentServiceTests {
     }
 
     @Test
+    fun `getAllStudents name filtering returns only students with those names`() {
+        val testStudent = Student("Lars", "Cauter")
+        val testStudent2 = Student("Sral", "Retuac")
+        val testStudent3 = Student("Arsl", "Auterc")
+        val testStudent4 = Student("Rsla", "Uterca")
+        val repository: StudentRepository = mockk()
+        val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
+        every { repository.findAll(PageRequest.of(0, 50, Sort.by("id"))) } returns PageImpl(
+            allStudents
+
+        )
+        val service = StudentService(repository, userService)
+        assertEquals(
+            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "lars", true),
+            listOf(testStudent)
+        )
+        assertEquals(
+            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "ars", true),
+            listOf(testStudent, testStudent3)
+        )
+        assertEquals(
+            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "uter", true),
+            listOf(testStudent, testStudent3, testStudent4)
+        )
+        assertEquals(service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true), allStudents)
+    }
+
+    @Test
     fun `getStudentById succeeds when student with id exists`() {
         val service = StudentService(getRepository(true), userService)
         assertEquals(service.getStudentById(studentId), testStudent)
