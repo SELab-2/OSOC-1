@@ -12,25 +12,20 @@ import javax.servlet.http.HttpServletResponse
 @RequestMapping("/token")
 class TokenController {
     /**
-     * Get a new access token using your refresh token
+     * Get a new access token using your refresh token.
      */
     @PostMapping("/refresh")
     fun renewAccessToken(request: HttpServletRequest, response: HttpServletResponse) {
-        val refreshToken: String? = request.getParameter("refreshToken")
-        if (refreshToken != null) {
-            try {
-                val decodedToken = TokenUtil.decodeAndVerifyToken(refreshToken)
-                if (decodedToken.getClaim("isAccessToken").asBoolean()) {
-                    throw InvalidTokenException("Expected a refresh token, got an access token.")
-                }
-                val email: String = decodedToken.subject
-                val authorities: List<String> = decodedToken.getClaim("authorities").asList(String::class.java)
-                TokenUtil.createAccessAndRefreshToken(response, email, authorities, refreshToken)
-            } catch (exception: Exception) {
-                throw InvalidTokenException()
-            }
-        } else {
-            throw InvalidTokenException("No refresh token found.")
+        val refreshToken: String = request.getParameter("refreshToken")
+            ?: throw InvalidTokenException("No refresh token found in request body.")
+
+        val decodedToken = TokenUtil.decodeAndVerifyToken(refreshToken)
+        if (decodedToken.getClaim("isAccessToken").asBoolean()) {
+            throw InvalidTokenException("Expected a refresh token, got an access token.")
         }
+
+        val email: String = decodedToken.subject
+        val authorities: List<String> = decodedToken.getClaim("authorities").asList(String::class.java)
+        TokenUtil.createAccessAndRefreshToken(response, email, authorities, refreshToken)
     }
 }

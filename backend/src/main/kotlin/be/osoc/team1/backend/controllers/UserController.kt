@@ -3,9 +3,6 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
-import be.osoc.team1.backend.exceptions.InvalidTokenException
-import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
-import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import be.osoc.team1.backend.services.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

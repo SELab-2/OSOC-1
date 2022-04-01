@@ -69,7 +69,7 @@ object TokenUtil {
             val verifier: JWTVerifier = JWT.require(hashingAlgorithm).build()
             return verifier.verify(token)
         } catch (exception: Exception) {
-            throw InvalidTokenException()
+            throw InvalidTokenException("Token is signed incorrectly, integrity of token could not be verified.")
         }
     }
 
