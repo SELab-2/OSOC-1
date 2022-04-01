@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
+import java.net.URI
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Before
@@ -29,7 +30,6 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
-import java.net.URI
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -58,7 +58,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     companion object {
         @ClassRule
         @Container
-        private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres")
+        private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:latest")
 
         @DynamicPropertySource
         @JvmStatic
