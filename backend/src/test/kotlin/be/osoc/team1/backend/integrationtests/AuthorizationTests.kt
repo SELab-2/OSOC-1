@@ -277,7 +277,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
         assert(response.statusCodeValue == 204)
-        assert(userRepository.findByEmail(coachUser.email).get(0).role == Role.Disabled)
+        assert(userRepository.findByEmail(coachUser.email)?.role == Role.Disabled)
         logoutHeader(authHeaders)
     }
 
@@ -290,7 +290,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(disabledUser.email).get(0).role == Role.Disabled)
+        assert(userRepository.findByEmail(disabledUser.email)?.role == Role.Disabled)
         logoutHeader(authHeaders)
     }
 
@@ -303,7 +303,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(coachUser.email).get(0).role == Role.Coach)
+        assert(userRepository.findByEmail(coachUser.email)?.role == Role.Coach)
         logoutHeader(authHeaders)
     }
 
@@ -316,7 +316,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(adminUser.email).get(0).role == Role.Admin)
+        assert(userRepository.findByEmail(adminUser.email)?.role == Role.Admin)
         logoutHeader(authHeaders)
     }
 

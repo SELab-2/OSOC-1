@@ -30,10 +30,8 @@ class OsocUserDetailService(val userRepository: UserRepository, val passwordEnco
      * confusing at first, but we cannot change it as we are implementing this function from UserDetailService.
      */
     override fun loadUserByUsername(email: String): UserDetails {
-        val osocUsers: List<User> = userRepository.findByEmail(email)
-        if (osocUsers.isEmpty())
-            throw UsernameNotFoundException("User with email=\"$email\" not found!")
-        val osocUser = osocUsers[0]
+        val osocUser: User = userRepository.findByEmail(email)
+            ?: throw UsernameNotFoundException("User with email=\"$email\" not found!")
         emailUserMap[email] = osocUser
 
         val authorities = mutableListOf<SimpleGrantedAuthority>()

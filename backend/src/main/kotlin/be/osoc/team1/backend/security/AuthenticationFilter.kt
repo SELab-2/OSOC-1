@@ -49,7 +49,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
     }
 
     /**
-     * add an access token to the response when authentication is successful
+     * add an access token and information about the successfully authenticated user to the response
      * this token can be used by the user to authorise itself in the following requests
      */
     override fun successfulAuthentication(
