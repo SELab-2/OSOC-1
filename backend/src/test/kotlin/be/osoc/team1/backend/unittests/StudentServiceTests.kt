@@ -32,7 +32,9 @@ import java.util.UUID
 
 class StudentServiceTests {
 
-    private val testStudent = Student("Tom", "Alard")
+    private val testOrganization = "testOrganization"
+    private val testEditionName = "testEditionName"
+    private val testStudent = Student("Tom", "Alard", testOrganization, testEditionName)
     private val studentId = testStudent.id
     private val testCoach = User("", "", Role.Coach, "")
     private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
@@ -43,7 +45,7 @@ class StudentServiceTests {
         every { repository.existsById(studentId) } returns studentAlreadyExists
         every { repository.findByIdOrNull(studentId) } returns if (studentAlreadyExists) testStudent else null
         every { repository.deleteById(studentId) } just Runs
-        val differentIdTestStudent = Student("Tom", "Alard")
+        val differentIdTestStudent = Student("Tom", "Alard", testOrganization, testEditionName)
         every { repository.save(testStudent) } returns differentIdTestStudent
         every { repository.findAll() } returns listOf(testStudent)
         every {
@@ -55,26 +57,34 @@ class StudentServiceTests {
     }
 
     @Test
-    fun `getAllStudents does not fail`() {
-        val service = StudentService(getRepository(true), userService)
-        assertEquals(service.getAllStudents(0, 50, "id"), listOf(testStudent))
-    }
-
-    @Test
     fun `getAllStudents paging returns the correct amount`() {
         val repository: StudentRepository = mockk()
-        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(listOf(testStudent))
+        val sortBy = "id"
+        val paging = PageRequest.of(0, 1, Sort.by(sortBy))
+        every {
+            repository.findByOrganizationAndEditionName(testOrganization, testEditionName, paging)
+        } returns PageImpl(listOf(testStudent))
         val service = StudentService(repository, userService)
-        assertEquals(service.getAllStudents(0, 1, "id"), listOf(testStudent))
+        assertEquals(
+            service.getAllStudents(paging.pageNumber, paging.pageSize, sortBy, testOrganization, testEditionName),
+            listOf(testStudent)
+        )
     }
 
     @Test
     fun `getAllStudents paging should not fail when list is empty`() {
         val repository: StudentRepository = mockk()
-        val testList = listOf<Student>()
-        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(testList)
+        val emptyList = emptyList<Student>()
+        val sortBy = "id"
+        val paging = PageRequest.of(0, 1, Sort.by(sortBy))
+        every {
+            repository.findByOrganizationAndEditionName(testOrganization, testEditionName, paging)
+        } returns PageImpl(emptyList)
         val service = StudentService(repository, userService)
-        assertEquals(service.getAllStudents(0, 1, "id"), testList)
+        assertEquals(
+            service.getAllStudents(paging.pageNumber, paging.pageSize, sortBy, testOrganization, testEditionName),
+            emptyList
+        )
     }
 
     @Test

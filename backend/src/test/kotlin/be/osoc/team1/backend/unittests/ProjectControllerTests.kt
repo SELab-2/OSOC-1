@@ -103,7 +103,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `postStudentToProject succeeds if project with given id exists`() {
-        val student = Student("Lars", "Van Cauter")
+        val student = Student("Lars", "Van Cauter", "", "")
         every { projectService.addStudentToProject(testId, student) } just Runs
         every { studentService.getStudentById(student.id) } returns student
         mockMvc.perform(
@@ -115,7 +115,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `postStudentToProject returns 404 Not Found if project with given id does not exist`() {
-        val student = Student("Lars", "Van Cauter")
+        val student = Student("Lars", "Van Cauter", "", "")
         val differentId = UUID.randomUUID()
         every { projectService.addStudentToProject(differentId, student) }.throws(InvalidIdException())
         every { studentService.getStudentById(student.id) } returns student
@@ -219,7 +219,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
-        val testStudent = Student("Lars", "Van Cauter")
+        val testStudent = Student("Lars", "Van Cauter", "", "")
         val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
         val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent))
         val result = mutableListOf(ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))

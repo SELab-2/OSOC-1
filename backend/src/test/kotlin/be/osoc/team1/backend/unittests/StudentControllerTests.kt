@@ -36,23 +36,30 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     private val studentId = UUID.randomUUID()
     private val coachId = UUID.randomUUID()
-    private val testStudent = Student("Tom", "Alard")
+    private val testOrganization = "testOrganization"
+    private val testEditionName = "testEditionName"
+    private val testStudent = Student("Tom", "Alard", testOrganization, testEditionName)
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
     private val testSuggestion = StatusSuggestion(UUID.randomUUID(), SuggestionEnum.Yes, "test motivation")
+    private val baseUrl = "/$testOrganization/$testEditionName/students"
 
     @Test
     fun `getAllStudents should not fail`() {
-        every { studentService.getAllStudents(0, 50, "id") } returns emptyList()
-        mockMvc.perform(get("/students"))
+        every {
+            studentService.getAllStudents(0, 50, "id", testOrganization, testEditionName)
+        } returns emptyList()
+        mockMvc.perform(get(baseUrl))
             .andExpect(status().isOk)
     }
 
     @Test
     fun `getAllStudents paging returns the correct amount`() {
         val testList = listOf(testStudent)
-        every { studentService.getAllStudents(0, 1, "id") } returns testList
-        mockMvc.perform(get("/students?pageNumber=0&pageSize=1"))
+        every {
+            studentService.getAllStudents(0, 1, "id", testOrganization, testEditionName)
+        } returns testList
+        mockMvc.perform(get("$baseUrl?pageNumber=0&pageSize=1"))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
@@ -60,7 +67,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getStudentById returns student if student with given id exists`() {
         every { studentService.getStudentById(studentId) } returns testStudent
-        mockMvc.perform(get("/students/$studentId")).andExpect(status().isOk)
+        mockMvc.perform(get("$baseUrl/$studentId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
 
@@ -68,27 +75,27 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getStudentById returns 404 Not Found if student with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { studentService.getStudentById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(get("/students/$differentId")).andExpect(status().isNotFound)
+        mockMvc.perform(get("$baseUrl/$differentId")).andExpect(status().isNotFound)
     }
 
     @Test
     fun `deleteStudentById succeeds if student with given id exists`() {
         every { studentService.deleteStudentById(studentId) } just Runs
-        mockMvc.perform(delete("/students/$studentId")).andExpect(status().isNoContent)
+        mockMvc.perform(delete("$baseUrl/$studentId")).andExpect(status().isNoContent)
     }
 
     @Test
     fun `deleteStudentById returns 404 Not Found if student with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { studentService.deleteStudentById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(delete("/students/$differentId")).andExpect(status().isNotFound)
+        mockMvc.perform(delete("$baseUrl/$differentId")).andExpect(status().isNotFound)
     }
 
     @Test
     fun `addStudent should return created student`() {
         every { studentService.addStudent(any()) } returns testStudent
         val mvcResult = mockMvc.perform(
-            post("/students")
+            post(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isCreated).andReturn()
@@ -101,7 +108,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val status = StatusEnum.Yes
         every { studentService.setStudentStatus(studentId, status) } just Runs
         mockMvc.perform(
-            post("/students/$studentId/status")
+            post("$baseUrl/$studentId/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(status))
         ).andExpect(status().isNoContent)
@@ -112,7 +119,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val status = StatusEnum.Yes
         every { studentService.setStudentStatus(studentId, status) }.throws(InvalidIdException())
         mockMvc.perform(
-            post("/students/$studentId/status")
+            post("$baseUrl/$studentId/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(status))
         ).andExpect(status().isNotFound)
@@ -122,7 +129,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `addStudentStatusSuggestion succeeds when student with given id exists`() {
         every { studentService.addStudentStatusSuggestion(studentId, any()) } just Runs
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
         ).andExpect(status().isNoContent)
@@ -132,7 +139,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `addStudentStatusSuggestion returns 404 Not Found if student with given id does not exist`() {
         every { studentService.addStudentStatusSuggestion(studentId, any()) }.throws(InvalidStudentIdException())
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
         ).andExpect(status().isNotFound)
@@ -142,7 +149,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `addStudentStatusSuggestion returns 403 Forbidden if coach already made suggestion for student`() {
         every { studentService.addStudentStatusSuggestion(studentId, any()) }.throws(ForbiddenOperationException())
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
         ).andExpect(status().isForbidden)
@@ -152,7 +159,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `addStudentStatusSuggestion returns 404 Not Found if coach doesn't exist`() {
         every { studentService.addStudentStatusSuggestion(studentId, any()) }.throws(InvalidUserIdException())
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
         ).andExpect(status().isNotFound)
@@ -161,24 +168,24 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `deleteStudentStatusSuggestion succeeds when student, suggestion and coach exist`() {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) } just Runs
-        mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isNoContent)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")).andExpect(status().isNoContent)
     }
 
     @Test
     fun `deleteStudentStatusSuggestion returns 404 Not Found if student doesn't exist`() {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }.throws(InvalidStudentIdException())
-        mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isNotFound)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")).andExpect(status().isNotFound)
     }
 
     @Test
     fun `deleteStudentStatusSuggestion returns 400 Bad Request if suggestion doesn't exist`() {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }.throws(FailedOperationException())
-        mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isBadRequest)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")).andExpect(status().isBadRequest)
     }
 
     @Test
     fun `deleteStudentStatusSuggestion returns 404 Not Found if coach doesn't exist`() {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }.throws(InvalidUserIdException())
-        mockMvc.perform(delete("/students/$studentId/suggestions/$coachId")).andExpect(status().isNotFound)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")).andExpect(status().isNotFound)
     }
 }
