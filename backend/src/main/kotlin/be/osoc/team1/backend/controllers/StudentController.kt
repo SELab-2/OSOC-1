@@ -32,8 +32,15 @@ class StudentController(private val service: StudentService) {
     fun getAllStudents(
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
-        @RequestParam(defaultValue = "id") sortBy: String
-    ): Iterable<Student> = service.getAllStudents(pageNumber, pageSize, sortBy)
+        @RequestParam(defaultValue = "id") sortBy: String,
+        @RequestParam(defaultValue = "yes,no,maybe,undecided") status: List<String>
+    ): Iterable<Student> {
+        if (status.size > 4 || status.all { listOf("yes", "no", "undecided", "maybe").contains(it) }) {
+            // illegal input
+            // TODO MAKE EXCEPTION
+        }
+        return service.getAllStudents(pageNumber, pageSize, sortBy, status)
+    }
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists,

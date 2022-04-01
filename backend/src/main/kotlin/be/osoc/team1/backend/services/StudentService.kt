@@ -25,10 +25,21 @@ class StudentService(private val repository: StudentRepository, private val user
     /**
      * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
      */
-    fun getAllStudents(pageNumber: Int, pageSize: Int, sortBy: String): Iterable<Student> {
+    fun getAllStudents(
+        pageNumber: Int,
+        pageSize: Int,
+        sortBy: String,
+        statusFilter: List<String> = listOf("yes", "no", "maybe", "undecided")
+    ): Iterable<Student> {
         val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
         val pagedResult: Page<Student> = repository.findAll(paging)
-        return pagedResult.content
+        val studentList = mutableListOf<Student>()
+        for (student in pagedResult.content) {
+            if (statusFilter.contains(student.status.toString().lowercase())) {
+                studentList.add(student)
+            }
+        }
+        return studentList
     }
 
     /**
