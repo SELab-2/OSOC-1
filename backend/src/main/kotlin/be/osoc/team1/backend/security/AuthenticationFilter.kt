@@ -17,7 +17,6 @@ import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import kotlin.collections.HashMap
 
 /**
  * This filter gets called by the filter-chain (see [SecurityConfig] for more info)
@@ -61,11 +60,10 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
         val authenticatedUser: User = authentication.principal as User
         val accessToken: String = createToken(authenticatedUser, 5)
 
-        val tokens: MutableMap<String, Any> = HashMap()
-        tokens["accessToken"] = accessToken
-        tokens["user"] = userDetailsService.emailUserMap[authenticatedUser.username]!!
+        val osocUser = userDetailsService.emailUserMap[authenticatedUser.username]!!
+        val authResponse = AuthResponse(accessToken, osocUser)
         response.contentType = APPLICATION_JSON_VALUE
-        ObjectMapper().writeValue(response.outputStream, tokens)
+        ObjectMapper().writeValue(response.outputStream, authResponse)
     }
 
     /**
@@ -82,4 +80,6 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
             .withClaim("roles", roles)
             .sign(SecretUtil.algorithm)
     }
+
+    data class AuthResponse(val accessToken: String, val user: be.osoc.team1.backend.entities.User)
 }
