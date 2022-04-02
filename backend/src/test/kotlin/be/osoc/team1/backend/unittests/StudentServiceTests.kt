@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
 
@@ -43,13 +46,35 @@ class StudentServiceTests {
         val differentIdTestStudent = Student("Tom", "Alard")
         every { repository.save(testStudent) } returns differentIdTestStudent
         every { repository.findAll() } returns listOf(testStudent)
+        every {
+            repository.findAll(
+                PageRequest.of(0, 50, Sort.by("id"))
+            )
+        } returns PageImpl(mutableListOf(testStudent))
         return repository
     }
 
     @Test
     fun `getAllStudents does not fail`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(service.getAllStudents(), listOf(testStudent))
+        assertEquals(service.getAllStudents(0, 50, "id"), listOf(testStudent))
+    }
+
+    @Test
+    fun `getAllStudents paging returns the correct amount`() {
+        val repository: StudentRepository = mockk()
+        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(listOf(testStudent))
+        val service = StudentService(repository, userService)
+        assertEquals(service.getAllStudents(0, 1, "id"), listOf(testStudent))
+    }
+
+    @Test
+    fun `getAllStudents paging should not fail when list is empty`() {
+        val repository: StudentRepository = mockk()
+        val testList = listOf<Student>()
+        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(testList)
+        val service = StudentService(repository, userService)
+        assertEquals(service.getAllStudents(0, 1, "id"), testList)
     }
 
     @Test
