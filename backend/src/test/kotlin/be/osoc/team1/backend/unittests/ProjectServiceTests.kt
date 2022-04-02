@@ -1,16 +1,16 @@
 package be.osoc.team1.backend.unittests
 
-import InvalidAssignmentIdException
-import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Role
-import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidAssignmentIdException
+import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.repositories.ProjectRepository
