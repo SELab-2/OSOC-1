@@ -44,8 +44,8 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     }
 
     /**
-     * add an access token to the response when authentication is successful
-     * this token can be used by the user to authorise itself in the following requests
+     * Add an access token to the response when authentication is successful.
+     * This token can be used by the user to authorise itself in the following requests.
      */
     override fun successfulAuthentication(
         request: HttpServletRequest,

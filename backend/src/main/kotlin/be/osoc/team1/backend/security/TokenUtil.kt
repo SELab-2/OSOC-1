@@ -49,8 +49,7 @@ object TokenUtil {
     }
 
     /**
-     * Extract access token from request header. Throw an [InvalidTokenException] when the Authentication header is
-     * absent or invalid.
+     * Extract access token from request header. return null when there is no access token given.
      */
     fun getAccessTokenFromRequest(request: HttpServletRequest): String? {
         val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
@@ -74,7 +73,8 @@ object TokenUtil {
     }
 
     /**
-     * Interpret access token to authenticate the user. Throw an [InvalidTokenException] when a refresh token is given.
+     * Interpret access token and authenticate the user with it. Throw an [InvalidTokenException] when a refresh token
+     * is given.
      */
     fun authenticateWithAccessToken(decodedToken: DecodedJWT) {
         if (!decodedToken.getClaim("isAccessToken").asBoolean()) {
@@ -87,7 +87,7 @@ object TokenUtil {
     }
 
     /**
-     * extract the authorities of the logged in user from the token. Return the authorities as [SimpleGrantedAuthority]
+     * Extract the authorities of the logged-in user from the token. Return the authorities as [SimpleGrantedAuthority]
      * as they need to be, to work with [UsernamePasswordAuthenticationToken].
      */
     private fun getAuthoritiesFromToken(decodedToken: DecodedJWT): List<SimpleGrantedAuthority> {
@@ -99,7 +99,7 @@ object TokenUtil {
 
     /**
      * Create an access and refresh token and add these tokens to the [response]. When this function gets called to
-     * renew an access token using a refresh token, the function passes a new access token with the old refresh token.
+     * renew an access token, only create a new access token and keep the old refresh token.
      */
     fun createAccessAndRefreshToken(
         response: HttpServletResponse,

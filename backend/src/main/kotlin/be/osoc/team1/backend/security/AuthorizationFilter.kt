@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse
  */
 class AuthorizationFilter : OncePerRequestFilter() {
     /**
-     * extract access token from authorization header in request, and process the access token
+     * Get access token from request, and authenticate with the access token.
      * when this function is finished, just pass the request and response to the next filter ([AuthenticationFilter])
      */
     override fun doFilterInternal(
