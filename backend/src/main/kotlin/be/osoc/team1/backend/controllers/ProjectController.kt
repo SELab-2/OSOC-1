@@ -121,6 +121,7 @@ class ProjectController(private val service: ProjectService) {
      * not met. These conditions are described in the documentation for [ProjectService.postAssignment].
      */
     @PostMapping("/{projectId}/assignments")
+    @Secured("ROLE_COACH")
     fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) {
         service.postAssignment(projectId, assignment)
     }
@@ -131,6 +132,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @DeleteMapping("/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_COACH")
     fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) {
         service.deleteAssignment(projectId, assignmentId)
     }

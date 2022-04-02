@@ -48,7 +48,7 @@ class Project(
     val coaches: MutableCollection<User> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    val requiredRoles: List<RoleRequirement> = mutableListOf(),
+    val requiredRoles: List<RoleRequirement> = listOf(),
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val assignments: MutableCollection<Assignment> = mutableListOf()

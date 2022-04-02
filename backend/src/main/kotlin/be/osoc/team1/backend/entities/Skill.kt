@@ -7,5 +7,4 @@ import javax.persistence.Id
 class Skill(
     @Id
     val skillName: String
-
 )

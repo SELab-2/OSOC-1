@@ -79,6 +79,7 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
 /**
  * Represents a student in the database. A student is constructed with a [firstName]
  * and a [lastName]. Note that neither of these fields, nor the combination of both of them need be unique.
+ * A student also has a set of [skills].
  * I.e. there could be two students in the database with [firstName] "Tom" and [lastName] "Alard".
  * A student also has a [status], see the documentation of [StatusEnum] for more information on what it represents.
  * Finally, each student keeps a [MutableList] of [StatusSuggestion]s.
