@@ -96,7 +96,7 @@ class AuthorizationTests() {
         val refreshHeaders = HttpHeaders()
         refreshHeaders.contentType = MediaType.APPLICATION_FORM_URLENCODED
         val refreshRequest = HttpEntity(input, refreshHeaders)
-        return restTemplate.exchange(URI("$baseUrl/token/refresh"), HttpMethod.POST, refreshRequest, String::class.java)
+        return restTemplate.exchange(URI("/token/refresh"), HttpMethod.POST, refreshRequest, String::class.java)
     }
 
     /**
@@ -254,7 +254,7 @@ class AuthorizationTests() {
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
         val request = HttpEntity(null, createAuthHeaders(refreshToken))
 
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 401)
     }
 
@@ -346,7 +346,7 @@ class AuthorizationTests() {
 
         val authHeaders = createAuthHeaders(newAccessToken)
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 200)
         logoutHeader(authHeaders)
     }
