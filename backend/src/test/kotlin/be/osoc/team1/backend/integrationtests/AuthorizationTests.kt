@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
+import java.net.URI
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
@@ -21,11 +22,10 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.testcontainers.junit.jupiter.Testcontainers
-import java.net.URI
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthorizationTests() {
+class AuthorizationTests {
 
     @AfterEach
     fun cleanup() {
@@ -50,7 +50,9 @@ class AuthorizationTests() {
     @Autowired
     private lateinit var userRepository: UserRepository
 
-    private val studentBaseUrl = "/testOrganization/testEditionName"
+    private val testOrganization = "testOrganization"
+    private val testEditionName = "testEditionName"
+    private val studentBaseUrl = "/$testOrganization/$testEditionName/students"
 
     private val adminPassword = "adminPassword"
     private val adminEmail = "admin@admin.com"
@@ -67,7 +69,7 @@ class AuthorizationTests() {
     private val encodedDisabledPassword = BCryptPasswordEncoder().encode(disabledPassword)
     private val disabledUser = User("disabled", disabledEmail, Role.Disabled, encodedDisabledPassword)
 
-    private val testStudent = Student("Test", "Student", "testOrganization", "testEditionName")
+    private val testStudent = Student("Test", "Student", testOrganization, testEditionName)
 
     /**
      * Log in with given email and password via post request to /login
@@ -191,7 +193,7 @@ class AuthorizationTests() {
 
     @Test
     fun `GET students returns 403 when not logged in`() {
-        val response: ResponseEntity<String> = restTemplate.getForEntity<String>("/students")
+        val response: ResponseEntity<String> = restTemplate.getForEntity("/students")
         assert(response.statusCodeValue == 403)
     }
 
