@@ -71,9 +71,10 @@ class StudentServiceTests {
     @Test
     fun `getAllStudents paging should not fail when list is empty`() {
         val repository: StudentRepository = mockk()
-        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(listOf())
+        val testList = listOf<Student>()
+        every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(testList)
         val service = StudentService(repository, userService)
-        assertEquals(service.getAllStudents(0, 1, "id"), listOf<Student>())
+        assertEquals(service.getAllStudents(0, 1, "id"), testList)
     }
 
     @Test
