@@ -32,9 +32,11 @@ class AuthorizationFilter : OncePerRequestFilter() {
         filterChain: FilterChain
     ) {
         try {
-            val accessToken: String = getAccessTokenFromRequest(request)
-            val decodedToken = decodeAndVerifyToken(accessToken)
-            authenticateWithAccessToken(decodedToken)
+            val accessToken: String? = getAccessTokenFromRequest(request)
+            if (accessToken != null) {
+                val decodedToken = decodeAndVerifyToken(accessToken)
+                authenticateWithAccessToken(decodedToken)
+            }
             filterChain.doFilter(request, response)
         } catch (exception: Exception) {
             respondException(response, exception)

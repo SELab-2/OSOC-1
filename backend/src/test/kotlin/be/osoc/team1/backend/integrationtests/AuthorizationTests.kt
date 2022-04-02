@@ -127,7 +127,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
         val refreshHeaders = HttpHeaders()
         refreshHeaders.contentType = MediaType.APPLICATION_FORM_URLENCODED
         val refreshRequest = HttpEntity(input, refreshHeaders)
-        return restTemplate.exchange(URI("$baseUrl/users/refresh"), HttpMethod.POST, refreshRequest, String::class.java)
+        return restTemplate.exchange(URI("$baseUrl/token/refresh"), HttpMethod.POST, refreshRequest, String::class.java)
     }
 
     /**

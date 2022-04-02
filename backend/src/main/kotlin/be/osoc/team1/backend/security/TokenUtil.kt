@@ -52,12 +52,12 @@ object TokenUtil {
      * Extract access token from request header. Throw an [InvalidTokenException] when the Authentication header is
      * absent or invalid.
      */
-    fun getAccessTokenFromRequest(request: HttpServletRequest): String {
+    fun getAccessTokenFromRequest(request: HttpServletRequest): String? {
         val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Basic ")) {
-            throw InvalidTokenException("No access token found. Please append it to \"Authentication: Basic \" header")
+        if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
+            return authorizationHeader.substring("Basic ".length)
         }
-        return authorizationHeader.substring("Basic ".length)
+        return null
     }
 
     /**
