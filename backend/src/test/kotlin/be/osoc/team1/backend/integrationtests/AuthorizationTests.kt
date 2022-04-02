@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
+import be.osoc.team1.backend.security.ConfigUtil
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
@@ -291,4 +292,25 @@ class AuthorizationTests() {
     // Test to check if you can use refresh token to renew access token
 
     // Test to check if refresh token gets cycled
+
+    // This test needs a login first since there are no unprotected endpoints to GET
+    @Test
+    fun `CORS using not allowed origin gives error`() {
+        val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
+        authHeaders.add("Origin", "http://notallowed.com")
+        val request = HttpEntity("", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 403)
+        assert(response.body == "Invalid CORS request")
+    }
+
+    // This test needs a login first since there are no unprotected endpoints to GET
+    @Test
+    fun `CORS using allowed origin works`() {
+        val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
+        authHeaders.add("Origin", ConfigUtil.allowedCorsOrigins[0])
+        val request = HttpEntity("", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 200)
+    }
 }
