@@ -42,7 +42,7 @@ class AuthorizationFilter : OncePerRequestFilter() {
     }
 
     /**
-     * This function gets called when an invalid token is passed, and therefor an error occurs.
+     * This function gets called when an invalid token is passed, and therefore an error occurs.
      * When that error occurs, don't throw it, send a response containing that error instead.
      */
     private fun respondException(response: HttpServletResponse, exception: Exception) {

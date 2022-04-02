@@ -120,7 +120,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     }
 
     /**
-     * Create the correct header for an access token to perform an authenticated request
+     * Use [refreshToken] to get a new access token.
      */
     fun requestNewAccessToken(refreshToken: String): ResponseEntity<String> {
         val input = "refreshToken=$refreshToken"
@@ -284,9 +284,7 @@ class AuthorizationTests(@Autowired val restTemplate: TestRestTemplate) {
     fun `Authentication with refresh token returns 401`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
-        val authHeaders = HttpHeaders()
-        authHeaders.add("Authorization", "Basic $refreshToken")
-        val request = HttpEntity(null, authHeaders)
+        val request = HttpEntity(null, createAuthHeaders(refreshToken))
 
         val response: ResponseEntity<String> = restTemplate.exchange(URI("$baseUrl/students"), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 401)

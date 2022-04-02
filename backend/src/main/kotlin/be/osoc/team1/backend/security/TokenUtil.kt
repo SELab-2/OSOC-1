@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse
 import kotlin.random.Random.Default.nextBytes
 
 /**
- * Every function needed to create and process a token. This object is used for both access and refresh tokens.
+ * This object contains every function needed to create and process a token (works with both access and refresh tokens).
  */
 object TokenUtil {
     /**
@@ -34,8 +34,8 @@ object TokenUtil {
 
     /**
      * Create a JSON web token. The token contains email, expiration date of token, whether the token is an access token
-     * and the role of the user. Set isAccessToken to true when making an access token, set it to false when creating a
-     * refresh token. Access tokens are valid for 5 minutes, while refresh tokens stay valid for 12 hours.
+     * and the authorities of the user. Set [isAccessToken] to true when making an access token, set it to false when
+     * creating a refresh token. Access tokens are valid for 5 minutes, while refresh tokens stay valid for 12 hours.
      * The created token gets signed using above hashing algorithm and secret.
      */
     private fun createToken(email: String, authorities: List<String>, isAccessToken: Boolean): String {
@@ -49,8 +49,8 @@ object TokenUtil {
     }
 
     /**
-     * Get access token from request header. Throw an [InvalidTokenException] when the Authentication header is absent
-     * or invalid.
+     * Extract access token from request header. Throw an [InvalidTokenException] when the Authentication header is
+     * absent or invalid.
      */
     fun getAccessTokenFromRequest(request: HttpServletRequest): String {
         val authorizationHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
