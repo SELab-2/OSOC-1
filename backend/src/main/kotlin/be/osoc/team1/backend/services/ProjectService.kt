@@ -1,7 +1,7 @@
 package be.osoc.team1.backend.services
 
 import InvalidAssignmentIdException
-import InvalidRoleRequirementIdException
+import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
@@ -123,30 +123,30 @@ class ProjectService(
     }
 
     /**
-     * Assigns a student to a specific role on the project with [projectId]. A [ForbiddenOperationException] will be
-     * thrown if the student was already assigned on this project, if the role already has enough assignees or if the
-     * specified student doesn't actually have the required skill to be given the specified role. A
-     * [InvalidAssignmentIdException] will be thrown if specified role is not part of the specified project. If the
+     * Assigns a student to a specific position on the project with [projectId]. A [ForbiddenOperationException] will be
+     * thrown if the student was already assigned on this project, if that position already has enough assignees or if
+     * the specified student doesn't actually have the required skill to be given the specified position. A
+     * [InvalidAssignmentIdException] will be thrown if specified position is not part of the specified project. If the
      * specified student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
      */
     fun postAssignment(projectId: UUID, assignmentForm: AssignmentPost) {
         val project = getProjectById(projectId)
-        val role = project.requiredRoles.find { it.id == assignmentForm.role }
-            ?: throw InvalidRoleRequirementIdException("The specified role is not part of the specified project.")
+        val position = project.positions.find { it.id == assignmentForm.position }
+            ?: throw InvalidPositionIdException("The specified position is not part of the specified project.")
 
         if (project.assignments.find { it.student.id == assignmentForm.student } != null)
-            throw ForbiddenOperationException("This student was already assigned a role on this project!")
+            throw ForbiddenOperationException("This student was already assigned a position on this project!")
 
-        val amount = project.assignments.count { it.roleRequirement == role }
-        if (amount >= role.amount)
-            throw ForbiddenOperationException("This role already has enough assignees!")
+        val amount = project.assignments.count { it.position == position }
+        if (amount >= position.amount)
+            throw ForbiddenOperationException("This position already has enough assignees!")
 
         val student = studentService.getStudentById(assignmentForm.student)
-        if (!student.skills.contains(role.skill))
-            throw ForbiddenOperationException("This student doesn't have the required skill to be assigned this role.")
+        if (!student.skills.contains(position.skill))
+            throw ForbiddenOperationException("This student doesn't have the required skill to be assigned to this position.")
 
         val suggester = userService.getUserById(assignmentForm.suggester)
-        val assignment = Assignment(student, role, suggester, assignmentForm.reason)
+        val assignment = Assignment(student, position, suggester, assignmentForm.reason)
         project.assignments.add(assignment)
         repository.save(project)
     }
@@ -167,5 +167,5 @@ class ProjectService(
     }
 
     data class Conflict(val student: UUID, val projects: MutableList<UUID> = mutableListOf())
-    data class AssignmentPost(val student: UUID, val role: UUID, val suggester: UUID, val reason: String)
+    data class AssignmentPost(val student: UUID, val position: UUID, val suggester: UUID, val reason: String)
 }

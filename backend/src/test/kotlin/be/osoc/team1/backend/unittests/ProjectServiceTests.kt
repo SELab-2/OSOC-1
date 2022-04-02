@@ -1,11 +1,11 @@
 package be.osoc.team1.backend.unittests
 
 import InvalidAssignmentIdException
-import InvalidRoleRequirementIdException
+import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Role
-import be.osoc.team1.backend.entities.RoleRequirement
+import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
@@ -39,7 +39,7 @@ class ProjectServiceTests {
         "Client",
         "a test project",
         mutableListOf(testCoach),
-        listOf(RoleRequirement(testSkill, 1))
+        listOf(Position(testSkill, 1))
     )
     private val savedProject = Project(
         "Saved",
@@ -161,17 +161,17 @@ class ProjectServiceTests {
         val testStudent = Student("Lars", "Van Cauter")
         val testStudent2 = Student("Lars2", "Van Cauter2")
         val testStudent3 = Student("Lars3", "Van Cauter3")
-        val role = RoleRequirement(Skill("backend"), 2)
+        val position = Position(Skill("backend"), 2)
         val suggester = User("suggester", "email", Role.Coach, "password")
-        val testProjectConflict = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, role, suggester, "reason")))
-        val testProjectConflict2 = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, role, suggester, "reason"), Assignment(testStudent2, role, suggester, "reason")))
+        val testProjectConflict = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, position, suggester, "reason")))
+        val testProjectConflict2 = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, position, suggester, "reason"), Assignment(testStudent2, position, suggester, "reason")))
         val testProjectConflict3 = Project(
             "Test",
             "Client",
             "a test project",
             assignments = mutableListOf(
-                Assignment(testStudent2, role, suggester, "reason"),
-                Assignment(testStudent3, role, suggester, "reason")
+                Assignment(testStudent2, position, suggester, "reason"),
+                Assignment(testStudent3, position, suggester, "reason")
             )
         )
         val repository = getRepository(true)
@@ -195,7 +195,7 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(true), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.requiredRoles[0].id,
+            testProject.positions[0].id,
             suggester.id,
             "reason"
         )
@@ -203,7 +203,7 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `postAssignment fails if role is not part of project`() {
+    fun `postAssignment fails if position is not part of project`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), mockk(), mockk())
         val assignmentPost = ProjectService.AssignmentPost(
@@ -212,7 +212,7 @@ class ProjectServiceTests {
             suggester.id,
             "reason"
         )
-        assertThrows<InvalidRoleRequirementIdException> { service.postAssignment(testProject.id, assignmentPost) }
+        assertThrows<InvalidPositionIdException> { service.postAssignment(testProject.id, assignmentPost) }
     }
 
     @Test
@@ -220,7 +220,7 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(false), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.requiredRoles[0].id,
+            testProject.positions[0].id,
             suggester.id,
             "reason"
         )
@@ -228,31 +228,31 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `postAssignment fails if the student was already assigned a role on this project`() {
+    fun `postAssignment fails if the student was already assigned a position on this project`() {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(true), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.requiredRoles[0].id,
+            testProject.positions[0].id,
             suggester.id,
             "reason"
         )
-        val assignment = Assignment(testStudent, testProject.requiredRoles[0], suggester, "reason")
+        val assignment = Assignment(testStudent, testProject.positions[0], suggester, "reason")
         testProject.assignments.add(assignment)
         assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
         testProject.assignments.remove(assignment)
     }
 
     @Test
-    fun `postAssignment fails if the role already has enough assignees`() {
+    fun `postAssignment fails if the position already has enough assignees`() {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(true), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.requiredRoles[0].id,
+            testProject.positions[0].id,
             suggester.id,
             "reason"
         )
         val differentStudent = Student("Maarten", "Steevens")
-        val assignment = Assignment(differentStudent, testProject.requiredRoles[0], suggester, "reason")
+        val assignment = Assignment(differentStudent, testProject.positions[0], suggester, "reason")
         testProject.assignments.add(assignment)
         assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
         testProject.assignments.remove(assignment)
@@ -274,7 +274,7 @@ class ProjectServiceTests {
             getUserService(suggester)
         )
 
-        val assignment = Assignment(testStudent, testProject.requiredRoles[0], suggester, "reason")
+        val assignment = Assignment(testStudent, testProject.positions[0], suggester, "reason")
         every { assignmentRepository.findByIdOrNull(assignment.id) } returns assignment
 
         testProject.assignments.add(assignment)

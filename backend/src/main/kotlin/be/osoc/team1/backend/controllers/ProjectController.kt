@@ -108,11 +108,11 @@ class ProjectController(private val service: ProjectService) {
     fun getProjectConflicts(): MutableList<ProjectService.Conflict> = service.getConflicts()
 
     /**
-     * Assigns a student to a role in the project, format:
+     * Assigns a student to a position on the project, format:
      * ```
      * {
      *     "student": "STUDENT(Student) ID",
-     *     "role": "ROLE(RoleRequirement) ID",
+     *     "position": "POSITION(Position) ID",
      *     "suggester": "SUGGESTER(User) ID",
      *     "reason": "REASON(String)"
      * }
@@ -127,8 +127,9 @@ class ProjectController(private val service: ProjectService) {
     }
 
     /**
-     * Removes assignment with [assignmentId] of a student to a role on project with [projectId]. Will return a 404 if
-     * the specified [assignmentId] is not actually part of this project or if [assignmentId] outright doesn't exist.
+     * Removes assignment with [assignmentId] of a student to a position on the project with [projectId]. Will return a
+     * 404 if the specified [assignmentId] is not actually part of this project or if [assignmentId] outright doesn't
+     * exist.
      */
     @DeleteMapping("/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
