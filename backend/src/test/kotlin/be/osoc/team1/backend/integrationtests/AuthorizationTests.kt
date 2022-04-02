@@ -177,7 +177,7 @@ class AuthorizationTests {
         val authHeaders = HttpHeaders()
         authHeaders.add("Authorization", "Invalid $accessToken")
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 403)
         logoutResponse(loginResponse)
     }
@@ -186,14 +186,14 @@ class AuthorizationTests {
     fun `access token can be used after login`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 200)
         logoutHeader(authHeaders)
     }
 
     @Test
     fun `GET students returns 403 when not logged in`() {
-        val response: ResponseEntity<String> = restTemplate.getForEntity("/students")
+        val response: ResponseEntity<String> = restTemplate.getForEntity(studentBaseUrl)
         assert(response.statusCodeValue == 403)
     }
 
