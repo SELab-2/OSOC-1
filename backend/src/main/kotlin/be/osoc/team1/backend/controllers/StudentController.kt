@@ -27,6 +27,10 @@ class StudentController(private val service: StudentService) {
      * Get a list of all students in the database. This request cannot fail.
      * There are default values applied for paging ([pageNumber], [pageSize] and [sortBy]),
      * these can be modified by adding request parameters to the url.
+     *
+     * Can also filter the results by [name] (default value is empty so no student is excluded),
+     * by [status] (default value allows all statuses)
+     * by [includeSuggested] (default value is true, so you will also see students you already suggested for)
      */
     @GetMapping
     @Secured("ROLE_COACH")
