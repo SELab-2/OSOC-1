@@ -5,6 +5,8 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
+import be.osoc.team1.backend.security.TokenUtil
+import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
@@ -323,6 +325,7 @@ class AuthorizationTests() {
         val newRefreshToken: String = JSONObject(refreshResponse.body).get("refreshToken") as String
         assert(accessToken != newAccessToken)
         assert(refreshToken != newRefreshToken)
+        assert(decodeAndVerifyToken(refreshToken).expiresAt == decodeAndVerifyToken(newRefreshToken).expiresAt)
     }
 
     @Test

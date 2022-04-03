@@ -114,8 +114,8 @@ object TokenUtil {
     }
 
     /**
-     * Create an access and refresh token and add these tokens to the [response]. When this function gets called to
-     * renew an access token, only create a new access token and keep the old refresh token.
+     * Create an access and refresh token and add these tokens to the [response]. Add the refresh token to
+     * [validRefreshTokens], so it can be used to renew the corresponding access token.
      */
     fun createAccessAndRefreshToken(
         response: HttpServletResponse,
