@@ -2,7 +2,7 @@ package be.osoc.team1.backend.controllers
 
 import be.osoc.team1.backend.exceptions.InvalidTokenException
 import be.osoc.team1.backend.security.TokenUtil
-import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
+import be.osoc.team1.backend.security.TokenUtil.refreshTokenRotation
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -12,13 +12,6 @@ import javax.servlet.http.HttpServletResponse
 @RestController
 @RequestMapping("/token")
 class TokenController {
-    /**
-     * TODOC
-     */
-    companion object {
-        val validRefreshTokens: MutableMap<String, String> = mutableMapOf()
-    }
-
     /**
      * Get a new access token using your refresh token.
      */
@@ -34,13 +27,6 @@ class TokenController {
 
         val email: String = decodedToken.subject
         val authorities: List<String> = decodedToken.getClaim("authorities").asList(String::class.java)
-
-        if (validRefreshTokens[email] != refreshToken) {
-            validRefreshTokens.remove(email)
-            response.status = 400
-            return
-        }
-
-        createAccessAndRefreshToken(response, email, authorities, decodedToken.expiresAt)
+        refreshTokenRotation(response, refreshToken, email, authorities, decodedToken.expiresAt)
     }
 }

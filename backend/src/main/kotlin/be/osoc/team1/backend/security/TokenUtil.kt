@@ -1,6 +1,5 @@
 package be.osoc.team1.backend.security
 
-import be.osoc.team1.backend.controllers.TokenController.Companion.validRefreshTokens
 import be.osoc.team1.backend.exceptions.InvalidTokenException
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
@@ -33,6 +32,11 @@ object TokenUtil {
      * We use the HMAC-SHA256 algorithm to sign/hash our token, this is done to test the token's integrity.
      */
     private val hashingAlgorithm: Algorithm = Algorithm.HMAC256(secret)
+
+    /**
+     * TODOC
+     */
+    private val validRefreshTokens: MutableMap<String, String> = mutableMapOf()
 
     /**
      * Create a JSON web token. The token contains email, an id, expiration date of token, whether the token is an
@@ -128,5 +132,23 @@ object TokenUtil {
         ObjectMapper().writeValue(response.outputStream, tokens)
 
         validRefreshTokens[email] = refreshToken
+    }
+
+    /**
+     * TODOC
+     */
+    fun refreshTokenRotation(
+        response: HttpServletResponse,
+        refreshToken: String,
+        email: String,
+        authorities: List<String>,
+        expirationDate: Date
+    ) {
+        if (validRefreshTokens[email] == refreshToken) {
+            createAccessAndRefreshToken(response, email, authorities, expirationDate)
+        } else {
+            validRefreshTokens.remove(email)
+            response.status = 400
+        }
     }
 }
