@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.security
 
+import be.osoc.team1.backend.controllers.TokenController.Companion.validRefreshTokens
 import be.osoc.team1.backend.exceptions.InvalidTokenException
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
@@ -15,6 +16,7 @@ import java.util.Date
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.random.Random.Default.nextBytes
+import kotlin.random.Random.Default.nextInt
 
 /**
  * This object contains every function needed to create and process a token (works with both access and refresh tokens).
@@ -33,16 +35,25 @@ object TokenUtil {
     private val hashingAlgorithm: Algorithm = Algorithm.HMAC256(secret)
 
     /**
-     * Create a JSON web token. The token contains email, expiration date of token, whether the token is an access token
-     * and the authorities of the user. Set [isAccessToken] to true when making an access token, set it to false when
-     * creating a refresh token. Access tokens are valid for 5 minutes, while refresh tokens stay valid for 12 hours.
+     * Create a JSON web token. The token contains email, an id, expiration date of token, whether the token is an
+     * access token and the authorities of the user. Set [isAccessToken] to true when making an access token, set it to
+     * false when creating a refresh token. Access tokens are valid for 5 minutes, while refresh tokens stay valid for
+     * 12 hours.
      * The created token gets signed using above hashing algorithm and secret.
      */
-    private fun createToken(email: String, authorities: List<String>, isAccessToken: Boolean): String {
+    private fun createToken(
+        email: String,
+        authorities: List<String>,
+        isAccessToken: Boolean,
+        expirationDate: Date? = null
+    ): String {
         val minutesToLive: Int = if (isAccessToken) 5 else 60 * 12
         return JWT.create()
             .withSubject(email)
-            .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))
+            .withJWTId(nextInt().toString())
+            .withExpiresAt(
+                expirationDate ?: Date(System.currentTimeMillis() + minutesToLive * 60 * 1000)
+            )
             .withClaim("isAccessToken", isAccessToken)
             .withClaim("authorities", authorities)
             .sign(hashingAlgorithm)
@@ -105,15 +116,17 @@ object TokenUtil {
         response: HttpServletResponse,
         email: String,
         authorities: List<String>,
-        oldRefreshToken: String? = null
+        refreshTokenExpiresAt: Date? = null
     ) {
         val accessToken: String = createToken(email, authorities, true)
-        val refreshToken: String = oldRefreshToken ?: createToken(email, authorities, false)
+        val refreshToken: String = createToken(email, authorities, false, refreshTokenExpiresAt)
         val tokens: MutableMap<String, String> = HashMap()
         tokens["accessToken"] = accessToken
         tokens["refreshToken"] = refreshToken
 
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(response.outputStream, tokens)
+
+        validRefreshTokens[email] = refreshToken
     }
 }

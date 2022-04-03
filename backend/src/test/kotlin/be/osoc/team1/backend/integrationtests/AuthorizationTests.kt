@@ -311,11 +311,10 @@ class AuthorizationTests() {
     }
 
     @Test
-    fun `use refresh token to renew access token`() {
+    fun `refresh token rotation happens`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
-        Thread.sleep(1000)
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(refreshResponse.statusCodeValue == 200)
@@ -323,7 +322,7 @@ class AuthorizationTests() {
         val newAccessToken: String = JSONObject(refreshResponse.body).get("accessToken") as String
         val newRefreshToken: String = JSONObject(refreshResponse.body).get("refreshToken") as String
         assert(accessToken != newAccessToken)
-        assert(refreshToken == newRefreshToken)
+        assert(refreshToken != newRefreshToken)
     }
 
     @Test
@@ -350,6 +349,4 @@ class AuthorizationTests() {
         assert(response.statusCodeValue == 200)
         logoutHeader(authHeaders)
     }
-
-    // Test to check if refresh token gets cycled
 }
