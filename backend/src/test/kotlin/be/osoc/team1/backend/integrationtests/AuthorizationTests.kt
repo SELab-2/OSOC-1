@@ -327,12 +327,12 @@ class AuthorizationTests() {
     }
 
     @Test
-    fun `use access token to renew access token returns 404`() {
+    fun `use access token to renew access token returns 400`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(accessToken)
-        assert(refreshResponse.statusCodeValue == 404)
+        assert(refreshResponse.statusCodeValue == 400)
     }
 
     @Test
