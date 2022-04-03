@@ -59,7 +59,7 @@ class Project(
     val coaches: MutableCollection<User> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    val positions: List<Position> = listOf(),
+    val positions: Collection<Position> = listOf(),
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val assignments: MutableCollection<Assignment> = mutableListOf()

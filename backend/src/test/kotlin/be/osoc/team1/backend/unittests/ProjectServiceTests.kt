@@ -195,7 +195,7 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(true), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.positions[0].id,
+            testProject.positions.first().id,
             suggester.id,
             "reason"
         )
@@ -220,7 +220,7 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(false), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.positions[0].id,
+            testProject.positions.first().id,
             suggester.id,
             "reason"
         )
@@ -232,11 +232,11 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(true), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.positions[0].id,
+            testProject.positions.first().id,
             suggester.id,
             "reason"
         )
-        val assignment = Assignment(testStudent, testProject.positions[0], suggester, "reason")
+        val assignment = Assignment(testStudent, testProject.positions.first(), suggester, "reason")
         testProject.assignments.add(assignment)
         assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
         testProject.assignments.remove(assignment)
@@ -247,12 +247,12 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(true), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.positions[0].id,
+            testProject.positions.first().id,
             suggester.id,
             "reason"
         )
         val differentStudent = Student("Maarten", "Steevens")
-        val assignment = Assignment(differentStudent, testProject.positions[0], suggester, "reason")
+        val assignment = Assignment(differentStudent, testProject.positions.first(), suggester, "reason")
         testProject.assignments.add(assignment)
         assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
         testProject.assignments.remove(assignment)
@@ -274,7 +274,7 @@ class ProjectServiceTests {
             getUserService(suggester)
         )
 
-        val assignment = Assignment(testStudent, testProject.positions[0], suggester, "reason")
+        val assignment = Assignment(testStudent, testProject.positions.first(), suggester, "reason")
         every { assignmentRepository.findByIdOrNull(assignment.id) } returns assignment
 
         testProject.assignments.add(assignment)
