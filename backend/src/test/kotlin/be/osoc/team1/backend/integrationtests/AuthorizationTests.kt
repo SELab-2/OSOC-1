@@ -349,4 +349,32 @@ class AuthorizationTests() {
         assert(response.statusCodeValue == 200)
         logoutHeader(authHeaders)
     }
+
+    @Test
+    fun `using same refresh token twice returns 400`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+
+        val firstRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(firstRefreshResponse.statusCodeValue == 200)
+
+        val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(secondRefreshResponse.statusCodeValue == 400)
+    }
+
+    @Test
+    fun `using same refresh token twice invalidates refresh token family`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+
+        val firstRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(firstRefreshResponse.statusCodeValue == 200)
+
+        val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(secondRefreshResponse.statusCodeValue == 400)
+
+        val firstRefreshToken: String = JSONObject(firstRefreshResponse.body).get("refreshToken") as String
+        val thirdRefreshResponse: ResponseEntity<String> = requestNewAccessToken(firstRefreshToken)
+        assert(thirdRefreshResponse.statusCodeValue == 400)
+    }
 }
