@@ -34,7 +34,8 @@ object TokenUtil {
     private val hashingAlgorithm: Algorithm = Algorithm.HMAC256(secret)
 
     /**
-     * TODOC
+     * This map holds the latest refresh token per email, so the keys are emails and the values are refresh tokens. This
+     * map is essential for [refreshTokenRotation].
      */
     private val validRefreshTokens: MutableMap<String, String> = mutableMapOf()
 
@@ -135,7 +136,16 @@ object TokenUtil {
     }
 
     /**
-     * TODOC
+     * Refresh token rotation means that every time we request a new access token, we also get a new refresh token. If a
+     * refresh token is used more than once, we invalidate all the refresh tokens that user used, and this
+     * user has to go through the authentication process again. This is necessary to hinder token theft.
+     *
+     * Here we use the [validRefreshTokens] map, to make sure users only use their latest refresh token to renew their
+     * access token. When a used refresh token gets used for the second time, the email of the user gets removed from
+     * [validRefreshTokens]. This means this user needs to re-authenticate to be able to renew their access token.
+     *
+     * More on refresh token rotation can be read on the following link:
+     * https://www.pingidentity.com/en/resources/blog/posts/2021/refresh-token-rotation-spa.html
      */
     fun refreshTokenRotation(
         response: HttpServletResponse,
