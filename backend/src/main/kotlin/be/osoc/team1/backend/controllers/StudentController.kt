@@ -127,7 +127,6 @@ class StudentController(private val service: StudentService, private val userDet
         service.addStudentStatusSuggestion(studentId, statusSuggestion)
     }
 
-
     /**
      * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId]
      * from the [Student] with the given [studentId]. If the student doesn't exist, a
