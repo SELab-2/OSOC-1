@@ -5,7 +5,6 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
-import be.osoc.team1.backend.security.TokenUtil
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import org.json.JSONArray
 import org.json.JSONObject
