@@ -178,6 +178,18 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `addStudentStatusSuggestion returns 401 if we try creating a suggestion on behalf of another user`() {
+        every { userDetailService.getUserFromPrincipal(any()) } returns User("other user", "email", Role.Coach, "password")
+
+        mockMvc.perform(
+            post("/students/$studentId/suggestions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testSuggestion))
+                .principal(TestingAuthenticationToken(null, null))
+        ).andExpect(status().isUnauthorized)
+    }
+
+    @Test
     fun `deleteStudentStatusSuggestion succeeds when student, suggestion and coach exist`() {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) } just Runs
 
@@ -215,5 +227,15 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             delete("/students/$studentId/suggestions/$coachId")
                 .principal(TestingAuthenticationToken(null, null))
         ).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `deleteStudentStatusSuggestion returns 401 if we try deleting a suggestion made by another user`() {
+        every { userDetailService.getUserFromPrincipal(any()) } returns User("other user", "email", Role.Coach, "password")
+
+        mockMvc.perform(
+            delete("/students/$studentId/suggestions/$coachId")
+                .principal(TestingAuthenticationToken(null, null))
+        ).andExpect(status().isUnauthorized)
     }
 }
