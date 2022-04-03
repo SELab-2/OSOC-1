@@ -356,7 +356,7 @@ paths:
                 '204':
                     description: successful operation
                 '404':
-                    description: No such projectId.
+                    description: No such projectId or coachId.
                 '400':
                     description: Bad Request.
     /projects/{projectId}/coaches/{coachId}:
