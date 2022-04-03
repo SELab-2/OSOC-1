@@ -3,6 +3,8 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
+import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,11 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
 import java.util.UUID
 
 @RestController
 @RequestMapping("/students")
-class StudentController(private val service: StudentService) {
+class StudentController(private val service: StudentService, private val userDetailService: OsocUserDetailService) {
 
     /**
      * Get a list of all students in the database. This request cannot fail.
@@ -116,8 +119,14 @@ class StudentController(private val service: StudentService) {
     @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun addStudentStatusSuggestion(@PathVariable studentId: UUID, @RequestBody statusSuggestion: StatusSuggestion) =
+    fun addStudentStatusSuggestion(@PathVariable studentId: UUID, @RequestBody statusSuggestion: StatusSuggestion, principal: Principal) {
+        val user = userDetailService.getUserFromPrincipal(principal)
+        if (statusSuggestion.coachId != user.id)
+            throw UnauthorizedOperationException("The 'coachId' did not equal authenticated user id!")
+
         service.addStudentStatusSuggestion(studentId, statusSuggestion)
+    }
+
 
     /**
      * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId]
@@ -128,6 +137,11 @@ class StudentController(private val service: StudentService) {
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun deleteStudentStatusSuggestion(@PathVariable studentId: UUID, @PathVariable coachId: UUID) =
+    fun deleteStudentStatusSuggestion(@PathVariable studentId: UUID, @PathVariable coachId: UUID, principal: Principal) {
+        val user = userDetailService.getUserFromPrincipal(principal)
+        if (coachId != user.id)
+            throw UnauthorizedOperationException("The 'coachId' did not equal authenticated user id. You can't remove suggestions from other users!")
+
         service.deleteStudentStatusSuggestion(studentId, coachId)
+    }
 }
