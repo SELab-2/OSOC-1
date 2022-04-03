@@ -55,9 +55,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     ) {
         val authenticatedUser: User = authentication.principal as User
         val email: String = authenticatedUser.username
-        val authorities: List<String> =
-            authenticatedUser.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
-
+        val authorities: List<String> = authenticatedUser.authorities.map { it.authority }.toList()
         createAccessAndRefreshToken(response, email, authorities)
     }
 }
