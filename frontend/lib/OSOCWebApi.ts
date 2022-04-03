@@ -42,6 +42,14 @@ class OSOCWebApi {
     return this._accessToken;
   }
 
+  /**
+   * Registers a new user to the underlying database
+   * 
+   * @param username - the name of the new user
+   * @param email - the email of the new user
+   * @param password - the password of the user, in plaintext
+   * 
+   */
   async registerUser(
     username: string,
     email: string,
@@ -59,6 +67,13 @@ class OSOCWebApi {
     });
   }
 
+  /**
+   * login using a valid email and password combination
+   * 
+   * @param email - email of the user that want's to log in
+   * @param password - corresponding password of the user
+   * @returns an object containing an accessToken, refreshToken
+   */
   async login(email: string, password: string): Promise<LoginResponse> {
     const response = await HttpFetcher.postURLEncoded({
       endpoint: Endpoints.LOGIN,
@@ -72,7 +87,11 @@ class OSOCWebApi {
     return data;
   }
 
-  // TODO: Update with pagination
+  /**
+   * get all the users from the unnderlying database
+   * 
+   * @returns a list containing all the user in User objects
+   */
   async getUsers(): Promise<User[]> {
     const response = await HttpFetcher.get({
       endpoint: Endpoints.USERS,
@@ -84,6 +103,12 @@ class OSOCWebApi {
     return data;
   }
 
+  /**
+   * find a certain user by its id
+   * 
+   * @param id - the identifier of the user to search for
+   * @returns the User object that is identified by the id
+   */
   async getUser(id: UUID): Promise<User> {
     const response = await HttpFetcher.get({
       endpoint: Endpoints.USERS + `/${id}`,
@@ -95,6 +120,13 @@ class OSOCWebApi {
     return data;
   }
 
+  /**
+   * update the role of the user by its id
+   * 
+   * @param id - the identifier of the user to update
+   * @param role - the new role to assign
+   * @returns the updated user object
+   */
   async updateUserRole(id: UUID, role: UserRole): Promise<User> {
     const response = await HttpFetcher.postJSON({
       endpoint: Endpoints.USERS + `/${id}/role`,
@@ -107,13 +139,17 @@ class OSOCWebApi {
     return data;
   }
 
-  async deleteUser(id: UUID): Promise<unknown> {
-    const response = await HttpFetcher.delete({
+  /**
+   * delete the user by its id
+   * 
+   * @param id - the identifier of the user to delete
+   */
+  async deleteUser(id: UUID) {
+    await HttpFetcher.delete({
       endpoint: Endpoints.USERS + `/${id}`,
       accessToken: this.getAccessToken()
     });
 
-    return response;
   }
 }
 
