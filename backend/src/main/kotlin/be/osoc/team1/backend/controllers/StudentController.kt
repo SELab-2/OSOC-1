@@ -100,9 +100,11 @@ class StudentController(private val service: StudentService, private val userDet
 
     /**
      * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should be equal to the id
-     * of the coach who is making this suggestion. If either of these id's do not have a matching record
-     * in the database, a "404: Not Found" message is returned to the caller instead. The [statusSuggestion] should be
-     * passed in the request body as a JSON object and should have the following format:
+     * of the coach who is making this suggestion, so equal to the id of the currently authenticated user. If either of
+     * these id's do not have a matching record in the database, a "404: Not Found" message is returned to the caller
+     * instead. If the coachId does not match the id of the currently authenticated user a '401: Unauthorized" is
+     * returned. The [statusSuggestion] should be passed in the request body as a JSON object and should have the
+     * following format:
      *
      * ```
      * {
@@ -131,7 +133,8 @@ class StudentController(private val service: StudentService, private val userDet
      * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId]
      * from the [Student] with the given [studentId]. If the student doesn't exist, a
      * "404: Not Found" message is returned instead. Additionally, if the student does exist, but
-     * the coach hasn't made a suggestion for this student, a "400: Bad Request" message will be returned.
+     * the coach hasn't made a suggestion for this student, a "400: Bad Request" message will be returned. If the user
+     * attempts to remove a [StatusSuggestion] that was not made by them a "401: Unauthorized" is returned.
      */
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
