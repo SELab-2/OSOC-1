@@ -19,10 +19,13 @@ import java.security.Principal
 @Service
 class OsocUserDetailService(val userRepository: UserRepository, val passwordEncoder: PasswordEncoder) :
     UserDetailsService {
-    private val emailUserMap = mutableMapOf<String, User>()
 
+    /**
+     * Get the [User] object from a principal. We use !! here because a user that has successfully logged in has to
+     * exist.
+     */
     fun getUserFromPrincipal(principal: Principal): User {
-        return emailUserMap[principal.name]!!
+        return userRepository.findByEmail(principal.name)!!
     }
 
     /**
@@ -32,7 +35,6 @@ class OsocUserDetailService(val userRepository: UserRepository, val passwordEnco
     override fun loadUserByUsername(email: String): UserDetails {
         val osocUser: User = userRepository.findByEmail(email)
             ?: throw UsernameNotFoundException("User with email=\"$email\" not found!")
-        emailUserMap[email] = osocUser
 
         val authorities = mutableListOf<SimpleGrantedAuthority>()
         for (role in Role.values()) {
