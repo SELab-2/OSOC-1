@@ -26,7 +26,8 @@ class StudentService(private val repository: StudentRepository, private val user
      * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
      * Can be filtered by [name] (requested string gets processed to more easily give matches),
      * [statusFilter] (see if student status matches 1 in the given list),
-     * whether or not the requesting user has already made a suggestion for this student [includeSuggested]
+     * whether or not the requesting user has already made a suggestion for this student [includeSuggested],
+     * [callee] is the user who made this request
      */
     fun getAllStudents(
         pageNumber: Int,
