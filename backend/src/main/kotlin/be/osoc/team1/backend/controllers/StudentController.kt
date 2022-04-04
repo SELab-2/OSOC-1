@@ -46,6 +46,7 @@ class StudentController(
         @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
+        principal: Principal
     ): Iterable<Student> =
         service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested,userDetailService.getUserFromPrincipal(principal))
 
