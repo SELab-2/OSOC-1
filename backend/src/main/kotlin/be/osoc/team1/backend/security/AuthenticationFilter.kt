@@ -1,5 +1,7 @@
 package be.osoc.team1.backend.security
 
+import be.osoc.team1.backend.entities.EntityViews
+import be.osoc.team1.backend.services.OsocUserDetailService
 import com.auth0.jwt.JWT
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -16,7 +18,6 @@ import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import kotlin.collections.HashMap
 
 /**
  * This filter gets called by the filter-chain (see [SecurityConfig] for more info)
@@ -25,7 +26,7 @@ import kotlin.collections.HashMap
  * If the authentication is successful, then a response gets send with a new access token.
  * The now authenticated user can use this access token to authorize himself in the following requests.
  */
-class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
+class AuthenticationFilter(authenticationManager: AuthenticationManager?, val userDetailsService: OsocUserDetailService) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     /**
@@ -48,7 +49,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     }
 
     /**
-     * add an access token to the response when authentication is successful
+     * add an access token and information about the successfully authenticated user to the response
      * this token can be used by the user to authorise itself in the following requests
      */
     override fun successfulAuthentication(
@@ -60,16 +61,18 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         val authenticatedUser: User = authentication.principal as User
         val accessToken: String = createToken(authenticatedUser, 5)
 
-        val tokens: MutableMap<String, String> = HashMap()
-        tokens["accessToken"] = accessToken
+        val osocUser = userDetailsService.getUserFromPrincipal(authentication)
+        val authResponse = AuthResponse(accessToken, osocUser)
         response.contentType = APPLICATION_JSON_VALUE
-        ObjectMapper().writeValue(response.outputStream, tokens)
+        ObjectMapper().writerWithView(EntityViews.Public::class.java).writeValue(response.outputStream, authResponse)
     }
 
     /**
-     * create a JSON web token
-     * the token contains username, expiration date and roles of user
-     * this function can be used for making an access token or even a refresh token
+     * Create a JSON web token. The token contains email, expiration date and roles of the authenticated user. The
+     * authenticated user passed as an argument here is of class [User] from Spring Security which is different from our
+     * own User class. This user object stores the email of a user in the username field and the role of a user in the
+     * authorities field using [GrantedAuthority] objects.
+     * this function can be used for making an access token or a refresh token.
      */
     private fun createToken(user: User, minutesToLive: Int): String {
         val roles: List<String> =
@@ -80,4 +83,6 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
             .withClaim("roles", roles)
             .sign(SecretUtil.algorithm)
     }
+
+    data class AuthResponse(val accessToken: String, val user: be.osoc.team1.backend.entities.User)
 }

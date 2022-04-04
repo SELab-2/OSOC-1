@@ -12,11 +12,9 @@ server.error.include-exception=false
 
 ## Running tests
 When running integration tests, Spring needs to load the entire application. \
-This means Spring will also need a database to connect to. \
 For this ```/backend/src/test/resources/application.properties``` is used. \
-These properties are setup as used by github actions, to run tests locally change \
-```spring.datasource.url=jdbc:postgresql://postgres:5432/osoc```
-to ```spring.datasource.url=jdbc:postgresql://localhost:5432/osoc``` \
+This is setup to automatically create and start docker containers, so make sure docker is installed. \
+On windows this means docker desktop should be up and running. \
 Then simply run the test command in /backend to run all tests.
 ```
 ./mvnw test
@@ -29,6 +27,3 @@ To remove old reports and force a rebuild you can run
 ```
 ./mvnw clean
 ```
-#### Note on integration tests
-Integration tests (using testcontainers) will not use /api in request paths.
-They ignore ```server.servlet.context-path=/api```.

@@ -2,16 +2,16 @@ package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
-import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
+import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class ProjectService(private val repository: ProjectRepository) {
+class ProjectService(private val repository: ProjectRepository, private val userService: UserService) {
     /**
      * Get all projects
      */
@@ -82,10 +82,12 @@ class ProjectService(private val repository: ProjectRepository) {
 
     /**
      * Adds a coach to project based on [projectId],
-     * if [projectId] is not in [repository] throw InvalidProjectIdException
+     * if [projectId] is not in [repository] throw [InvalidProjectIdException]
+     * If there is no user with [coachId] a [InvalidUserIdException] will be thrown.
      */
-    fun addCoachToProject(projectId: UUID, coach: User) {
-        val project: Project = getProjectById(projectId)
+    fun addCoachToProject(projectId: UUID, coachId: UUID) {
+        val project = getProjectById(projectId)
+        val coach = userService.getUserById(coachId)
         project.coaches.add(coach)
         repository.save(project)
     }

@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse
  * This filter gets called by the filter-chain (see [SecurityConfig] for more info)
  *
  * Authorization will only succeed when the request contains an Authorization header with a valid access token.
- * This access token says which user is logged in and what permissions he has.
+ * This access token says which user is logged in and what permissions the user has.
  *
  * The difference between [AuthenticationFilter] and this class([AuthorizationFilter]) is that [AuthorizationFilter]
  * manages the authorities of users, or in other words what they are allowed to do. The [AuthenticationFilter] on the
@@ -81,7 +81,7 @@ class AuthorizationFilter : OncePerRequestFilter() {
     }
 
     /**
-     * This function gets called when an invalid token is passed, and therefor an error occurs
+     * This function gets called when an invalid token is passed, and therefore an error occurs
      * When that error occurs, don't throw it, send a response containing that error instead
      */
     private fun respondException(response: HttpServletResponse, exception: Exception) {
