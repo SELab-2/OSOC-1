@@ -129,7 +129,7 @@ class StudentController(
      *
      * Any other values for the status will result in a "400: Bad Request" response. Importantly,
      * this includes the "Undecided" value, which is a valid value in other endpoints. This is
-     * because a user cannot suggest to change the status of a student to "Undecided".
+     * because a user cannot suggest changing the status of a student to "Undecided".
      */
     @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
