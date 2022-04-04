@@ -2,12 +2,15 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
+import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.ProjectService
+import be.osoc.team1.backend.services.StudentService
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -17,6 +20,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
 
@@ -40,7 +46,23 @@ class ProjectServiceTests {
     @Test
     fun `getAllProjects does not fail`() {
         val service = ProjectService(getRepository(true))
-        assertEquals(service.getAllProjects(), listOf(testProject))
+        assertEquals(service.getAllProjects(""), listOf(testProject))
+    }
+
+    @Test
+    fun `getAllProjects name filtering returns only projects with those names`() {
+        val testProject = Project("Lars", "Cauter")
+        val testProject2 = Project("Sral", "Retuac")
+        val testProject3 = Project("Arsl", "Auterc")
+        val testProject4 = Project("Rsla", "Uterca")
+        val repository: ProjectRepository = mockk()
+        val allProjects = listOf(testProject, testProject2, testProject3, testProject4)
+        every { repository.findAll() } returns allProjects
+        val service = ProjectService(repository)
+        assertEquals(listOf(testProject), service.getAllProjects("lars"))
+        assertEquals(listOf(testProject, testProject3), service.getAllProjects("ars"))
+        assertEquals(listOf<Project>(), service.getAllProjects("uter"))
+        assertEquals(allProjects, service.getAllProjects(""))
     }
 
     @Test
@@ -158,11 +180,25 @@ class ProjectServiceTests {
         val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent, testStudent2))
         val testProjectConflict3 = Project("Test", "a test project", mutableListOf(testStudent2, testStudent3))
         val repository = getRepository(true)
-        every { repository.findAll() } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
+        every { repository.findAll() } returns mutableListOf(
+            testProjectConflict,
+            testProjectConflict2,
+            testProjectConflict3
+        )
         val service = ProjectService(repository)
         val conflictlist = service.getConflicts()
-        assert(conflictlist[0] == ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
-        assert(conflictlist[1] == ProjectService.Conflict(testStudent2.id, mutableListOf(testProjectConflict2.id, testProjectConflict3.id)))
+        assert(
+            conflictlist[0] == ProjectService.Conflict(
+                testStudent.id,
+                mutableListOf(testProjectConflict.id, testProjectConflict2.id)
+            )
+        )
+        assert(
+            conflictlist[1] == ProjectService.Conflict(
+                testStudent2.id,
+                mutableListOf(testProjectConflict2.id, testProjectConflict3.id)
+            )
+        )
         assert(conflictlist.size == 2)
     }
 
