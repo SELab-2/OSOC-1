@@ -12,6 +12,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
+import java.nio.file.attribute.UserPrincipal
 
 class OsocUserDetailServiceTests {
 
@@ -38,9 +39,9 @@ class OsocUserDetailServiceTests {
 
     private fun getRepository(userAlreadyExists: Boolean): UserRepository {
         val repository: UserRepository = mockk()
-        every { repository.findByEmail(testAdmin.email) } returns if (userAlreadyExists) listOf(testAdmin) else listOf()
-        every { repository.findByEmail(testCoach.email) } returns if (userAlreadyExists) listOf(testCoach) else listOf()
-        every { repository.findByEmail(testDisabled.email) } returns if (userAlreadyExists) listOf(testDisabled) else listOf()
+        every { repository.findByEmail(testAdmin.email) } returns if (userAlreadyExists) testAdmin else null
+        every { repository.findByEmail(testCoach.email) } returns if (userAlreadyExists) testCoach else null
+        every { repository.findByEmail(testDisabled.email) } returns if (userAlreadyExists) testDisabled else null
         return repository
     }
 
@@ -72,5 +73,11 @@ class OsocUserDetailServiceTests {
     fun `loadUserByUsername does not fail when the user with email exists and is disabled`() {
         val service = OsocUserDetailService(getRepository(true), getPasswordEncoder())
         assert(service.loadUserByUsername(testDisabled.email) == userDetailsDisabled)
+    }
+
+    @Test
+    fun `getUserFromPrincipal works when user is present`() {
+        val service = OsocUserDetailService(getRepository(true), getPasswordEncoder())
+        assert(service.getUserFromPrincipal(UserPrincipal { testAdmin.email }) == testAdmin)
     }
 }
