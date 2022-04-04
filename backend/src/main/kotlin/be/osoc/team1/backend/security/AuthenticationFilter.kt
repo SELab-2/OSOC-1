@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse
  * If the authentication is successful, then a response gets send with a new access token.
  * The now authenticated user can use this access token to authorize himself in the following requests.
  */
-class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
+class AuthenticationFilter(authenticationManager: AuthenticationManager?, val userDetailsService: OsocUserDetailService) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     /**
@@ -56,4 +56,6 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         val authorities: List<String> = authenticatedUser.authorities.map { it.authority }.toList()
         createAccessAndRefreshToken(response, email, authorities)
     }
+
+    data class AuthResponse(val accessToken: String, val user: be.osoc.team1.backend.entities.User)
 }
