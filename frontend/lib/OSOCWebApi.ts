@@ -1,5 +1,5 @@
 import Endpoints from './endpoints';
-import HttpFetcher from './HttpFetcher';
+import HttpFetcher, { NamedError } from './HttpFetcher';
 
 type UUID = string;
 
@@ -21,6 +21,8 @@ type User = {
   role: UserRole;
 }
 
+export class InvalidRefreshTokenError extends NamedError {};
+
 class OSOCWebApi {
   _accessToken: AuthToken;
   _refreshToken: AuthToken;
@@ -39,7 +41,15 @@ class OSOCWebApi {
   }
 
   getAccessToken() {
+
+    // Check if access token is still valid
+
+    // if so, return the access token
     return this._accessToken;
+    
+    // otherwise, refresh the access token
+
+    // if that fails, return to login (somehow, or throw a specific error like InvalidRefreshToken)
   }
 
   /**

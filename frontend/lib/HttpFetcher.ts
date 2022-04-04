@@ -58,7 +58,7 @@ export type getProps = {
    accessToken?: string;
 }
 
-class NamedError extends Error {
+export class NamedError extends Error {
   get name() {
     return this.constructor.name;
   }
