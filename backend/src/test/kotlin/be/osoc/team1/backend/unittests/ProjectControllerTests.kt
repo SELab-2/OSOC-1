@@ -46,6 +46,15 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `getAllProjects name filtering parses the correct name`() {
+        val testList = listOf(Project("tester", "testie"))
+        every { projectService.getAllProjects("lars") } returns testList
+        mockMvc.perform(get("/projects?name=lars"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+    }
+
+    @Test
     fun `getProjectById returns project if project with given id exists`() {
         every { projectService.getProjectById(testId) } returns testProject
         mockMvc.perform(get("/projects/$testId")).andExpect(status().isOk)
