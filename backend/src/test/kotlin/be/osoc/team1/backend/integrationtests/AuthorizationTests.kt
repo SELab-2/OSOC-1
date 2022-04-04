@@ -293,22 +293,22 @@ class AuthorizationTests() {
 
     // Test to check if refresh token gets cycled
 
-    // This test needs a login first since there are no unprotected endpoints to GET
+    // Login first to test GET with protected endpoint
     @Test
     fun `CORS using not allowed origin gives error`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
-        authHeaders.add("Origin", "http://notallowed.com")
+        authHeaders.add(HttpHeaders.ORIGIN, "http://notallowed.com")
         val request = HttpEntity("", authHeaders)
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 403)
         assert(response.body == "Invalid CORS request")
     }
 
-    // This test needs a login first since there are no unprotected endpoints to GET
+    // Login first to test GET with protected endpoint
     @Test
     fun `CORS using allowed origin works`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
-        authHeaders.add("Origin", ConfigUtil.allowedCorsOrigins[0])
+        authHeaders.add(HttpHeaders.ORIGIN, ConfigUtil.allowedCorsOrigins[0])
         val request = HttpEntity("", authHeaders)
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 200)
