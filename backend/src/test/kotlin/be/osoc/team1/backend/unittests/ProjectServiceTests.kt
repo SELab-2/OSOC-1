@@ -67,7 +67,7 @@ class ProjectServiceTests {
         val repository: ProjectRepository = mockk()
         val allProjects = listOf(testProject, testProject2, testProject3, testProject4)
         every { repository.findAll() } returns allProjects
-        val service = ProjectService(repository)
+        val service = ProjectService(repository, getUserService())
         assertEquals(listOf(testProject), service.getAllProjects("lars"))
         assertEquals(listOf(testProject, testProject3), service.getAllProjects("ars"))
         assertEquals(listOf<Project>(), service.getAllProjects("uter"))
