@@ -6,8 +6,6 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
-import java.security.Principal
-import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -20,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
+import java.util.UUID
 
 @RestController
 @RequestMapping("/students")
 class StudentController(
-        private val service: StudentService,
-        private val userDetailService: OsocUserDetailService
+    private val service: StudentService,
+    private val userDetailService: OsocUserDetailService
 ) {
 
     /**
@@ -40,14 +40,14 @@ class StudentController(
     @GetMapping
     @Secured("ROLE_COACH")
     fun getAllStudents(
-            @RequestParam(defaultValue = "0") pageNumber: Int,
-            @RequestParam(defaultValue = "50") pageSize: Int,
-            @RequestParam(defaultValue = "id") sortBy: String,
-            @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
-            @RequestParam(defaultValue = "") name: String,
-            @RequestParam(defaultValue = "true") includeSuggested: Boolean,
+        @RequestParam(defaultValue = "0") pageNumber: Int,
+        @RequestParam(defaultValue = "50") pageSize: Int,
+        @RequestParam(defaultValue = "id") sortBy: String,
+        @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
+        @RequestParam(defaultValue = "") name: String,
+        @RequestParam(defaultValue = "true") includeSuggested: Boolean,
     ): Iterable<Student> =
-            service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested)
+        service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested,userDetailService.getUserFromPrincipal(principal))
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists, returns a
@@ -108,7 +108,7 @@ class StudentController(
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum) =
-            service.setStudentStatus(studentId, status)
+        service.setStudentStatus(studentId, status)
 
     /**
      * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should
@@ -135,15 +135,15 @@ class StudentController(
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
     fun addStudentStatusSuggestion(
-            @PathVariable studentId: UUID,
-            @RequestBody statusSuggestion: StatusSuggestion,
-            principal: Principal
+        @PathVariable studentId: UUID,
+        @RequestBody statusSuggestion: StatusSuggestion,
+        principal: Principal
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
         if (statusSuggestion.coachId != user.id)
-                throw UnauthorizedOperationException(
-                        "The 'coachId' did not equal authenticated user id!"
-                )
+            throw UnauthorizedOperationException(
+                "The 'coachId' did not equal authenticated user id!"
+            )
 
         service.addStudentStatusSuggestion(studentId, statusSuggestion)
     }
@@ -160,15 +160,15 @@ class StudentController(
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
     fun deleteStudentStatusSuggestion(
-            @PathVariable studentId: UUID,
-            @PathVariable coachId: UUID,
-            principal: Principal
+        @PathVariable studentId: UUID,
+        @PathVariable coachId: UUID,
+        principal: Principal
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
         if (coachId != user.id)
-                throw UnauthorizedOperationException(
-                        "The 'coachId' did not equal authenticated user id. You can't remove suggestions from other users!"
-                )
+            throw UnauthorizedOperationException(
+                "The 'coachId' did not equal authenticated user id. You can't remove suggestions from other users!"
+            )
 
         service.deleteStudentStatusSuggestion(studentId, coachId)
     }

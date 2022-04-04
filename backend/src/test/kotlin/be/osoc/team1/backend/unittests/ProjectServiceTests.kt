@@ -14,32 +14,32 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
+import java.util.UUID
 
 class ProjectServiceTests {
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Lars", "Van Cauter")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
     private val testProject =
-            Project("Test", "a test project", mutableListOf(testStudent), mutableListOf(testCoach))
+        Project("Test", "a test project", mutableListOf(testStudent), mutableListOf(testCoach))
     private val savedProject =
-            Project(
-                    "Saved",
-                    "a saved project",
-                    mutableListOf(testStudent),
-                    mutableListOf(testCoach)
-            )
+        Project(
+            "Saved",
+            "a saved project",
+            mutableListOf(testStudent),
+            mutableListOf(testCoach)
+        )
 
     private fun getRepository(projectAlreadyExists: Boolean): ProjectRepository {
         val repository: ProjectRepository = mockk()
         every { repository.existsById(any()) } returns projectAlreadyExists
         every { repository.findByIdOrNull(any()) } returns
-                if (projectAlreadyExists) testProject else null
+            if (projectAlreadyExists) testProject else null
         every { repository.deleteById(any()) } just Runs
         every { repository.save(any()) } returns savedProject
         every { repository.findAll() } returns listOf(testProject)
@@ -194,27 +194,27 @@ class ProjectServiceTests {
         val testStudent3 = Student("Lars3", "Van Cauter3")
         val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
         val testProjectConflict2 =
-                Project("Test", "a test project", mutableListOf(testStudent, testStudent2))
+            Project("Test", "a test project", mutableListOf(testStudent, testStudent2))
         val testProjectConflict3 =
-                Project("Test", "a test project", mutableListOf(testStudent2, testStudent3))
+            Project("Test", "a test project", mutableListOf(testStudent2, testStudent3))
         val repository = getRepository(true)
         every { repository.findAll() } returns
-                mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
+            mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
         val service = ProjectService(repository, getUserService())
         val conflictlist = service.getConflicts()
         assert(
-                conflictlist[0] ==
-                        ProjectService.Conflict(
-                                testStudent.id,
-                                mutableListOf(testProjectConflict.id, testProjectConflict2.id)
-                        )
+            conflictlist[0] ==
+                ProjectService.Conflict(
+                    testStudent.id,
+                    mutableListOf(testProjectConflict.id, testProjectConflict2.id)
+                )
         )
         assert(
-                conflictlist[1] ==
-                        ProjectService.Conflict(
-                                testStudent2.id,
-                                mutableListOf(testProjectConflict2.id, testProjectConflict3.id)
-                        )
+            conflictlist[1] ==
+                ProjectService.Conflict(
+                    testStudent2.id,
+                    mutableListOf(testProjectConflict2.id, testProjectConflict3.id)
+                )
         )
         assert(conflictlist.size == 2)
     }
