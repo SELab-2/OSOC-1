@@ -729,7 +729,34 @@ paths:
                 '404':
                     description: NOT FOUND
                 '400':
-                    description: Bad Request.                
+                    description: Bad Request.
+    /token/refresh:
+      post:
+        summary: renew access token using refresh token
+        requestBody:
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                required:
+                  - refreshToken
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    accessToken:
+                      type: string
+                    refreshToken:
+                      type: string
+          '400':
+            description: Bad Request.
 components:
     schemas:
         Student:
