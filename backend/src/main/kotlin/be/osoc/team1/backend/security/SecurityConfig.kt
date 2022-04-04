@@ -17,9 +17,9 @@ import org.springframework.security.config.http.SessionCreationPolicy
  * Authentication is verifying the identity of a user (using an email and a password). Authorization is verifying which
  * resources this user has access to.
  *
- * Every incoming request will be handled by our [SecurityConfig] class. Some urls will be set to be accessible to all,
- * other urls will require authorization to be accessed. Those requests that need authorization will get processed by
- * the filter-chain. The filter-chain is just a list of filters that get called in a pre-configured order.
+ * Every incoming request will be handled by our [SecurityConfig] class. Urls defined in [ConfigUtil] will be open to
+ * non-authenticated users. All other urls require authorization. Those requests that need authorization will get
+ * processed by the filter-chain. The filter-chain is a list of filters that get called in a pre-configured order.
  * The first filter in the filter-chain is the [AuthorizationFilter] and tries to authorize the request. If that fails,
  * then the filter-chain proceeds to the next filter, the [AuthenticationFilter] which tries to authenticate the request.
  */
@@ -28,10 +28,15 @@ import org.springframework.security.config.http.SessionCreationPolicy
 @EnableGlobalMethodSecurity(securedEnabled = true)
 class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurityConfigurerAdapter() {
     /**
-     * set configuration to handle all incoming requests
-     * authentication and authorization are configured to work stateless and thus to use tokens instead of cookies
-     * Because we do not use cookies, there is no room for CSRF attacks, and no reason to put in CSRF protection
-     * First add [AuthorizationFilter] to check if user is authorized, if not, try to authenticate with the [AuthenticationFilter]
+     * Set configuration to handle all incoming requests.
+     *
+     * In this function, we configure Spring Security to only work stateless and thus not use any cookies. With this
+     * Spring Security configuration, we ensure the browser is not responsible for automatic authentication. This means
+     * we can safely disable CSRF protection, since CSRF attacks rely on cookie-based authentication.
+     * More on CSRF attacks can be read on: https://owasp.org/www-community/attacks/csrf
+     *
+     * First add [AuthorizationFilter] to check if user is authorized, if not, try to authenticate with the
+     * [AuthenticationFilter].
      */
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
@@ -39,14 +44,13 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
         // THIS IS A TEMPORARY FIX SOMEBODY SHOULD LOOK UP HOW CORS SHOULD BE ENABLED CORRECTLY
         http.cors().disable()
 
-        http.sessionManagement().maximumSessions(1)
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
         http.authorizeRequests().antMatchers(*ConfigUtil.urlsOpenToAll).permitAll()
         http.authorizeRequests().antMatchers(HttpMethod.POST, *ConfigUtil.urlsOpenToAllToPostTo).permitAll()
         http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_COACH")
 
-        val authenticationFilter = AuthenticationFilter(authenticationManagerBean())
+        val authenticationFilter = AuthenticationFilter(authenticationManagerBean(), userDetailsService)
         http.addFilterBefore(AuthorizationFilter(), AuthenticationFilter::class.java)
         http.addFilter(authenticationFilter)
     }
