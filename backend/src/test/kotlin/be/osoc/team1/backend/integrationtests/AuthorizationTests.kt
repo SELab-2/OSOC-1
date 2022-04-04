@@ -5,6 +5,8 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
+import be.osoc.team1.backend.security.ConfigUtil
+import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
@@ -89,6 +91,17 @@ class AuthorizationTests() {
     }
 
     /**
+     * Use [refreshToken] to get a new access token.
+     */
+    fun requestNewAccessToken(refreshToken: String): ResponseEntity<String> {
+        val input = "refreshToken=$refreshToken"
+        val refreshHeaders = HttpHeaders()
+        refreshHeaders.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        val refreshRequest = HttpEntity(input, refreshHeaders)
+        return restTemplate.exchange(URI("/token/refresh"), HttpMethod.POST, refreshRequest, String::class.java)
+    }
+
+    /**
      * Logout to avoid influencing other tests
      */
     fun logoutResponse(response: ResponseEntity<String>) {
@@ -110,9 +123,7 @@ class AuthorizationTests() {
     fun getAuthenticatedHeader(email: String, password: String): HttpHeaders {
         val response: ResponseEntity<String> = loginUser(email, password)
         val accessToken: String = JSONObject(response.body).get("accessToken") as String
-        val authHeaders = HttpHeaders()
-        authHeaders.add("Authorization", "Basic $accessToken")
-        return authHeaders
+        return createAuthHeaders(accessToken)
     }
 
     @Test
@@ -147,6 +158,7 @@ class AuthorizationTests() {
         val loginResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
+        assert(JSONObject(loginResponse.body).has("refreshToken"))
         logoutResponse(loginResponse)
     }
 
@@ -155,6 +167,7 @@ class AuthorizationTests() {
         val loginResponse: ResponseEntity<String> = loginUser(coachEmail, coachPassword)
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
+        assert(JSONObject(loginResponse.body).has("refreshToken"))
         logoutResponse(loginResponse)
     }
 
@@ -163,6 +176,7 @@ class AuthorizationTests() {
         val loginResponse: ResponseEntity<String> = loginUser(disabledEmail, disabledPassword)
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
+        assert(JSONObject(loginResponse.body).has("refreshToken"))
         logoutResponse(loginResponse)
     }
 
@@ -237,6 +251,16 @@ class AuthorizationTests() {
     }
 
     @Test
+    fun `Authentication with refresh token returns 401`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+        val request = HttpEntity(null, createAuthHeaders(refreshToken))
+
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 401)
+    }
+
+    @Test
     fun `changing role as admin returns 204`() {
         val userId = coachUser.id
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
@@ -245,7 +269,7 @@ class AuthorizationTests() {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
         assert(response.statusCodeValue == 204)
-        assert(userRepository.findByEmail(coachUser.email).get(0).role == Role.Disabled)
+        assert(userRepository.findByEmail(coachUser.email)?.role == Role.Disabled)
         logoutHeader(authHeaders)
     }
 
@@ -258,7 +282,7 @@ class AuthorizationTests() {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(disabledUser.email).get(0).role == Role.Disabled)
+        assert(userRepository.findByEmail(disabledUser.email)?.role == Role.Disabled)
         logoutHeader(authHeaders)
     }
 
@@ -271,7 +295,7 @@ class AuthorizationTests() {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(coachUser.email).get(0).role == Role.Coach)
+        assert(userRepository.findByEmail(coachUser.email)?.role == Role.Coach)
         logoutHeader(authHeaders)
     }
 
@@ -284,11 +308,96 @@ class AuthorizationTests() {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java)
 
         assert(response.statusCodeValue == 403)
-        assert(userRepository.findByEmail(adminUser.email).get(0).role == Role.Admin)
+        assert(userRepository.findByEmail(adminUser.email)?.role == Role.Admin)
         logoutHeader(authHeaders)
     }
 
-    // Test to check if you can use refresh token to renew access token
+    @Test
+    fun `refresh token rotation happens`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
 
-    // Test to check if refresh token gets cycled
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(refreshResponse.statusCodeValue == 200)
+
+        val newAccessToken: String = JSONObject(refreshResponse.body).get("accessToken") as String
+        val newRefreshToken: String = JSONObject(refreshResponse.body).get("refreshToken") as String
+        assert(accessToken != newAccessToken)
+        assert(refreshToken != newRefreshToken)
+        assert(decodeAndVerifyToken(refreshToken).expiresAt == decodeAndVerifyToken(newRefreshToken).expiresAt)
+    }
+
+    @Test
+    fun `use access token to renew access token returns 400`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
+
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(accessToken)
+        assert(refreshResponse.statusCodeValue == 400)
+    }
+
+    @Test
+    fun `use refresh token and login with new access token`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(refreshResponse.statusCodeValue == 200)
+        val newAccessToken: String = JSONObject(refreshResponse.body).get("accessToken") as String
+
+        val authHeaders = createAuthHeaders(newAccessToken)
+        val request = HttpEntity(null, authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 200)
+        logoutHeader(authHeaders)
+    }
+
+    @Test
+    fun `using same refresh token twice returns 400`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+
+        val firstRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(firstRefreshResponse.statusCodeValue == 200)
+        val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(secondRefreshResponse.statusCodeValue == 400)
+    }
+
+    @Test
+    fun `using same refresh token twice invalidates refresh token family`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+
+        val firstRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(firstRefreshResponse.statusCodeValue == 200)
+
+        val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(secondRefreshResponse.statusCodeValue == 400)
+
+        val firstRefreshToken: String = JSONObject(firstRefreshResponse.body).get("refreshToken") as String
+        val thirdRefreshResponse: ResponseEntity<String> = requestNewAccessToken(firstRefreshToken)
+        assert(thirdRefreshResponse.statusCodeValue == 400)
+    }
+
+    // Login first to test GET with protected endpoint
+    @Test
+    fun `CORS using not allowed origin gives error`() {
+        val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
+        authHeaders.add(HttpHeaders.ORIGIN, "http://notallowed.com")
+        val request = HttpEntity("", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 403)
+        assert(response.body == "Invalid CORS request")
+    }
+
+    // Login first to test GET with protected endpoint
+    @Test
+    fun `CORS using allowed origin works`() {
+        val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
+        authHeaders.add(HttpHeaders.ORIGIN, ConfigUtil.allowedCorsOrigins[0])
+        val request = HttpEntity("", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 200)
+    }
 }

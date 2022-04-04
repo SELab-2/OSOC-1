@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.entities
 
+import com.fasterxml.jackson.annotation.JsonView
 import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -31,12 +32,20 @@ enum class Role(private val permissionLevel: Int) {
 @Entity
 @Table(name = "account")
 class User(
+    @field:JsonView(EntityViews.Public::class)
     val username: String,
+
     @Column(unique = true)
+    @field:JsonView(EntityViews.Public::class)
     val email: String,
+
+    @field:JsonView(EntityViews.Public::class)
     var role: Role = Role.Disabled,
+
+    @field:JsonView(EntityViews.Hidden::class)
     val password: String
 ) {
     @Id
+    @field:JsonView(EntityViews.Public::class)
     val id: UUID = UUID.randomUUID()
 }
