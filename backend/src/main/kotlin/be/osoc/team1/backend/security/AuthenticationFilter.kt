@@ -45,7 +45,6 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, privat
     /**
      * Add an access token, refresh token, TTL of refresh token and information about the successfully authenticated
      * user to the response.
-     * This token can be used by the user to authorise itself in the following requests.
      */
     override fun successfulAuthentication(
         request: HttpServletRequest,
