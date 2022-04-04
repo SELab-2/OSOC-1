@@ -40,7 +40,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
     private val testSuggestion = StatusSuggestion(UUID.randomUUID(), SuggestionEnum.Yes, "test motivation")
-    private val defaultStatusFilter = listOf(StatusEnum.Undecided)
+    private val defaultStatusFilter = listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
 
     @Test
     fun `getAllStudents should not fail`() {
@@ -57,9 +57,59 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
-    @Test
-    fun `getAllStudents status filtering returns only students with those statuses`() {
 
+    @Test
+    fun `getAllStudents status filtering parses the correct statuses`() {
+        val testStudent1 = Student("L1", "VC")
+        testStudent1.status = StatusEnum.Yes
+        val testStudent2 = Student("L2", "VC")
+        testStudent2.status = StatusEnum.No
+        val testStudent3 = Student("L3", "VC")
+        testStudent3.status = StatusEnum.Maybe
+        val testStudent4 = Student("L4", "VC")
+        testStudent4.status = StatusEnum.Undecided
+        every { studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true) } returns listOf(
+            testStudent1
+        )
+        every { studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true) } returns listOf(
+            testStudent2
+        )
+        every { studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true) } returns listOf(
+            testStudent3
+        )
+        every { studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true) } returns listOf(
+            testStudent4
+        )
+        mockMvc.perform(get("/students?status=Yes"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent1))))
+        mockMvc.perform(get("/students?status=No"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent2))))
+        mockMvc.perform(get("/students?status=Maybe"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent3))))
+        mockMvc.perform(get("/students?status=Undecided"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent4))))
+    }
+
+    @Test
+    fun `getAllStudents name filtering parses the correct name`() {
+        val testList = listOf(Student("tester", "testie"))
+        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars", true) } returns testList
+        mockMvc.perform(get("/students?name=lars"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+    }
+
+    @Test
+    fun `getAllStudents include filtering parses the correctly`() {
+        val testList = listOf(Student("test", "testie"))
+        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", false) } returns testList
+        mockMvc.perform(get("/students?includeSuggested=false"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
 
     @Test
