@@ -756,8 +756,12 @@ paths:
                     content:
                         application/json:
                             schema:
-                                description: accessToken
-                                type: string
+                                type: object
+                                properties:
+                                    accessToken:
+                                        type: string
+                                    user:
+                                        $ref: '#/components/schemas/User'
                 '401':
                     description: |
                         The response if authorization has failed.
