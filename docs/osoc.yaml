@@ -135,6 +135,9 @@ paths:
                 '204':
                     description: |
                         The response if there is a student in the database with the given id.
+                '401':
+                    description: |
+                        The response if the currently authenticated user doesn't match the coachId specified in the StatusSuggestion
                 '404':
                     description: |
                         The response if there is no student in the database with the given id.
@@ -166,6 +169,10 @@ paths:
                     description: |
                         The response if the given coach hasn't made a suggestion
                         for the given student.
+                '401':
+                    description: |
+                        The response if the currently authenticated user attempts
+                        to delete a suggestion made by another user.
                 '404':
                     description: |
                         The response if the student specified by the given id
