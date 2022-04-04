@@ -729,7 +729,31 @@ paths:
                 '404':
                     description: NOT FOUND
                 '400':
-                    description: Bad Request.                
+                    description: Bad Request.
+    /login:
+        post:
+            summary: login to the user with the correct email and password
+            requestBody:
+                content:
+                    application/x-www-form-urlencoded:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                password:
+                                    type: string
+            responses:
+                '200':
+                    description: Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                description: accessToken
+                                type: string
+                '401':
+                    description: |
+                        The response if authorization has failed.
 components:
     schemas:
         Student:
