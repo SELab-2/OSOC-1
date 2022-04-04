@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.security
 
 import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
+import be.osoc.team1.backend.services.OsocUserDetailService
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
