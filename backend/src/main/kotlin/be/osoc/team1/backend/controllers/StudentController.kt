@@ -48,7 +48,7 @@ class StudentController(
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         principal: Principal
     ): Iterable<Student> =
-        service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested,userDetailService.getUserFromPrincipal(principal))
+        service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested, userDetailService.getUserFromPrincipal(principal))
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists, returns a
