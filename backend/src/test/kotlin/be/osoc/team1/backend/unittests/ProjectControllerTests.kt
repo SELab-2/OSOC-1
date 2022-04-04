@@ -175,7 +175,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(
             post("/projects/$testId/coaches/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(coach))
+                .content(objectMapper.writeValueAsString(coach.id))
         ).andExpect(status().isNoContent)
     }
 
@@ -187,7 +187,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(
             post("/projects/$differentId/coaches/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(coach))
+                .content(objectMapper.writeValueAsString(coach.id))
         ).andExpect(status().isNotFound)
     }
 
