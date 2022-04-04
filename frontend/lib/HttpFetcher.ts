@@ -89,7 +89,20 @@ export class WebApiError extends NamedError {
  * to instantiate this class
  */
 class HttpFetcher {
-
+  
+  /**
+   * Helper function to make requests that contain a body
+   *
+   * @param endpoint - the endpoint to make a request to
+   * @param body - the body to use in the request
+   * @param contentType - the content type header
+   * @param method - the method used in the request
+   * @param accessToken - the access token for the Basic authorization header
+   * @returns the response from the request
+   *
+   * @throws {@link WEB_API_ERROR}
+   * This error is thrown when the request fails
+   */
   static async _makeBodyRequest({
     endpoint,
     body,
@@ -215,7 +228,6 @@ class HttpFetcher {
    *
    * @param endpoint - the endpoint to make a request to
    * @param body - the body to use in the POST request
-   * @param contentType - the content type header
    * @param accessToken - the access token for the Basic authorization header
    * @returns the response from a POST request
    *

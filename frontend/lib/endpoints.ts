@@ -12,6 +12,7 @@ type Endpoints = typeof Endpoints[keyof typeof Endpoints];
 const Endpoints = {
   USERS: baseURL + '/users',
   LOGIN: baseURL + '/login',
+  REFRESH: baseURL + '/token/refresh'
 } as const;
 
 export default Endpoints;

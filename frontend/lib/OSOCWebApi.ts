@@ -40,16 +40,41 @@ class OSOCWebApi {
     this._accessToken = accessToken;
   }
 
-  getAccessToken() {
+  getRefreshToken(): AuthToken {
+    return this._refreshToken;
+  }
+
+  getAccessToken(): AuthToken {
 
     // Check if access token is still valid
 
     // if so, return the access token
     return this._accessToken;
     
-    // otherwise, refresh the access token
+    // otherwise, refresh the access token and refresh token
+    this.refreshTokens(this.getRefreshToken() as string);
 
     // if that fails, return to login (somehow, or throw a specific error like InvalidRefreshToken)
+  }
+
+
+  async refreshTokens(refreshToken: string) {
+    const requestBody = {
+      refreshToken
+    };
+
+    const response = await HttpFetcher.postURLEncoded({
+      endpoint: Endpoints.REFRESH,
+      body: requestBody
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      const { accessToken, refreshToken } = data;
+    } else {
+      throw new InvalidRefreshTokenError();
+    }
   }
 
   /**
