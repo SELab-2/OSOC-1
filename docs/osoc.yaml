@@ -135,6 +135,9 @@ paths:
                 '204':
                     description: |
                         The response if there is a student in the database with the given id.
+                '401':
+                    description: |
+                        The response if the currently authenticated user doesn't match the coachId specified in the StatusSuggestion
                 '404':
                     description: |
                         The response if there is no student in the database with the given id.
@@ -166,6 +169,10 @@ paths:
                     description: |
                         The response if the given coach hasn't made a suggestion
                         for the given student.
+                '401':
+                    description: |
+                        The response if the currently authenticated user attempts
+                        to delete a suggestion made by another user.
                 '404':
                     description: |
                         The response if the student specified by the given id
@@ -356,7 +363,7 @@ paths:
                 '204':
                     description: successful operation
                 '404':
-                    description: No such projectId.
+                    description: No such projectId or coachId.
                 '400':
                     description: Bad Request.
     /projects/{projectId}/coaches/{coachId}:
@@ -729,7 +736,34 @@ paths:
                 '404':
                     description: NOT FOUND
                 '400':
-                    description: Bad Request.                
+                    description: Bad Request.
+    /token/refresh:
+      post:
+        summary: renew access token using refresh token
+        requestBody:
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                required:
+                  - refreshToken
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    accessToken:
+                      type: string
+                    refreshToken:
+                      type: string
+          '400':
+            description: Bad Request.
 components:
     schemas:
         Student:
