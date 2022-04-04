@@ -1,6 +1,6 @@
 ### Authenticate with email and password
 
-Send a POST request with the user's email and password to the api. The api will return an access token and a refresh token. \
+Send a POST request with the user's email and password to the api. The api will return an access token, a refresh token and the user object of the authenticated user. \
 The access token is used for authorization, the refresh token is used to renew the access token without having to re-enter your email and password. \
 ```bash
 curl --location --request POST 'http://localhost:8080/api/login' \
