@@ -94,13 +94,14 @@ class ProjectController(private val service: ProjectService, @Autowired private 
         service.getProjectById(projectId).coaches
 
     /**
-     * assign a coach to a project, if this [projectId] doesn't exist the service will return a 404
+     * assign a coach to a project, if a project with [projectId] or a user with [coachId] doesn't exist the service
+     * will return a 404
      */
     @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coach: User) =
-        service.addCoachToProject(projectId, coach)
+    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID) =
+        service.addCoachToProject(projectId, coachId)
 
     /**
      * Deletes a coach [coachId] from a project [projectId], if [projectId] or [coachId] doesn't exist the service will return a 404
