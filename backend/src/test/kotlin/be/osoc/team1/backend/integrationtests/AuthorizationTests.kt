@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
+import be.osoc.team1.backend.security.ConfigUtil
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import org.json.JSONArray
 import org.json.JSONObject
@@ -359,7 +360,6 @@ class AuthorizationTests() {
 
         val firstRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(firstRefreshResponse.statusCodeValue == 200)
-
         val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(secondRefreshResponse.statusCodeValue == 400)
     }
@@ -378,5 +378,26 @@ class AuthorizationTests() {
         val firstRefreshToken: String = JSONObject(firstRefreshResponse.body).get("refreshToken") as String
         val thirdRefreshResponse: ResponseEntity<String> = requestNewAccessToken(firstRefreshToken)
         assert(thirdRefreshResponse.statusCodeValue == 400)
+    }
+
+    // Login first to test GET with protected endpoint
+    @Test
+    fun `CORS using not allowed origin gives error`() {
+        val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
+        authHeaders.add(HttpHeaders.ORIGIN, "http://notallowed.com")
+        val request = HttpEntity("", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 403)
+        assert(response.body == "Invalid CORS request")
+    }
+
+    // Login first to test GET with protected endpoint
+    @Test
+    fun `CORS using allowed origin works`() {
+        val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
+        authHeaders.add(HttpHeaders.ORIGIN, ConfigUtil.allowedCorsOrigins[0])
+        val request = HttpEntity("", authHeaders)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        assert(response.statusCodeValue == 200)
     }
 }

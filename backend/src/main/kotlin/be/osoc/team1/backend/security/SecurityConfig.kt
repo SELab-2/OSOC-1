@@ -2,6 +2,7 @@ package be.osoc.team1.backend.security
 
 import be.osoc.team1.backend.services.OsocUserDetailService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -10,6 +11,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 /**
  * [SecurityConfig] sets the configuration of how requests are handled, how users are authenticated and authorized.
@@ -41,8 +45,7 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
 
-        // THIS IS A TEMPORARY FIX SOMEBODY SHOULD LOOK UP HOW CORS SHOULD BE ENABLED CORRECTLY
-        http.cors().disable()
+        http.cors().configurationSource(corsConfigurationSource())
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
@@ -53,6 +56,20 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
         val authenticationFilter = AuthenticationFilter(authenticationManagerBean(), userDetailsService)
         http.addFilterBefore(AuthorizationFilter(), AuthenticationFilter::class.java)
         http.addFilter(authenticationFilter)
+    }
+
+    /**
+     * Set up cors configuration to allow any request made from origins included in [ConfigUtil.allowedCorsOrigins]
+     */
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource? {
+        val configuration = CorsConfiguration()
+        configuration.allowedOrigins = ConfigUtil.allowedCorsOrigins
+        configuration.allowedMethods = listOf("*") // Allow all methods
+        configuration.allowedHeaders = listOf("*") // Allow all headers
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration) // Set this cors configuration for all endpoints
+        return source
     }
 
     /**
