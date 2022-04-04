@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse
  * If the authentication is successful, then a response gets send with a new access token.
  * The now authenticated user can use this access token to authorize himself in the following requests.
  */
-class AuthenticationFilter(authenticationManager: AuthenticationManager?, val userDetailsService: OsocUserDetailService) :
+class AuthenticationFilter(authenticationManager: AuthenticationManager?, private val userDetailsService: OsocUserDetailService) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     /**
@@ -43,7 +43,8 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
     }
 
     /**
-     * Add an access token to the response when authentication is successful.
+     * Add an access token, refresh token, TTL of refresh token and information about the successfully authenticated
+     * user to the response.
      * This token can be used by the user to authorise itself in the following requests.
      */
     override fun successfulAuthentication(
@@ -55,8 +56,10 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
         val authenticatedUser: User = authentication.principal as User
         val email: String = authenticatedUser.username
         val authorities: List<String> = authenticatedUser.authorities.map { it.authority }.toList()
-        createAccessAndRefreshToken(response, email, authorities)
-    }
+        val newTokenResponseData = createAccessAndRefreshToken(email, authorities)
 
-    data class AuthResponse(val accessToken: String, val user: be.osoc.team1.backend.entities.User)
+        val osocUser = userDetailsService.getUserFromPrincipal(authentication)
+        val authResponseData = AuthResponseData(newTokenResponseData, osocUser)
+        authResponseData.addDataToHttpResponse(response)
+    }
 }

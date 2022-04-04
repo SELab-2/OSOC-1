@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.security
 
+import be.osoc.team1.backend.entities.EntityViews
 import be.osoc.team1.backend.exceptions.InvalidTokenException
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
@@ -118,21 +119,15 @@ object TokenUtil {
      * [validRefreshTokens], so it can be used to renew the corresponding access token.
      */
     fun createAccessAndRefreshToken(
-        response: HttpServletResponse,
         email: String,
         authorities: List<String>,
         refreshTokenExpiresAt: Date? = null
-    ) {
+    ): NewTokenResponseData {
         val accessToken: String = createToken(email, authorities, true)
         val refreshToken: String = createToken(email, authorities, false, refreshTokenExpiresAt)
-        val tokens: MutableMap<String, String> = HashMap()
-        tokens["accessToken"] = accessToken
-        tokens["refreshToken"] = refreshToken
-
-        response.contentType = MediaType.APPLICATION_JSON_VALUE
-        ObjectMapper().writeValue(response.outputStream, tokens)
 
         validRefreshTokens[email] = refreshToken
+        return NewTokenResponseData(accessToken, refreshToken, decodeAndVerifyToken(refreshToken).expiresAt)
     }
 
     /**
@@ -155,7 +150,8 @@ object TokenUtil {
         expirationDate: Date
     ) {
         if (validRefreshTokens[email] == refreshToken) {
-            createAccessAndRefreshToken(response, email, authorities, expirationDate)
+            val newTokenResponse = createAccessAndRefreshToken(email, authorities, expirationDate)
+            newTokenResponse.addDataToHttpResponse(response)
         } else {
             validRefreshTokens.remove(email)
             response.status = 400
