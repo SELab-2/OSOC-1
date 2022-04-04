@@ -107,10 +107,7 @@ class StudentServiceTests {
         val testStudent4 = Student("Rsla", "Uterca")
         val repository: StudentRepository = mockk()
         val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
-        every { repository.findAll(PageRequest.of(0, 50, Sort.by("id"))) } returns PageImpl(
-            allStudents
-
-        )
+        every { repository.findAll(PageRequest.of(0, 50, Sort.by("id"))) } returns PageImpl(allStudents)
         val service = StudentService(repository, userService)
         assertEquals(
             service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "lars", true),

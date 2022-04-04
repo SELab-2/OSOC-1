@@ -41,9 +41,7 @@ class StudentController(private val service: StudentService) {
         @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
-    ): Iterable<Student> {
-        return service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested)
-    }
+    ): Iterable<Student> = service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested)
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists,
