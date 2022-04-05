@@ -1,20 +1,14 @@
 package be.osoc.team1.backend.security
 
-import be.osoc.team1.backend.entities.EntityViews
+import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
 import be.osoc.team1.backend.services.OsocUserDetailService
-import com.auth0.jwt.JWT
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import java.util.Date
-import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -26,7 +20,7 @@ import javax.servlet.http.HttpServletResponse
  * If the authentication is successful, then a response gets send with a new access token.
  * The now authenticated user can use this access token to authorize himself in the following requests.
  */
-class AuthenticationFilter(authenticationManager: AuthenticationManager?, val userDetailsService: OsocUserDetailService) :
+class AuthenticationFilter(authenticationManager: AuthenticationManager?, private val userDetailsService: OsocUserDetailService) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     /**
@@ -49,8 +43,8 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
     }
 
     /**
-     * add an access token and information about the successfully authenticated user to the response
-     * this token can be used by the user to authorise itself in the following requests
+     * Add an access token, refresh token, TTL of refresh token and information about the successfully authenticated
+     * user to the response.
      */
     override fun successfulAuthentication(
         request: HttpServletRequest,
@@ -59,30 +53,12 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, val us
         authentication: Authentication
     ) {
         val authenticatedUser: User = authentication.principal as User
-        val accessToken: String = createToken(authenticatedUser, 5)
+        val email: String = authenticatedUser.username
+        val authorities: List<String> = authenticatedUser.authorities.map { it.authority }.toList()
+        val newTokenResponseData = createAccessAndRefreshToken(email, authorities)
 
         val osocUser = userDetailsService.getUserFromPrincipal(authentication)
-        val authResponse = AuthResponse(accessToken, osocUser)
-        response.contentType = APPLICATION_JSON_VALUE
-        ObjectMapper().writerWithView(EntityViews.Public::class.java).writeValue(response.outputStream, authResponse)
+        val authResponseData = AuthResponseData(newTokenResponseData, osocUser)
+        authResponseData.addDataToHttpResponse(response)
     }
-
-    /**
-     * Create a JSON web token. The token contains email, expiration date and roles of the authenticated user. The
-     * authenticated user passed as an argument here is of class [User] from Spring Security which is different from our
-     * own User class. This user object stores the email of a user in the username field and the role of a user in the
-     * authorities field using [GrantedAuthority] objects.
-     * this function can be used for making an access token or a refresh token.
-     */
-    private fun createToken(user: User, minutesToLive: Int): String {
-        val roles: List<String> =
-            user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
-        return JWT.create()
-            .withSubject(user.username)
-            .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))
-            .withClaim("roles", roles)
-            .sign(SecretUtil.algorithm)
-    }
-
-    data class AuthResponse(val accessToken: String, val user: be.osoc.team1.backend.entities.User)
 }
