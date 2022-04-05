@@ -158,7 +158,6 @@ class AuthorizationTests() {
         val loginResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
-        assert(JSONObject(loginResponse.body).has("refreshToken"))
         logoutResponse(loginResponse)
     }
 
@@ -167,7 +166,6 @@ class AuthorizationTests() {
         val loginResponse: ResponseEntity<String> = loginUser(coachEmail, coachPassword)
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
-        assert(JSONObject(loginResponse.body).has("refreshToken"))
         logoutResponse(loginResponse)
     }
 
@@ -176,7 +174,17 @@ class AuthorizationTests() {
         val loginResponse: ResponseEntity<String> = loginUser(disabledEmail, disabledPassword)
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
+        logoutResponse(loginResponse)
+    }
+
+    @Test
+    fun `login response contains necessary fields`() {
+        val loginResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        assert(loginResponse.statusCodeValue == 200)
+        assert(JSONObject(loginResponse.body).has("accessToken"))
         assert(JSONObject(loginResponse.body).has("refreshToken"))
+        assert(JSONObject(loginResponse.body).has("refreshTokenTTL"))
+        assert(JSONObject(loginResponse.body).has("user"))
         logoutResponse(loginResponse)
     }
 
@@ -310,6 +318,19 @@ class AuthorizationTests() {
         assert(response.statusCodeValue == 403)
         assert(userRepository.findByEmail(adminUser.email)?.role == Role.Admin)
         logoutHeader(authHeaders)
+    }
+
+    @Test
+    fun `refresh response contains necessary fields`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(refreshResponse.statusCodeValue == 200)
+        assert(JSONObject(refreshResponse.body).has("accessToken"))
+        assert(JSONObject(refreshResponse.body).has("refreshToken"))
+        assert(JSONObject(refreshResponse.body).has("refreshTokenTTL"))
     }
 
     @Test
