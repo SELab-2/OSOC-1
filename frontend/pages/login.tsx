@@ -4,7 +4,6 @@ import { FormEventHandler, useState } from 'react';
 import toast from 'react-hot-toast';
 import FormContainer from '../components/FormContainer';
 import Endpoints from '../lib/endpoints';
-import webApi from '../lib/OSOCWebApi';
 
 /**
  * Login page for OSOC application
@@ -38,9 +37,7 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
-        //webApi.refreshTokens(data.refreshToken);
-        //router.push('/wait');
+        router.push('/wait');
       } else {
         toast.error('An error occurred while trying to log in.');
       }

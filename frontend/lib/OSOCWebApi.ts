@@ -52,13 +52,13 @@ class OSOCWebApi {
     return this._accessToken;
     
     // otherwise, refresh the access token and refresh token
-    this.refreshTokens(this.getRefreshToken() as string);
+    this.refreshAuthTokens(this.getRefreshToken() as string);
 
     // if that fails, return to login (somehow, or throw a specific error like InvalidRefreshToken)
   }
 
 
-  async refreshTokens(refreshToken: string) {
+  async refreshAuthTokens(refreshToken: string) {
     const requestBody = {
       refreshToken
     };
@@ -70,8 +70,10 @@ class OSOCWebApi {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       const { accessToken, refreshToken } = data;
+
+      this.setAccessToken(accessToken);
+      this.setRefreshToken(refreshToken);
     } else {
       throw new InvalidRefreshTokenError();
     }
