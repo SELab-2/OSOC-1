@@ -49,7 +49,7 @@ class StudentController(
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         principal: Principal
     ): Iterable<Student> {
-        val decodedName = URLDecoder.decode(name,"UTF-8")
+        val decodedName = URLDecoder.decode(name, "UTF-8")
         return service.getAllStudents(pageNumber, pageSize, sortBy, status, decodedName, includeSuggested, userDetailService.getUserFromPrincipal(principal))
     }
 

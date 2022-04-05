@@ -34,7 +34,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     fun getAllProjects(
         @RequestParam(defaultValue = "") name: String,
     ): Iterable<Project> {
-        val decodedName = URLDecoder.decode(name,"UTF-8")
+        val decodedName = URLDecoder.decode(name, "UTF-8")
         return service.getAllProjects(decodedName)
     }
 

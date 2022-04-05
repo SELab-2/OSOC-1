@@ -84,7 +84,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         testStudent3.status = StatusEnum.Maybe
         val testStudent4 = Student("L4", "VC")
         testStudent4.status = StatusEnum.Undecided
-        val allStudents = listOf(testStudent1,testStudent2,testStudent3,testStudent4)
+        val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
         every {
             studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testCoach)
         } returns listOf(testStudent1)
