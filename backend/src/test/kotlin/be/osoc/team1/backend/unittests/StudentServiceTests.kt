@@ -37,7 +37,7 @@ class StudentServiceTests {
     private val testCoach = User("", "", Role.Coach, "")
     private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
     private val userService = mockk<UserService>()
-    private val defaultStatusFilter = listOf(StatusEnum.Undecided)
+    private val defaultStatusFilter = listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
 
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
@@ -84,6 +84,7 @@ class StudentServiceTests {
         val testStudent2 = Student("Sral", "Retuac")
         val testStudent3 = Student("Arsl", "Auterc")
         val testStudent4 = Student("Rsla", "Uterca")
+        val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
         val repository: StudentRepository = mockk()
         every { repository.findAll(PageRequest.of(0, 50, Sort.by("id"))) } returns PageImpl(
             listOf(testStudent, testStudent2, testStudent3, testStudent4)
@@ -108,6 +109,10 @@ class StudentServiceTests {
         assertEquals(
             service.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testCoach),
             listOf(testStudent4)
+        )
+        assertEquals(
+            service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach),
+            allStudents
         )
     }
 

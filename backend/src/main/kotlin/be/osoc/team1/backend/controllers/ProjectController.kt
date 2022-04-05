@@ -26,6 +26,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
 
     /**
      * Get all projects from service
+     * The results can also be filtered by [name] (default value is empty so no project is excluded).
      */
     @GetMapping
     @Secured("ROLE_COACH")

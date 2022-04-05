@@ -229,6 +229,12 @@ paths:
     /projects:
         get:
             summary: Get list containing all Project objects
+            parameters:
+              - in: query
+                name: name
+                schema:
+                  type: string
+                description: Part of a name of a project that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
             responses:
                 '200':
                     description: successful operation

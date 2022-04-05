@@ -33,8 +33,8 @@ class StudentController(
      * values applied for paging ([pageNumber], [pageSize] and [sortBy]), these can be modified by
      * adding request parameters to the url.
      *
-     * Can also filter the results by [name] (default value is empty so no student is excluded), by
-     * [status] (default value allows all statuses) by [includeSuggested] (default value is true, so
+     * The results can also be filtered by [name] (default value is empty so no student is excluded),
+     * by [status] (default value allows all statuses) by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for)
      */
     @GetMapping

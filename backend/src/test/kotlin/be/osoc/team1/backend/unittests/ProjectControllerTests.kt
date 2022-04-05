@@ -47,8 +47,9 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllProjects name filtering parses the correct name`() {
-        val testList = listOf(Project("tester", "testie"))
+        val testList = listOf(Project("_", "_"))
         every { projectService.getAllProjects("lars") } returns testList
+        // tests the url parsing
         mockMvc.perform(get("/projects?name=lars"))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
