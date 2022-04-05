@@ -760,6 +760,11 @@ paths:
                                 properties:
                                     accessToken:
                                         type: string
+                                    refreshToken:
+                                        type: string
+                                    refreshTokenTTL:
+                                        type: integer
+                                        format: date
                                     user:
                                         $ref: '#/components/schemas/User'
                 '401':
