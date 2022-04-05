@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.net.URLDecoder
 import java.security.Principal
 import java.util.UUID
 
@@ -47,8 +48,10 @@ class StudentController(
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         principal: Principal
-    ): Iterable<Student> =
-        service.getAllStudents(pageNumber, pageSize, sortBy, status, name, includeSuggested, userDetailService.getUserFromPrincipal(principal))
+    ): Iterable<Student> {
+        val decodedName = URLDecoder.decode(name,"UTF-8")
+        return service.getAllStudents(pageNumber, pageSize, sortBy, status, decodedName, includeSuggested, userDetailService.getUserFromPrincipal(principal))
+    }
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists, returns a

@@ -120,13 +120,20 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents name filtering parses the correct name`() {
         val testList = listOf(Student("_", "_"))
+        val testList2 = listOf(Student("_2", "_2"))
         every {
             studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars", true, testCoach)
         } returns testList
-        // tests the url parsing
+        every {
+            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars test", true, testCoach)
+        } returns testList2
+        // tests the url parsing + with url encoding
         mockMvc.perform(get("/students?name=lars").principal(TestingAuthenticationToken(null, null)))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+        mockMvc.perform(get("/students?name=lars%20test").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
     }
 
     @Test
