@@ -737,6 +737,39 @@ paths:
                     description: NOT FOUND
                 '400':
                     description: Bad Request.
+    /login:
+        post:
+            summary: login to the user with the correct email and password
+            requestBody:
+                content:
+                    application/x-www-form-urlencoded:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                password:
+                                    type: string
+            responses:
+                '200':
+                    description: Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accessToken:
+                                        type: string
+                                    refreshToken:
+                                        type: string
+                                    refreshTokenTTL:
+                                        type: integer
+                                        format: date
+                                    user:
+                                        $ref: '#/components/schemas/User'
+                '401':
+                    description: |
+                        The response if authorization has failed.
     /token/refresh:
       post:
         summary: renew access token using refresh token
