@@ -323,7 +323,7 @@ class AuthorizationTests() {
     @Test
     fun `refresh response contains necessary fields`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
-        val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
+        assert(JSONObject(logInResponse.body).has("accessToken"))
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
