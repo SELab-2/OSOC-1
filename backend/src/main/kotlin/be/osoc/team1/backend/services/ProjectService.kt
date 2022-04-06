@@ -3,7 +3,6 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
-import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidAssignmentIdException
@@ -11,6 +10,7 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -25,8 +25,20 @@ class ProjectService(
 ) {
     /**
      * Get all projects
+     * The results can also be filtered by [name] (requested string gets processed to more easily give matches),
      */
-    fun getAllProjects(): Iterable<Project> = repository.findAll()
+    fun getAllProjects(name: String): Iterable<Project> {
+        val allProjects = repository.findAll()
+        val projectList = mutableListOf<Project>()
+        for (project in allProjects) {
+            val projectHasMatchingName = project.name.lowercase().replace(" ", "")
+                .contains(name.lowercase().replace(" ", ""))
+            if (projectHasMatchingName) {
+                projectList.add(project)
+            }
+        }
+        return projectList
+    }
 
     /**
      * Get a project by its [id], if this id doesn't exist throw an InvalidProjectIdException
@@ -60,10 +72,12 @@ class ProjectService(
 
     /**
      * Adds a coach to project based on [projectId],
-     * if [projectId] is not in [repository] throw InvalidProjectIdException
+     * if [projectId] is not in [repository] throw [InvalidProjectIdException]
+     * If there is no user with [coachId] a [InvalidUserIdException] will be thrown.
      */
-    fun addCoachToProject(projectId: UUID, coach: User) {
-        val project: Project = getProjectById(projectId)
+    fun addCoachToProject(projectId: UUID, coachId: UUID) {
+        val project = getProjectById(projectId)
+        val coach = userService.getUserById(coachId)
         project.coaches.add(coach)
         repository.save(project)
     }
@@ -98,7 +112,7 @@ class ProjectService(
      */
     fun getConflicts(): MutableList<Conflict> {
         val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
-        for (project in getAllProjects()) {
+        for (project in getAllProjects("")) {
             for (student in getStudents(project)) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())

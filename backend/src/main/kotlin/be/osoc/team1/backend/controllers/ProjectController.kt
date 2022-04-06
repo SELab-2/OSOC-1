@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.net.URLDecoder
 import java.util.UUID
 
 @RestController
@@ -23,10 +25,16 @@ class ProjectController(private val service: ProjectService) {
 
     /**
      * Get all projects from service
+     * The results can also be filtered by [name] (default value is empty so no project is excluded).
      */
     @GetMapping
     @Secured("ROLE_COACH")
-    fun getAllProjects(): Iterable<Project> = service.getAllProjects()
+    fun getAllProjects(
+        @RequestParam(defaultValue = "") name: String,
+    ): Iterable<Project> {
+        val decodedName = URLDecoder.decode(name, "UTF-8")
+        return service.getAllProjects(decodedName)
+    }
 
     /**
      * Get a project by its [projectId], if this id doesn't exist the service will return a 404
@@ -71,13 +79,14 @@ class ProjectController(private val service: ProjectService) {
         service.getProjectById(projectId).coaches
 
     /**
-     * assign a coach to a project, if this [projectId] doesn't exist the service will return a 404
+     * assign a coach to a project, if a project with [projectId] or a user with [coachId] doesn't exist the service
+     * will return a 404
      */
     @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coach: User) =
-        service.addCoachToProject(projectId, coach)
+    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID) =
+        service.addCoachToProject(projectId, coachId)
 
     /**
      * Deletes a coach [coachId] from a project [projectId], if [projectId] or [coachId] doesn't exist the service will return a 404
