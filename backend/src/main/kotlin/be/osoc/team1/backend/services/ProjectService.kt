@@ -124,8 +124,7 @@ class ProjectService(
 
     /**
      * Assigns a student to a specific position on the project with [projectId]. A [ForbiddenOperationException] will be
-     * thrown if the student was already assigned on this project, if that position already has enough assignees or if
-     * the specified student doesn't actually have the required skill to be given the specified position. A
+     * thrown if the student was already assigned on this project or if that position already has enough assignees. A
      * [InvalidAssignmentIdException] will be thrown if specified position is not part of the specified project. If the
      * specified student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
      */
@@ -142,9 +141,6 @@ class ProjectService(
             throw ForbiddenOperationException("This position already has enough assignees!")
 
         val student = studentService.getStudentById(assignmentForm.student)
-        if (!student.skills.contains(position.skill))
-            throw ForbiddenOperationException("This student doesn't have the required skill to be assigned to this position.")
-
         val suggester = userService.getUserById(assignmentForm.suggester)
         val assignment = Assignment(student, position, suggester, assignmentForm.reason)
         project.assignments.add(assignment)

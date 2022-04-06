@@ -216,18 +216,6 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `postAssignment fails if the student doesn't have the required skill`() {
-        val service = ProjectService(getRepository(true), mockk(), getStudentService(false), getUserService(suggester))
-        val assignmentPost = ProjectService.AssignmentPost(
-            testStudent.id,
-            testProject.positions.first().id,
-            suggester.id,
-            "reason"
-        )
-        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
-    }
-
-    @Test
     fun `postAssignment fails if the student was already assigned a position on this project`() {
         val service = ProjectService(getRepository(true), mockk(), getStudentService(true), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
