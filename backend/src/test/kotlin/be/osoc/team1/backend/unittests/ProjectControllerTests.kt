@@ -41,8 +41,23 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllProjects should not fail`() {
-        every { projectService.getAllProjects() } returns emptyList()
+        every { projectService.getAllProjects("") } returns emptyList()
         mockMvc.perform(get("/projects")).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `getAllProjects name filtering parses the correct name`() {
+        val testList = listOf(Project("_", "_"))
+        val testList2 = listOf(Project("_2", "_2"))
+        every { projectService.getAllProjects("lars") } returns testList
+        every { projectService.getAllProjects("lars test") } returns testList2
+        // tests the url parsing + with encoding
+        mockMvc.perform(get("/projects?name=lars"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+        mockMvc.perform(get("/projects?name=lars%20test"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
     }
 
     @Test

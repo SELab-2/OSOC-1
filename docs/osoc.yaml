@@ -28,6 +28,23 @@ paths:
                   The id, firstName and lastName fields are sorted alphabetically. 
                   Sorting on the status field will first return students with a Yes status, then Maybe, No and finally Undecided. 
                   Sorting on other parameters is nonsensical. Ties are broken randomly.
+              - in: query
+                name: name
+                schema:
+                  type: string
+                description: Part of a name of a student that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
+              - in: query
+                name: status
+                schema:
+                  type: array
+                  items: 
+                      $ref: '#/components/schemas/Status'
+                description: Status to filter on, only students that have one of the given statuses will be shown (default value is all statuses).
+              - in: query
+                name: includeSuggested
+                schema:
+                  type: boolean
+                description: Whether or not to include students you have already added a suggestion for (default value is true)
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -212,6 +229,12 @@ paths:
     /projects:
         get:
             summary: Get list containing all Project objects
+            parameters:
+              - in: query
+                name: name
+                schema:
+                  type: string
+                description: Part of a name of a project that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
             responses:
                 '200':
                     description: successful operation

@@ -14,8 +14,20 @@ import java.util.UUID
 class ProjectService(private val repository: ProjectRepository, private val userService: UserService) {
     /**
      * Get all projects
+     * The results can also be filtered by [name] (requested string gets processed to more easily give matches),
      */
-    fun getAllProjects(): Iterable<Project> = repository.findAll()
+    fun getAllProjects(name: String): Iterable<Project> {
+        val allProjects = repository.findAll()
+        val projectList = mutableListOf<Project>()
+        for (project in allProjects) {
+            val projectHasMatchingName = project.name.lowercase().replace(" ", "")
+                .contains(name.lowercase().replace(" ", ""))
+            if (projectHasMatchingName) {
+                projectList.add(project)
+            }
+        }
+        return projectList
+    }
 
     /**
      * Get a project by its [id], if this id doesn't exist throw an InvalidProjectIdException
@@ -99,7 +111,7 @@ class ProjectService(private val repository: ProjectRepository, private val user
      */
     fun getConflicts(): MutableList<Conflict> {
         val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
-        for (project in getAllProjects()) {
+        for (project in getAllProjects("")) {
             for (student in project.students) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())
