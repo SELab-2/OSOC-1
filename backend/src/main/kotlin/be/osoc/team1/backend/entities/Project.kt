@@ -1,5 +1,10 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.util.StudentListSerializer
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
@@ -20,9 +25,11 @@ class Project(
     val description: String,
 
     @ManyToMany(cascade = [CascadeType.ALL])
+    @JsonSerialize(using = StudentListSerializer::class)
     val students: MutableCollection<Student> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.ALL])
+    @JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.PropertyGenerator::class)
     val coaches: MutableCollection<User> = mutableListOf()
 ) {
     @Id
