@@ -14,6 +14,7 @@ import java.util.UUID
 class ProjectService(private val repository: ProjectRepository, private val userService: UserService) {
     /**
      * Get all projects
+     * The results can also be filtered by [name] (requested string gets processed to more easily give matches),
      */
     fun getAllProjects(name: String): Iterable<Project> {
         val allProjects = repository.findAll()
