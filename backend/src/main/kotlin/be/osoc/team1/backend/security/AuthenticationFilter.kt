@@ -43,7 +43,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, privat
     }
 
     /**
-     * Add an access token, refresh token, TTL of refresh token and information about the successfully authenticated
+     * Add an access token, refresh token, TTL of access token and information about the successfully authenticated
      * user to the response.
      */
     override fun successfulAuthentication(
