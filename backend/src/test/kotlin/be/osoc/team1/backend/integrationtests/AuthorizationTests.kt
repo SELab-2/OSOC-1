@@ -183,7 +183,7 @@ class AuthorizationTests() {
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
         assert(JSONObject(loginResponse.body).has("refreshToken"))
-        assert(JSONObject(loginResponse.body).has("refreshTokenTTL"))
+        assert(JSONObject(loginResponse.body).has("accessTokenTTL"))
         assert(JSONObject(loginResponse.body).has("user"))
         logoutResponse(loginResponse)
     }
@@ -330,7 +330,7 @@ class AuthorizationTests() {
         assert(refreshResponse.statusCodeValue == 200)
         assert(JSONObject(refreshResponse.body).has("accessToken"))
         assert(JSONObject(refreshResponse.body).has("refreshToken"))
-        assert(JSONObject(refreshResponse.body).has("refreshTokenTTL"))
+        assert(JSONObject(refreshResponse.body).has("accessTokenTTL"))
     }
 
     @Test
