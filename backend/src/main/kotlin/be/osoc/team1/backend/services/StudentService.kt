@@ -46,7 +46,7 @@ class StudentService(private val repository: StudentRepository, private val user
             // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
             val studentHasMatchingName = (student.firstName + student.lastName).lowercase().replace(" ", "")
                 .contains(name.lowercase().replace(" ", ""))
-            val studentBeenSuggestedByUserCheck = includeSuggested || !student.statusSuggestions.any { it.coachId == callee.id }
+            val studentBeenSuggestedByUserCheck = includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
             if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
                 studentList.add(student)
             }
