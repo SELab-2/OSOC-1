@@ -9,8 +9,8 @@ import be.osoc.team1.backend.exceptions.InvalidAssignmentIdException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
-import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.repositories.ProjectRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
