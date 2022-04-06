@@ -785,7 +785,7 @@ paths:
                                         type: string
                                     refreshToken:
                                         type: string
-                                    refreshTokenTTL:
+                                    accessTokenTTL:
                                         type: integer
                                         format: date
                                     user:

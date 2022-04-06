@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse
 open class NewTokenResponseData(
     val accessToken: String,
     val refreshToken: String,
-    val refreshTokenTTL: Date
+    val accessTokenTTL: Date
 ) {
     /**
      * Add data of this class to [response].

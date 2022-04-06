@@ -82,6 +82,7 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
  * A student also has a set of [skills].
  * I.e. there could be two students in the database with [firstName] "Tom" and [lastName] "Alard".
  * A student also has a [status], see the documentation of [StatusEnum] for more information on what it represents.
+ * Whether a student is an alumn can be indicated by the [alumn] boolean (default false).
  * Finally, each student keeps a [MutableList] of [StatusSuggestion]s.
  */
 @Entity
@@ -89,7 +90,8 @@ class Student(
     val firstName: String,
     val lastName: String,
     @ManyToMany(cascade = [CascadeType.ALL])
-    val skills: Set<Skill> = emptySet()
+    val skills: Set<Skill> = emptySet(),
+    val alumn: Boolean = false
 ) {
 
     @Id
