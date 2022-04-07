@@ -80,6 +80,7 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
  * and a [lastName]. Note that neither of these fields, nor the combination of both of them need be unique.
  * I.e. there could be two students in the database with [firstName] "Tom" and [lastName] "Alard".
  * A student also has a [status], see the documentation of [StatusEnum] for more information on what it represents.
+ * Whether a student is an alumn can be indicated by the [alumn] boolean (default false).
  * Finally, each student keeps a [MutableList] of [StatusSuggestion]s.
  */
 @Entity
@@ -90,7 +91,8 @@ class Student(
     @JsonIgnore
     val organization: String,
     @JsonIgnore
-    val editionName: String
+    val editionName: String,
+    val alumn: Boolean = false
 ) {
 
     @Id

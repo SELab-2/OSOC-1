@@ -3,6 +3,8 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
+import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.net.URLDecoder
+import java.security.Principal
 import java.util.UUID
 
 /**
@@ -24,13 +28,20 @@ import java.util.UUID
  */
 @RestController
 @RequestMapping("/{organization}/{editionName}/students")
-class StudentController(private val service: StudentService) {
+class StudentController(
+    private val service: StudentService,
+    private val userDetailService: OsocUserDetailService
+) {
 
     /**
      * Get a list of all students in the database who are a part of the OSOC edition
-     * named [editionName] by the given [organization]. This request cannot fail.
-     * There are default values applied for paging ([pageNumber], [pageSize] and [sortBy]),
-     * these can be modified by adding request parameters to the url.
+     * named [editionName] by the given [organization]. This request cannot fail. There are default
+     * values applied for paging ([pageNumber], [pageSize] and [sortBy]), these can be modified by
+     * adding request parameters to the url.
+     *
+     * The results can also be filtered by [name] (default value is empty so no student is excluded),
+     * by [status] (default value allows all statuses) by [includeSuggested] (default value is true, so
+     * you will also see students you already suggested for)
      */
     @GetMapping
     @Secured("ROLE_COACH")
@@ -38,13 +49,21 @@ class StudentController(private val service: StudentService) {
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
         @RequestParam(defaultValue = "id") sortBy: String,
+        @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
+        @RequestParam(defaultValue = "") name: String,
+        @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         @PathVariable organization: String,
-        @PathVariable editionName: String
-    ): Iterable<Student> = service.getAllStudents(pageNumber, pageSize, sortBy, organization, editionName)
+        @PathVariable editionName: String,
+        principal: Principal
+    ): Iterable<Student> {
+        val decodedName = URLDecoder.decode(name, "UTF-8")
+        return service.getAllStudents(pageNumber, pageSize, sortBy, status, decodedName, includeSuggested, organization,
+                                      editionName, userDetailService.getUserFromPrincipal(principal))
+    }
 
     /**
-     * Returns the student with the corresponding [studentId]. If no such student exists,
-     * returns a "404: Not Found" message instead.
+     * Returns the student with the corresponding [studentId]. If no such student exists, returns a
+     * "404: Not Found" message instead.
      */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
@@ -55,8 +74,8 @@ class StudentController(private val service: StudentService) {
     ): Student = service.getStudentById(studentId)
 
     /**
-     * Deletes the student with the corresponding [studentId]. If no such student exists,
-     * returns a "404: Not Found" message instead.
+     * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
+     * "404: Not Found" message instead.
      */
     @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -68,8 +87,8 @@ class StudentController(private val service: StudentService) {
     ) = service.deleteStudentById(studentId)
 
     /**
-     * Add a student to the database. The student should be passed in the request body
-     * as a JSON object and should have the following format:
+     * Add a student to the database. The student should be passed in the request body as a JSON
+     * object and should have the following format:
      *
      * ```
      * {
@@ -78,9 +97,9 @@ class StudentController(private val service: StudentService) {
      * }
      * ```
      *
-     * The location of the newly created student is then returned to the API caller in the location header.
-     * No checking is done to see if firstName or lastName qualify as valid 'names'.
-     * This verification is the responsibility of the caller.
+     * The location of the newly created student is then returned to the API caller in the location
+     * header. No checking is done to see if firstName or lastName qualify as valid 'names'. This
+     * verification is the responsibility of the caller.
      */
     @PostMapping
     @Secured("ROLE_COACH")
@@ -110,7 +129,8 @@ class StudentController(private val service: StudentService) {
      *
      * "Undecided" for [StatusEnum.Undecided]
      *
-     * Any other input value will result in a "400: Bad Request" response. These values are also case-sensitive.
+     * Any other input value will result in a "400: Bad Request" response. These values are also
+     * case-sensitive.
      */
     @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -123,10 +143,13 @@ class StudentController(private val service: StudentService) {
     ) = service.setStudentStatus(studentId, status)
 
     /**
-     * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should be equal to the id
-     * of the coach who is making this suggestion. If either of these id's do not have a matching record
-     * in the database, a "404: Not Found" message is returned to the caller instead. The [statusSuggestion] should be
-     * passed in the request body as a JSON object and should have the following format:
+     * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should
+     * be equal to the id of the coach who is making this suggestion, so equal to the id of the
+     * currently authenticated user. If either of these id's do not have a matching record in the
+     * database, a "404: Not Found" message is returned to the caller instead. If the coachId does
+     * not match the id of the currently authenticated user a '401: Unauthorized" is returned. The
+     * [statusSuggestion] should be passed in the request body as a JSON object and should have the
+     * following format:
      *
      * ```
      * {
@@ -134,11 +157,11 @@ class StudentController(private val service: StudentService) {
      *      "status": "Yes" OR "Maybe" OR "No",
      *      "motivation": "(INSERT MOTIVATION)"
      * }
-     *```
+     * ```
      *
-     * Any other values for the status will result in a "400: Bad Request" response.
-     * Importantly, this includes the "Undecided" value, which is a valid value in other endpoints.
-     * This is because a user cannot suggest to change the status of a student to "Undecided".
+     * Any other values for the status will result in a "400: Bad Request" response. Importantly,
+     * this includes the "Undecided" value, which is a valid value in other endpoints. This is
+     * because a user cannot suggest changing the status of a student to "Undecided".
      */
     @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -147,14 +170,25 @@ class StudentController(private val service: StudentService) {
         @PathVariable studentId: UUID,
         @RequestBody statusSuggestion: StatusSuggestion,
         @PathVariable organization: String,
-        @PathVariable editionName: String
-    ) = service.addStudentStatusSuggestion(studentId, statusSuggestion)
+        @PathVariable editionName: String,
+        principal: Principal
+    ) {
+        val user = userDetailService.getUserFromPrincipal(principal)
+        if (statusSuggestion.coachId != user.id)
+            throw UnauthorizedOperationException(
+                "The 'coachId' did not equal authenticated user id!"
+            )
+
+        service.addStudentStatusSuggestion(studentId, statusSuggestion)
+    }
 
     /**
-     * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId]
-     * from the [Student] with the given [studentId]. If the student doesn't exist, a
-     * "404: Not Found" message is returned instead. Additionally, if the student does exist, but
-     * the coach hasn't made a suggestion for this student, a "400: Bad Request" message will be returned.
+     * Deletes the [StatusSuggestion] made by the coach identified by the given [coachId] from the
+     * [Student] with the given [studentId]. If the student doesn't exist, a "404: Not Found"
+     * message is returned instead. Additionally, if the student does exist, but the coach hasn't
+     * made a suggestion for this student, a "400: Bad Request" message will be returned. If the
+     * user attempts to remove a [StatusSuggestion] that was not made by them a "401: Unauthorized"
+     * is returned.
      */
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -163,6 +197,15 @@ class StudentController(private val service: StudentService) {
         @PathVariable studentId: UUID,
         @PathVariable coachId: UUID,
         @PathVariable organization: String,
-        @PathVariable editionName: String
-    ) = service.deleteStudentStatusSuggestion(studentId, coachId)
+        @PathVariable editionName: String,
+        principal: Principal
+    ) {
+        val user = userDetailService.getUserFromPrincipal(principal)
+        if (coachId != user.id)
+            throw UnauthorizedOperationException(
+                "The 'coachId' did not equal authenticated user id. You can't remove suggestions from other users!"
+            )
+
+        service.deleteStudentStatusSuggestion(studentId, coachId)
+    }
 }
