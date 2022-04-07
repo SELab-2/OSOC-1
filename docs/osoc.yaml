@@ -858,8 +858,9 @@ components:
                 - id
                 - name
                 - client
+                - students
                 - coaches
-                - desc
+                - description
                 - studentRoles
                 - studentAssignments
             properties:
@@ -871,11 +872,15 @@ components:
                     type: string
                 client:
                     type: string # Later on this could be a different schema if clients need to be saved in the database
+                students:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Student'
                 coaches:
                     type: array
                     items:
                         $ref: '#/components/schemas/User'
-                desc:
+                description:
                     type: string
                 studentRoles:
                     type: array
