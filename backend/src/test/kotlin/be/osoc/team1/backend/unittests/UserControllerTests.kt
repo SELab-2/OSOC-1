@@ -48,7 +48,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `getUserById returns user if user with given id exists`() {
         every { userService.getUserById(testId) } returns testUser
-        mockMvc.perform(get("/$testOrganization/users/$testId"))
+        mockMvc.perform(get("/users/$testId"))
             .andExpect(status().isOk)
             .andExpect(content().json(testUserJsonRepresentation))
     }
@@ -56,7 +56,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `getUserById return 404 if the user with given id does not exist`() {
         every { userService.getUserById(testId) }.throws(InvalidIdException())
-        mockMvc.perform(get("/$testOrganization/users/$testId")).andExpect(status().isNotFound)
+        mockMvc.perform(get("/users/$testId")).andExpect(status().isNotFound)
     }
 
     @Test
@@ -67,7 +67,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
          */
         every { userService.patchUser(any()) } returns testUser
         mockMvc.perform(
-            patch("/$testOrganization/users/$testId")
+            patch("/users/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
         ).andExpect(status().isCreated).andExpect(content().string(testUserJsonRepresentation))
@@ -77,7 +77,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     fun `patchUser should return 404 if the user does not exist`() {
         every { userService.patchUser(any()) }.throws(InvalidIdException())
         mockMvc.perform(
-            patch("/$testOrganization/users/$testId")
+            patch("/users/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
         ).andExpect(status().isNotFound)
@@ -87,7 +87,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     fun `patchUser should return 400 if the url id and request body id do not match`() {
         every { userService.patchUser(any()) }.throws(InvalidIdException())
         mockMvc.perform(
-            patch("/$testOrganization/users/${UUID.randomUUID()}")
+            patch("/users/${UUID.randomUUID()}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
         ).andExpect(status().isBadRequest)
@@ -96,13 +96,13 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `deleteUser should not fail if the user exists`() {
         every { userService.deleteUserById(testId) } just Runs
-        mockMvc.perform(delete("/$testOrganization/users/$testId")).andExpect(status().isNoContent)
+        mockMvc.perform(delete("/users/$testId")).andExpect(status().isNoContent)
     }
 
     @Test
     fun `deleteUser should return 404 if the user does not exist`() {
         every { userService.deleteUserById(testId) }.throws(InvalidIdException())
-        mockMvc.perform(delete("/$testOrganization/users/$testId")).andExpect(status().isNotFound)
+        mockMvc.perform(delete("/users/$testId")).andExpect(status().isNotFound)
     }
 
     @Test
@@ -119,9 +119,9 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `postUserRole should not fail if the user exists`() {
-        every { userService.changeRole(testId, Role.Admin, testOrganization) } just Runs
+        every { userService.changeRole(testId, Role.Admin) } just Runs
         mockMvc.perform(
-            post("/$testOrganization/users/$testId/role")
+            post("/users/$testId/role")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(ObjectMapper().writeValueAsString(Role.Admin))
         ).andExpect(status().isNoContent)
@@ -129,9 +129,9 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `postUserRole should return 404 if the user does not exist`() {
-        every { userService.changeRole(testId, Role.Admin, testOrganization) }.throws(InvalidIdException())
+        every { userService.changeRole(testId, Role.Admin) }.throws(InvalidIdException())
         mockMvc.perform(
-            post("/$testOrganization/users/$testId/role")
+            post("/users/$testId/role")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(ObjectMapper().writeValueAsString(Role.Admin))
         ).andExpect(status().isNotFound)

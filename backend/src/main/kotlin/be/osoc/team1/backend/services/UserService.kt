@@ -55,14 +55,14 @@ class UserService(private val repository: UserRepository, private val passwordEn
 
     /**
      * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidUserIdException]
-     * will be thrown. If the role of the last remaining admin of the given [organization] is changed to a role with
+     * will be thrown. If the role of the last remaining admin of his organization is changed to a role with
      * fewer permissions a [ForbiddenOperationException] will be thrown. Currently, anyone can change the role of
      * any other user, this will be changed when we have functional authentication in place.
      */
-    fun changeRole(id: UUID, newRole: Role, organization: String) {
+    fun changeRole(id: UUID, newRole: Role) {
         val user = getUserById(id)
         if (user.role == Role.Admin && !newRole.hasPermissionLevel(Role.Admin) &&
-            repository.findByOrganizationAndRole(organization, Role.Admin).size == 1
+            repository.findByOrganizationAndRole(user.organization, Role.Admin).size == 1
         ) {
             throw ForbiddenOperationException("Cannot demote last remaining admin")
         }
