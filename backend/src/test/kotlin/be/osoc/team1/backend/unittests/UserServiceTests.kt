@@ -42,13 +42,13 @@ class UserServiceTests {
     @Test
     fun `getAllUsers does not fail`() {
         val service = UserService(getRepository(true), getPasswordEncoder())
-        assertEquals(service.getAllUsers(), listOf(testUser))
+        assertEquals(listOf(testUser), service.getAllUsers())
     }
 
     @Test
     fun `getUserById does not fail when the user with id exists`() {
         val service = UserService(getRepository(true), getPasswordEncoder())
-        assertEquals(service.getUserById(testId), testUser)
+        assertEquals(testUser, service.getUserById(testId))
     }
 
     @Test
@@ -83,10 +83,10 @@ class UserServiceTests {
 
         verify { repository.save(any()) }
         val capturedUser = slot.captured
-        assertEquals(capturedUser.username, "username")
-        assertEquals(capturedUser.email, "email")
-        assertEquals(capturedUser.role, Role.Disabled)
-        assertEquals(capturedUser.password, "Encoded password")
+        assertEquals("username", capturedUser.username)
+        assertEquals("email", capturedUser.email)
+        assertEquals(Role.Disabled, capturedUser.role)
+        assertEquals("Encoded password", capturedUser.password)
     }
 
     @Test
@@ -107,7 +107,7 @@ class UserServiceTests {
         val service = UserService(repository, getPasswordEncoder())
         service.changeRole(testId, Role.Coach)
         verify { repository.save(testUser) }
-        assertEquals(testUser.role, Role.Coach)
+        assertEquals(Role.Coach, testUser.role)
         service.changeRole(testId, Role.Admin)
     }
 
@@ -135,13 +135,13 @@ class UserServiceTests {
         val service = UserService(repository, getPasswordEncoder())
         service.changeRole(testCoachId, Role.Disabled)
         verify { repository.save(testCoachUser) }
-        assertEquals(testCoachUser.role, Role.Disabled)
+        assertEquals(Role.Disabled, testCoachUser.role)
         service.changeRole(testCoachId, Role.Admin)
         verify { repository.save(testCoachUser) }
-        assertEquals(testCoachUser.role, Role.Admin)
+        assertEquals(Role.Admin, testCoachUser.role)
         service.changeRole(testCoachId, Role.Admin)
         verify { repository.save(testCoachUser) }
-        assertEquals(testCoachUser.role, Role.Admin)
+        assertEquals(Role.Admin, testCoachUser.role)
     }
 
     @Test

@@ -59,7 +59,7 @@ class StudentServiceTests {
     @Test
     fun `getAllStudents does not fail`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach), listOf(testStudent))
+        assertEquals(listOf(testStudent), service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach))
     }
 
     @Test
@@ -68,7 +68,7 @@ class StudentServiceTests {
         every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(listOf(testStudent))
         every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
-        assertEquals(service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach), listOf(testStudent))
+        assertEquals(listOf(testStudent), service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach))
     }
 
     @Test
@@ -78,7 +78,7 @@ class StudentServiceTests {
         every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(testList)
         every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
-        assertEquals(service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach), testList)
+        assertEquals(testList, service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach))
     }
 
     @Test
@@ -99,24 +99,24 @@ class StudentServiceTests {
         testStudent3.status = StatusEnum.No
         testStudent4.status = StatusEnum.Maybe
         assertEquals(
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testCoach),
-            listOf(testStudent)
+            listOf(testStudent),
+            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testCoach)
         )
         assertEquals(
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testCoach),
-            listOf(testStudent2)
+            listOf(testStudent2),
+            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testCoach)
         )
         assertEquals(
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testCoach),
-            listOf(testStudent3)
+            listOf(testStudent3),
+            service.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testCoach)
         )
         assertEquals(
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testCoach),
-            listOf(testStudent4)
+            listOf(testStudent4),
+            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testCoach)
         )
         assertEquals(
-            service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach),
-            allStudents
+            allStudents,
+            service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach)
         )
     }
 
@@ -132,20 +132,20 @@ class StudentServiceTests {
         every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
         assertEquals(
+            listOf(testStudent),
             service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "lars", true, testCoach),
-            listOf(testStudent)
         )
         assertEquals(
+            listOf(testStudent, testStudent3),
             service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "ars", true, testCoach),
-            listOf(testStudent, testStudent3)
         )
         assertEquals(
+            listOf(testStudent, testStudent3, testStudent4),
             service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "uter", true, testCoach),
-            listOf(testStudent, testStudent3, testStudent4)
         )
         assertEquals(
+            allStudents,
             service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testCoach),
-            allStudents
         )
     }
 
@@ -158,14 +158,14 @@ class StudentServiceTests {
         every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
 
-        assertEquals(service.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testCoach), listOf<Student>())
-        assertEquals(service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach), listOf(testStudent))
+        assertEquals(listOf<Student>(), service.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testCoach))
+        assertEquals(listOf(testStudent), service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach))
     }
 
     @Test
     fun `getStudentById succeeds when student with id exists`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(service.getStudentById(studentId), testStudent)
+        assertEquals(testStudent, service.getStudentById(studentId))
     }
 
     @Test
