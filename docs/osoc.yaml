@@ -680,7 +680,7 @@ paths:
                             schema:
                                 type: string
                                 format: url
-    /{organization}/users/{userId}:
+    /users/{userId}:
         get:
             summary: get User by id
             parameters:
@@ -690,11 +690,6 @@ paths:
                   schema:
                     type: string
                     format: uuid
-                - name: organization
-                  required: true
-                  in: path
-                  schema:
-                      type: string
             responses:
                 '200':
                     description: OK
@@ -713,11 +708,6 @@ paths:
                   schema:
                     type: string
                     format: uuid
-                - name: organization
-                  required: true
-                  in: path
-                  schema:
-                      type: string
             requestBody:
                 content:
                     application/json:
@@ -750,17 +740,12 @@ paths:
                   schema:
                     type: string
                     format: uuid
-                - name: organization
-                  required: true
-                  in: path
-                  schema:
-                      type: string
             responses:
                 '204':
                     description: OK
                 '404':
                     description: NOT FOUND
-    /{organization}/users/{userId}/role:
+    /users/{userId}/role:
         post:
             summary: change role of user
             parameters:
@@ -770,11 +755,6 @@ paths:
                   schema:
                     type: string
                     format: uuid
-                - name: organization
-                  required: true
-                  in: path
-                  schema:
-                      type: string
             requestBody:
                 content:
                     application/json:
