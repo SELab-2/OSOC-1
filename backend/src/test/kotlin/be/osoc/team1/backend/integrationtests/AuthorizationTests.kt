@@ -183,7 +183,7 @@ class AuthorizationTests() {
         assert(loginResponse.statusCodeValue == 200)
         assert(JSONObject(loginResponse.body).has("accessToken"))
         assert(JSONObject(loginResponse.body).has("refreshToken"))
-        assert(JSONObject(loginResponse.body).has("refreshTokenTTL"))
+        assert(JSONObject(loginResponse.body).has("accessTokenTTL"))
         assert(JSONObject(loginResponse.body).has("user"))
         logoutResponse(loginResponse)
     }
@@ -323,14 +323,14 @@ class AuthorizationTests() {
     @Test
     fun `refresh response contains necessary fields`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
-        val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
+        assert(JSONObject(logInResponse.body).has("accessToken"))
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(refreshResponse.statusCodeValue == 200)
         assert(JSONObject(refreshResponse.body).has("accessToken"))
         assert(JSONObject(refreshResponse.body).has("refreshToken"))
-        assert(JSONObject(refreshResponse.body).has("refreshTokenTTL"))
+        assert(JSONObject(refreshResponse.body).has("accessTokenTTL"))
     }
 
     @Test

@@ -124,7 +124,7 @@ object TokenUtil {
         val refreshToken: String = createToken(email, authorities, false, refreshTokenExpiresAt)
 
         validRefreshTokens[email] = refreshToken
-        return NewTokenResponseData(accessToken, refreshToken, decodeAndVerifyToken(refreshToken).expiresAt)
+        return NewTokenResponseData(accessToken, refreshToken, decodeAndVerifyToken(accessToken).expiresAt)
     }
 
     /**
