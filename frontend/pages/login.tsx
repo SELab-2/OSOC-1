@@ -2,8 +2,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEventHandler, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useRecoilState } from 'recoil';
+import { tokenAtom, userAtom } from '../atoms/globalAtoms';
 import FormContainer from '../components/FormContainer';
-import Endpoints from '../lib/endpoints';
+import useApi from '../hooks/useApi';
+import { UserRole } from '../lib/OSOCWebApi';
 
 /**
  * Login page for OSOC application
@@ -14,33 +17,38 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [, setUser] = useRecoilState(userAtom);
+  const [, setTokens] = useRecoilState(tokenAtom);
+
   const router = useRouter();
+  const webApi = useApi();
 
   const loginUser: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
     if (email && password) {
-      const params = new URLSearchParams({
-        email,
-        password,
-      });
+      try {
+        const { accessToken, refreshToken, refreshTokenTTL, user: _user } = await webApi.login(email, password);
+        // set current user
+        setUser(_user);
+        
+        // set current tokens
+        setTokens({
+          refreshToken,
+          accessToken,
+          accessTokenTTL: refreshTokenTTL
+        });
 
-      const request = fetch(Endpoints.LOGIN, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params,
-      });
-
-      const response = await request;
-
-      if (response.ok) {
-        const data = await response.json();
-        router.push('/wait');
-      } else {
+        // go to wait page if user role is disabled
+        if (_user.role === UserRole.Disabled) {
+          router.push('/wait');
+        } else { // go to 'index page'
+          router.push('/');
+        }
+      } catch {
         toast.error('An error occurred while trying to log in.');
       }
+
     }
   };
 
