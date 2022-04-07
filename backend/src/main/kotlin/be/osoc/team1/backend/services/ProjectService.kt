@@ -95,9 +95,8 @@ class ProjectService(
         repository.save(project)
     }
 
-    fun getStudents(projectId: UUID): List<Student> {
-        return getStudents(getProjectById(projectId))
-    }
+    fun getStudents(projectId: UUID): List<Student> =
+        getStudents(getProjectById(projectId))
 
     fun getStudents(project: Project): List<Student> {
         val students = mutableListOf<Student>()
@@ -132,9 +131,8 @@ class ProjectService(
     /**
      * Get an assignment by its [assignmentId], if it doesn't exist a [InvalidAssignmentIdException] will be thrown.
      */
-    fun getAssignmentById(assignmentId: UUID): Assignment {
-        return assignmentRepository.findByIdOrNull(assignmentId) ?: throw InvalidAssignmentIdException()
-    }
+    fun getAssignmentById(assignmentId: UUID): Assignment =
+        assignmentRepository.findByIdOrNull(assignmentId) ?: throw InvalidAssignmentIdException()
 
     /**
      * Assigns a student to a specific position on the project with [projectId]. A [ForbiddenOperationException] will be

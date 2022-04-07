@@ -131,9 +131,8 @@ class ProjectController(private val service: ProjectService) {
      */
     @PostMapping("/{projectId}/assignments")
     @Secured("ROLE_COACH")
-    fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) {
+    fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) =
         service.postAssignment(projectId, assignment)
-    }
 
     /**
      * Removes assignment with [assignmentId] of a student to a position on the project with [projectId]. Will return a
@@ -143,7 +142,6 @@ class ProjectController(private val service: ProjectService) {
     @DeleteMapping("/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) {
+    fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) =
         service.deleteAssignment(projectId, assignmentId)
-    }
 }
