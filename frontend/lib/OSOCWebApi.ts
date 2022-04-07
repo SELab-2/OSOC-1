@@ -3,20 +3,23 @@ import HttpFetcher, { NamedError } from './HttpFetcher';
 
 type UUID = string;
 
-enum UserRole {
-  Admin,
-  Coach,
-  Disabled
+export enum UserRole {
+  Admin = 'Admin',
+  Coach = 'Coach',
+  Disabled = 'Disabled'
 }
 
 type AuthToken = string | undefined;
 type LoginResponse = {
   accessToken: string;
+  refreshToken: string;
+  refreshTokenTTL: Date;
+  user: User;
 };
 
-type User = {
+export type User = {
   id: UUID;
-  name: string;
+  username: string;
   email: string;
   role: UserRole;
 }
@@ -26,10 +29,12 @@ export class InvalidRefreshTokenError extends NamedError {};
 class OSOCWebApi {
   _accessToken: AuthToken;
   _refreshToken: AuthToken;
+  _accessTokenTTL: Date | undefined;
 
   constructor() {
     this._accessToken = undefined;
     this._refreshToken = undefined;
+    this._accessTokenTTL = undefined;
   }
 
   setRefreshToken(refreshToken: string) {
@@ -38,6 +43,10 @@ class OSOCWebApi {
 
   setAccessToken(accessToken: string) {
     this._accessToken = accessToken;
+  }
+
+  setAccessTokenTTL(accessTokenTTL: Date) {
+    this._accessTokenTTL = accessTokenTTL;
   }
 
   getRefreshToken(): AuthToken {
@@ -55,6 +64,12 @@ class OSOCWebApi {
     this.refreshAuthTokens(this.getRefreshToken() as string);
 
     // if that fails, return to login (somehow, or throw a specific error like InvalidRefreshToken)
+  }
+
+  setupFields(accessToken: string, refreshToken: string, accessTokenTTL: Date) {
+    this.setAccessToken(accessToken);
+    this.setRefreshToken(refreshToken);
+    this.setAccessTokenTTL(accessTokenTTL);
   }
 
 
