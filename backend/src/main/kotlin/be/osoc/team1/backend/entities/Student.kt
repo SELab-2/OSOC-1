@@ -90,7 +90,7 @@ class Student(
     val firstName: String,
     val lastName: String,
     @ManyToMany(cascade = [CascadeType.ALL])
-    val skills: Set<Skill> = emptySet(),
+    val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false
 ) {
 
