@@ -1,7 +1,7 @@
 package be.osoc.team1.backend.entities
 
-import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonView
 import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
