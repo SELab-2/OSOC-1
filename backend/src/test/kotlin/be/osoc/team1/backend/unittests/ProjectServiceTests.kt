@@ -183,17 +183,21 @@ class ProjectServiceTests {
         val testStudent3 = Student("Lars3", "Van Cauter3")
         val position = Position(Skill("backend"), 2)
         val suggester = User("suggester", "email", Role.Coach, "password")
-        val testProjectConflict = Project("Test", "Client", "a test project",
-            assignments = mutableListOf(Assignment(testStudent, position, suggester, "reason")
+        val testProjectConflict = Project(
+            "Test", "Client", "a test project",
+            assignments = mutableListOf(
+                Assignment(testStudent, position, suggester, "reason")
             )
         )
-        val testProjectConflict2 = Project("Test", "Client", "a test project",
+        val testProjectConflict2 = Project(
+            "Test", "Client", "a test project",
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")
             )
         )
-        val testProjectConflict3 = Project("Test", "Client", "a test project",
+        val testProjectConflict3 = Project(
+            "Test", "Client", "a test project",
             assignments = mutableListOf(
                 Assignment(testStudent2, position, suggester, "reason"),
                 Assignment(testStudent3, position, suggester, "reason")
@@ -314,7 +318,8 @@ class ProjectServiceTests {
         val testStudent = Student("Lars", "Van Cauter")
         val testStudent2 = Student("Lars2", "Van Cauter2")
         val position = Position(Skill("backend"), 2)
-        val testProject = Project("Test", "Client", "a test project",
+        val testProject = Project(
+            "Test", "Client", "a test project",
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")
