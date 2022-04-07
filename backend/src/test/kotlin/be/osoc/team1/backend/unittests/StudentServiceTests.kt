@@ -47,6 +47,7 @@ class StudentServiceTests {
         val differentIdTestStudent = Student("Tom", "Alard")
         every { repository.save(testStudent) } returns differentIdTestStudent
         every { repository.findAll() } returns listOf(testStudent)
+        every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         every {
             repository.findAll(
                 PageRequest.of(0, 50, Sort.by("id"))
@@ -65,6 +66,7 @@ class StudentServiceTests {
     fun `getAllStudents paging returns the correct amount`() {
         val repository: StudentRepository = mockk()
         every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(listOf(testStudent))
+        every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
         assertEquals(service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach), listOf(testStudent))
     }
@@ -74,6 +76,7 @@ class StudentServiceTests {
         val repository: StudentRepository = mockk()
         val testList = listOf<Student>()
         every { repository.findAll(PageRequest.of(0, 1, Sort.by("id"))) } returns PageImpl(testList)
+        every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
         assertEquals(service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach), testList)
     }
@@ -89,6 +92,7 @@ class StudentServiceTests {
         every { repository.findAll(PageRequest.of(0, 50, Sort.by("id"))) } returns PageImpl(
             listOf(testStudent, testStudent2, testStudent3, testStudent4)
         )
+        every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
         testStudent.status = StatusEnum.Undecided
         testStudent2.status = StatusEnum.Yes
@@ -125,6 +129,7 @@ class StudentServiceTests {
         val repository: StudentRepository = mockk()
         val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
         every { repository.findAll(PageRequest.of(0, 50, Sort.by("id"))) } returns PageImpl(allStudents)
+        every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
         assertEquals(
             service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "lars", true, testCoach),
@@ -150,6 +155,7 @@ class StudentServiceTests {
         testStudent.statusSuggestions.add(StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "Nice!"))
         val repository: StudentRepository = mockk()
         every { repository.findAll(PageRequest.of(0, 50, Sort.by("id"))) } returns PageImpl(listOf(testStudent))
+        every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
 
         assertEquals(service.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testCoach), listOf<Student>())

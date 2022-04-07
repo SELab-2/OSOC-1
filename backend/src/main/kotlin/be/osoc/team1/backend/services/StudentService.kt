@@ -38,20 +38,29 @@ class StudentService(private val repository: StudentRepository, private val user
         includeSuggested: Boolean,
         callee: User
     ): Iterable<Student> {
-        val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
-        val pagedResult: Page<Student> = repository.findAll(paging)
+        //val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
+        //val pagedResult: Page<Student> = repository.findAll(paging)
+        val res = repository.findAll(Sort.by(sortBy))
         val studentList = mutableListOf<Student>()
-        for (student in pagedResult.content) {
+        for (student in res) {
             val studentHasStatus = statusFilter.contains(student.status)
             // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
             val studentHasMatchingName = (student.firstName + student.lastName).lowercase().replace(" ", "")
                 .contains(name.lowercase().replace(" ", ""))
-            val studentBeenSuggestedByUserCheck = includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
+            val studentBeenSuggestedByUserCheck =
+                includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
             if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
                 studentList.add(student)
             }
         }
-        return studentList
+        val startOfPaging = pageNumber * pageSize
+        val pagedList = mutableListOf<Student>()
+        for ((i, filteredStudent) in studentList.withIndex()) {
+            if (i >= startOfPaging && i <= startOfPaging + pageSize) {
+                pagedList.add(filteredStudent)
+            }
+        }
+        return pagedList
     }
 
     /**
