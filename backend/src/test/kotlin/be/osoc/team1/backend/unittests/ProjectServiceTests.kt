@@ -77,8 +77,8 @@ class ProjectServiceTests {
 
     @Test
     fun `getAllProjects does not fail`() {
-        val service = ProjectService(getRepository(true), mockk(), mockk(), mockk())
-        assertEquals(service.getAllProjects(""), listOf(testProject))
+        val service = ProjectService(getRepository(true), mockk(), mockk(), getUserService())
+        assertEquals(listOf(testProject), service.getAllProjects(""))
     }
 
     @Test
@@ -100,7 +100,7 @@ class ProjectServiceTests {
     @Test
     fun `getProjectById succeeds when project with id exists`() {
         val service = ProjectService(getRepository(true), mockk(), mockk(), getUserService())
-        assertEquals(service.getProjectById(testId), testProject)
+        assertEquals(testProject, service.getProjectById(testId))
     }
 
     @Test
