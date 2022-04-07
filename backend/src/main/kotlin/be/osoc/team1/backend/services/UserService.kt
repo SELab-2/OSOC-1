@@ -42,7 +42,7 @@ class UserService(private val repository: UserRepository, private val passwordEn
         val encodedPasswordUser = User(
             plaintextPasswordUser.username,
             plaintextPasswordUser.email,
-            plaintextPasswordUser.role,
+            Role.Disabled,
             encodedPassword,
             organization
         )
