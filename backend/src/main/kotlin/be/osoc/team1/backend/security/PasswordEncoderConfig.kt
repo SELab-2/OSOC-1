@@ -6,29 +6,37 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 
 /**
- * Passwords get encoded before being sent over the network.
+ * This class is used to encrypt passwords before storing them in the database.
  *
- * Here we use BCryptPasswordEncoder with no arguments, so it uses default argument 10 as strength. The
- * BCryptPasswordEncoder should take roughly 1 second to verify a password when strength 10 is used.
- * BCryptPasswordEncoder is currently the most used password encoder. The BCryptPasswordEncoder implementation uses the
- * widely supported bcrypt algorithm to hash the passwords
+ * In this project we use the [BCryptPasswordEncoder] to encode the passwords. [BCryptPasswordEncoder] is currently the
+ * most popular password encoder. It uses the widely supported bcrypt algorithm to hash passwords.
  *
- * In order to make it more resistant to password cracking, bcrypt is deliberately slow, because if it takes more time
- * to hash the value, it also takes a much longer time to brute-force the password.
+ * The recommendation is that the password encoder should be tuned, so it takes about 1 second to verify a password on
+ * your system. This trade-off is to make it difficult for attackers to crack the password using brute-force attacks,
+ * but not so costly it puts an excessive burden on your system.
+ * More on brute-force attacks can be read on: https://owasp.org/www-community/controls/Blocking_Brute_Force_Attacks
  *
- * Pbkdf2PasswordEncoder is a good choice if FIPS certification would be required, but Pbkdf2 is not memory hard and
- * thus is weaker than bcrypt
- * Argon2PasswordEncoder and SCryptPasswordEncoder are good alternatives but use more memory. Argon is stronger than
- * bcrypt but only when runtimes exceed 1000ms, we want something that does not need specific tuning a client might not
- * be knowledgeable enough for, so bcrypt is the better choice.
+ * [BCryptPasswordEncoder] takes an argument between 4 and 31. This argument decides how 'strong' your password encoder
+ * is and thus how long it takes to verify a password. This parameter is logarithmic, and defaults to 10. Each time you
+ * increment it you double the amount of work needed, and the time your app will take to check a password.
  *
- * above information is based on following link:
+ * When we need to verify the password without a password encoder enabled, the verification takes about 0.10 seconds.
+ * When we use [BCryptPasswordEncoder] while the strength parameter is set to 14, verification will take about 1 second.
+ *
+ * Below is discussed why [BCryptPasswordEncoder] is chosen over the three other most popular password encoders.
+ * Pbkdf2 is not memory hard and thus weaker than bcrypt. Pbkdf2PasswordEncoder is a good choice if FIPS certification
+ * would be required.
+ * SCryptPasswordEncoder is a good alternative to [BCryptPasswordEncoder], but uses more memory.
+ * Argon2 is stronger than bcrypt but only when runtimes exceed 1 second, and thus Argon2PasswordEncoder needs more
+ * configuring to be effective on all hardware. Longer encryption runtimes also make for a worse end-user experience.
+ *
+ * above information is partially based on following link:
  * https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html#authentication-password-storage-bcrypt
  */
 @Configuration
 class PasswordEncoderConfig {
     @Bean
     fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder()
+        return BCryptPasswordEncoder(14)
     }
 }

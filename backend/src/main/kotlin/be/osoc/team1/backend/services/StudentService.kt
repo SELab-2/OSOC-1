@@ -24,11 +24,34 @@ class StudentService(private val repository: StudentRepository, private val user
 
     /**
      * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
+     * Can be filtered by [name] (requested string gets processed to more easily give matches),
+     * [statusFilter] (see if student status matches 1 in the given list),
+     * whether or not the requesting user has already made a suggestion for this student [includeSuggested],
+     * [callee] is the user who made this request
      */
-    fun getAllStudents(pageNumber: Int, pageSize: Int, sortBy: String): Iterable<Student> {
+    fun getAllStudents(
+        pageNumber: Int,
+        pageSize: Int,
+        sortBy: String,
+        statusFilter: List<StatusEnum>,
+        name: String,
+        includeSuggested: Boolean,
+        callee: User
+    ): Iterable<Student> {
         val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
         val pagedResult: Page<Student> = repository.findAll(paging)
-        return pagedResult.content
+        val studentList = mutableListOf<Student>()
+        for (student in pagedResult.content) {
+            val studentHasStatus = statusFilter.contains(student.status)
+            // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
+            val studentHasMatchingName = (student.firstName + student.lastName).lowercase().replace(" ", "")
+                .contains(name.lowercase().replace(" ", ""))
+            val studentBeenSuggestedByUserCheck = includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
+            if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
+                studentList.add(student)
+            }
+        }
+        return studentList
     }
 
     /**
