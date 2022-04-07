@@ -183,12 +183,17 @@ class ProjectServiceTests {
         val testStudent3 = Student("Lars3", "Van Cauter3")
         val position = Position(Skill("backend"), 2)
         val suggester = User("suggester", "email", Role.Coach, "password")
-        val testProjectConflict = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, position, suggester, "reason")))
-        val testProjectConflict2 = Project("Test", "Client", "a test project", assignments = mutableListOf(Assignment(testStudent, position, suggester, "reason"), Assignment(testStudent2, position, suggester, "reason")))
-        val testProjectConflict3 = Project(
-            "Test",
-            "Client",
-            "a test project",
+        val testProjectConflict = Project("Test", "Client", "a test project",
+            assignments = mutableListOf(Assignment(testStudent, position, suggester, "reason")
+            )
+        )
+        val testProjectConflict2 = Project("Test", "Client", "a test project",
+            assignments = mutableListOf(
+                Assignment(testStudent, position, suggester, "reason"),
+                Assignment(testStudent2, position, suggester, "reason")
+            )
+        )
+        val testProjectConflict3 = Project("Test", "Client", "a test project",
             assignments = mutableListOf(
                 Assignment(testStudent2, position, suggester, "reason"),
                 Assignment(testStudent3, position, suggester, "reason")
@@ -297,5 +302,44 @@ class ProjectServiceTests {
         testProject.assignments.add(assignment)
         service.deleteAssignment(testProject.id, assignment.id)
         testProject.assignments.remove(assignment)
+    }
+
+    @Test
+    fun `getStudents(Project) does not fail`() {
+        val service = ProjectService(
+            getRepository(true),
+            getStudentService(true),
+            getUserService(suggester)
+        )
+        val testStudent = Student("Lars", "Van Cauter")
+        val testStudent2 = Student("Lars2", "Van Cauter2")
+        val position = Position(Skill("backend"), 2)
+        val testProject = Project("Test", "Client", "a test project",
+            assignments = mutableListOf(
+                Assignment(testStudent, position, suggester, "reason"),
+                Assignment(testStudent2, position, suggester, "reason")
+            )
+        )
+        assertEquals(mutableListOf(testStudent, testStudent2), service.getStudents(testProject))
+    }
+
+    @Test
+    fun `getStudents(UUID) does not fail when project exists`() {
+        val service = ProjectService(
+            getRepository(true),
+            getStudentService(true),
+            getUserService(suggester)
+        )
+        assertEquals(mutableListOf<Student>(), service.getStudents(testProject.id))
+    }
+
+    @Test
+    fun `getStudents(UUID) fails when project doesn't exist`() {
+        val service = ProjectService(
+            getRepository(false),
+            getStudentService(true),
+            getUserService(suggester)
+        )
+        assertThrows<InvalidProjectIdException> { service.getStudents(testProject.id) }
     }
 }
