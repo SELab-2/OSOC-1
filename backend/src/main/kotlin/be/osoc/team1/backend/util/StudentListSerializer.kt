@@ -13,8 +13,8 @@ class StudentListSerializer protected constructor(t: Class<List<Student>>?) : St
         if (gen != null) {
             gen.writeStartArray()
             if (students != null) {
-                for (p in students) {
-                    gen.writeObject(getBaseUrl() + "/students/" + p.id.toString())
+                for (s in students) {
+                    gen.writeObject(getBaseUrl() + "/students/" + s.id.toString())
                 }
             }
             gen.writeEndArray()
