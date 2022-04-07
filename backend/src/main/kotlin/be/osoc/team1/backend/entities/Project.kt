@@ -15,6 +15,7 @@ import javax.persistence.OneToMany
  * and a [description]. Note that neither of these fields, nor the combination of both of them need be unique.
  * A project also has [students], which is a list of the students assigned to this project
  * Finally, a project also has [coaches], which is a list of coaches who will be aiding with this project
+ * [students] and [coaches] are represented by a list with their corresponding rest API url
  */
 @Entity
 class Project(
