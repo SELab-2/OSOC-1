@@ -10,7 +10,6 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
-import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.repositories.ProjectRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -19,7 +18,6 @@ import java.util.UUID
 @Service
 class ProjectService(
     private val repository: ProjectRepository,
-    private val assignmentRepository: AssignmentRepository,
     private val studentService: StudentService,
     private val userService: UserService
 ) {
@@ -129,12 +127,6 @@ class ProjectService(
     }
 
     /**
-     * Get an assignment by its [assignmentId], if it doesn't exist a [InvalidAssignmentIdException] will be thrown.
-     */
-    fun getAssignmentById(assignmentId: UUID): Assignment =
-        assignmentRepository.findByIdOrNull(assignmentId) ?: throw InvalidAssignmentIdException()
-
-    /**
      * Assigns a student to a specific position on the project with [projectId]. A [ForbiddenOperationException] will be
      * thrown if the student was already assigned on this project or if that position already has enough assignees. A
      * [InvalidAssignmentIdException] will be thrown if specified position is not part of the specified project. If the
@@ -166,10 +158,9 @@ class ProjectService(
      */
     fun deleteAssignment(projectId: UUID, assignmentId: UUID) {
         val project = getProjectById(projectId)
-        project.assignments.find { it.id == assignmentId }
+        val assignment = project.assignments.find { it.id == assignmentId }
             ?: throw InvalidAssignmentIdException("The specified assignment is not part of the specified project!")
 
-        val assignment = getAssignmentById(assignmentId)
         project.assignments.remove(assignment)
         repository.save(project)
     }
