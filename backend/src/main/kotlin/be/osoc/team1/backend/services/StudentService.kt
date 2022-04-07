@@ -11,9 +11,6 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -40,7 +37,7 @@ class StudentService(private val repository: StudentRepository, private val user
     ): Iterable<Student> {
         val allStudents = repository.findAll(Sort.by(sortBy))
         val studentList = mutableListOf<Student>()
-        //filtering
+        // filtering
         for (student in allStudents) {
             val studentHasStatus = statusFilter.contains(student.status)
             // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
@@ -52,7 +49,7 @@ class StudentService(private val repository: StudentRepository, private val user
                 studentList.add(student)
             }
         }
-        //pagination
+        // pagination
         val startOfPaging = pageNumber * pageSize
         val pagedList = mutableListOf<Student>()
         for ((i, filteredStudent) in studentList.withIndex()) {
