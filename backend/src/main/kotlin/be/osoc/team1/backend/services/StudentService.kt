@@ -14,10 +14,24 @@ import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.lang.Integer.min
 import java.util.UUID
 
 @Service
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
+
+    class Pager(val pageNumber: Int, val pageSize: Int) {
+        val startOfPaging = pageNumber * pageSize
+
+        fun <T> paginate(collection: List<T>): List<T> {
+            val endOfPaging = min(collection.size - 1, startOfPaging + pageSize)
+            return collection.slice(startOfPaging..endOfPaging)
+        }
+    }
+
+    data class Filter(val statusFilter: List<StatusEnum>, val nameQuery: String, val includeSuggested: Boolean) {
+
+    }
 
     /**
      * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
@@ -27,37 +41,26 @@ class StudentService(private val repository: StudentRepository, private val user
      * [callee] is the user who made this request
      */
     fun getAllStudents(
-        pageNumber: Int,
-        pageSize: Int,
-        sortBy: String,
-        statusFilter: List<StatusEnum>,
-        name: String,
-        includeSuggested: Boolean,
+        pager: Pager,
+        sortBy: Sort,
+        filter: Filter,
         callee: User
     ): Iterable<Student> {
-        val allStudents = repository.findAll(Sort.by(sortBy))
+        val allStudents = repository.findAll(sortBy)
         val studentList = mutableListOf<Student>()
         // filtering
         for (student in allStudents) {
-            val studentHasStatus = statusFilter.contains(student.status)
+            val studentHasStatus = filter.statusFilter.contains(student.status)
             // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
             val studentHasMatchingName = (student.firstName + student.lastName).lowercase().replace(" ", "")
-                .contains(name.lowercase().replace(" ", ""))
+                .contains(filter.nameQuery.lowercase().replace(" ", ""))
             val studentBeenSuggestedByUserCheck =
-                includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
+                filter.includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
             if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
                 studentList.add(student)
             }
         }
-        // pagination
-        val startOfPaging = pageNumber * pageSize
-        val pagedList = mutableListOf<Student>()
-        for ((i, filteredStudent) in studentList.withIndex()) {
-            if (i >= startOfPaging && i <= startOfPaging + pageSize) {
-                pagedList.add(filteredStudent)
-            }
-        }
-        return pagedList
+        return pager.paginate(studentList)
     }
 
     /**
