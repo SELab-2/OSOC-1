@@ -14,14 +14,14 @@ import javax.persistence.OneToMany
  * Finally, a project also has [coaches], which is a list of coaches who will be aiding with this project
  */
 @Entity
-class Project(
+open class Project(
     val name: String,
-
     val description: String,
+    val organization: String,
+    val editionName: String,
 
     @ManyToMany(cascade = [CascadeType.ALL])
     val students: MutableCollection<Student> = mutableListOf(),
-
     @OneToMany(cascade = [CascadeType.ALL])
     val coaches: MutableCollection<User> = mutableListOf()
 ) {
