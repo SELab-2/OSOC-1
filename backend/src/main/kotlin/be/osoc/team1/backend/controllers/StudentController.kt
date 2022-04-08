@@ -6,6 +6,8 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
+import java.net.URLDecoder
+import java.security.Principal
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -17,14 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.net.URLDecoder
-import java.security.Principal
 import java.util.UUID
 
-/**
- * [Student]s are associated with an organization and an edition. Note that a lot of these methods
- * don't use these path variables. This was done to keep the base URL consistent for the caller.
- */
+
 @RestController
 class StudentController(
     private val service: StudentService,
