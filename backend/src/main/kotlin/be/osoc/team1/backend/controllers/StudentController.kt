@@ -6,6 +6,8 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
+import java.net.URLDecoder
+import java.security.Principal
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -14,12 +16,9 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.net.URLDecoder
-import java.security.Principal
 import java.util.UUID
 
 /**
@@ -27,7 +26,6 @@ import java.util.UUID
  * don't use these path variables. This was done to keep the base URL consistent for the caller.
  */
 @RestController
-@RequestMapping("/{organization}/{editionName}/students")
 class StudentController(
     private val service: StudentService,
     private val userDetailService: OsocUserDetailService
@@ -43,7 +41,7 @@ class StudentController(
      * by [status] (default value allows all statuses) by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for)
      */
-    @GetMapping
+    @GetMapping("/{organization}/{editionName}/students")
     @Secured("ROLE_COACH")
     fun getAllStudents(
         @RequestParam(defaultValue = "0") pageNumber: Int,
@@ -65,26 +63,18 @@ class StudentController(
      * Returns the student with the corresponding [studentId]. If no such student exists, returns a
      * "404: Not Found" message instead.
      */
-    @GetMapping("/{studentId}")
+    @GetMapping("/students/{studentId}")
     @Secured("ROLE_COACH")
-    fun getStudentById(
-        @PathVariable studentId: UUID,
-        @PathVariable organization: String,
-        @PathVariable editionName: String
-    ): Student = service.getStudentById(studentId)
+    fun getStudentById(@PathVariable studentId: UUID): Student = service.getStudentById(studentId)
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
      * "404: Not Found" message instead.
      */
-    @DeleteMapping("/{studentId}")
+    @DeleteMapping("/students/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun deleteStudentById(
-        @PathVariable studentId: UUID,
-        @PathVariable organization: String,
-        @PathVariable editionName: String
-    ) = service.deleteStudentById(studentId)
+    fun deleteStudentById(@PathVariable studentId: UUID) = service.deleteStudentById(studentId)
 
     /**
      * Add a student to the database. The student should be passed in the request body as a JSON
@@ -101,7 +91,7 @@ class StudentController(
      * header. No checking is done to see if firstName or lastName qualify as valid 'names'. This
      * verification is the responsibility of the caller.
      */
-    @PostMapping
+    @PostMapping("/{organization}/{editionName}/students")
     @Secured("ROLE_COACH")
     fun addStudent(
         @RequestBody studentRegistration: StudentRegistration,
@@ -132,15 +122,11 @@ class StudentController(
      * Any other input value will result in a "400: Bad Request" response. These values are also
      * case-sensitive.
      */
-    @PostMapping("/{studentId}/status")
+    @PostMapping("/students/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun setStudentStatus(
-        @PathVariable studentId: UUID,
-        @RequestBody status: StatusEnum,
-        @PathVariable organization: String,
-        @PathVariable editionName: String
-    ) = service.setStudentStatus(studentId, status)
+    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum) =
+        service.setStudentStatus(studentId, status)
 
     /**
      * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should
@@ -163,14 +149,12 @@ class StudentController(
      * this includes the "Undecided" value, which is a valid value in other endpoints. This is
      * because a user cannot suggest changing the status of a student to "Undecided".
      */
-    @PostMapping("/{studentId}/suggestions")
+    @PostMapping("/students/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
     fun addStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @RequestBody statusSuggestion: StatusSuggestion,
-        @PathVariable organization: String,
-        @PathVariable editionName: String,
         principal: Principal
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
@@ -190,14 +174,12 @@ class StudentController(
      * user attempts to remove a [StatusSuggestion] that was not made by them a "401: Unauthorized"
      * is returned.
      */
-    @DeleteMapping("/{studentId}/suggestions/{coachId}")
+    @DeleteMapping("/students/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
     fun deleteStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @PathVariable coachId: UUID,
-        @PathVariable organization: String,
-        @PathVariable editionName: String,
         principal: Principal
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
