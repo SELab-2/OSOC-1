@@ -13,7 +13,7 @@ import java.util.UUID
 @Service
 class ProjectService(private val repository: ProjectRepository, private val userService: UserService) {
     /**
-     * Get all projects included in the edition given by [editionName] by the given [organization].
+     * Get all projects that are a part of the OSOC edition named [editionName] by the given [organization].
      * The projects can also be filtered by the optional [searchQuery] parameter.
      * See the documentation of the [nameMatchesSearchQuery] function to understand how the filtering is done.
      */
@@ -26,12 +26,12 @@ class ProjectService(private val repository: ProjectRepository, private val user
             .filter { nameMatchesSearchQuery(it.name, searchQuery) }
 
     /**
-     * Get a project by its [id], if this id doesn't exist throw an InvalidProjectIdException
+     * Get a project by its [id], if this id doesn't exist throw an [InvalidProjectIdException]
      */
     fun getProjectById(id: UUID): Project = repository.findByIdOrNull(id) ?: throw InvalidProjectIdException()
 
     /**
-     * Deletes a project by its [id], if this id doesn't exist throw an InvalidProjectIdException
+     * Deletes a project by its [id], if this id doesn't exist throw an [InvalidProjectIdException]
      */
     fun deleteProjectById(id: UUID) {
         if (!repository.existsById(id))
@@ -46,7 +46,7 @@ class ProjectService(private val repository: ProjectRepository, private val user
     fun postProject(project: Project): Project = repository.save(project)
 
     /**
-     * Updates a project based on [project], if [project] is not in [repository] throw InvalidProjectIdException
+     * Updates a project based on [project], if [project] is not in [repository] throw [InvalidProjectIdException]
      */
     fun patchProject(project: Project) {
         if (!repository.existsById(project.id))
@@ -56,7 +56,7 @@ class ProjectService(private val repository: ProjectRepository, private val user
     }
 
     /**
-     * Adds a student to project based on [projectId], if [projectId] is not in [repository] throw InvalidProjectIdException
+     * Adds a student to project based on [projectId], if [projectId] is not in [repository] throw [InvalidProjectIdException]
      */
     fun addStudentToProject(projectId: UUID, student: Student) {
         val project: Project = getProjectById(projectId)
@@ -66,8 +66,8 @@ class ProjectService(private val repository: ProjectRepository, private val user
 
     /**
      * removes a student from project based on [projectId] and [studentId],
-     * if [projectId] is not in [repository] throw InvalidProjectIdException
-     * if [studentId] not assigned to project throw FailedOperationException
+     * if [projectId] is not in [repository] throw [InvalidProjectIdException]
+     * if [studentId] not assigned to project throw [FailedOperationException]
      */
     fun removeStudentFromProject(projectId: UUID, studentId: UUID) {
         val project: Project = getProjectById(projectId)
@@ -91,8 +91,8 @@ class ProjectService(private val repository: ProjectRepository, private val user
 
     /**
      * removes a coach from project based on [projectId] and [coachId],
-     * if [projectId] is not in [repository] throw InvalidProjectIdException
-     * if [coachId] not assigned to project throw FailedOperationException
+     * if [projectId] is not in [repository] throw [InvalidProjectIdException]
+     * if [coachId] not assigned to project throw [FailedOperationException]
      */
     fun removeCoachFromProject(projectId: UUID, coachId: UUID) {
         val project: Project = getProjectById(projectId)

@@ -24,7 +24,7 @@ import java.util.UUID
 class ProjectController(private val service: ProjectService, @Autowired private val studentService: StudentService) {
 
     /**
-     * Get all projects from service
+     * Get all projects that are a part of the OSOC edition named [editionName] by the given [organization].
      * The results can also be filtered by [name] (default value is empty so no project is excluded).
      */
     @GetMapping("/{organization}/{editionName}/projects")
@@ -55,7 +55,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
 
     /**
      * Creates a project from the request body, this can also override an already existing project.
-     * Returns the created project.
+     * Returns the created project in the response body, with a link pointing to the resource in the Location header.
      */
     @PostMapping("/{organization}/{editionName}/projects")
     @Secured("ROLE_ADMIN")
