@@ -13,11 +13,17 @@ import java.util.UUID
 @Service
 class ProjectService(private val repository: ProjectRepository, private val userService: UserService) {
     /**
-     * Get all projects. The projects can also be filtered by the optional [searchQuery] parameter.
+     * Get all projects included in the edition given by [editionName] by the given [organization].
+     * The projects can also be filtered by the optional [searchQuery] parameter.
      * See the documentation of the [nameMatchesSearchQuery] function to understand how the filtering is done.
      */
-    fun getAllProjects(searchQuery: String = ""): Iterable<Project> =
-        repository.findAll().filter { nameMatchesSearchQuery(it.name, searchQuery) }
+    fun getAllProjects(
+        organization: String,
+        editionName: String,
+        searchQuery: String = ""
+    ): Iterable<Project> =
+        repository.findByOrganizationAndEditionName(organization, editionName)
+            .filter { nameMatchesSearchQuery(it.name, searchQuery) }
 
     /**
      * Get a project by its [id], if this id doesn't exist throw an InvalidProjectIdException
@@ -99,9 +105,9 @@ class ProjectService(private val repository: ProjectRepository, private val user
     /**
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
      */
-    fun getConflicts(): MutableList<Conflict> {
+    fun getConflicts(organization: String, editionName: String): MutableList<Conflict> {
         val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
-        for (project in getAllProjects()) {
+        for (project in getAllProjects(organization, editionName)) {
             for (student in project.students) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())
