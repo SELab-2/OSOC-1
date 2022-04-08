@@ -35,27 +35,30 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var studentService: StudentService
 
     private val testId = UUID.randomUUID()
-    private val testProject = Project("Proj", "desc")
+    private val testOrganization = "testOrganization"
+    private val testEditionName = "testEditionName"
+    private val editionUrl = "/$testOrganization/$testEditionName/projects"
+    private val testProject = Project("Proj", "desc", testOrganization, testEditionName)
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testProject)
 
     @Test
     fun `getAllProjects should not fail`() {
-        every { projectService.getAllProjects() } returns emptyList()
-        mockMvc.perform(get("/projects")).andExpect(status().isOk)
+        every { projectService.getAllProjects(testOrganization, testEditionName) } returns emptyList()
+        mockMvc.perform(get(editionUrl)).andExpect(status().isOk)
     }
 
     @Test
     fun `getAllProjects name filtering parses the correct name`() {
-        val testList = listOf(Project("_", "_"))
-        val testList2 = listOf(Project("_2", "_2"))
-        every { projectService.getAllProjects("lars") } returns testList
-        every { projectService.getAllProjects("lars test") } returns testList2
+        val testList = listOf(Project("_", "_", testOrganization, testEditionName))
+        val testList2 = listOf(Project("_2", "_2", testOrganization, testEditionName))
+        every { projectService.getAllProjects(testOrganization, testEditionName,"lars") } returns testList
+        every { projectService.getAllProjects(testOrganization, testEditionName,"lars test") } returns testList2
         // tests the url parsing + with encoding
-        mockMvc.perform(get("/projects?name=lars"))
+        mockMvc.perform(get("$editionUrl?name=lars"))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
-        mockMvc.perform(get("/projects?name=lars%20test"))
+        mockMvc.perform(get("$editionUrl?name=lars%20test"))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
     }
@@ -94,7 +97,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `postProject should return created project`() {
         every { projectService.postProject(any()) } returns testProject
         mockMvc.perform(
-            post("/projects")
+            post(editionUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isCreated).andExpect(content().string(jsonRepresentation))
@@ -235,11 +238,11 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
         val testStudent = Student("Lars", "Van Cauter")
-        val testProjectConflict = Project("Test", "a test project", mutableListOf(testStudent))
-        val testProjectConflict2 = Project("Test", "a test project", mutableListOf(testStudent))
+        val testProjectConflict = Project("Test", "a test project", testOrganization, testEditionName, mutableListOf(testStudent))
+        val testProjectConflict2 = Project("Test", "a test project", testOrganization, testEditionName, mutableListOf(testStudent))
         val result = mutableListOf(ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
-        every { projectService.getConflicts() } returns result
-        mockMvc.perform(get("/projects/conflicts"))
+        every { projectService.getConflicts(testOrganization, testEditionName) } returns result
+        mockMvc.perform(get("$editionUrl/conflicts"))
             .andExpect(status().isOk)
             .andExpect(content().string(objectMapper.writeValueAsString(result)))
     }
