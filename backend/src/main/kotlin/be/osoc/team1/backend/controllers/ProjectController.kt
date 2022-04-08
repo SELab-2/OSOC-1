@@ -77,8 +77,8 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     class ProjectRegistration(
         name: String,
         description: String,
-        students: MutableCollection<Student>,
-        coaches: MutableCollection<User>
+        students: MutableCollection<Student> = mutableListOf(),
+        coaches: MutableCollection<User> = mutableListOf()
     ) : Project(name, description, "", "", students, coaches)
 
     /**
