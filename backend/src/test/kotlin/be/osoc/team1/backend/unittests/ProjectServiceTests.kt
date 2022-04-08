@@ -204,14 +204,18 @@ class ProjectServiceTests {
             mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
         val service = ProjectService(repository, getUserService())
         val conflictList = service.getConflicts(testOrganization, testEditionName)
-        assert(conflictList[0] == ProjectService.Conflict(
-            testStudent.id,
-            mutableListOf(testProjectConflict.id, testProjectConflict2.id)
-        ))
-        assert(conflictList[1] == ProjectService.Conflict(
-            testStudent2.id,
-            mutableListOf(testProjectConflict2.id, testProjectConflict3.id)
-        ))
+        assert(
+            conflictList[0] == ProjectService.Conflict(
+                testStudent.id,
+                mutableListOf(testProjectConflict.id, testProjectConflict2.id)
+            )
+        )
+        assert(
+            conflictList[1] == ProjectService.Conflict(
+                testStudent2.id,
+                mutableListOf(testProjectConflict2.id, testProjectConflict3.id)
+            )
+        )
         assert(conflictList.size == 2)
     }
 
