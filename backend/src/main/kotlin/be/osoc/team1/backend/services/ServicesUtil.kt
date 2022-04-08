@@ -1,6 +1,5 @@
 package be.osoc.team1.backend.services
 
-
 private fun preprocess(string: String) = string.lowercase().replace(" ", "")
 
 /**

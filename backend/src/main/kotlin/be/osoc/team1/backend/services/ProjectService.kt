@@ -19,7 +19,6 @@ class ProjectService(private val repository: ProjectRepository, private val user
     fun getAllProjects(searchQuery: String = ""): Iterable<Project> =
         repository.findAll().filter { nameMatchesSearchQuery(it.name, searchQuery) }
 
-
     /**
      * Get a project by its [id], if this id doesn't exist throw an InvalidProjectIdException
      */
