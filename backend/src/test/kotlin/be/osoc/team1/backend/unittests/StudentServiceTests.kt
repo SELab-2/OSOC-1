@@ -71,8 +71,13 @@ class StudentServiceTests {
             repository.findByOrganizationAndEditionName(testOrganization, testEditionName, paging)
         } returns PageImpl(listOf(testStudent))
         val service = StudentService(repository, userService)
-        assertEquals(listOf(testStudent), service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true,
-                                                                 testOrganization, testEditionName, testCoach))
+        assertEquals(
+            listOf(testStudent),
+            service.getAllStudents(
+                0, 1, "id", defaultStatusFilter, "", true,
+                testOrganization, testEditionName, testCoach
+            )
+        )
     }
 
     @Test
@@ -85,8 +90,13 @@ class StudentServiceTests {
             repository.findByOrganizationAndEditionName(testOrganization, testEditionName, paging)
         } returns PageImpl(emptyList)
         val service = StudentService(repository, userService)
-        assertEquals(emptyList, service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testOrganization,
-                                                       testEditionName, testCoach))
+        assertEquals(
+            emptyList,
+            service.getAllStudents(
+                0, 1, "id", defaultStatusFilter, "", true, testOrganization,
+                testEditionName, testCoach
+            )
+        )
     }
 
     @Test

@@ -6,8 +6,6 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
-import java.net.URLDecoder
-import java.security.Principal
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -19,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.net.URLDecoder
+import java.security.Principal
 import java.util.UUID
 
 /**
@@ -55,8 +55,10 @@ class StudentController(
         principal: Principal
     ): Iterable<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllStudents(pageNumber, pageSize, sortBy, status, decodedName, includeSuggested, organization,
-                                      editionName, userDetailService.getUserFromPrincipal(principal))
+        return service.getAllStudents(
+            pageNumber, pageSize, sortBy, status, decodedName, includeSuggested, organization,
+            editionName, userDetailService.getUserFromPrincipal(principal)
+        )
     }
 
     /**
