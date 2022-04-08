@@ -54,6 +54,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val defaultStatusFilter =
         listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
     private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
+    private val token = TestingAuthenticationToken(null, null)
 
     @BeforeEach
     fun beforeEach() {
@@ -65,7 +66,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every {
             studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testOrganization, testEditionName, testCoach)
         } returns emptyList()
-        mockMvc.perform(get("/students").principal(TestingAuthenticationToken(null, null))).andExpect(status().isOk)
+        mockMvc.perform(get(baseUrl)
+            .principal(token))
+            .andExpect(status().isOk)
     }
 
     @Test
@@ -74,79 +77,80 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every {
             studentService.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testOrganization, testEditionName, testCoach)
         } returns testList
-        mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?pageNumber=0&pageSize=1")
+            .principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
 
     @Test
     fun `getAllStudents status filtering parses the correct statuses`() {
-        val testStudent1 = Student("L1", "VC")
+        val testStudent1 = Student("L1", "VC", testOrganization, testEditionName)
         testStudent1.status = StatusEnum.Yes
-        val testStudent2 = Student("L2", "VC")
+        val testStudent2 = Student("L2", "VC", testOrganization, testEditionName)
         testStudent2.status = StatusEnum.No
-        val testStudent3 = Student("L3", "VC")
+        val testStudent3 = Student("L3", "VC", testOrganization, testEditionName)
         testStudent3.status = StatusEnum.Maybe
-        val testStudent4 = Student("L4", "VC")
+        val testStudent4 = Student("L4", "VC", testOrganization, testEditionName)
         testStudent4.status = StatusEnum.Undecided
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testCoach)
+            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testOrganization, testEditionName, testCoach)
         } returns listOf(testStudent1)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testCoach)
+            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testOrganization, testEditionName, testCoach)
         } returns listOf(testStudent2)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testCoach)
+            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testOrganization, testEditionName, testCoach)
         } returns listOf(testStudent3)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testCoach)
+            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testOrganization, testEditionName, testCoach)
         } returns listOf(testStudent4)
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach)
+            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testOrganization, testEditionName, testCoach)
         } returns allStudents
-        mockMvc.perform(get("/students?status=Yes").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?status=Yes").principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent1))))
-        mockMvc.perform(get("/students?status=No").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?status=No").principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent2))))
-        mockMvc.perform(get("/students?status=Maybe").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?status=Maybe").principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent3))))
-        mockMvc.perform(get("/students?status=Undecided").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?status=Undecided").principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent4))))
-        mockMvc.perform(get("/students?status=Yes,No,Maybe,Undecided").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?status=Yes,No,Maybe,Undecided").principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(allStudents)))
     }
 
     @Test
     fun `getAllStudents name filtering parses the correct name`() {
-        val testList = listOf(Student("_", "_"))
-        val testList2 = listOf(Student("_2", "_2"))
+        val testList = listOf(Student("_", "_", testOrganization, testEditionName))
+        val testList2 = listOf(Student("_2", "_2", testOrganization, testEditionName))
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars", true, testCoach)
+            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars", true, testOrganization, testEditionName, testCoach)
         } returns testList
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars test", true, testCoach)
+            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars test", true, testOrganization, testEditionName, testCoach)
         } returns testList2
         // tests the url parsing + with url encoding
-        mockMvc.perform(get("/students?name=lars").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?name=lars").principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
-        mockMvc.perform(get("/students?name=lars%20test").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?name=lars%20test").principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
     }
 
     @Test
     fun `getAllStudents include filtering parses the boolean correctly`() {
-        val testList = listOf(Student("test", "testie"))
-        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testCoach) } returns
+        val testList = listOf(Student("test", "testie", testOrganization, testEditionName))
+        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testOrganization, testEditionName, testCoach) } returns
             testList
-        mockMvc.perform(get("/students?includeSuggested=false").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("$baseUrl?includeSuggested=false").principal(token))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
@@ -191,7 +195,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
                 .andExpect(status().isCreated)
                 .andReturn()
         val locationHeader = mvcResult.response.getHeader("Location")
-        assert(locationHeader!!.endsWith("/students/${testStudent.id}"))
+        assert(locationHeader!!.endsWith("$baseUrl/${testStudent.id}"))
     }
 
     @Test
@@ -225,7 +229,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
-                .principal(TestingAuthenticationToken(null, null))
+                .principal(token)
         )
             .andExpect(status().isNoContent)
     }
@@ -238,7 +242,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
-                .principal(TestingAuthenticationToken(null, null))
+                .principal(token)
         )
             .andExpect(status().isNotFound)
     }
@@ -251,9 +255,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
-                .principal(TestingAuthenticationToken(null, null))
-        )
-            .andExpect(status().isForbidden)
+                .principal(token)
+        ).andExpect(status().isForbidden)
     }
 
     @Test
@@ -262,12 +265,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .throws(InvalidUserIdException())
 
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
-                .principal(TestingAuthenticationToken(null, null))
-        )
-            .andExpect(status().isNotFound)
+                .principal(token)
+        ).andExpect(status().isNotFound)
     }
 
     @Test
@@ -279,20 +281,17 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("$baseUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
-                .principal(TestingAuthenticationToken(null, null))
-        )
-            .andExpect(status().isUnauthorized)
+                .principal(token)
+        ).andExpect(status().isUnauthorized)
     }
 
     @Test
     fun `deleteStudentStatusSuggestion succeeds when student, suggestion and coach exist`() {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) } just Runs
 
-        mockMvc.perform(
-            delete("$baseUrl/$studentId/suggestions/$coachId")
-                .principal(TestingAuthenticationToken(null, null))
-        )
-            .andExpect(status().isNoContent)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")
+            .principal(token)
+        ).andExpect(status().isNoContent)
     }
 
     @Test
@@ -300,11 +299,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }
             .throws(InvalidStudentIdException())
 
-        mockMvc.perform(
-            delete("$baseUrl/$studentId/suggestions/$coachId")
-                .principal(TestingAuthenticationToken(null, null))
-        )
-            .andExpect(status().isNotFound)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")
+            .principal(token)
+        ).andExpect(status().isNotFound)
     }
 
     @Test
@@ -312,11 +309,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }
             .throws(FailedOperationException())
 
-        mockMvc.perform(
-            delete("$baseUrl/$studentId/suggestions/$coachId")
-                .principal(TestingAuthenticationToken(null, null))
-        )
-            .andExpect(status().isBadRequest)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")
+            .principal(token)
+        ).andExpect(status().isBadRequest)
     }
 
     @Test
@@ -324,11 +319,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) }
             .throws(InvalidUserIdException())
 
-        mockMvc.perform(
-            delete("$baseUrl/$studentId/suggestions/$coachId")
-                .principal(TestingAuthenticationToken(null, null))
-        )
-            .andExpect(status().isNotFound)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")
+            .principal(token)
+        ).andExpect(status().isNotFound)
     }
 
     @Test
@@ -336,10 +329,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { userDetailService.getUserFromPrincipal(any()) } returns
             User("other user", "email", Role.Coach, "password")
 
-        mockMvc.perform(
-            delete("/students/$studentId/suggestions/$coachId")
-                .principal(TestingAuthenticationToken(null, null))
-        )
-            .andExpect(status().isUnauthorized)
+        mockMvc.perform(delete("$baseUrl/$studentId/suggestions/$coachId")
+            .principal(token)
+        ).andExpect(status().isUnauthorized)
     }
 }
