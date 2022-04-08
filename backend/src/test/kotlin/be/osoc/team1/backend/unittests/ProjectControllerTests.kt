@@ -41,7 +41,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllProjects should not fail`() {
-        every { projectService.getAllProjects("") } returns emptyList()
+        every { projectService.getAllProjects() } returns emptyList()
         mockMvc.perform(get("/projects")).andExpect(status().isOk)
     }
 

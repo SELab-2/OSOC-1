@@ -16,7 +16,7 @@ class ProjectService(private val repository: ProjectRepository, private val user
      * Get all projects. The projects can also be filtered by the optional [searchQuery] parameter.
      * See the documentation of the [nameMatchesSearchQuery] function to understand how the filtering is done.
      */
-    fun getAllProjects(searchQuery: String): Iterable<Project> =
+    fun getAllProjects(searchQuery: String = ""): Iterable<Project> =
         repository.findAll().filter { nameMatchesSearchQuery(it.name, searchQuery) }
 
 
@@ -102,7 +102,7 @@ class ProjectService(private val repository: ProjectRepository, private val user
      */
     fun getConflicts(): MutableList<Conflict> {
         val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
-        for (project in getAllProjects("")) {
+        for (project in getAllProjects()) {
             for (student in project.students) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())
