@@ -7,6 +7,7 @@ import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.ConfigUtil
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
+import java.net.URI
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
@@ -23,7 +24,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.testcontainers.junit.jupiter.Testcontainers
-import java.net.URI
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -268,7 +268,7 @@ class AuthorizationTests {
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
         val request = HttpEntity(null, createAuthHeaders(refreshToken))
 
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 401)
     }
 
@@ -373,7 +373,7 @@ class AuthorizationTests {
 
         val authHeaders = createAuthHeaders(newAccessToken)
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 200)
         logoutHeader(authHeaders)
     }
@@ -411,7 +411,7 @@ class AuthorizationTests {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         authHeaders.add(HttpHeaders.ORIGIN, "http://notallowed.com")
         val request = HttpEntity("", authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 403)
         assert(response.body == "Invalid CORS request")
     }
@@ -422,7 +422,7 @@ class AuthorizationTests {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         authHeaders.add(HttpHeaders.ORIGIN, ConfigUtil.allowedCorsOrigins[0])
         val request = HttpEntity("", authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 200)
     }
 }
