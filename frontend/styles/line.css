@@ -14,3 +14,14 @@
   line-height: 0px;
   margin: 0px 8px;
 }
+
+
+
+.toggle-checkbox:checked {
+   right: 0;
+   border-color: #24a0ed;
+ }
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #24a0ed;
+}
+

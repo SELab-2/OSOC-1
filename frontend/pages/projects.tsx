@@ -65,13 +65,13 @@ const Projects: NextPage = () => {
           {/* Holds the filter controls */}
           <div className="flex w-full flex-col rounded-sm border-2 border-amber-400 p-4">
             {/* holds drowndown, deselect all, clear all filters */}
-            <div className="flex w-full flex-row">
-              <div className="flex w-full flex-row">
+            <div className="flex w-full flex-row justify-between">
+              <div className="flex flex-row justify-items-center">
                 {/* TODO fix this dropdown later */}
                 {/* This button controls the dropdown */}
                 <button
                   type="button"
-                  className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100"
+                  className="flex flex-row justify-items-center rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100"
                   id="menu-button"
                   aria-expanded="true"
                   aria-haspopup="true"
@@ -92,64 +92,42 @@ const Projects: NextPage = () => {
                   </svg>
                 </button>
 
-                <button className="ml-2 bg-gray-300 text-black">
+                <button className="ml-2 bg-gray-300 text-black p-2">
                   Deselect all
                 </button>
               </div>
-              <button className="mr-2 justify-self-end bg-gray-300 text-black">
+              <button className="mr-2 bg-gray-300 text-black p-2">
                 Clear all filters
               </button>
             </div>
 
             {/* holds the toggles */}
-            <div className="flex w-full flex-col">
-              <div className="flex justify-center">
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input float-left -ml-10 h-5 w-9 cursor-pointer appearance-none rounded-full bg-white bg-gray-300 bg-contain bg-no-repeat align-top shadow-sm focus:outline-none"
-                    type="checkbox"
-                    role="switch"
-                    id="flexSwitchCheckDefault"
-                  />
-                  <label
-                    className="form-check-label inline-block text-gray-800"
-                    htmlFor="flexSwitchCheckDefault"
-                  >
-                    Only Alumni
-                  </label>
-                </div>
+            <div className="flex w-full flex-col my-2 space-y-2">
+              <div className="flex w-full flex-row flex-wrap">
+              <div className="relative inline-block w-10 mr-2 select-none transition duration-200 ease-in">
+                <input type="checkbox" name="toggleAlumni" id="toggleAlumni"
+                       className="toggle-checkbox absolute w-3 h-3 rounded-full bg-gray-300 appearance-none cursor-pointer m-1"/>
+                <label htmlFor="toggleAlumni" className="toggle-label block overflow-hidden h-5 rounded-full bg-white border-2 border-gray-300 cursor-pointer"/>
               </div>
-              <div className="flex justify-center">
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input float-left -ml-10 h-5 w-9 cursor-pointer appearance-none rounded-full bg-white bg-gray-300 bg-contain bg-no-repeat align-top shadow-sm focus:outline-none"
-                    type="checkbox"
-                    role="switch"
-                    id="flexSwitchCheckDefault"
-                  />
-                  <label
-                    className="form-check-label inline-block text-gray-800"
-                    htmlFor="flexSwitchCheckDefault"
-                  >
-                    Only Student Coach Volunteers
-                  </label>
+              <label htmlFor="toggleAlumni" className="">Only Alumni</label>
+            </div>
+
+              <div className="flex w-full flex-row flex-wrap">
+                <div className="relative inline-block w-10 mr-2 select-none transition duration-200 ease-in">
+                  <input type="checkbox" name="toggleStudentCoach" id="toggleStudentCoach"
+                         className="toggle-checkbox absolute w-3 h-3 rounded-full bg-gray-300 appearance-none cursor-pointer m-1"/>
+                  <label htmlFor="toggleStudentCoach" className="toggle-label block overflow-hidden h-5 rounded-full bg-white border-2 border-gray-300 cursor-pointer"/>
                 </div>
+                <label htmlFor="toggleStudentCoach" className="">Only Student Coach Volunteers</label>
               </div>
-              <div className="flex justify-center">
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input float-left -ml-10 h-5 w-9 cursor-pointer appearance-none rounded-full bg-white bg-gray-300 bg-contain bg-no-repeat align-top shadow-sm focus:outline-none"
-                    type="checkbox"
-                    role="switch"
-                    id="flexSwitchCheckDefault"
-                  />
-                  <label
-                    className="form-check-label inline-block text-gray-800"
-                    htmlFor="flexSwitchCheckDefault"
-                  >
-                    Include students you've made a suggestion for
-                  </label>
+
+              <div className="flex w-full flex-row flex-wrap">
+                <div className="relative inline-block w-10 mr-2 select-none transition duration-200 ease-in">
+                  <input type="checkbox" name="toggleSuggested" id="toggleSuggested"
+                         className="toggle-checkbox absolute w-3 h-3 rounded-full bg-gray-300 appearance-none cursor-pointer m-1"/>
+                  <label htmlFor="toggleSuggested" className="toggle-label block overflow-hidden h-5 rounded-full bg-white border-2 border-gray-300 cursor-pointer"/>
                 </div>
+                <label htmlFor="toggleSuggested" className="">Include students you've made a suggestion for</label>
               </div>
             </div>
 
@@ -166,7 +144,8 @@ const Projects: NextPage = () => {
             </div>
           </div>
 
-          {/* TODO add something for x/y shown */}
+          {/* TODO add something real for x/y shown */}
+          <p>shown 10/10</p>
 
           <div className="my-4 h-1 w-full border-b-2" />
 
