@@ -14,24 +14,10 @@ import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.lang.Integer.min
 import java.util.UUID
 
 @Service
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
-
-    class Pager(val pageNumber: Int, val pageSize: Int) {
-        val startOfPaging = pageNumber * pageSize
-
-        fun <T> paginate(collection: List<T>): List<T> {
-            val endOfPaging = min(collection.size - 1, startOfPaging + pageSize)
-            return collection.slice(startOfPaging..endOfPaging)
-        }
-    }
-
-    data class Filter(val statusFilter: List<StatusEnum>, val nameQuery: String, val includeSuggested: Boolean) {
-
-    }
 
     /**
      * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
@@ -43,22 +29,12 @@ class StudentService(private val repository: StudentRepository, private val user
     fun getAllStudents(
         pager: Pager,
         sortBy: Sort,
-        filter: Filter,
+        filter: StudentFilter,
         callee: User
     ): Iterable<Student> {
         val allStudents = repository.findAll(sortBy)
-        val studentList = mutableListOf<Student>()
-        // filtering
-        for (student in allStudents) {
-            val studentHasStatus = filter.statusFilter.contains(student.status)
-            val fullName = "${student.firstName} ${student.lastName}"
-            val studentHasMatchingName = nameMatchesSearchQuery(fullName, filter.nameQuery)
-            val studentBeenSuggestedByUserCheck = filter.includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
-            if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
-                studentList.add(student)
-            }
-        }
-        return pager.paginate(studentList)
+        val filteredStudents = filterStudents(allStudents, filter, callee)
+        return pager.paginate(filteredStudents)
     }
 
     /**

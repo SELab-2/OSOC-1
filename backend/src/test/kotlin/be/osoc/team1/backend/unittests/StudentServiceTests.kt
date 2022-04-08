@@ -13,6 +13,8 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
+import be.osoc.team1.backend.services.Pager
+import be.osoc.team1.backend.services.StudentFilter
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.UserService
 import io.mockk.Runs
@@ -36,6 +38,9 @@ class StudentServiceTests {
     private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
     private val userService = mockk<UserService>()
     private val defaultStatusFilter = listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
+    private val defaultStudentFilter = StudentFilter(defaultStatusFilter, "", true)
+    private val defaultPager = Pager(0, 50)
+    private val defaultSort = Sort.by("id")
 
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
@@ -52,13 +57,19 @@ class StudentServiceTests {
     @Test
     fun `getAllStudents does not fail`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(listOf(testStudent), service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach))
+        assertEquals(
+            listOf(testStudent),
+            service.getAllStudents(defaultPager, defaultSort, defaultStudentFilter, testCoach)
+        )
     }
 
     @Test
     fun `getAllStudents paging returns the correct amount`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(listOf(testStudent), service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach))
+        assertEquals(
+            listOf(testStudent),
+            service.getAllStudents(Pager(0, 1), defaultSort, defaultStudentFilter, testCoach)
+        )
     }
 
     @Test
@@ -75,7 +86,12 @@ class StudentServiceTests {
         val service = StudentService(repository, userService)
         assertEquals(
             listOf(testStudent2, testStudent3),
-            service.getAllStudents(0, 2, "name", listOf(StatusEnum.Yes), "", true, testCoach)
+            service.getAllStudents(
+                Pager(0, 2),
+                Sort.by("name"),
+                StudentFilter(listOf(StatusEnum.Yes), "", true),
+                testCoach
+            )
         )
     }
 
@@ -85,7 +101,7 @@ class StudentServiceTests {
         val testList = listOf<Student>()
         every { repository.findAll(Sort.by("id")) } returns testList
         val service = StudentService(repository, userService)
-        assertEquals(testList, service.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach))
+        assertEquals(testList, service.getAllStudents(Pager(0, 1), defaultSort, defaultStudentFilter, testCoach))
     }
 
     @Test
@@ -104,23 +120,38 @@ class StudentServiceTests {
         testStudent4.status = StatusEnum.Maybe
         assertEquals(
             listOf(testStudent),
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testCoach)
+            service.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Undecided), "", true),
+                testCoach
+            )
         )
         assertEquals(
             listOf(testStudent2),
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testCoach)
+            service.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Yes), "", true),
+                testCoach
+            )
         )
         assertEquals(
             listOf(testStudent3),
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testCoach)
+            service.getAllStudents(defaultPager, defaultSort, StudentFilter(listOf(StatusEnum.No), "", true), testCoach)
         )
         assertEquals(
             listOf(testStudent4),
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testCoach)
+            service.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Maybe), "", true),
+                testCoach
+            )
         )
         assertEquals(
             allStudents,
-            service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach)
+            service.getAllStudents(defaultPager, defaultSort, defaultStudentFilter, testCoach)
         )
     }
 
@@ -136,19 +167,39 @@ class StudentServiceTests {
         val service = StudentService(repository, userService)
         assertEquals(
             listOf(testStudent),
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "lars", true, testCoach),
+            service.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Undecided), "lars", true),
+                testCoach
+            ),
         )
         assertEquals(
             listOf(testStudent, testStudent3),
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "ars", true, testCoach),
+            service.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Undecided), "ars", true),
+                testCoach
+            ),
         )
         assertEquals(
             listOf(testStudent, testStudent3, testStudent4),
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "uter", true, testCoach),
+            service.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Undecided), "uter", true),
+                testCoach
+            ),
         )
         assertEquals(
             allStudents,
-            service.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testCoach),
+            service.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Undecided), "", true),
+                testCoach
+            ),
         )
     }
 
@@ -160,8 +211,14 @@ class StudentServiceTests {
         every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         val service = StudentService(repository, userService)
 
-        assertEquals(listOf<Student>(), service.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testCoach))
-        assertEquals(listOf(testStudent), service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach))
+        assertEquals(
+            listOf<Student>(),
+            service.getAllStudents(defaultPager, defaultSort, StudentFilter(defaultStatusFilter, "", false), testCoach)
+        )
+        assertEquals(
+            listOf(testStudent),
+            service.getAllStudents(defaultPager, defaultSort, StudentFilter(defaultStatusFilter, "", true), testCoach)
+        )
     }
 
     @Test

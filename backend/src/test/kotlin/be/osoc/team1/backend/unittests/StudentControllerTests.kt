@@ -13,6 +13,8 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.services.OsocUserDetailService
+import be.osoc.team1.backend.services.Pager
+import be.osoc.team1.backend.services.StudentFilter
 import be.osoc.team1.backend.services.StudentService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -22,6 +24,7 @@ import io.mockk.just
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.test.web.servlet.MockMvc
@@ -50,6 +53,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
     private val defaultStatusFilter =
         listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
+    private val defaultStudentFilter = StudentFilter(defaultStatusFilter, "", true)
+    private val defaultPager = Pager(0, 50)
+    private val defaultSort = Sort.by("id")
     private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
 
     @BeforeEach
@@ -59,7 +65,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents should not fail`() {
-        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach) } returns
+        every { studentService.getAllStudents(defaultPager, defaultSort, defaultStudentFilter, testCoach) } returns
             emptyList()
         mockMvc.perform(get("/students").principal(TestingAuthenticationToken(null, null))).andExpect(status().isOk)
     }
@@ -67,7 +73,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents paging returns the correct amount`() {
         val testList = listOf(testStudent)
-        every { studentService.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach) } returns
+        every { studentService.getAllStudents(Pager(0, 1), defaultSort, defaultStudentFilter, testCoach) } returns
             testList
         mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(TestingAuthenticationToken(null, null)))
             .andExpect(status().isOk)
@@ -86,19 +92,44 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         testStudent4.status = StatusEnum.Undecided
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testCoach)
+            studentService.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Yes), "", true),
+                testCoach
+            )
         } returns listOf(testStudent1)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testCoach)
+            studentService.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.No), "", true),
+                testCoach
+            )
         } returns listOf(testStudent2)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testCoach)
+            studentService.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Maybe), "", true),
+                testCoach
+            )
         } returns listOf(testStudent3)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testCoach)
+            studentService.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(listOf(StatusEnum.Undecided), "", true),
+                testCoach
+            )
         } returns listOf(testStudent4)
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach)
+            studentService.getAllStudents(
+                defaultPager,
+                defaultSort,
+                defaultStudentFilter,
+                testCoach
+            )
         } returns allStudents
         mockMvc.perform(get("/students?status=Yes").principal(TestingAuthenticationToken(null, null)))
             .andExpect(status().isOk)
@@ -112,7 +143,14 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(get("/students?status=Undecided").principal(TestingAuthenticationToken(null, null)))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent4))))
-        mockMvc.perform(get("/students?status=Yes,No,Maybe,Undecided").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(
+            get("/students?status=Yes,No,Maybe,Undecided").principal(
+                TestingAuthenticationToken(
+                    null,
+                    null
+                )
+            )
+        )
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(allStudents)))
     }
@@ -122,10 +160,20 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testList = listOf(Student("_", "_"))
         val testList2 = listOf(Student("_2", "_2"))
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars", true, testCoach)
+            studentService.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(defaultStatusFilter, "lars", true),
+                testCoach
+            )
         } returns testList
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars test", true, testCoach)
+            studentService.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(defaultStatusFilter, "lars test", true),
+                testCoach
+            )
         } returns testList2
         // tests the url parsing + with url encoding
         mockMvc.perform(get("/students?name=lars").principal(TestingAuthenticationToken(null, null)))
@@ -139,7 +187,14 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents include filtering parses the boolean correctly`() {
         val testList = listOf(Student("test", "testie"))
-        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testCoach) } returns
+        every {
+            studentService.getAllStudents(
+                defaultPager,
+                defaultSort,
+                StudentFilter(defaultStatusFilter, "", false),
+                testCoach
+            )
+        } returns
             testList
         mockMvc.perform(get("/students?includeSuggested=false").principal(TestingAuthenticationToken(null, null)))
             .andExpect(status().isOk)
