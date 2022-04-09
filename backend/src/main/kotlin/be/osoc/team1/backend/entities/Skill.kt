@@ -12,7 +12,5 @@ class Skill(
     @Id
     val skillName: String
 ) : Comparable<Skill> {
-    override fun compareTo(other: Skill): Int {
-        return skillName.compareTo(other.skillName)
-    }
+    override fun compareTo(other: Skill): Int = skillName.compareTo(other.skillName)
 }
