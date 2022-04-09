@@ -99,7 +99,8 @@ class ProjectService(
     fun getStudents(project: Project): List<Student> {
         val students = mutableListOf<Student>()
         for (assignment in project.assignments) {
-            students.add(assignment.student)
+            if(!students.contains(assignment.student))
+                students.add(assignment.student)
         }
         return students
     }
@@ -128,7 +129,7 @@ class ProjectService(
 
     /**
      * Assigns a student to a specific position on the project with [projectId]. A [ForbiddenOperationException] will be
-     * thrown if the student was already assigned on this project or if that position already has enough assignees. A
+     * thrown if the student was already assigned this position. A
      * [InvalidAssignmentIdException] will be thrown if specified position is not part of the specified project. If the
      * specified student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
      */
@@ -137,12 +138,8 @@ class ProjectService(
         val position = project.positions.find { it.id == assignmentForm.position }
             ?: throw InvalidPositionIdException("The specified position is not part of the specified project.")
 
-        if (project.assignments.find { it.student.id == assignmentForm.student } != null)
-            throw ForbiddenOperationException("This student was already assigned a position on this project!")
-
-        val amount = project.assignments.count { it.position == position }
-        if (amount >= position.amount)
-            throw ForbiddenOperationException("This position already has enough assignees!")
+        if (project.assignments.find { it.student.id == assignmentForm.student && position == it.position} != null)
+            throw ForbiddenOperationException("This student was already assigned this position on the project!")
 
         val student = studentService.getStudentById(assignmentForm.student)
         val suggester = userService.getUserById(assignmentForm.suggester)

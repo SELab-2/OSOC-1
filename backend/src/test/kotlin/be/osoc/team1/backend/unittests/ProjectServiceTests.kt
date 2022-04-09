@@ -34,12 +34,13 @@ class ProjectServiceTests {
     private val testStudent = Student("Lars", "Van Cauter")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
     private val testSkill = Skill("Backend")
+    private val testSkill2 = Skill("Frontend")
     private val testProject = Project(
         "Test",
         "Client",
         "a test project",
         mutableListOf(testCoach),
-        listOf(Position(testSkill, 1))
+        listOf(Position(testSkill, 1), Position(testSkill2, 1))
     )
     private val savedProject = Project(
         "Saved",
@@ -255,7 +256,7 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `postAssignment fails if the student was already assigned a position on this project`() {
+    fun `postAssignment fails if the student was already assigned this position on the project`() {
         val service = ProjectService(getRepository(true), getStudentService(true), getUserService(suggester))
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
@@ -270,18 +271,18 @@ class ProjectServiceTests {
     }
 
     @Test
-    fun `postAssignment fails if the position already has enough assignees`() {
+    fun `postAssignment does not fail when assigned a different position on the project`() {
         val service = ProjectService(getRepository(true), getStudentService(true), getUserService(suggester))
+        val positionIterator = testProject.positions.iterator()
         val assignmentPost = ProjectService.AssignmentPost(
             testStudent.id,
-            testProject.positions.first().id,
+            positionIterator.next().id,
             suggester.id,
             "reason"
         )
-        val differentStudent = Student("Maarten", "Steevens")
-        val assignment = Assignment(differentStudent, testProject.positions.first(), suggester, "reason")
+        val assignment = Assignment(testStudent, positionIterator.next(), suggester, "reason")
         testProject.assignments.add(assignment)
-        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
+        service.postAssignment(testProject.id, assignmentPost)
         testProject.assignments.remove(assignment)
     }
 
