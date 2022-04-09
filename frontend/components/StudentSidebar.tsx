@@ -12,12 +12,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [showFilter, setShowFilter] = useState(true);
   return (
     // TODO test with a long list for autoscroll etc this should be separate from projects scroll
-    <section className="mt-[14px] w-1/3 flex-initial bg-osoc-neutral-bg p-4">
-      {/* holds searchbar + hide filter button */}
-      <div className="flex w-full flex-row items-center justify-between">
+    // holds searchbar + hide filter button
+    <div>
+      <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
         {/* The students searchbar */}
-        <div className="justify-left flex">
-          <div className="relative mb-3">
+        <div className="justify-left mb-3 flex w-[80%] self-end md:ml-0 md:w-full lg:mb-0 lg:w-2/3">
+          <div className="relative w-full">
             <input
               type="search"
               className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
@@ -36,7 +36,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
         {/* Show/hide filter button */}
         <button
-          className="justify-right rounded-sm bg-amber-400 px-4 py-1 font-medium text-white shadow-sm shadow-gray-300 lg:mb-4"
+          className="justify-right rounded-sm bg-amber-400 px-4 py-1 font-medium text-white shadow-sm shadow-gray-300"
           type="submit"
           onClick={() => setShowFilter(!showFilter)}
         >
@@ -53,7 +53,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
         {/* holds drowndown, deselect all, clear all filters */}
         <div className="flex w-full flex-row justify-between">
           <div className="flex flex-row justify-items-center">
-            {/* TODO fix this dropdown later */}
+            {/* TODO fix dropdown functionality */}
+            {/* TODO fix dropdown being too big */}
             {/* This button controls the dropdown */}
             <button
               type="button"
@@ -78,11 +79,11 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
               </svg>
             </button>
 
-            <button className="ml-2 bg-gray-300 p-2 text-black">
+            <button className="ml-2 bg-gray-300 p-2 text-sm text-black">
               Deselect all
             </button>
           </div>
-          <button className="mr-2 bg-gray-300 p-2 text-black">
+          <button className="bg-gray-300 px-2 text-sm text-black">
             Clear all filters
           </button>
         </div>
@@ -102,7 +103,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 className="toggle-label block h-5 cursor-pointer overflow-hidden rounded-full border-2 border-gray-300 bg-white"
               />
             </div>
-            <label htmlFor="toggleAlumni" className="">
+            <label htmlFor="toggleAlumni" className="text-sm">
               Only Alumni
             </label>
           </div>
@@ -120,7 +121,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 className="toggle-label block h-5 cursor-pointer overflow-hidden rounded-full border-2 border-gray-300 bg-white"
               />
             </div>
-            <label htmlFor="toggleStudentCoach" className="">
+            <label htmlFor="toggleStudentCoach" className="text-sm">
               Only Student Coach Volunteers
             </label>
           </div>
@@ -138,7 +139,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 className="toggle-label block h-5 cursor-pointer overflow-hidden rounded-full border-2 border-gray-300 bg-white"
               />
             </div>
-            <label htmlFor="toggleSuggested" className="">
+            <label htmlFor="toggleSuggested" className="text-sm">
               Include students you&rsquo;ve made a suggestion for
             </label>
           </div>
@@ -147,17 +148,29 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
         <p className="justify-self-start">Filter on status</p>
 
         {/* holds the filter buttons */}
-        <div className="flex flex-row justify-center space-x-4 border-y-2 py-1.5 px-8">
-          <button className="w-1 grow bg-gray-300 text-black">Yes</button>
-          <button className="w-1 grow bg-gray-300 text-black">No</button>
-          <button className="w-1 grow bg-gray-300 text-black">Maybe</button>
-          <button className="w-1 grow bg-gray-300 text-black">Undecided</button>
+        <div className="flex flex-col justify-center border-y-2 py-1.5 lg:flex-row">
+          <div className="flex grow flex-row justify-between lg:mr-[2.75%] lg:w-1">
+            <button className="w-[44%] bg-gray-300 text-sm text-black">
+              Yes
+            </button>
+            <button className="w-[44%] bg-gray-300 text-sm text-black">
+              No
+            </button>
+          </div>
+          <div className="mt-2.5 flex grow flex-row justify-between lg:ml-[2.75%] lg:mt-0 lg:w-1">
+            <button className="w-[44%] bg-gray-300 text-sm text-black">
+              Maybe
+            </button>
+            <button className="w-[44%] bg-gray-300 text-sm text-black">
+              Undecided
+            </button>
+          </div>
         </div>
       </div>
 
       {/* These are the student tiles */}
       <StudentTiles students={students} />
-    </section>
+    </div>
   );
 };
 

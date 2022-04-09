@@ -52,7 +52,7 @@ type AssignmentProp = {
 
 const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
   return (
-    <div className="m-4 flex w-[calc(50%-48px)] flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500">
+    <div className="m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] 2xl:w-[calc(33.5%-48px)]">
       {/* project info top */}
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}

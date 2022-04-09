@@ -2,10 +2,13 @@ import type { NextPage } from 'next';
 import Header from '../components/Header';
 import StudentSidebar from '../components/StudentSidebar';
 import ProjectTiles from '../components/projects/ProjectTiles';
-
+import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
+const arrow_out = <Icon icon="bi:arrow-right-circle" />;
+const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
 // Header
 //
@@ -22,32 +25,63 @@ const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 //          assigned people list
 
 const Projects: NextPage = () => {
+  const [showSidebar, setShowSidebar] = useState(false);
+
   return (
     <div className="flex min-h-screen flex-col items-center py-2">
       <Header />
 
       <main className="flex w-full flex-row">
         {/* Holds the sidebar with search, filter and student results */}
-        <StudentSidebar />
+        <section
+          className={`${
+            showSidebar ? 'visible' : 'hidden'
+          } relative mt-[14px] w-full flex-initial bg-osoc-neutral-bg p-4 md:visible md:block md:w-[350px] md:max-w-[500px] lg:w-[450px] xl:w-1/3 2xl:w-[30%]`}
+        >
+          {/* button to close sidebar on mobile */}
+          <div
+            className={`${
+              showSidebar ? 'visible' : 'hidden'
+            } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+          >
+            <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
+          </div>
+          <StudentSidebar />
+        </section>
 
         {/* Holds the projects searchbar + project tiles */}
-        <section className="mt-[30px] w-2/3 flex-initial">
-          {/* This is the projects searchbar */}
-          <div className="flex justify-center">
-            <div className="relative mb-3 xl:w-96">
-              <input
-                type="search"
-                className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
-                id="ProjectsSearch"
-                placeholder="Search projects by name"
-              />
-              {/* TODO add actual onclick search */}
-              <i
-                className="absolute bottom-1.5 right-2 opacity-20"
-                // onClick={() => }
-              >
-                {magnifying_glass}
-              </i>
+        <section
+          className={`${
+            showSidebar ? 'hidden' : 'visible'
+          } mt-[30px] w-full flex-initial md:visible md:block md:w-[calc(100%-350px)] lg:w-[calc(100%-450px)] xl:w-2/3 2xl:w-[70%]`}
+        >
+          <div className={`ml-6 mb-3 flex w-full flex-row md:ml-0`}>
+            {/* button to open sidebar on mobile */}
+            <div
+              className={`${
+                showSidebar ? 'hidden' : 'visible w-auto'
+              } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+            >
+              <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_out}</i>
+            </div>
+
+            {/* This is the projects searchbar */}
+            <div className="mx-6 flex w-full justify-center md:mr-4">
+              <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
+                <input
+                  type="search"
+                  className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+                  id="ProjectsSearch"
+                  placeholder="Search projects by name"
+                />
+                {/* TODO add actual onclick search */}
+                <i
+                  className="absolute bottom-1.5 right-2 opacity-20"
+                  // onClick={() => }
+                >
+                  {magnifying_glass}
+                </i>
+              </div>
             </div>
           </div>
 
