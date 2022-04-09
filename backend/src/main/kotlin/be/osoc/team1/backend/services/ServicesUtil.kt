@@ -46,23 +46,30 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
 /**
  * New filters can be defined here following this format:
  * ```
- *      FORMAT HERE
+ *      fun filter(REQUIRED VARIABLES FOR FILTER) = { obj: Obj -> BOOLEAN FILTER STATEMENT }
  * ```
  * These filters can then later be applied to a collection with [applyFilterList]
- */
-
-/**
- * This functions takes a list of [filters] as defined above and a list of [values] over which those [filters] will be applied
+ *
+ * This function takes a list of [filters] as defined above and a list of [values] over which those [filters] will be applied
  */
 fun <T> applyFilterList(filters: Iterable<(T) -> Boolean>, values: Iterable<T>): List<T> =
     values.filter { filters.all { filter -> filter(it) } }
 
 // Student related filters
+/**
+ * Filter students based on their status field
+ */
 fun statusFilter(statuses: List<StatusEnum>) = { student: Student -> statuses.contains(student.status) }
 
+/**
+ * Filter students based on whether its name matches the query (in preprocessed form, see [nameMatchesSearchQuery])
+ */
 fun studentNameFilter(nameQuery: String) =
     { student: Student -> nameMatchesSearchQuery("${student.firstName} ${student.lastName}", nameQuery) }
 
+/**
+ * Filter students based on whether the given [callee] has already made a suggestion for them
+ */
 fun suggestedFilter(includeSuggested: Boolean, callee: User) =
     { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
 

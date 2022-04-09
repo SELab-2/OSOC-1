@@ -6,7 +6,6 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.Pager
-import be.osoc.team1.backend.services.StudentFilter
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.statusFilter
 import be.osoc.team1.backend.services.studentNameFilter
