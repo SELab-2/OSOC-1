@@ -1,13 +1,11 @@
 import type { NextPage } from 'next';
 import Header from '../components/Header';
 import {useState} from "react";
-// import react minimal pie chart
+import StudentTiles from '../components/students/StudentTiles';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
-// const eyeSlash = <FontAwesomeIcon icon={faEyeSlash} />;
-// <FontAwesomeIcon icon="fa-thin fa-magnifying-glass" />
 
 // Temporary fake data to test with
 const students = [
@@ -40,6 +38,78 @@ const students = [
     firstName: 'FNaam2',
     lastName: 'LNaam2',
     status: 'Undecided',
+    statusSuggestions: [
+      {
+        coachId: '100',
+        status: 'Maybe',
+        motivation: 'Dit is een motivatie voor maybe'
+      },
+      {
+        coachId: '101',
+        status: 'Yes',
+        motivation: 'Dit is een motivatie voor yes'
+      },
+      {
+        coachId: '102',
+        status: 'No',
+        motivation: 'Dit is een motivatie voor no'
+      }
+    ],
+    alumn: false
+  },
+  {
+    id: '3',
+    firstName: 'FNaam2',
+    lastName: 'LNaam2',
+    status: 'Yes',
+    statusSuggestions: [
+      {
+        coachId: '100',
+        status: 'Maybe',
+        motivation: 'Dit is een motivatie voor maybe'
+      },
+      {
+        coachId: '101',
+        status: 'Yes',
+        motivation: 'Dit is een motivatie voor yes'
+      },
+      {
+        coachId: '102',
+        status: 'No',
+        motivation: 'Dit is een motivatie voor no'
+      }
+    ],
+    alumn: false
+  },
+  {
+    id: '4',
+    firstName: 'FNaam2',
+    lastName: 'LNaam2',
+    status: 'No',
+    statusSuggestions: [
+      {
+        coachId: '100',
+        status: 'Maybe',
+        motivation: 'Dit is een motivatie voor maybe'
+      },
+      {
+        coachId: '101',
+        status: 'Yes',
+        motivation: 'Dit is een motivatie voor yes'
+      },
+      {
+        coachId: '102',
+        status: 'No',
+        motivation: 'Dit is een motivatie voor no'
+      }
+    ],
+    alumn: false
+  },
+  {
+    id: '5',
+    firstName: 'FNaam2',
+    lastName: 'LNaam2',
+    status: 'Maybe',
     statusSuggestions: [
       {
         coachId: '100',
@@ -213,9 +283,11 @@ const Projects: NextPage = () => {
           </div>
 
           {/* TODO add something real for x/y shown */}
-          <p>shown 10/10</p>
+          {/*<p>shown 10/10</p>*/}
 
-          <div className="my-2 h-1 w-full border-b-2" />
+          {/*<div className="my-2 h-1 w-full border-b-2" />*/}
+
+          <StudentTiles students={ students } />
 
           {/* TODO here should be the student tiles */}
         </section>
