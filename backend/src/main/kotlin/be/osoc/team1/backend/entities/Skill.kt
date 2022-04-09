@@ -11,4 +11,8 @@ import javax.persistence.Id
 class Skill(
     @Id
     val skillName: String
-)
+) : Comparable<Skill> {
+    override fun compareTo(other: Skill): Int {
+        return skillName.compareTo(other.skillName)
+    }
+}
