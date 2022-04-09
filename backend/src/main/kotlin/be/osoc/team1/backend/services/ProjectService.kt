@@ -99,7 +99,7 @@ class ProjectService(
     fun getStudents(project: Project): List<Student> {
         val students = mutableListOf<Student>()
         for (assignment in project.assignments) {
-            if(!students.contains(assignment.student))
+            if (!students.contains(assignment.student))
                 students.add(assignment.student)
         }
         return students
@@ -138,7 +138,7 @@ class ProjectService(
         val position = project.positions.find { it.id == assignmentForm.position }
             ?: throw InvalidPositionIdException("The specified position is not part of the specified project.")
 
-        if (project.assignments.find { it.student.id == assignmentForm.student && position == it.position} != null)
+        if (project.assignments.find { it.student.id == assignmentForm.student && position == it.position } != null)
             throw ForbiddenOperationException("This student was already assigned this position on the project!")
 
         val student = studentService.getStudentById(assignmentForm.student)
