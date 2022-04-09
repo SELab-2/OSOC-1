@@ -10,6 +10,8 @@ module.exports = {
         'osoc-yellow': '#FCB70F',
         'osoc-green': '#44DBA4',
         'osoc-red': '#F14A3B',
+        'osoc-bg': '#86efac',
+        'osoc-neutral-bg': '#fafafa',
        'osoc-btn-primary': '#1DE1AE'
       },
     },

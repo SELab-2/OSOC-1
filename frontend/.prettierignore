@@ -32,3 +32,4 @@ frontend/*
 !styles/
 !lib/
 !atoms/
+!components/
