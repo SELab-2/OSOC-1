@@ -10,8 +10,7 @@ const StudentTiles: React.FC<StudentTableProps> = ({ students }: StudentTablePro
         <table className="w-full table-auto">
             <thead className="top-0 bg-white">
             <tr>
-                {/* TODO outline right does not want to work */}
-                <th className="col-span-full">
+                <th className="col-span-full text-xs font-normal text-right border-b-2 border-gray-400 pb-1">
                     {/* TODO this should be something else once endpoint is dont */}
                     { students.length + "/" + students.length + " shown" }
                 </th>

@@ -45,7 +45,6 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
     let no = 0;
     let maybe = 0;
     student.statusSuggestions.forEach( (suggestion) => {
-        console.log(suggestion);
         if (suggestion.status == 'Yes') {
             yes += 1;
         } else if (suggestion.status == 'No') {
@@ -56,25 +55,32 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
     })
 
     return (
-        <tr key={student.id} className="border-y-2 border-collapse">
-            <td className="py-4">
-                { student.firstName + " " + student.lastName }
-            </td>
-            {/* TODO Add the alumni thing */}
-            <td className="text-right">
-                <div className="relative">
+        <tr key={student.id} className="">
+            <td className="">
+                <div className="flex flex-row justify-between p-2 my-2 shadow-sm shadow-gray-500">
+
+                        <div className="w-3/4 flex flex-col justify-center">
+                            <div className={`flex flex-row ${student.alumn ? 'visible' : 'hidden h-0 w-0'}`}>
+                            <p className={`m-0 text-xs bg-green-300 rounded-xl ${student.alumn ? 'visible px-1' : 'invisible px-0 h-0'}`}>
+                                Alumn
+                            </p>
+                            </div>
+                    <p className="pl-2"> {student.firstName + " " + student.lastName} </p>
+                    </div>
+                    <div className="relative w-[10%]">
                 <PieChart
                     data={[
                         { title: 'Yes', value: yes, color: '#22c55e' },
                         { title: 'No', value: no, color: '#ef4444' },
                         { title: 'Maybe', value: maybe, color: '#f97316' },
                     ]}
-                    lineWidth={15}
+                    lineWidth={25}
                 />
-                    {/* TODO fix this size to not be hardcoded */}
+                    {/* TODO fix this text size to not be hardcoded */}
                     <i
-                        className={`absolute left-1/2 top-1/2 chart-label text-[60px] ${myColor}`}
+                        className={`absolute left-1/2 top-1/2 chart-label text-[28px] ${myColor}`}
                     >{myLabel}</i>
+                </div>
                 </div>
             </td>
         </tr>
