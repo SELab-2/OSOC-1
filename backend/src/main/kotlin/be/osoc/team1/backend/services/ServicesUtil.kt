@@ -43,21 +43,26 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
     }
 }
 
-data class StudentFilter(val statusFilter: List<StatusEnum>, val nameQuery: String, val includeSuggested: Boolean)
+/**
+ * New filters can be defined here following this format:
+ * ```
+ *      FORMAT HERE
+ * ```
+ * These filters can then later be applied to a collection with [applyFilterList]
+ */
 
-fun filterStudents(students: Iterable<Student>, filters: StudentFilter, callee: User): List<Student> {
-    val filteredStudents = mutableListOf<Student>()
-    for (student in students) {
-        val studentHasStatus = filters.statusFilter.contains(student.status)
-        val fullName = "${student.firstName} ${student.lastName}"
-        val studentHasMatchingName = nameMatchesSearchQuery(fullName, filters.nameQuery)
-        val studentBeenSuggestedByUserCheck =
-            filters.includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
-        if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
-            filteredStudents.add(student)
-        }
-    }
-    return filteredStudents
-}
+/**
+ * This functions takes a list of [filters] as defined above and a list of [values] over which those [filters] will be applied
+ */
+fun <T> applyFilterList(filters: Iterable<(T) -> Boolean>, values: Iterable<T>): List<T> =
+    values.filter { filters.all { filter -> filter(it) } }
 
+// Student related filters
+fun statusFilter(statuses: List<StatusEnum>) = { student: Student -> statuses.contains(student.status) }
+
+fun studentNameFilter(nameQuery: String) =
+    { student: Student -> nameMatchesSearchQuery("${student.firstName} ${student.lastName}", nameQuery) }
+
+fun suggestedFilter(includeSuggested: Boolean, callee: User) =
+    { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
 

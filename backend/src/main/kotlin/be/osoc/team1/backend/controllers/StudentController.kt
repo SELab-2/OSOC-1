@@ -8,6 +8,9 @@ import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentFilter
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.statusFilter
+import be.osoc.team1.backend.services.studentNameFilter
+import be.osoc.team1.backend.services.suggestedFilter
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -56,8 +59,11 @@ class StudentController(
         return service.getAllStudents(
             Pager(pageNumber, pageSize),
             Sort.by(sortBy),
-            StudentFilter(status, decodedName, includeSuggested),
-            userDetailService.getUserFromPrincipal(principal)
+            listOf(
+                statusFilter(status),
+                studentNameFilter(decodedName),
+                suggestedFilter(includeSuggested, userDetailService.getUserFromPrincipal(principal))
+            )
         )
     }
 
