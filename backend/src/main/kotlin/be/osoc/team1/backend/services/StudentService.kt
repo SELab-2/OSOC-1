@@ -20,22 +20,10 @@ import java.util.UUID
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
     /**
-     * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
-     * Can be filtered by [searchQuery] (see the [nameMatchesSearchQuery] function for the details),
-     * [statusFilter] (see if student status matches 1 in the given list),
-     * whether or not the requesting user has already made a suggestion for this student [includeSuggested],
-     * [callee] is the user who made this request
+     * Get all students sorted using [sortBy].
+     * Can be filtered using the List<Student> extension functions.
      */
-    fun getAllStudents(
-        pager: Pager,
-        sortBy: Sort,
-        filter: StudentFilter,
-        callee: User
-    ): Iterable<Student> {
-        val allStudents = repository.findAll(sortBy)
-        val filteredStudents = filterStudents(allStudents, filter, callee)
-        return pager.paginate(filteredStudents)
-    }
+    fun getAllStudents(sortBy: Sort): List<Student> = repository.findAll(sortBy).toList()
 
     /**
      * Get a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student exists.

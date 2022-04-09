@@ -1,5 +1,7 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.services.Pager
+import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.UUID
 import javax.persistence.CascadeType
@@ -97,3 +99,14 @@ class Student(val firstName: String, val lastName: String, val alumn: Boolean = 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val communications: MutableList<Communication> = mutableListOf()
 }
+
+fun List<Student>.filterByStatus(statuses: List<StatusEnum>) =
+    filter { student: Student -> statuses.contains(student.status) }
+
+fun List<Student>.filterByName(nameQuery: String) =
+    filter { student: Student -> nameMatchesSearchQuery("${student.firstName} ${student.lastName}", nameQuery) }
+
+fun List<Student>.filterBySuggested(includeSuggested: Boolean, callee: User) =
+    filter { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
+
+fun List<Student>.page(pager: Pager) = pager.paginate(this)
