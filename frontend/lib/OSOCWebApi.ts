@@ -1,28 +1,14 @@
 import Endpoints from './endpoints';
 import HttpFetcher, { NamedError } from './HttpFetcher';
-
-type UUID = string;
-
-export enum UserRole {
-  Admin = 'Admin',
-  Coach = 'Coach',
-  Disabled = 'Disabled'
-}
+import { User, UserRole, UUID } from './types';
 
 type AuthToken = string | undefined;
 type LoginResponse = {
   accessToken: string;
   refreshToken: string;
-  refreshTokenTTL: Date;
+  accessTokenTTL: Date;
   user: User;
 };
-
-export type User = {
-  id: UUID;
-  username: string;
-  email: string;
-  role: UserRole;
-}
 
 export class InvalidRefreshTokenError extends NamedError {};
 
