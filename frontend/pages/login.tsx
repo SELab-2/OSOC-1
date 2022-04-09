@@ -2,11 +2,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEventHandler, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useRecoilState } from 'recoil';
-import { tokenAtom, userAtom } from '../atoms/globalAtoms';
 import FormContainer from '../components/FormContainer';
-import useApi from '../hooks/useApi';
-import { UserRole } from '../lib/OSOCWebApi';
+import useTokens from '../hooks/useTokens';
+import useUser from '../hooks/useUser';
+import { UserRole } from '../lib/types';
+import axios from '../lib/axios';
+
+const LOGIN_URL = '/login';
 
 /**
  * Login page for OSOC application
@@ -17,45 +19,54 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [, setUser] = useRecoilState(userAtom);
-  const [, setTokens] = useRecoilState(tokenAtom);
+  const [, setUser] = useUser();
+  const [, setTokens] = useTokens();
 
   const router = useRouter();
-  const webApi = useApi();
 
-  const loginUser: FormEventHandler<HTMLFormElement> = async (e) => {
+  const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
     if (email && password) {
       try {
-        const { accessToken, refreshToken, refreshTokenTTL, user: _user } = await webApi.login(email, password);
-        // set current user
-        setUser(_user);
-        
-        // set current tokens
-        setTokens({
-          refreshToken,
-          accessToken,
-          accessTokenTTL: refreshTokenTTL
+        const response = await axios.post(LOGIN_URL, new URLSearchParams({
+          email,
+          password
+        }), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
         });
+        
+        if (response?.data) {
+          const { accessToken, refreshToken, user } = response.data;
+          setUser(user);
+          setTokens({
+            accessToken,
+            refreshToken
+          });
 
-        // go to wait page if user role is disabled
-        if (_user.role === UserRole.Disabled) {
-          router.push('/wait');
-        } else { // go to 'index page'
-          router.push('/');
+          if (user.role === UserRole.Disabled) {
+            router.push('/wait');
+          } else {
+            router.push('/');
+          }
+
+        } else {
+          toast.error('Something went wrong trying to process the request.')
         }
-      } catch {
+
+      } catch (err) {
+        console.error(err);
         toast.error('An error occurred while trying to log in.');
       }
-
     }
   };
 
   return (
     <>
       <FormContainer pageTitle="LOGIN">
-        <form className="mb-1 w-11/12 max-w-md" onSubmit={loginUser}>
+        <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             Email Address
             <input
