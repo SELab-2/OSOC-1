@@ -108,5 +108,3 @@ fun List<Student>.filterByName(nameQuery: String) =
 
 fun List<Student>.filterBySuggested(includeSuggested: Boolean, callee: User) =
     filter { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
-
-fun List<Student>.page(pager: Pager) = pager.paginate(this)

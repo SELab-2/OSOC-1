@@ -50,4 +50,4 @@ fun filterStudents(students: Iterable<Student>, filters: StudentFilter, callee: 
     return filteredStudents
 }
 
-
+fun <T> List<T>.page(pager: Pager) = pager.paginate(this)

@@ -5,11 +5,11 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.filterByName
 import be.osoc.team1.backend.entities.filterBySuggested
-import be.osoc.team1.backend.entities.page
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.page
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
