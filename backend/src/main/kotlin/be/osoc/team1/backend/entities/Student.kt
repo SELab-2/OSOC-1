@@ -7,6 +7,7 @@ import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 
@@ -78,13 +79,20 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
 /**
  * Represents a student in the database. A student is constructed with a [firstName]
  * and a [lastName]. Note that neither of these fields, nor the combination of both of them need be unique.
+ * A student also has a set of [skills].
  * I.e. there could be two students in the database with [firstName] "Tom" and [lastName] "Alard".
  * A student also has a [status], see the documentation of [StatusEnum] for more information on what it represents.
  * Whether a student is an alumn can be indicated by the [alumn] boolean (default false).
  * Finally, each student keeps a [MutableList] of [StatusSuggestion]s.
  */
 @Entity
-class Student(val firstName: String, val lastName: String, val alumn: Boolean = false) {
+class Student(
+    val firstName: String,
+    val lastName: String,
+    @ManyToMany(cascade = [CascadeType.ALL])
+    val skills: Set<Skill> = sortedSetOf(),
+    val alumn: Boolean = false
+) {
 
     @Id
     val id: UUID = UUID.randomUUID()
