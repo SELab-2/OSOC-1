@@ -20,7 +20,7 @@ import java.util.UUID
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
     /**
-     * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
+     * Get all students within paging range (defined in [pager]]) and sorted [sortBy].
      * Can be filtered by [searchQuery] (see the [nameMatchesSearchQuery] function for the details),
      * [statusFilter] (see if student status matches 1 in the given list),
      * whether or not the requesting user has already made a suggestion for this student [includeSuggested],
