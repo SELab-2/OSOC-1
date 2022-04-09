@@ -28,7 +28,7 @@ const Projects: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col items-center py-2">
+    <div className="min-w-screen flex min-h-screen flex-col items-center">
       <Header />
 
       <main className="flex w-full flex-row">
@@ -55,7 +55,7 @@ const Projects: NextPage = () => {
             showSidebar ? 'hidden' : 'visible'
           } mt-[30px] w-full flex-initial md:visible md:block md:w-[calc(100%-350px)] lg:w-[calc(100%-450px)] xl:w-2/3 2xl:w-[70%]`}
         >
-          <div className={`ml-6 mb-3 flex w-full flex-row md:ml-0`}>
+          <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
             {/* button to open sidebar on mobile */}
             <div
               className={`${
@@ -66,7 +66,7 @@ const Projects: NextPage = () => {
             </div>
 
             {/* This is the projects searchbar */}
-            <div className="mx-6 flex w-full justify-center md:mr-4">
+            <div className="ml-6 flex w-full justify-center md:mx-6 md:mr-4">
               <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
                 <input
                   type="search"

@@ -40,7 +40,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
           type="submit"
           onClick={() => setShowFilter(!showFilter)}
         >
-          Hide Filters
+          {showFilter ? 'Hide Filters' : 'Show Filters'}
         </button>
       </div>
 
