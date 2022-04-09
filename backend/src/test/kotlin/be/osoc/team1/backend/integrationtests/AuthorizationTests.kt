@@ -401,6 +401,24 @@ class AuthorizationTests() {
         assert(thirdRefreshResponse.statusCodeValue == 400)
     }
 
+    @Test
+    fun `logout invalidates refresh token`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+
+        val input = "token=$refreshToken"
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        val refreshRequest = HttpEntity(input, headers)
+        val logoutResponse = restTemplate.exchange(URI("/token/logout"), HttpMethod.POST, refreshRequest, String::class.java)
+        println(logoutResponse)
+        println(logoutResponse.statusCodeValue)
+        assert(logoutResponse.statusCodeValue == 200)
+
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(refreshResponse.statusCodeValue == 400)
+    }
+
     // Login first to test GET with protected endpoint
     @Test
     fun `CORS using not allowed origin gives error`() {
