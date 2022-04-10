@@ -16,7 +16,7 @@ const LOGIN_URL = '/login';
  * @remarks
  * The login page sets the correct user and tokens in the {@link AuthProvider} on valid login and
  * it's context.
- * 
+ *
  * @returns Login Page
  */
 const Login = () => {
@@ -33,21 +33,25 @@ const Login = () => {
 
     if (email && password) {
       try {
-        const response = await axios.post(LOGIN_URL, new URLSearchParams({
-          email,
-          password
-        }), {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+        const response = await axios.post(
+          LOGIN_URL,
+          new URLSearchParams({
+            email,
+            password,
+          }),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
           }
-        });
-        
+        );
+
         if (response?.data) {
           const { accessToken, refreshToken, user } = response.data;
           setUser(user);
           setTokens({
             accessToken,
-            refreshToken
+            refreshToken,
           });
 
           if (user.role === UserRole.Disabled) {
@@ -55,11 +59,9 @@ const Login = () => {
           } else {
             router.push('/');
           }
-
         } else {
-          toast.error('Something went wrong trying to process the request.')
+          toast.error('Something went wrong trying to process the request.');
         }
-
       } catch (err) {
         toast.error('An error occurred while trying to log in.');
       }

@@ -47,16 +47,16 @@ export type getProps = {
    * The endpoint to make the request to
    * @see {@link ENDPOINT_ENUM | The Endpoint Enum} for available options
    */
-   endpoint: Endpoints;
+  endpoint: Endpoints;
 
-   /**
-    * An optional access token to make authenticated requests
-    *
-    * @remarks
-    * More information can be found in the authentication docs
-    */
-   accessToken?: string;
-}
+  /**
+   * An optional access token to make authenticated requests
+   *
+   * @remarks
+   * More information can be found in the authentication docs
+   */
+  accessToken?: string;
+};
 
 export class NamedError extends Error {
   get name() {
@@ -89,7 +89,6 @@ export class WebApiError extends NamedError {
  * to instantiate this class
  */
 class HttpFetcher {
-  
   /**
    * Helper function to make requests that contain a body
    *
@@ -111,7 +110,7 @@ class HttpFetcher {
     ...props
   }: {
     endpoint: Endpoints;
-    body: BodyInit,
+    body: BodyInit;
     contentType: string;
     method: string;
     accessToken?: string;
@@ -141,7 +140,7 @@ class HttpFetcher {
         response.status
       );
 
-    return response;    
+    return response;
   }
 
   /**
@@ -160,7 +159,7 @@ class HttpFetcher {
     endpoint,
     body,
     contentType,
-    accessToken
+    accessToken,
   }: {
     endpoint: Endpoints;
     body: BodyInit;
@@ -172,7 +171,7 @@ class HttpFetcher {
       body,
       contentType,
       method: 'POST',
-      accessToken
+      accessToken,
     });
   }
 
@@ -180,7 +179,7 @@ class HttpFetcher {
     endpoint,
     body,
     contentType,
-    accessToken
+    accessToken,
   }: {
     endpoint: Endpoints;
     body: BodyInit;
@@ -192,7 +191,7 @@ class HttpFetcher {
       body,
       contentType,
       method: 'PATCH',
-      accessToken
+      accessToken,
     });
   }
 
@@ -258,13 +257,10 @@ class HttpFetcher {
    *
    * @throws {@link WebApiError}
    * This error is thrown when the request fails
-   */  
-  static async get({
-    endpoint,
-    ...props
-  }: getProps): Promise<Response> {
+   */
+  static async get({ endpoint, ...props }: getProps): Promise<Response> {
     const options: RequestInit = {
-      method: 'GET'
+      method: 'GET',
     };
 
     if (props.accessToken) {
@@ -289,25 +285,25 @@ class HttpFetcher {
   static async patchJSON({
     endpoint,
     body,
-    accessToken
+    accessToken,
   }: PostJSONProps): Promise<Response> {
     return await this._patchRequest({
       endpoint,
       body: JSON.stringify(body),
       contentType: 'application/json',
-      accessToken
+      accessToken,
     });
   }
 
   static async delete({
     endpoint,
-    accessToken
+    accessToken,
   }: {
     endpoint: Endpoints;
     accessToken?: string;
   }): Promise<Response> {
     const options: RequestInit = {
-      method: 'DELETE'
+      method: 'DELETE',
     };
 
     if (accessToken) {

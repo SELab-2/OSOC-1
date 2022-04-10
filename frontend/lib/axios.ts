@@ -1,16 +1,17 @@
-import axios from "axios";
+import axios from 'axios';
 
-const envURL: string = process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8080';
+const envURL: string =
+  process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8080';
 const BASEURL = envURL.replace(/\/$/, '');
 
 /**
  * axios instance to be used for unauthenticated requests
- * 
+ *
  * @remarks
  * this is only used for posting to user endpoint and interacting with login/token endpoint
  */
 export default axios.create({
-  baseURL: BASEURL
+  baseURL: BASEURL,
 });
 
 /**
@@ -19,6 +20,6 @@ export default axios.create({
 export const axiosAuthenticated = axios.create({
   baseURL: BASEURL,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });

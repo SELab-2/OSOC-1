@@ -33,7 +33,6 @@ const WaitPage = () => {
             We{"'"}ll let you know once this has been completed
           </p>
         </section>
-
       </div>
     </div>
   );

@@ -3,20 +3,20 @@ export type AuthToken = string;
 
 export type AuthTokens = {
   /**
-   * 
+   *
    */
   accessToken: AuthToken;
 
   /**
-   * 
+   *
    */
   refreshToken: AuthToken;
-}
+};
 
 export enum UserRole {
   Admin = 'Admin',
   Coach = 'Coach',
-  Disabled = 'Disabled'
+  Disabled = 'Disabled',
 }
 
 export type User = {
@@ -40,4 +40,4 @@ export type User = {
    * @see {@link UserRole}
    */
   role: UserRole;
-}
+};
