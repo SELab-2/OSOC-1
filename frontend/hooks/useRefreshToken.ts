@@ -1,8 +1,7 @@
 import useTokens from "./useTokens";
 import axios from "../lib/axios";
 import { AuthToken } from "../lib/types";
-
-const REFRESH_URL = '/token/refresh';
+import Endpoints from "../lib/endpoints";
 
 /**
  * Custom React hook exposing a refresh function to refresh access token and refresh token.
@@ -16,7 +15,7 @@ const useRefreshToken = () => {
 
   const refresh: () => Promise<AuthToken> = async () => {
     const response = await axios.post(
-      REFRESH_URL, 
+      Endpoints.REFRESH, 
       new URLSearchParams({
         refreshToken: tokens.refreshToken
       }),

@@ -7,8 +7,7 @@ import useTokens from '../hooks/useTokens';
 import useUser from '../hooks/useUser';
 import { UserRole } from '../lib/types';
 import axios from '../lib/axios';
-
-const LOGIN_URL = '/login';
+import Endpoints from '../lib/endpoints';
 
 /**
  * Login page for OSOC application
@@ -34,7 +33,7 @@ const Login = () => {
     if (email && password) {
       try {
         const response = await axios.post(
-          LOGIN_URL,
+          Endpoints.LOGIN,
           new URLSearchParams({
             email,
             password,
