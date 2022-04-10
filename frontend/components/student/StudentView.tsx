@@ -27,7 +27,8 @@ type StatusSuggestion = {
   motivation: string;
 };
 
-// this is bad mkay
+// I don't think its worth doing this layout with fake data since
+// a lot will change and will need to be redone
 type TallyForm = {
   livingBelgium: boolean;
   workTime: number; // 1-4 cba this
@@ -62,7 +63,6 @@ type StatusSuggestionProp = {
   statusSuggestion: StatusSuggestion;
 };
 
-// TODO on mobile view the suggestion controls should be above the student layout
 const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
   return (
     <section className={`flex flex-col-reverse justify-between xl:flex-row`}>
@@ -223,6 +223,8 @@ const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
 };
 
 /*
+OSOC tally form for reference remove when layout finished
+
 Practical Questions
 
 Will you live in Belgium in july 2022 yes/no
