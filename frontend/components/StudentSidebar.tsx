@@ -140,7 +140,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
               Deselect all
             </button>
           </div>
-          <button className="bg-gray-300 px-2 text-sm text-black">
+          <button className="bg-gray-300 px-2 ml-4 text-sm text-black">
             Clear all filters
           </button>
         </div>
