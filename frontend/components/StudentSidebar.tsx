@@ -14,10 +14,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   return (
     // TODO test with a long list for autoscroll etc this should be separate from projects scroll
     // holds searchbar + hide filter button
-    <div>
+    <div className="mt-[50px] sm:mt-0">
       <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
         {/* The students searchbar */}
-        <div className="justify-left mb-3 flex w-[80%] self-end md:ml-0 md:w-full lg:mb-0 lg:w-2/3">
+        <div className="justify-left mb-3 flex w-[80%] md:ml-0 md:w-[calc(100% - 200px)] lg:mb-0 ">
           <div className="relative w-full">
             <input
               type="search"
@@ -37,7 +37,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
         {/* Show/hide filter button */}
         <button
-          className="justify-right rounded-sm bg-check-orange px-4 py-1 font-medium text-white shadow-sm shadow-gray-300"
+          className="justify-right rounded-sm bg-check-orange min-w-[120px] ml-2 text-sm px-2 py-1 font-medium text-white shadow-sm shadow-gray-300"
           type="submit"
           onClick={() => setShowFilter(!showFilter)}
         >
@@ -57,7 +57,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
             {/* This button controls the dropdown */}
             <Menu as="div" className="relative inline-block text-left">
               <div>
-                <Menu.Button className="inline-flex w-full justify-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                <Menu.Button className="inline-flex w-full justify-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                   Select Roles
                   <ChevronDownIcon
                     className="-mr-1 ml-2 h-5 w-5"
