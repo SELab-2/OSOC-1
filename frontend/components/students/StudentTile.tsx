@@ -92,7 +92,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
               lineWidth={25}
             />
             <i
-              className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[22px] md:text-[12px] lg:text-[20px] xl:text-[22px] ${myColor}`}
+              className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[22px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${myColor}`}
             >
               {myLabel}
             </i>
