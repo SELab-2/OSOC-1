@@ -1,5 +1,5 @@
 import { Context, createContext, Dispatch, PropsWithChildren, SetStateAction, useState } from "react";
-import { AuthTokens, User, UserRole } from "../lib/types";
+import { AuthTokens, User } from "../lib/types";
 
 type ProviderProps = Record<string, unknown>;
 
@@ -40,16 +40,8 @@ const AuthContext: Context<AuthContextProps> = createContext({} as AuthContextPr
  * @returns Provider component of the AuthContext
  */
 export const AuthProvider = ({ children }: PropsWithChildren<ProviderProps>) => {
-  const [user, setUser] = useState({
-    id: '',
-    username: '',
-    email: '',
-    role: UserRole.Disabled
-  });
-  const [tokens, setTokens] = useState({
-    refreshToken: '',
-    accessToken: ''
-  });
+  const [user, setUser] = useState({} as User);
+  const [tokens, setTokens] = useState({} as AuthTokens);
 
   return (
     <AuthContext.Provider value={{ user, setUser, tokens, setTokens }}>
