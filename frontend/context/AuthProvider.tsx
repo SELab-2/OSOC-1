@@ -31,8 +31,7 @@ type AuthContextProps = {
   setTokens: Dispatch<SetStateAction<AuthTokens>>;
 }
 
-// @ts-ignore
-const AuthContext: Context<AuthContextProps> = createContext({});
+const AuthContext: Context<AuthContextProps> = createContext({} as AuthContextProps);
 
 /**
  * Provider object to expose authentication data to all components
