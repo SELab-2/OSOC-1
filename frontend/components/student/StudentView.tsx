@@ -47,7 +47,10 @@ type StudentProp = {
 
 const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
     return (
-        <div>
+        <div className="flex flex-col mx-8 bg-osoc-neutral-bg">
+            <div>
+                <p className="font-bold">{student.tallyForm.birthName + " " + student.tallyForm.lastName}</p>
+            </div>
 
         </div>
     );
