@@ -31,12 +31,12 @@ export type User = {
   username: string;
 
   /**
-   * email address of the user
+   * Email address of the user
    */
   email: string;
 
   /**
-   * current role of the user
+   * Current role of the user
    * @see {@link UserRole}
    */
   role: UserRole;
