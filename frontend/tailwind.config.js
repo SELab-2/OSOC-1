@@ -12,7 +12,11 @@ module.exports = {
         'osoc-red': '#F14A3B',
         'osoc-bg': '#86efac',
         'osoc-neutral-bg': '#fafafa',
-       'osoc-btn-primary': '#1DE1AE'
+        'osoc-btn-primary': '#1DE1AE',
+        'check-green': '#4ade80',
+        'check-red': '#f87171',
+        'check-orange': '#fbbf24',
+        'check-gray': '#9ca3af',
       },
     },
     fontFamily: {

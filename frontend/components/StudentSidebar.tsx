@@ -1,13 +1,14 @@
-import { PropsWithChildren, useState } from 'react';
+import { Fragment, PropsWithChildren, useState } from 'react';
 import StudentTiles from './students/StudentTiles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { Menu, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/solid';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 type StudentsSidebarProps = PropsWithChildren<unknown>;
 
 // TODO no actual functionality implemented yet
-// TODO fix mobile view
 const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [showFilter, setShowFilter] = useState(true);
   return (
@@ -36,7 +37,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
         {/* Show/hide filter button */}
         <button
-          className="justify-right rounded-sm bg-amber-400 px-4 py-1 font-medium text-white shadow-sm shadow-gray-300"
+          className="justify-right rounded-sm bg-check-orange px-4 py-1 font-medium text-white shadow-sm shadow-gray-300"
           type="submit"
           onClick={() => setShowFilter(!showFilter)}
         >
@@ -46,38 +47,95 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
       {/* Holds the filter controls */}
       <div
-        className={`flex w-full flex-col rounded-sm border-2 border-amber-400 ${
+        className={`flex w-full flex-col rounded-sm border-2 border-check-orange ${
           showFilter ? 'visible my-2 h-auto p-2' : 'my-0 hidden h-0 p-0'
         }`}
       >
         {/* holds drowndown, deselect all, clear all filters */}
         <div className="flex w-full flex-row justify-between">
           <div className="flex flex-row justify-items-center">
-            {/* TODO fix dropdown functionality */}
-            {/* TODO fix dropdown being too big */}
             {/* This button controls the dropdown */}
-            <button
-              type="button"
-              className="flex flex-row justify-items-center rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100"
-              id="menu-button"
-              aria-expanded="true"
-              aria-haspopup="true"
-            >
-              Select Roles
-              <svg
-                className="-mr-1 ml-2 h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
+            <Menu as="div" className="relative inline-block text-left">
+              <div>
+                <Menu.Button className="inline-flex w-full justify-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                  Select Roles
+                  <ChevronDownIcon
+                    className="-mr-1 ml-2 h-5 w-5"
+                    aria-hidden="true"
+                  />
+                </Menu.Button>
+              </div>
+
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
+                {/* These are the actual dropdown options */}
+                <Menu.Items className="absolute right-0 z-10 w-full origin-top-right bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div className="">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <p
+                          className={`${
+                            active
+                              ? 'bg-gray-100 text-gray-900'
+                              : 'text-gray-700'
+                          } block px-4 py-2 text-sm`}
+                        >
+                          opt1
+                        </p>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <p
+                          className={`${
+                            active
+                              ? 'bg-gray-100 text-gray-900'
+                              : 'text-gray-700'
+                          } block px-4 py-2 text-sm`}
+                        >
+                          opt2
+                        </p>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <p
+                          className={`${
+                            active
+                              ? 'bg-gray-100 text-gray-900'
+                              : 'text-gray-700'
+                          } block px-4 py-2 text-sm`}
+                        >
+                          opt3
+                        </p>
+                      )}
+                    </Menu.Item>
+                    {/* Don't know what type this dropdown menu will end up being yet */}
+                    {/*<form method="POST" action="#">*/}
+                    {/*    <Menu.Item>*/}
+                    {/*        {({ active }) => (*/}
+                    {/*            <button*/}
+                    {/*                type="submit"*/}
+                    {/*                className={`${*/}
+                    {/*                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'}*/}
+                    {/*                block px-4 py-2 text-sm`}*/}
+                    {/*            >*/}
+                    {/*                Sign out*/}
+                    {/*            </button>*/}
+                    {/*        )}*/}
+                    {/*    </Menu.Item>*/}
+                    {/*</form>*/}
+                  </div>
+                </Menu.Items>
+              </Transition>
+            </Menu>
 
             <button className="ml-2 bg-gray-300 p-2 text-sm text-black">
               Deselect all

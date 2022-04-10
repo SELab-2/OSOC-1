@@ -1,64 +1,226 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faCheck,
+  faQuestion,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
+const check_mark = <FontAwesomeIcon icon={faCheck} />;
+const question_mark = <FontAwesomeIcon icon={faQuestion} />;
+const x_mark = <FontAwesomeIcon icon={faXmark} />;
+import { Fragment } from 'react';
+import { Menu, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/solid';
+
 export type Student = {
-    id: string;
-    firstName: string;
-    lastName: string;
-    status: string;
-    statusSuggestions: StatusSuggestion[];
-    alumn: boolean;
-    tallyForm: TallyForm;
+  id: string;
+  firstName: string;
+  lastName: string;
+  status: string;
+  statusSuggestions: StatusSuggestion[];
+  alumn: boolean;
+  tallyForm: TallyForm;
 };
 
 type StatusSuggestion = {
-    coachId: string;
-    status: string;
-    motivation: string;
+  coachId: string;
+  status: string;
+  motivation: string;
 };
 
 // this is bad mkay
 type TallyForm = {
-    livingBelgium: boolean,
-    workTime: number, // 1-4 cba this
-    workJuly: boolean,
-    responsibilities: string,
-    birthName: string,
-    lastName: string,
-    // different name whatever
-    gender: string,
-    // pronouns stuff
-    language: string,
-    englishLevel: number, // 1-5
-    phoneNumber: string,
-    email: string,
-    // Skipping cv, portfolio, motivation
-    studies: string[],
-    diploma: string,
-    diplomaYears: string,
-    diplomaYear: string,
-    school: string,
-    role: string[],
-    bestSkill: string,
-    participated: boolean,
-    studentCoach: boolean
-}
-
-type StudentProp = {
-    student: Student;
+  livingBelgium: boolean;
+  workTime: number; // 1-4 cba this
+  workJuly: boolean;
+  responsibilities: string;
+  birthName: string;
+  lastName: string;
+  // different name whatever
+  gender: string;
+  // pronouns stuff
+  language: string;
+  englishLevel: number; // 1-5
+  phoneNumber: string;
+  email: string;
+  // Skipping cv, portfolio, motivation
+  studies: string[];
+  diploma: string;
+  diplomaYears: string;
+  diplomaYear: string;
+  school: string;
+  role: string[];
+  bestSkill: string;
+  participated: boolean;
+  studentCoach: boolean;
 };
 
+type StudentProp = {
+  student: Student;
+};
+
+type StatusSuggestionProp = {
+  statusSuggestion: StatusSuggestion;
+};
+
+// TODO on mobile view the suggestion controls should be above the student layout
 const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
-    return (
-        <div className="flex flex-col mx-8 bg-osoc-neutral-bg">
+  return (
+    <section className={`flex flex-col-reverse justify-between xl:flex-row`}>
+      <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
+        <div>
+          <h4 className="font-bold">
+            {student.tallyForm.birthName + ' ' + student.tallyForm.lastName}
+          </h4>
+        </div>
+        <div className="flex flex-col">
+          <h5>Suggestions</h5>
+          {student.statusSuggestions.map((statusSuggestion) => (
+            <StudentStatusSuggestion
+              key={statusSuggestion.coachId}
+              statusSuggestion={statusSuggestion}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
+        {/* regular coach status suggestion form */}
+        <form className={`border-2 p-2`}>
+          <div className={`flex w-[380px] flex-row justify-between`}>
+            <button
+              className={`w-[30%] bg-check-green py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+            >
+              Suggest Yes
+            </button>
+            <button
+              className={`w-[30%] bg-check-orange py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+            >
+              Suggest Maybe
+            </button>
+            <button
+              className={`w-[30%] bg-check-red py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+            >
+              Suggest No
+            </button>
+          </div>
+          <textarea
+            placeholder="Motivation"
+            className="mt-3 w-full resize-y border-2 border-check-gray"
+          />
+        </form>
+
+        {/* TODO this should only be visible to admin role */}
+        {/* admin status selection form */}
+        <form className={`mt-10 flex flex-row justify-between border-2 p-2`}>
+          <Menu as="div" className="relative inline-block text-left">
             <div>
-                <p className="font-bold">{student.tallyForm.birthName + " " + student.tallyForm.lastName}</p>
+              <Menu.Button className="inline-flex w-full justify-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                Make permanent selection
+                <ChevronDownIcon
+                  className="-mr-1 ml-2 h-5 w-5"
+                  aria-hidden="true"
+                />
+              </Menu.Button>
             </div>
 
-        </div>
-    );
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              {/* These are the actual dropdown options */}
+              <Menu.Items className="absolute right-0 w-full origin-top-right bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <p
+                        className={`${
+                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                        } block px-4 py-2 text-sm`}
+                      >
+                        opt1
+                      </p>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <p
+                        className={`${
+                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                        } block px-4 py-2 text-sm`}
+                      >
+                        opt2
+                      </p>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <p
+                        className={`${
+                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                        } block px-4 py-2 text-sm`}
+                      >
+                        opt3
+                      </p>
+                    )}
+                  </Menu.Item>
+                  {/* Don't know what type this dropdown menu will end up being yet */}
+                  {/*<form method="POST" action="#">*/}
+                  {/*    <Menu.Item>*/}
+                  {/*        {({ active }) => (*/}
+                  {/*            <button*/}
+                  {/*                type="submit"*/}
+                  {/*                className={`${*/}
+                  {/*                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'}*/}
+                  {/*                block px-4 py-2 text-sm`}*/}
+                  {/*            >*/}
+                  {/*                Sign out*/}
+                  {/*            </button>*/}
+                  {/*        )}*/}
+                  {/*    </Menu.Item>*/}
+                  {/*</form>*/}
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+          <button
+            className={`bg-check-gray px-2 py-[2px] text-sm shadow-md shadow-gray-400`}
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </section>
+  );
 };
 
 export default StudentView;
 
+// TODO This should get the coach name somehow
+const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
+  statusSuggestion,
+}: StatusSuggestionProp) => {
+  let myLabel = question_mark;
+  let myColor = 'text-check-orange';
+  if (statusSuggestion.status == 'Yes') {
+    myLabel = check_mark;
+    myColor = 'text-check-green';
+  } else if (statusSuggestion.status == 'No') {
+    myLabel = x_mark;
+    myColor = 'text-check-red';
+  }
 
+  return (
+    <div className="flex flex-row">
+      <i className={`${myColor} w-[30px] px-2`}>{myLabel}</i>
+      <p className="">{statusSuggestion.coachId}</p>
+    </div>
+  );
+};
 
 /*
 Practical Questions

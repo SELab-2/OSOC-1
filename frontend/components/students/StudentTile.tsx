@@ -32,16 +32,16 @@ type StudentProp = {
 
 const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
   let myLabel = tilde_mark;
-  let myColor = 'text-gray-400';
+  let myColor = 'text-check-gray';
   if (student.status == 'Yes') {
     myLabel = check_mark;
-    myColor = 'text-green-400';
+    myColor = 'text-check-green';
   } else if (student.status == 'No') {
     myLabel = x_mark;
-    myColor = 'text-red-400';
+    myColor = 'text-check-red';
   } else if (student.status == 'Maybe') {
     myLabel = question_mark;
-    myColor = 'text-orange-400';
+    myColor = 'text-check-orange';
   }
 
   let yes = 0;
@@ -89,9 +89,8 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
               ]}
               lineWidth={25}
             />
-            {/* TODO fix this text size to not be hardcoded */}
             <i
-              className={`chart-label absolute left-1/2 top-1/2 text-[28px] ${myColor}`}
+              className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[22px] md:text-[12px] lg:text-[20px] xl:text-[22px] ${myColor}`}
             >
               {myLabel}
             </i>
