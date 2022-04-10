@@ -8,7 +8,7 @@ const ProjectTiles: React.FC<ProjectTableProps> = ({
   projects,
 }: ProjectTableProps) => {
   return (
-    <div className="ml-0 lg:ml-6 flex flex-row flex-wrap">
+    <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
       {projects.map((project) => (
         <ProjectTile key={project.id} project={project} />
       ))}

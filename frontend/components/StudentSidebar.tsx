@@ -17,7 +17,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     <div className="mt-[50px] sm:mt-0">
       <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
         {/* The students searchbar */}
-        <div className="justify-left mb-3 flex w-[80%] md:ml-0 md:w-[calc(100% - 200px)] lg:mb-0 ">
+        <div className="justify-left md:w-[calc(100% - 200px)] mb-3 flex w-[80%] md:ml-0 lg:mb-0 ">
           <div className="relative w-full">
             <input
               type="search"
@@ -37,7 +37,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
         {/* Show/hide filter button */}
         <button
-          className="justify-right rounded-sm bg-check-orange min-w-[120px] ml-2 text-sm px-2 py-1 font-medium text-white shadow-sm shadow-gray-300"
+          className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300"
           type="submit"
           onClick={() => setShowFilter(!showFilter)}
         >
@@ -140,7 +140,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
               Deselect all
             </button>
           </div>
-          <button className="bg-gray-300 px-2 ml-4 text-sm text-black">
+          <button className="ml-4 bg-gray-300 px-2 text-sm text-black">
             Clear all filters
           </button>
         </div>
