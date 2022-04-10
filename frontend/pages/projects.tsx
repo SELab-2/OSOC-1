@@ -53,7 +53,7 @@ const Projects: NextPage = () => {
         <section
           className={`${
             showSidebar ? 'hidden' : 'visible'
-          } mt-[30px] w-full flex-initial md:visible md:block md:w-[calc(100%-350px)] lg:w-[calc(100%-450px)] xl:w-2/3 2xl:w-[70%]`}
+          } mt-[30px] w-full flex-initial md:visible md:block md:w-[calc(100%-350px)] lg:w-[calc(100%-450px)] xl:w-2/3 2xl:w-full`}
         >
           <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
             {/* button to open sidebar on mobile */}
@@ -123,7 +123,7 @@ const projects = [
       },
       {
         id: '1002',
-        skill: 'Skill2',
+        skill: 'A VERY VERY VERY VERY VERY LONG NAME',
         amount: 3,
       },
       {

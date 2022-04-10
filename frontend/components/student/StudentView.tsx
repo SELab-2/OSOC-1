@@ -63,9 +63,11 @@ type StatusSuggestionProp = {
   statusSuggestion: StatusSuggestion;
 };
 
+// TODO no actual functionality present yet
 const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
   return (
     <section className={`flex flex-col-reverse justify-between xl:flex-row`}>
+      {/* hold the student information */}
       <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
         <div>
           <h4 className="font-bold">
@@ -83,6 +85,7 @@ const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
         </div>
       </div>
 
+      {/* holds suggestion controls */}
       <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
         {/* regular coach status suggestion form */}
         <form className={`border-2 p-2`}>
@@ -187,6 +190,7 @@ const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
               </Menu.Items>
             </Transition>
           </Menu>
+          {/* button to submit the admin status choice */}
           <button
             className={`bg-check-gray px-2 py-[2px] text-sm shadow-md shadow-gray-400`}
           >

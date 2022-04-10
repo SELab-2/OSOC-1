@@ -12,7 +12,7 @@ const StudentTiles: React.FC<StudentTableProps> = ({
       <thead className="top-0">
         <tr>
           <th className="col-span-full border-b-2 border-gray-400 pb-1 text-right text-xs font-normal">
-            {/* TODO this should be something else once endpoint is dont */}
+            {/* TODO this should be actual functionality */}
             {students.length + '/' + students.length + ' shown'}
           </th>
         </tr>

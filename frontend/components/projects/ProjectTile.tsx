@@ -52,11 +52,11 @@ type AssignmentProp = {
 
 const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
   return (
-    <div className="m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] 2xl:w-[calc(33.5%-48px)]">
+    <div className="m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]">
       {/* project info top */}
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}
-        <div className="flex flex-col">
+        <div className="flex min-w-[40%] flex-col xl:min-w-[50%]">
           <p className="text-lg font-bold">{project.name}</p>
           <p>{project.clientName}</p>
           <div className="flex flex-row">
@@ -119,12 +119,10 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
           </div>
         </div>
         <p className="my-1 inline bg-gray-300 px-1 text-sm">
-          {' '}
-          {assignment.position.skill}{' '}
+          {assignment.position.skill}
         </p>
         <p className="text-xs opacity-40">
-          {' '}
-          Suggested by {assignment.suggester.username}{' '}
+          Suggested by {assignment.suggester.username}
         </p>
       </div>
       <div className="flex flex-col justify-center">

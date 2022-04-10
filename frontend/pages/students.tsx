@@ -32,7 +32,7 @@ const Students: NextPage = () => {
           <StudentSidebar />
         </section>
 
-        {/*  */}
+        {/* Holds main student content */}
         <section
           className={`${
             showSidebar ? 'hidden' : 'visible'

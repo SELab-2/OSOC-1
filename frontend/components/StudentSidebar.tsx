@@ -136,7 +136,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 </Menu.Items>
               </Transition>
             </Menu>
-
             <button className="ml-2 bg-gray-300 p-2 text-sm text-black">
               Deselect all
             </button>

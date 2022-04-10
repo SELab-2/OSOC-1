@@ -5,6 +5,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        'xl1920': '1920px',
+      },
       colors: {
         'osoc-blue': '#0A0839',
         'osoc-yellow': '#FCB70F',

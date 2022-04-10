@@ -31,6 +31,7 @@ type StudentProp = {
 };
 
 const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
+  // There is probably a better way of doing this
   let myLabel = tilde_mark;
   let myColor = 'text-check-gray';
   if (student.status == 'Yes') {
@@ -44,6 +45,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
     myColor = 'text-check-orange';
   }
 
+  // There is probably a better way of doing this
   let yes = 0;
   let no = 0;
   let maybe = 0;
@@ -61,6 +63,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
     <tr key={student.id} className="">
       <td className="">
         <div className="my-2 flex flex-row justify-between p-2 shadow-sm shadow-gray-500">
+          {/* basic student info */}
           <div className="flex w-3/4 flex-col justify-center">
             <div
               className={`flex flex-row ${
@@ -75,11 +78,10 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
                 Alumn
               </p>
             </div>
-            <p className="pl-2">
-              {' '}
-              {student.firstName + ' ' + student.lastName}{' '}
-            </p>
+            <p className="pl-2">{student.firstName + ' ' + student.lastName}</p>
           </div>
+
+          {/* holds the suggestions circle image thing + checkmark */}
           <div className="relative w-[10%]">
             <PieChart
               data={[
