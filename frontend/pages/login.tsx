@@ -13,6 +13,10 @@ const LOGIN_URL = '/login';
 /**
  * Login page for OSOC application
  *
+ * @remarks
+ * The login page sets the correct user and tokens in the {@link AuthProvider} on valid login and
+ * it's context.
+ * 
  * @returns Login Page
  */
 const Login = () => {
@@ -57,7 +61,6 @@ const Login = () => {
         }
 
       } catch (err) {
-        console.error(err);
         toast.error('An error occurred while trying to log in.');
       }
     }
