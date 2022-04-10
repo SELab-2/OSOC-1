@@ -3,7 +3,7 @@ import useTokens from "./useTokens";
 import useRefreshToken from "./useRefreshToken";
 import { useEffect } from "react";
 
-const UNAUTHORIZED_STATUS = 401;
+const UNAUTHORIZED_STATUSES = [401, 403];
 
 /**
  * Custom React hook to expose authenticated axios instance
@@ -48,7 +48,7 @@ const useAxiosAuth = () => {
       (response) => response,
       async (error) => {
         const prevRequest = error?.config;
-        if (error?.response?.status === UNAUTHORIZED_STATUS && !prevRequest?.sent) {
+        if (UNAUTHORIZED_STATUSES.includes(error?.response?.status) && !prevRequest?.sent) {
           prevRequest.sent = true;
           const newAccessToken = await refresh();
           prevRequest.headers['Authorization'] = `Basic ${newAccessToken}`;
