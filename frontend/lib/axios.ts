@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const envURL: string =
-  process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8080';
+  process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8080/api';
 const BASEURL = envURL.replace(/\/$/, '');
 
 /**
