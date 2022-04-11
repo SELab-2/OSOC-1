@@ -6,7 +6,6 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from '@iconify/react';
-import { useState } from 'react';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;

@@ -1,5 +1,3 @@
-import { Preloader, TailSpin } from 'react-preloader-icon';
-
 /**
  * Waiting page for OSOC application
  *
@@ -35,15 +33,6 @@ const WaitPage = () => {
             We{"'"}ll let you know once this has been completed
           </p>
         </section>
-
-        <Preloader
-          use={TailSpin}
-          size={72}
-          className="py-8"
-          strokeWidth={6}
-          strokeColor="#FCB70F"
-          duration={1200}
-        />
       </div>
     </div>
   );
