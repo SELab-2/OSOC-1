@@ -86,7 +86,6 @@ class StudentController(
      * verification is the responsibility of the caller.
      */
     @PostMapping
-    @Secured("ROLE_COACH")
     fun addStudent(@RequestBody student: Student): ResponseEntity<Student> {
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
