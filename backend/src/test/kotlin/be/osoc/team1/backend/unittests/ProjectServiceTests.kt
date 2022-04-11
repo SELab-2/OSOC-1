@@ -65,7 +65,7 @@ class ProjectServiceTests {
         val service = mockk<StudentService>()
         val skills = mutableSetOf<Skill>()
         if (hasSkill) skills.add(testSkill)
-        val student = Student("firstname", "lastname", skills)
+        val student = Student("firstname", "lastname", "", "", skills)
         every { service.getStudentById(any()) } returns student
         return service
     }
@@ -142,24 +142,6 @@ class ProjectServiceTests {
     fun `patchProject fails when no project with same id exists`() {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
         assertThrows<InvalidProjectIdException> { service.patchProject(testProject) }
-    }
-
-    @Test
-    fun `addStudentToProject runs`() {
-        val repository = getRepository(true)
-        val service = ProjectService(repository, getUserService())
-        val student = Student("Lars", "Van Cauter", "", "")
-        service.addStudentToProject(testProject.id, student)
-        verify { repository.save(testProject) }
-    }
-
-    @Test
-    fun `addStudentToProject fails when project doesnt exist`() {
-        val service = ProjectService(getRepository(false), getUserService())
-        val student = Student("Lars", "Van Cauter", "", "")
-        assertThrows<InvalidProjectIdException> {
-            service.addStudentToProject(testProject.id, student)
-        }
     }
 
     @Test
@@ -334,8 +316,8 @@ class ProjectServiceTests {
             getStudentService(true),
             getUserService(suggester)
         )
-        val testStudent = Student("Lars", "Van Cauter")
-        val testStudent2 = Student("Lars2", "Van Cauter2")
+        val testStudent = Student("Lars", "Van Cauter", "", "")
+        val testStudent2 = Student("Lars2", "Van Cauter2", "", "")
         val position = Position(Skill("backend"), 2)
         val testProject = Project(
             "Test", "Client", "a test project",
