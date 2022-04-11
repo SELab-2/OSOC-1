@@ -3,10 +3,16 @@ import {
   ItemTypes,
   Position,
   Project,
+  Student,
   User,
+  UUID,
 } from '../../lib/types';
 import { Icon } from '@iconify/react';
 import { useDrop } from 'react-dnd';
+import useAxiosAuth from '../../hooks/useAxiosAuth';
+import { useEffect } from 'react';
+import { axiosAuthenticated } from '../../lib/axios';
+import Endpoints from '../../lib/endpoints';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
@@ -26,18 +32,67 @@ type AssignmentProp = {
   assignment: Assignment;
 };
 
+/**
+ * This function sends an authenticated POST request to add a student to a project via an assignment
+ *
+ * @param projectId   = the UUID of the project to add a student to
+ * @param studentId   = the UUID of the student to add to a project
+ * @param positionId  = the UUID of the position to assign the student
+ *                      this position is already part of the needed project positions
+ * @param suggesterId = the UUID of the currently authenticated User
+ * @param reason      = the reason for assigning this student to this project
+ */
+// TODO when post is finished, should update the project frontend view & also the student filter
+// TODO should show success / error
+function postStudentToProject(
+  projectId: UUID,
+  studentId: UUID,
+  positionId: UUID,
+  suggesterId: UUID,
+  reason: string
+) {
+  useAxiosAuth();
+  useEffect(() => {
+    axiosAuthenticated
+      .post(
+        Endpoints.BASEURL + '/' + projectId + '/assignments', // TODO import this url somehow
+        {
+          studentId,
+          positionId,
+          suggesterId,
+          reason,
+        }
+      )
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((ex) => {
+        console.log(ex);
+      });
+  }, []);
+}
+
 const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
+  /**
+   * This hook catches the dropped studentTile
+   * The studentTile passes its student as the DragObject to this function on drop
+   * Then we allow the user to choose a position & reason, then post student to project
+   */
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: ItemTypes.STUDENTTILE,
-      canDrop: () => true, // TODO this should probably be an actual check
-      drop: () => {
-        console.log('DROPPED SMNT');
-      }, // TODO this should open a popup to add this student to the project
+      // accept: Student,
+      canDrop: () => true, // TODO add check to see if student is already part of project
+      drop: (item) => {
+        console.log(item);
+        const student = item as Student; // TODO find a way to pass item not as type DragObject but as type Student
+        // TODO call a function that creates a pop up thing to choose reason & position
+        // TODO after that call postStudentToProject with correct information
+      },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
-      }), // I have no clue what this collect thing does
+      }), // TODO isOver & canDrop styling
     }),
     []
   );

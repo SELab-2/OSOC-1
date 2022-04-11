@@ -6,8 +6,14 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from '@iconify/react';
-import { ItemTypes, StatusSuggestionStatus, Student } from '../../lib/types';
-import { DragPreviewImage, useDrag } from 'react-dnd';
+import {
+  ItemTypes,
+  Project,
+  StatusSuggestionStatus,
+  Student,
+  UUID,
+} from '../../lib/types';
+import { useDrag } from 'react-dnd';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
@@ -49,11 +55,16 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
       suggestionCounts[suggestion.status] + 1 || 1;
   });
 
-  const [{ isDragging }, drag, preview] = useDrag(
+  /**
+   * This hook allows dragging the StudentTile
+   * It can be dropped onto a ProjectTile and will then open assignment functionality
+   */
+  const [{ isDragging }, drag] = useDrag(
     () => ({
       type: ItemTypes.STUDENTTILE,
+      item: student, // This is what will be 'given' to the project this is dropped on
       collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
+        isDragging: monitor.isDragging(), // TODO add isDragging styling
       }),
     }),
     []
@@ -61,12 +72,11 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
 
   return (
     // TODO add a chevron dropdown to show possible roles, student coach, ...
-    // TODO add an isDragging styling ?
     <tr key={student.id} className="">
       <td className="">
-        {/* TODO do we want a drag preview? <DragPreviewImage connect={preview} src={"some_image"} />*/}
         <div
           ref={drag}
+          key={student.id}
           className="my-2 flex flex-row justify-between p-2 shadow-sm shadow-gray-500"
         >
           {/* basic student info */}

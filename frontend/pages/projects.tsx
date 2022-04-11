@@ -31,9 +31,7 @@ const Projects: NextPage = () => {
   const [error, setError]: [string, (error: string) => void] = useState('');
 
   useAxiosAuth();
-
   useEffect(() => {
-    // axiosAuthenticated
     axiosAuthenticated
       .get<Project[]>(Endpoints.PROJECTS)
       .then((response) => {
