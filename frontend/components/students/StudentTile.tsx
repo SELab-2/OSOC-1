@@ -6,6 +6,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from '@iconify/react';
+import { useState } from 'react';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
@@ -22,7 +23,7 @@ export type Student = {
 
 type StatusSuggestion = {
   coachId: string;
-  status: string;
+  status: string; // Expected to only be Yes, No, Maybe
   motivation: string;
 };
 
@@ -30,36 +31,35 @@ type StudentProp = {
   student: Student;
 };
 
-const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
-  // There is probably a better way of doing this
-  let myLabel = tilde_mark;
-  let myColor = 'text-check-gray';
-  if (student.status == 'Yes') {
-    myLabel = check_mark;
-    myColor = 'text-check-green';
-  } else if (student.status == 'No') {
-    myLabel = x_mark;
-    myColor = 'text-check-red';
-  } else if (student.status == 'Maybe') {
-    myLabel = question_mark;
-    myColor = 'text-check-orange';
-  }
+type stringNumberDict = {
+  [key: string]: number;
+};
 
-  // There is probably a better way of doing this
-  let yes = 0;
-  let no = 0;
-  let maybe = 0;
+type stringArrayDict = {
+  [key: string]: [JSX.Element, string];
+};
+
+/**
+ * This is used for the icon + icon color for the student status pie chart
+ * If the student status is different from Yes, No, Maybe, Undecided then Default will be used
+ */
+const chartHelper = {
+  Yes: [check_mark, 'text-check-green'],
+  No: [x_mark, 'text-check-red'],
+  Maybe: [question_mark, 'text-check-orange'],
+  Undecided: [tilde_mark, 'text-check-gray'],
+  Default: [tilde_mark, 'text-check-gray'],
+} as stringArrayDict;
+
+const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
+  const suggestionCounts = {} as stringNumberDict;
   student.statusSuggestions.forEach((suggestion) => {
-    if (suggestion.status == 'Yes') {
-      yes += 1;
-    } else if (suggestion.status == 'No') {
-      no += 1;
-    } else {
-      maybe += 1;
-    }
+    suggestionCounts[suggestion.status] =
+      suggestionCounts[suggestion.status] + 1 || 1;
   });
 
   return (
+    //  TODO add a chevron dropdown to show possible roles, student coach, ...
     <tr key={student.id} className="">
       <td className="">
         <div className="my-2 flex flex-row justify-between p-2 shadow-sm shadow-gray-500">
@@ -81,20 +81,39 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
             <p className="pl-2">{student.firstName + ' ' + student.lastName}</p>
           </div>
 
+          {/* TODO add some sort of counter to show total amount of suggestions for this student */}
           {/* holds the suggestions circle image thing + checkmark */}
           <div className="relative w-[10%]">
             <PieChart
               data={[
-                { title: 'Yes', value: yes, color: '#22c55e' },
-                { title: 'No', value: no, color: '#ef4444' },
-                { title: 'Maybe', value: maybe, color: '#f97316' },
+                {
+                  title: 'Yes',
+                  value: suggestionCounts.Yes || 0,
+                  color: '#22c55e', // I can't get tailwind config colors to work here
+                },
+                {
+                  title: 'No',
+                  value: suggestionCounts.No || 0,
+                  color: '#ef4444',
+                },
+                {
+                  title: 'Maybe',
+                  value: suggestionCounts.Maybe || 0,
+                  color: '#f97316',
+                },
               ]}
               lineWidth={25}
             />
             <i
-              className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[22px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${myColor}`}
+              className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[22px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${
+                chartHelper[student.status]
+                  ? chartHelper[student.status][1]
+                  : chartHelper['Default'][1]
+              }`}
             >
-              {myLabel}
+              {chartHelper[student.status]
+                ? chartHelper[student.status][0]
+                : chartHelper['Default'][0]}
             </i>
           </div>
         </div>

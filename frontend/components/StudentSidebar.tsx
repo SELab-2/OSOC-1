@@ -320,8 +320,8 @@ const students = [
       },
       {
         coachId: '101',
-        status: 'Yes',
-        motivation: 'Dit is een motivatie voor yes',
+        status: 'No',
+        motivation: 'Dit is een motivatie voor no',
       },
       {
         coachId: '102',
