@@ -4,6 +4,7 @@ import StudentSidebar from '../components/StudentSidebar';
 import StudentView from '../components/student/StudentView';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
+import { StatusSuggestionStatus } from '../lib/types';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -19,7 +20,7 @@ const Students: NextPage = () => {
         <section
           className={`${
             showSidebar ? 'visible' : 'hidden'
-          } relative mt-[14px] w-full flex-initial bg-osoc-neutral-bg p-4 md:visible md:block md:w-[350px] md:max-w-[500px] lg:w-[450px] xl:w-1/3 2xl:w-[30%]`}
+          } relative mt-[14px] w-full flex-initial bg-osoc-neutral-bg p-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:w-[450px] xl:w-1/3 xl1920:w-[30%]`}
         >
           {/* button to close sidebar on mobile */}
           <div
@@ -36,7 +37,7 @@ const Students: NextPage = () => {
         <section
           className={`${
             showSidebar ? 'hidden' : 'visible'
-          } mt-[30px] w-full flex-initial md:visible md:block md:w-[calc(100%-350px)] lg:w-[calc(100%-450px)] xl:w-2/3 2xl:w-[70%]`}
+          } mt-[30px] w-full flex-initial md:visible md:block md:w-[calc(100%-400px)] lg:w-[calc(100%-450px)] xl:w-2/3 xl1920:w-full`}
         >
           <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
             {/* button to open sidebar on mobile */}
@@ -70,17 +71,17 @@ const student = {
   statusSuggestions: [
     {
       coachId: '100',
-      status: 'Yes',
+      status: StatusSuggestionStatus.Yes,
       motivation: 'Dit is een motivatie voor yes',
     },
     {
       coachId: '101',
-      status: 'Yes',
+      status: StatusSuggestionStatus.Yes,
       motivation: 'Dit is een motivatie voor yes',
     },
     {
       coachId: '102',
-      status: 'No',
+      status: StatusSuggestionStatus.No,
       motivation: 'Dit is een motivatie voor no',
     },
   ],
