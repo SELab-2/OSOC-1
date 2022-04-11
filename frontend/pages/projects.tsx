@@ -37,7 +37,7 @@ const Projects: NextPage = () => {
         <section
           className={`${
             showSidebar ? 'visible' : 'hidden'
-          } relative mt-[14px] w-full flex-initial bg-osoc-neutral-bg p-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:w-[450px] xl:w-1/3 xl1920:w-[30%]`}
+          } relative mt-[14px] w-full bg-osoc-neutral-bg p-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
         >
           {/* button to close sidebar on mobile */}
           <div
@@ -54,7 +54,7 @@ const Projects: NextPage = () => {
         <section
           className={`${
             showSidebar ? 'hidden' : 'visible'
-          } mt-[30px] w-full flex-initial md:visible md:block md:w-[calc(100%-400px)] lg:w-[calc(100%-450px)] xl:w-2/3 xl1920:w-full`}
+          } mt-[30px] w-full md:visible md:block`}
         >
           <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
             {/* button to open sidebar on mobile */}
