@@ -441,7 +441,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/StudentRole'
+                            $ref: '#/components/schemas/Position'
             responses:
                 '201':
                     description: succesful operation
@@ -484,7 +484,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/StudentAssignment'
+                            $ref: '#/components/schemas/Assignment'
             responses:
                 '200':
                     description: succesful operation
@@ -541,14 +541,14 @@ paths:
                             schema:
                                 type: array
                                 items:
-                                    $ref: '#/components/schemas/StudentRole'
+                                    $ref: '#/components/schemas/Position'
         post:
             summary: Add a new student dev role
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/StudentRole'
+                            $ref: '#/components/schemas/Position'
             responses:
                 '201':
                     description: |
@@ -573,7 +573,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/StudentRole'
+                                $ref: '#/components/schemas/Position'
                 '404':
                     description: |
                         Not Found. No such StudentRoleId.
@@ -845,6 +845,7 @@ components:
                 - id
                 - firstname
                 - lastname
+                - skills
                 - alumn
                 - status
                 - statusSuggestions
@@ -869,16 +870,20 @@ components:
                 alumn:
                     type: boolean
                     default: false
+                skills:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Skill'
         Project:
             type: object
             required:
                 - id
                 - name
-                - client
+                - clientName
                 - coaches
-                - desc
-                - studentRoles
-                - studentAssignments
+                - description
+                - positions
+                - assignments
             properties:
                 id:
                     type: string
@@ -886,18 +891,22 @@ components:
                     readOnly: true
                 name:
                     type: string
-                client:
+                clientName:
                     type: string # Later on this could be a different schema if clients need to be saved in the database
                 coaches:
                     type: array
                     items:
                         $ref: '#/components/schemas/User'
-                desc:
+                description:
                     type: string
-                studentRoles:
+                positions:
                     type: array
                     items:
-                        $ref: '#/components/schemas/StudentRole'
+                        $ref: '#/components/schemas/Position'
+                assignments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Assignment'
         Communication:
             type: object
             required:
@@ -955,25 +964,31 @@ components:
                     enum: [ Yes, Maybe, No ]
                 motivation:
                     type: string
-        StudentRole:
+        Skill:
+          type: object
+          required:
+              - skillName
+          properties:
+              skillName:
+                  type: string
+        Position:
             type: object
             required:
                 - id
-                - title
+                - skill
                 - amount
             properties:
                 id:
                     type: string
                     format: uuid
                     readOnly: true
-                title:
+                skill:
                     type: string
+                    format: uuid
                 amount:
                     type: integer
                     default: 1
-                information:
-                    type: string
-        StudentAssignment:
+        Assignment:
             type: object
             required:
                 - id
@@ -988,13 +1003,13 @@ components:
                 student:
                     type: string
                     format: uuid
-                role:
+                position:
                     type: string
                     format: uuid
                 suggester:
                     type: string
                     format: uuid
-                information:
+                reason:
                     type: string
         CommunicationType:
             type: string
