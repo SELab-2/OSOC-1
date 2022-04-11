@@ -59,17 +59,17 @@ class AuthorizationTests {
     private val adminPassword = "adminPassword"
     private val adminEmail = "admin@admin.com"
     private val encodedAdminPassword = BCryptPasswordEncoder().encode(adminPassword)
-    private val adminUser = User("admin", adminEmail, Role.Admin, encodedAdminPassword)
+    private val adminUser = User("admin", adminEmail, Role.Admin, encodedAdminPassword, testOrganization)
 
     private val coachPassword = "coachPassword"
     private val coachEmail = "coach@coach.com"
     private val encodedCoachPassword = BCryptPasswordEncoder().encode(coachPassword)
-    private val coachUser = User("coach", coachEmail, Role.Coach, encodedCoachPassword)
+    private val coachUser = User("coach", coachEmail, Role.Coach, encodedCoachPassword, testOrganization)
 
     private val disabledPassword = "disabledPassword"
     private val disabledEmail = "disabled@disabled.com"
     private val encodedDisabledPassword = BCryptPasswordEncoder().encode(disabledPassword)
-    private val disabledUser = User("disabled", disabledEmail, Role.Disabled, encodedDisabledPassword)
+    private val disabledUser = User("disabled", disabledEmail, Role.Disabled, encodedDisabledPassword, testOrganization)
 
     private val testStudent = Student("Test", "Student", testOrganization, testEditionName)
 
@@ -278,7 +278,9 @@ class AuthorizationTests {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         authHeaders.add("Content-Type", "application/json")
         val request = HttpEntity("\"Disabled\"", authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(
+            URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java
+        )
 
         assert(response.statusCodeValue == 204)
         assert(userRepository.findByEmail(coachUser.email)?.role == Role.Disabled)
@@ -291,7 +293,9 @@ class AuthorizationTests {
         val authHeaders = getAuthenticatedHeader(coachEmail, coachPassword)
         authHeaders.add("Content-Type", "application/json")
         val request = HttpEntity("\"Coach\"", authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(
+            URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java
+        )
 
         assert(response.statusCodeValue == 403)
         assert(userRepository.findByEmail(disabledUser.email)?.role == Role.Disabled)
@@ -304,7 +308,9 @@ class AuthorizationTests {
         val authHeaders = getAuthenticatedHeader(disabledEmail, disabledPassword)
         authHeaders.add("Content-Type", "application/json")
         val request = HttpEntity("\"Disabled\"", authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(
+            URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java
+        )
 
         assert(response.statusCodeValue == 403)
         assert(userRepository.findByEmail(coachUser.email)?.role == Role.Coach)
@@ -317,7 +323,9 @@ class AuthorizationTests {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         authHeaders.add("Content-Type", "application/json")
         val request = HttpEntity("\"Disabled\"", authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(
+            URI("/users/$userId/role"), HttpMethod.POST, request, String::class.java
+        )
 
         assert(response.statusCodeValue == 403)
         assert(userRepository.findByEmail(adminUser.email)?.role == Role.Admin)
