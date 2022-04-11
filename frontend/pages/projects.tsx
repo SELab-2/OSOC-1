@@ -11,21 +11,12 @@ const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
-// Header
-//
-// Sidebar
-//      Searchbar + filter control button
-//      Filter panel
-//      students list
-//
-//
-// Main
-//      searchbar
-//      Project tiles
-//          top information thing
-//          assigned people list
-
+/**
+ * Projects page for OSOC application
+ * @returns Projects page
+ */
 const Projects: NextPage = () => {
+  // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
 
   return (

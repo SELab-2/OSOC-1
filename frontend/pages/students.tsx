@@ -8,7 +8,12 @@ import { StatusSuggestionStatus } from '../lib/types';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
+/**
+ * Select Students page for OSOC application
+ * @returns Select Students page
+ */
 const Students: NextPage = () => {
+  // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
 
   return (
