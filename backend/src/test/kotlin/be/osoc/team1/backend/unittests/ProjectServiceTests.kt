@@ -35,14 +35,18 @@ class ProjectServiceTests {
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
     private val testOrganization = "testOrganization"
     private val testEditionName = "testEditionName"
+    private val testSkill = Skill("Backend")
+    private val testSkill2 = Skill("Frontend")
     private val testProject = Project(
         "Test", "Client", "a test project", testOrganization, testEditionName,
-        mutableListOf(testStudent), mutableListOf(testCoach)
+        mutableListOf(testCoach),
+        listOf(Position(testSkill, 1), Position(testSkill2, 1))
     )
     private val savedProject = Project(
         "Saved", "Client", "a saved project", testOrganization, testEditionName,
-        mutableListOf(testStudent), mutableListOf(testCoach)
+        mutableListOf(testCoach)
     )
+    private val suggester = User("username", "email", Role.Coach, "password")
 
     private fun getRepository(projectAlreadyExists: Boolean): ProjectRepository {
         val repository: ProjectRepository = mockk()
@@ -314,7 +318,7 @@ class ProjectServiceTests {
         val testStudent2 = Student("Lars2", "Van Cauter2")
         val position = Position(Skill("backend"), 2)
         val testProject = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", "", "",
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")

@@ -47,7 +47,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllProjects name filtering parses the correct name`() {
-        val testList = listOf(Project("_", "_", "_" testOrganization, testEditionName))
+        val testList = listOf(Project("_", "_", "_", testOrganization, testEditionName))
         val testList2 = listOf(Project("_2", "_2", "_2", testOrganization, testEditionName))
         every { projectService.getAllProjects(testOrganization, testEditionName, "lars") } returns testList
         every { projectService.getAllProjects(testOrganization, testEditionName, "lars test") } returns testList2
@@ -183,8 +183,8 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
         val testStudent = Student("Lars", "Van Cauter")
-        val testProjectConflict = Project("Test", "Client", "a test project", testOrganization, testEditionName, mutableListOf(testStudent))
-        val testProjectConflict2 = Project("Test", "Client", "a test project", testOrganization, testEditionName, mutableListOf(testStudent))
+        val testProjectConflict = Project("Test", "Client", "a test project", testOrganization, testEditionName)
+        val testProjectConflict2 = Project("Test", "Client", "a test project", testOrganization, testEditionName)
         val result = mutableListOf(ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
         every { projectService.getConflicts(testOrganization, testEditionName) } returns result
         mockMvc.perform(get("$editionUrl/conflicts"))

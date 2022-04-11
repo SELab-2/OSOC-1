@@ -1,9 +1,12 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.services.ProjectService
+import java.net.URLDecoder
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -15,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.net.URLDecoder
 import java.util.UUID
 
 @RestController
@@ -63,9 +65,9 @@ class ProjectController(private val service: ProjectService) {
         @PathVariable editionName: String
     ): ResponseEntity<Project> {
         val project = Project(
-            projectRegistration.name, projectRegistration.description,
+            projectRegistration.name, projectRegistration.description, projectRegistration.clientName,
             organization, editionName,
-            projectRegistration.students, projectRegistration.coaches
+            projectRegistration.coaches, projectRegistration.positions, projectRegistration.assignments
         )
         val createdProject = service.postProject(project)
         return getObjectCreatedResponse(createdProject.id, createdProject)
@@ -74,10 +76,12 @@ class ProjectController(private val service: ProjectService) {
     // Needed to avoid the caller having to pass the organization/editionName in the URL and the request body.
     class ProjectRegistration(
         name: String,
+        clientName: String,
         description: String,
-        students: MutableCollection<Student> = mutableListOf(),
-        coaches: MutableCollection<User> = mutableListOf()
-    ) : Project(name, description, "", "", students, coaches)
+        coaches: MutableCollection<User> = mutableListOf(),
+        positions: Collection<Position> = listOf(),
+        assignments: MutableCollection<Assignment> = mutableListOf()
+    ) : Project(name, clientName, description, "", "", coaches, positions, assignments)
 
     /**
      * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
@@ -150,7 +154,7 @@ class ProjectController(private val service: ProjectService) {
      * Will return a 404 if any of the ids are invalid. Will throw a 403 if the required conditions for assignment are
      * not met. These conditions are described in the documentation for [ProjectService.postAssignment].
      */
-    @PostMapping("/{projectId}/assignments")
+    @PostMapping("/projects/{projectId}/assignments")
     @Secured("ROLE_COACH")
     fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) =
         service.postAssignment(projectId, assignment)
@@ -160,7 +164,7 @@ class ProjectController(private val service: ProjectService) {
      * 404 if the specified [assignmentId] is not actually part of this project or if [assignmentId] outright doesn't
      * exist.
      */
-    @DeleteMapping("/{projectId}/assignments/{assignmentId}")
+    @DeleteMapping("/projects/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
     fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) =
