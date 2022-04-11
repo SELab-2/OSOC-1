@@ -36,21 +36,10 @@ token=$(curl -s --location --request POST 'http://localhost:8080/api/login' --he
 printf "created\n"
 
 # ADD DATA
-# create other users
-printf "Adding devs: "
-curl -s --location --request POST 'http://localhost:8080/api/students' --header "Authorization: Basic $token" --header 'Content-Type: application/json' --data-raw '{ "firstName": "Lars", "lastName": "Van Cauter" }' > /dev/null
-curl -s --location --request POST 'http://localhost:8080/api/students' --header "Authorization: Basic $token" --header 'Content-Type: application/json' --data-raw '{ "firstName": "Tom", "lastName": "Alard" }' > /dev/null
-curl -s --location --request POST 'http://localhost:8080/api/students' --header "Authorization: Basic $token" --header 'Content-Type: application/json' --data-raw '{ "firstName": "Niels", "lastName": "Praet" }' > /dev/null
-curl -s --location --request POST 'http://localhost:8080/api/students' --header "Authorization: Basic $token" --header 'Content-Type: application/json' --data-raw '{ "firstName": "Maarten", "lastName": "Steevens" }' > /dev/null
-curl -s --location --request POST 'http://localhost:8080/api/students' --header "Authorization: Basic $token" --header 'Content-Type: application/json' --data-raw '{ "firstName": "Michael", "lastName": "Meuleman" }' > /dev/null
-curl -s --location --request POST 'http://localhost:8080/api/students' --header "Authorization: Basic $token" --header 'Content-Type: application/json' --data-raw '{ "firstName": "Jitse", "lastName": "Willaert" }' > /dev/null
-curl -s --location --request POST 'http://localhost:8080/api/students' --header "Authorization: Basic $token" --header 'Content-Type: application/json' --data-raw '{ "firstName": "Tymen", "lastName": "Van Himme" }' > /dev/null
-printf "added :)\n"
-
 printf "Adding other data: "
 # call a python script for convenience
-python3 ../docker/subpopulate.py $token
-printf "TODO\n"
+python3 ../docker/subpopulate.py
+printf "added\n"
 
 # stopping backend
 printf "Killing backend: "
@@ -61,4 +50,4 @@ echo "The login detail of the first admin are the following"
 echo "  username:     tester"
 echo "  email:        tester@mail.com"
 printf "  password:     tester\n\n"
-echo "Current accesstoken: $token"
+# echo "Current accesstoken: $token"
