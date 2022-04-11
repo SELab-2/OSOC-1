@@ -6,7 +6,8 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from '@iconify/react';
-import { StatusSuggestionStatus, Student } from '../../lib/types';
+import { ItemTypes, StatusSuggestionStatus, Student } from '../../lib/types';
+import { DragPreviewImage, useDrag } from 'react-dnd';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
@@ -48,11 +49,26 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
       suggestionCounts[suggestion.status] + 1 || 1;
   });
 
+  const [{ isDragging }, drag, preview] = useDrag(
+    () => ({
+      type: ItemTypes.STUDENTTILE,
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    }),
+    []
+  );
+
   return (
-    //  TODO add a chevron dropdown to show possible roles, student coach, ...
+    // TODO add a chevron dropdown to show possible roles, student coach, ...
+    // TODO add an isDragging styling ?
     <tr key={student.id} className="">
       <td className="">
-        <div className="my-2 flex flex-row justify-between p-2 shadow-sm shadow-gray-500">
+        {/* TODO do we want a drag preview? <DragPreviewImage connect={preview} src={"some_image"} />*/}
+        <div
+          ref={drag}
+          className="my-2 flex flex-row justify-between p-2 shadow-sm shadow-gray-500"
+        >
           {/* basic student info */}
           <div className="flex w-3/4 flex-col justify-center">
             <div

@@ -5,8 +5,13 @@ import ProjectTiles from '../components/projects/ProjectTiles';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
-import { UserRole } from '../lib/types';
+import { useEffect, useState } from 'react';
+import { Project, UserRole } from '../lib/types';
+import axios, { axiosAuthenticated } from '../lib/axios';
+import Endpoints from '../lib/endpoints';
+import useAxiosAuth from '../hooks/useAxiosAuth';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -19,68 +24,95 @@ const Projects: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
 
+  const [projects, setProjects]: [Project[], (projects: Project[]) => void] =
+    useState([] as Project[]);
+  const [loading, setLoading]: [boolean, (loading: boolean) => void] =
+    useState<boolean>(true);
+  const [error, setError]: [string, (error: string) => void] = useState('');
+
+  useAxiosAuth();
+
+  useEffect(() => {
+    // axiosAuthenticated
+    axiosAuthenticated
+      .get<Project[]>(Endpoints.PROJECTS)
+      .then((response) => {
+        setProjects(response.data);
+        setLoading(false);
+      })
+      .catch((ex) => {
+        const error =
+          ex.response.status === 404
+            ? 'Resource Not found'
+            : 'An unexpected error has occurred';
+        setError(error);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div className="min-w-screen flex min-h-screen flex-col items-center">
       <Header />
-
-      <main className="flex w-full flex-row">
-        {/* Holds the sidebar with search, filter and student results */}
-        <section
-          className={`${
-            showSidebar ? 'visible' : 'hidden'
-          } relative mt-[14px] w-full bg-osoc-neutral-bg p-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
-        >
-          {/* button to close sidebar on mobile */}
-          <div
+      <DndProvider backend={HTML5Backend}>
+        <main className="flex w-full flex-row">
+          {/* Holds the sidebar with search, filter and student results */}
+          <section
             className={`${
               showSidebar ? 'visible' : 'hidden'
-            } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+            } relative mt-[14px] w-full bg-osoc-neutral-bg p-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
           >
-            <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
-          </div>
-          <StudentSidebar />
-        </section>
-
-        {/* Holds the projects searchbar + project tiles */}
-        <section
-          className={`${
-            showSidebar ? 'hidden' : 'visible'
-          } mt-[30px] w-full md:visible md:block`}
-        >
-          <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
-            {/* button to open sidebar on mobile */}
+            {/* button to close sidebar on mobile */}
             <div
               className={`${
-                showSidebar ? 'hidden' : 'visible w-auto'
-              } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                showSidebar ? 'visible' : 'hidden'
+              } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
             >
-              <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_out}</i>
+              <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
             </div>
+            <StudentSidebar />
+          </section>
 
-            {/* This is the projects searchbar */}
-            <div className="ml-6 flex w-full justify-center md:mx-6 md:mr-4">
-              <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
-                <input
-                  type="search"
-                  className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
-                  id="ProjectsSearch"
-                  placeholder="Search projects by name"
-                />
-                {/* TODO add actual onclick search */}
-                <i
-                  className="absolute bottom-1.5 right-2 opacity-20"
-                  // onClick={() => }
-                >
-                  {magnifying_glass}
-                </i>
+          {/* Holds the projects searchbar + project tiles */}
+          <section
+            className={`${
+              showSidebar ? 'hidden' : 'visible'
+            } mt-[30px] w-full md:visible md:block`}
+          >
+            <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
+              {/* button to open sidebar on mobile */}
+              <div
+                className={`${
+                  showSidebar ? 'hidden' : 'visible w-auto'
+                } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+              >
+                <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_out}</i>
+              </div>
+
+              {/* This is the projects searchbar */}
+              <div className="ml-6 flex w-full justify-center md:mx-6 md:mr-4">
+                <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
+                  <input
+                    type="search"
+                    className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+                    id="ProjectsSearch"
+                    placeholder="Search projects by name"
+                  />
+                  {/* TODO add actual onclick search */}
+                  <i
+                    className="absolute bottom-1.5 right-2 opacity-20"
+                    // onClick={() => }
+                  >
+                    {magnifying_glass}
+                  </i>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* This contains the project tiles */}
-          <ProjectTiles projects={projects} />
-        </section>
-      </main>
+            {/* This contains the project tiles */}
+            <ProjectTiles projects={projects} />
+          </section>
+        </main>
+      </DndProvider>
     </div>
   );
 };
@@ -89,7 +121,7 @@ export default Projects;
 
 // Test data
 // Skill will probably not work when actual data is used
-const projects = [
+const projects_test = [
   {
     id: '1',
     name: 'some project',

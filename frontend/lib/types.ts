@@ -94,3 +94,10 @@ export type Assignment = {
   suggester: User;
   reason: string;
 };
+
+/**
+ * Used for drag n drop
+ */
+export const ItemTypes = {
+  STUDENTTILE: 'studentTile',
+};

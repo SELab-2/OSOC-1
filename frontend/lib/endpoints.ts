@@ -1,4 +1,5 @@
-const envURL: string = process.env.NEXT_PUBLIC_API_ENDPOINT || '';
+const envURL: string =
+  process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8080/api'; // TODO remove this before merging
 const baseURL = envURL.replace(/\/$/, '');
 
 /**
@@ -13,6 +14,7 @@ const Endpoints = {
   USERS: baseURL + '/users',
   LOGIN: '/login',
   REFRESH: '/token/refresh',
+  PROJECTS: baseURL + '/projects',
 } as const;
 
 export default Endpoints;

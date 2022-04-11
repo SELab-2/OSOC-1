@@ -27,6 +27,7 @@ const useAxiosAuth = () => {
     
     const requestIntercept = axiosAuthenticated.interceptors.request.use(
       (config) => {
+          console.log("Does this work?", tokens.accessToken)
         if (!config) {
           return;
         }

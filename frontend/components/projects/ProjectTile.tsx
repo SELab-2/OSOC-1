@@ -1,5 +1,12 @@
-import { Assignment, Position, Project, User } from '../../lib/types';
+import {
+  Assignment,
+  ItemTypes,
+  Position,
+  Project,
+  User,
+} from '../../lib/types';
 import { Icon } from '@iconify/react';
+import { useDrop } from 'react-dnd';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
@@ -20,8 +27,26 @@ type AssignmentProp = {
 };
 
 const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
+  const [{ isOver, canDrop }, drop] = useDrop(
+    () => ({
+      accept: ItemTypes.STUDENTTILE,
+      canDrop: () => true, // TODO this should probably be an actual check
+      drop: () => {
+        console.log('DROPPED SMNT');
+      }, // TODO this should open a popup to add this student to the project
+      collect: (monitor) => ({
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop(),
+      }), // I have no clue what this collect thing does
+    }),
+    []
+  );
+
   return (
-    <div className="m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]">
+    <div
+      ref={drop}
+      className="m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]"
+    >
       {/* project info top */}
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}
