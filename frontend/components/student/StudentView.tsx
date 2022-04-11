@@ -10,50 +10,7 @@ const x_mark = <FontAwesomeIcon icon={faXmark} />;
 import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-
-export type Student = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  status: string;
-  statusSuggestions: StatusSuggestion[];
-  alumn: boolean;
-  tallyForm: TallyForm;
-};
-
-type StatusSuggestion = {
-  coachId: string;
-  status: string;
-  motivation: string;
-};
-
-// I don't think its worth doing this layout with fake data since
-// a lot will change and will need to be redone
-type TallyForm = {
-  livingBelgium: boolean;
-  workTime: number; // 1-4 cba this
-  workJuly: boolean;
-  responsibilities: string;
-  birthName: string;
-  lastName: string;
-  // different name whatever
-  gender: string;
-  // pronouns stuff
-  language: string;
-  englishLevel: number; // 1-5
-  phoneNumber: string;
-  email: string;
-  // Skipping cv, portfolio, motivation
-  studies: string[];
-  diploma: string;
-  diplomaYears: string;
-  diplomaYear: string;
-  school: string;
-  role: string[];
-  bestSkill: string;
-  participated: boolean;
-  studentCoach: boolean;
-};
+import { StatusSuggestion, Student } from '../../lib/types';
 
 type StudentProp = {
   student: Student;
@@ -71,7 +28,7 @@ const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
       <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
         <div>
           <h4 className="font-bold">
-            {student.tallyForm.birthName + ' ' + student.tallyForm.lastName}
+            {student.firstName + ' ' + student.lastName}
           </h4>
         </div>
         <div className="flex flex-col">

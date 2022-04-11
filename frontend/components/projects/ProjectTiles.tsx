@@ -1,4 +1,5 @@
-import ProjectTile, { Project } from './ProjectTile';
+import ProjectTile from './ProjectTile';
+import { Project } from '../../lib/types';
 
 type ProjectTableProps = {
   projects: Project[];

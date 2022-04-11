@@ -6,35 +6,21 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from '@iconify/react';
+import { StatusSuggestionStatus, Student } from '../../lib/types';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
 const tilde_mark = <Icon icon="mdi:tilde" />;
 
-export type Student = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  status: string;
-  statusSuggestions: StatusSuggestion[];
-  alumn: boolean;
-};
-
-type StatusSuggestion = {
-  coachId: string;
-  status: string; // Expected to only be Yes, No, Maybe
-  motivation: string;
-};
-
 type StudentProp = {
   student: Student;
 };
 
-type stringNumberDict = {
-  [key: string]: number;
+type statusSuggestionStatusToNumberDict = {
+  [key in StatusSuggestionStatus]: number;
 };
 
-type stringArrayDict = {
+type stringToArrayDict = {
   [key: string]: [JSX.Element, string];
 };
 
@@ -48,10 +34,15 @@ const chartHelper = {
   Maybe: [question_mark, 'text-check-orange'],
   Undecided: [tilde_mark, 'text-check-gray'],
   Default: [tilde_mark, 'text-check-gray'],
-} as stringArrayDict;
+} as stringToArrayDict;
 
 const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
-  const suggestionCounts = {} as stringNumberDict;
+  /**
+   * This counts the different status suggestions to create the pie chart
+   * The dict is empty without default values so when using suggestionCounts
+   * you should add '|| 0' to avoid getting an undefined error
+   */
+  const suggestionCounts = {} as statusSuggestionStatusToNumberDict;
   student.statusSuggestions.forEach((suggestion) => {
     suggestionCounts[suggestion.status] =
       suggestionCounts[suggestion.status] + 1 || 1;
@@ -87,17 +78,17 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
               data={[
                 {
                   title: 'Yes',
-                  value: suggestionCounts.Yes || 0,
+                  value: suggestionCounts[StatusSuggestionStatus.Yes] || 0,
                   color: '#22c55e', // I can't get tailwind config colors to work here
                 },
                 {
                   title: 'No',
-                  value: suggestionCounts.No || 0,
+                  value: suggestionCounts[StatusSuggestionStatus.No] || 0,
                   color: '#ef4444',
                 },
                 {
                   title: 'Maybe',
-                  value: suggestionCounts.Maybe || 0,
+                  value: suggestionCounts[StatusSuggestionStatus.Maybe] || 0,
                   color: '#f97316',
                 },
               ]}

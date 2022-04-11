@@ -6,6 +6,7 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
+import { UserRole } from '../lib/types';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -108,11 +109,13 @@ const projects = [
         id: '101',
         username: 'coach 101',
         email: 'coach101@smnt.com',
+        role: UserRole.Coach,
       },
       {
         id: '104',
         username: 'coach 104',
         email: 'coach104@smnt.com',
+        role: UserRole.Coach,
       },
     ],
     positions: [
@@ -167,6 +170,7 @@ const projects = [
           id: '102',
           username: 'coach 102',
           email: 'coach102@smnt.com',
+          role: UserRole.Coach,
         },
         reason: 'A reason for doing something I hate creating fake data',
       },
@@ -189,6 +193,7 @@ const projects = [
           id: '102',
           username: 'coach 102',
           email: 'coach102@smnt.com',
+          role: UserRole.Coach,
         },
         reason: 'Another reason for doing something I hate creating fake data',
       },
@@ -205,11 +210,13 @@ const projects = [
         id: '101',
         username: 'coach 101',
         email: 'coach101@smnt.com',
+        role: UserRole.Coach,
       },
       {
         id: '104',
         username: 'coach 104',
         email: 'coach104@smnt.com',
+        role: UserRole.Coach,
       },
     ],
     positions: [
@@ -264,6 +271,7 @@ const projects = [
           id: '102',
           username: 'coach 102',
           email: 'coach102@smnt.com',
+          role: UserRole.Coach,
         },
         reason: 'A reason for doing something I hate creating fake data',
       },
@@ -286,6 +294,7 @@ const projects = [
           id: '102',
           username: 'coach 102',
           email: 'coach102@smnt.com',
+          role: UserRole.Coach,
         },
         reason: 'Another reason for doing something I hate creating fake data',
       },
@@ -302,11 +311,13 @@ const projects = [
         id: '101',
         username: 'coach 101',
         email: 'coach101@smnt.com',
+        role: UserRole.Coach,
       },
       {
         id: '104',
         username: 'coach 104',
         email: 'coach104@smnt.com',
+        role: UserRole.Coach,
       },
     ],
     positions: [
@@ -361,6 +372,7 @@ const projects = [
           id: '102',
           username: 'coach 102',
           email: 'coach102@smnt.com',
+          role: UserRole.Coach,
         },
         reason: 'A reason for doing something I hate creating fake data',
       },
@@ -383,6 +395,7 @@ const projects = [
           id: '102',
           username: 'coach 102',
           email: 'coach102@smnt.com',
+          role: UserRole.Coach,
         },
         reason: 'Another reason for doing something I hate creating fake data',
       },
@@ -399,11 +412,13 @@ const projects = [
         id: '101',
         username: 'coach 101',
         email: 'coach101@smnt.com',
+        role: UserRole.Coach,
       },
       {
         id: '104',
         username: 'coach 104',
         email: 'coach104@smnt.com',
+        role: UserRole.Coach,
       },
     ],
     positions: [
@@ -458,6 +473,7 @@ const projects = [
           id: '102',
           username: 'coach 102',
           email: 'coach102@smnt.com',
+          role: UserRole.Coach,
         },
         reason: 'A reason for doing something I hate creating fake data',
       },
@@ -480,6 +496,7 @@ const projects = [
           id: '102',
           username: 'coach 102',
           email: 'coach102@smnt.com',
+          role: UserRole.Coach,
         },
         reason: 'Another reason for doing something I hate creating fake data',
       },

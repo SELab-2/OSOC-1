@@ -1,38 +1,7 @@
-import { Student } from '../students/StudentTile';
+import { Assignment, Position, Project, User } from '../../lib/types';
 import { Icon } from '@iconify/react';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
-
-export type Project = {
-  id: string;
-  name: string;
-  clientName: string;
-  description: string;
-  coaches: User[];
-  positions: Position[];
-  assignments: Assignment[];
-};
-
-type User = {
-  id: string;
-  username: string;
-  email: string;
-  // other stuff doesn't matter for now
-};
-
-type Position = {
-  id: string;
-  skill: string;
-  amount: number;
-};
-
-type Assignment = {
-  id: string;
-  student: Student;
-  position: Position;
-  suggester: User;
-  reason: string;
-};
 
 type ProjectProp = {
   project: Project;

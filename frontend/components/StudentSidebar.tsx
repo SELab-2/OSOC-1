@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
+import { StatusSuggestionStatus } from '../lib/types';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 type StudentsSidebarProps = PropsWithChildren<unknown>;
@@ -243,17 +244,17 @@ const students = [
     statusSuggestions: [
       {
         coachId: '100',
-        status: 'Yes',
+        status: StatusSuggestionStatus.Yes,
         motivation: 'Dit is een motivatie voor yes',
       },
       {
         coachId: '101',
-        status: 'Yes',
+        status: StatusSuggestionStatus.Yes,
         motivation: 'Dit is een motivatie voor yes',
       },
       {
         coachId: '102',
-        status: 'No',
+        status: StatusSuggestionStatus.No,
         motivation: 'Dit is een motivatie voor no',
       },
     ],
@@ -267,17 +268,17 @@ const students = [
     statusSuggestions: [
       {
         coachId: '100',
-        status: 'Maybe',
+        status: StatusSuggestionStatus.Maybe,
         motivation: 'Dit is een motivatie voor maybe',
       },
       {
         coachId: '101',
-        status: 'Yes',
+        status: StatusSuggestionStatus.Yes,
         motivation: 'Dit is een motivatie voor yes',
       },
       {
         coachId: '102',
-        status: 'No',
+        status: StatusSuggestionStatus.No,
         motivation: 'Dit is een motivatie voor no',
       },
     ],
@@ -287,21 +288,21 @@ const students = [
     id: '3',
     firstName: 'FNaam2',
     lastName: 'LNaam2',
-    status: 'Yes',
+    status: StatusSuggestionStatus.Yes,
     statusSuggestions: [
       {
         coachId: '100',
-        status: 'Maybe',
+        status: StatusSuggestionStatus.Maybe,
         motivation: 'Dit is een motivatie voor maybe',
       },
       {
         coachId: '101',
-        status: 'Yes',
+        status: StatusSuggestionStatus.Yes,
         motivation: 'Dit is een motivatie voor yes',
       },
       {
         coachId: '102',
-        status: 'No',
+        status: StatusSuggestionStatus.No,
         motivation: 'Dit is een motivatie voor no',
       },
     ],
@@ -311,21 +312,21 @@ const students = [
     id: '4',
     firstName: 'FNaam2',
     lastName: 'LNaam2',
-    status: 'No',
+    status: StatusSuggestionStatus.No,
     statusSuggestions: [
       {
         coachId: '100',
-        status: 'Maybe',
+        status: StatusSuggestionStatus.Maybe,
         motivation: 'Dit is een motivatie voor maybe',
       },
       {
         coachId: '101',
-        status: 'No',
+        status: StatusSuggestionStatus.No,
         motivation: 'Dit is een motivatie voor no',
       },
       {
         coachId: '102',
-        status: 'No',
+        status: StatusSuggestionStatus.No,
         motivation: 'Dit is een motivatie voor no',
       },
     ],
@@ -335,21 +336,21 @@ const students = [
     id: '5',
     firstName: 'FNaam2',
     lastName: 'LNaam2',
-    status: 'Maybe',
+    status: StatusSuggestionStatus.Maybe,
     statusSuggestions: [
       {
         coachId: '100',
-        status: 'Maybe',
+        status: StatusSuggestionStatus.Maybe,
         motivation: 'Dit is een motivatie voor maybe',
       },
       {
         coachId: '101',
-        status: 'Yes',
+        status: StatusSuggestionStatus.Yes,
         motivation: 'Dit is een motivatie voor yes',
       },
       {
         coachId: '102',
-        status: 'No',
+        status: StatusSuggestionStatus.No,
         motivation: 'Dit is een motivatie voor no',
       },
     ],

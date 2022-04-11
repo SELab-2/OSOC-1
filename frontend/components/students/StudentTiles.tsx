@@ -1,4 +1,5 @@
-import StudentTile, { Student } from './StudentTile';
+import { Student } from '../../lib/types';
+import StudentTile from './StudentTile';
 
 type StudentTableProps = {
   students: Student[];
