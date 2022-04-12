@@ -1,20 +1,12 @@
 import FormContainer from '../components/FormContainer';
 import Link from 'next/link';
-import { FormEventHandler } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import {
-  nameState,
-  emailState,
-  passwordState,
-  repeatPasswordState,
-  validNameState,
-  validEmailState,
-  validPasswordState,
-  validRepeatPasswordState,
-} from '../atoms/registerAtoms';
+import { FormEventHandler, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import Endpoints from '../lib/endpoints';
+import axios from '../lib/axios';
+import useInput from '../hooks/useInput';
+import { customPasswordRegex, emailRegex, nameRegex } from '../lib/regex';
 
 /**
  * Register page for OSOC application
@@ -22,61 +14,75 @@ import Endpoints from '../lib/endpoints';
  * @returns Register Page
  */
 const register = () => {
-  const [name, setName] = useRecoilState(nameState);
-  const [email, setEmail] = useRecoilState(emailState);
-  const [password, setPassword] = useRecoilState(passwordState);
-  const [repeatPassword, setRepeatPassword] =
-    useRecoilState(repeatPasswordState);
+  const [name, resetName, nameProps] = useInput('');
+  const [email, resetEmail, emailProps] = useInput('');
+  const [password, resetPassword, passwordProps] = useInput('');
+  const [match, resetMatch, matchProps] = useInput('');
 
-  const validName = useRecoilValue(validNameState);
-  const validEmail = useRecoilValue(validEmailState);
-  const validPassword = useRecoilValue(validPasswordState);
-  const validRepeatPassword = useRecoilValue(validRepeatPasswordState);
+  // TODO: update the errors for the register form
+  const [validName, setValidName] = useState(true);
+  const [validEmail, setValidEmail] = useState(true);
+  const [validPassword, setValidPassword] = useState(true);
+  const [validMatch, setValidMatch] = useState(true);
+
+  useEffect(() => {
+    setValidName(
+      nameRegex.test(name)
+    );
+  }, [name]);
+
+  useEffect(() => {
+    setValidEmail(
+      emailRegex.test(email)
+    );
+  }, [email]);
+
+  useEffect(() => {
+    setValidPassword(
+      customPasswordRegex.test(password)
+    );
+
+    setValidMatch(
+      customPasswordRegex.test(match)
+      && password === match
+    );
+  }, [password, match]);
 
   const router = useRouter();
 
   const registerUser: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    if (!(validName && validEmail && validPassword && validRepeatPassword))
+    if (!(validName && validEmail && validPassword && validMatch))
       return;
 
     const reqBody = {
       username: name,
-      email: email,
-      password: password,
+      email,
+      password,
     };
 
-    const req = fetch(Endpoints.USERS, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(reqBody),
-    });
+    const resetForm = () => {
+      resetName();
+      resetEmail();
+      resetPassword();
+      resetMatch();
+    }
 
-    const res = await req;
-
-    if (res.ok) {
-      const timeout = 1000;
-      toast.success('Succesfully registered\nReturning to login...', {
-        duration: timeout,
-      });
-
-      setTimeout(() => {
-        setName('');
-        setEmail('');
-        setPassword('');
-        setRepeatPassword('');
-        router.push('/login');
-      }, timeout);
-    } else {
-      setName('');
-      setEmail('');
-      setPassword('');
-      setRepeatPassword('');
-      toast.error(
-        'Unknown error while trying to create Account. Please try again later'
+    try {
+      await axios.post(
+        Endpoints.USERS,
+        JSON.stringify(reqBody),
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
+      
+      resetForm();
+      router.push('/login');
+    } catch (err) {
+      toast.error('Unknown error while trying to create Account. Please try again later');
     }
   };
 
@@ -94,8 +100,7 @@ const register = () => {
               } p-1 text-sm`}
               name="name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...nameProps}
             />
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
@@ -108,8 +113,7 @@ const register = () => {
               } p-1 text-sm`}
               name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...emailProps}
             />
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
@@ -122,26 +126,24 @@ const register = () => {
               } p-1 text-sm`}
               name="password"
               type="password"
-              value={password}
               minLength={8}
               maxLength={64}
-              onChange={(e) => setPassword(e.target.value)}
+              {...passwordProps}
             />
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Repeat Password
             <input
               className={`mt-1 box-border block h-8 w-full border-2 ${
-                validRepeatPassword || repeatPassword.length === 0
+                validMatch || match.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
               } p-1 text-sm`}
               name="repeatPassword"
               type="password"
-              value={repeatPassword}
               minLength={8}
               maxLength={64}
-              onChange={(e) => setRepeatPassword(e.target.value)}
+              {...matchProps}
             />
           </label>
           <button
