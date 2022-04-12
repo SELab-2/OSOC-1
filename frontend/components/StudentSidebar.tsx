@@ -1,10 +1,13 @@
-import { Fragment, PropsWithChildren, useState } from 'react';
+import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
 import StudentTiles from './students/StudentTiles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import { StatusSuggestionStatus } from '../lib/types';
+import { Project, StatusSuggestionStatus, Student } from '../lib/types';
+import useAxiosAuth from '../hooks/useAxiosAuth';
+import { axiosAuthenticated } from '../lib/axios';
+import Endpoints from '../lib/endpoints';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 type StudentsSidebarProps = PropsWithChildren<unknown>;
@@ -12,8 +15,33 @@ type StudentsSidebarProps = PropsWithChildren<unknown>;
 // TODO no actual functionality implemented yet
 const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [showFilter, setShowFilter] = useState(true);
+
+  const [students, setStudents]: [Student[], (students: Student[]) => void] =
+    useState([] as Student[]);
+  const [loading, setLoading]: [boolean, (loading: boolean) => void] =
+    useState<boolean>(true); // TODO use this for styling
+  const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
+
+  useAxiosAuth();
+  useEffect(() => {
+    axiosAuthenticated
+      .get<Student[]>(Endpoints.STUDENTS)
+      .then((response) => {
+        setStudents(response.data);
+        setLoading(false);
+      })
+      .catch((ex) => {
+        const error =
+          ex.response.status === 404
+            ? 'Resource Not found'
+            : 'An unexpected error has occurred';
+        setError(error);
+        setLoading(false);
+      });
+  }, []);
+
   return (
-    // TODO test with a long list for autoscroll etc this should be separate from projects scroll
+    // TODO test with a long list for autoscroll etc this should be separate from projects scroll but no longer
     // holds searchbar + hide filter button
     <div className="mt-[50px] sm:mt-0">
       <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
@@ -235,7 +263,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 export default StudentSidebar;
 
 // Temporary fake data to test with
-const students = [
+const students_fake = [
   {
     id: '1',
     firstName: 'FNaam1',

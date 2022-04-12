@@ -62,6 +62,8 @@ export type Student = {
   status: string;
   statusSuggestions: StatusSuggestion[];
   alumn: boolean;
+  skills: Skill[];
+  // communications: [];
 };
 
 export type StatusSuggestion = {
@@ -83,7 +85,7 @@ export type Project = {
 // TODO fix Skill
 export type Position = {
   id: UUID;
-  skill: string;
+  skill: Skill;
   amount: number;
 };
 
@@ -93,6 +95,10 @@ export type Assignment = {
   position: Position;
   suggester: User;
   reason: string;
+};
+
+export type Skill = {
+  skillName: string;
 };
 
 /**

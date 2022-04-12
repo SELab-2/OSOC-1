@@ -16,6 +16,7 @@ const Endpoints = {
   LOGIN: '/login',
   REFRESH: '/token/refresh',
   PROJECTS: baseURL + '/projects',
+  STUDENTS: baseURL + '/students',
 } as const;
 
 export default Endpoints;

@@ -13,6 +13,7 @@ import useAxiosAuth from '../../hooks/useAxiosAuth';
 import { useEffect } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
+import useUser from '../../hooks/useUser';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
@@ -30,6 +31,7 @@ type PositionProp = {
 
 type AssignmentProp = {
   assignment: Assignment;
+  projectId: UUID;
 };
 
 /**
@@ -51,28 +53,40 @@ function postStudentToProject(
   suggesterId: UUID,
   reason: string
 ) {
-  useAxiosAuth();
-  useEffect(() => {
-    axiosAuthenticated
-      .post(
-        Endpoints.BASEURL + '/' + projectId + '/assignments', // TODO import this url somehow
-        {
-          studentId,
-          positionId,
-          suggesterId,
-          reason,
-        }
-      )
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((ex) => {
-        console.log(ex);
-      });
-  }, []);
+  axiosAuthenticated
+    .post(
+      Endpoints.PROJECTS + '/' + projectId + '/assignments', // TODO import this url somehow
+      {
+        student: studentId,
+        position: positionId,
+        suggester: suggesterId,
+        reason: reason,
+      }
+    )
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((ex) => {
+      console.log(ex);
+    });
+}
+
+function deleteStudentFromProject(projectId: UUID, assignmentId: UUID) {
+  axiosAuthenticated
+    .delete(
+      Endpoints.PROJECTS + '/' + projectId + '/assignments/' + assignmentId // TODO import this url somehow
+    )
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((ex) => {
+      console.log(ex);
+    });
 }
 
 const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
+  const [User] = useUser(); // Needed for the suggester UUID
+  useAxiosAuth();
   /**
    * This hook catches the dropped studentTile
    * The studentTile passes its student as the DragObject to this function on drop
@@ -84,9 +98,16 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
       // accept: Student,
       canDrop: () => true, // TODO add check to see if student is already part of project
       drop: (item) => {
-        console.log(item);
+        // console.log(item);
         const student = item as Student; // TODO find a way to pass item not as type DragObject but as type Student
         // TODO call a function that creates a pop up thing to choose reason & position
+        postStudentToProject(
+          project.id,
+          student.id,
+          project.positions[0].id,
+          User.id,
+          'a fake reason'
+        );
         // TODO after that call postStudentToProject with correct information
       },
       collect: (monitor) => ({
@@ -126,7 +147,11 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
       {/* assigned students list */}
       <div className="flex flex-col">
         {project.assignments.map((assignment) => (
-          <ProjectAssignmentsList key={assignment.id} assignment={assignment} />
+          <ProjectAssignmentsList
+            key={assignment.id}
+            projectId={project.id}
+            assignment={assignment}
+          />
         ))}
       </div>
     </div>
@@ -150,6 +175,7 @@ const ProjectPositionsList: React.FC<PositionProp> = ({
 };
 
 const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
+  projectId,
   assignment,
 }: AssignmentProp) => {
   return (
@@ -168,14 +194,19 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
           </div>
         </div>
         <p className="my-1 inline bg-gray-300 px-1 text-sm">
-          {assignment.position.skill}
+          {assignment.position.skill.skillName}
         </p>
         <p className="text-xs opacity-40">
           Suggested by {assignment.suggester.username}
         </p>
       </div>
       <div className="flex flex-col justify-center">
-        <i className="icon-xcircle-red text-2xl">{xmark_circle}</i>
+        <i
+          onClick={() => deleteStudentFromProject(projectId, assignment.id)}
+          className="icon-xcircle-red text-2xl"
+        >
+          {xmark_circle}
+        </i>
       </div>
     </div>
   );
