@@ -402,14 +402,20 @@ class AuthorizationTests() {
     }
 
     @Test
+    fun `logging out when not logged in returns 403`() {
+        val logoutRequest = HttpEntity(null, HttpHeaders())
+        val logoutResponse = restTemplate.exchange(URI("/token/logout"), HttpMethod.POST, logoutRequest, String::class.java)
+        assert(logoutResponse.statusCodeValue == 403)
+    }
+
+    @Test
     fun `using refresh token after logout returns 400`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
-        val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
+        val accessToken = JSONObject(logInResponse.body).get("accessToken") as String
+        val refreshToken = JSONObject(logInResponse.body).get("refreshToken") as String
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-        val refreshRequest = HttpEntity("token=$refreshToken", headers)
-        val logoutResponse = restTemplate.exchange(URI("/token/logout"), HttpMethod.POST, refreshRequest, String::class.java)
+        val logoutRequest = HttpEntity(null, createAuthHeaders(accessToken))
+        val logoutResponse = restTemplate.exchange(URI("/token/logout"), HttpMethod.POST, logoutRequest, String::class.java)
         assert(logoutResponse.statusCodeValue == 200)
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
