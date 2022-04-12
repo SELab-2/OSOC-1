@@ -1,7 +1,9 @@
 package be.osoc.team1.backend.controllers
 
 import be.osoc.team1.backend.exceptions.InvalidTokenException
+import be.osoc.team1.backend.security.TokenUtil
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
+import be.osoc.team1.backend.security.TokenUtil.getAccessTokenFromRequest
 import be.osoc.team1.backend.security.TokenUtil.invalidateRefreshToken
 import be.osoc.team1.backend.security.TokenUtil.refreshTokenRotation
 import org.springframework.web.bind.annotation.PostMapping
@@ -32,14 +34,14 @@ class TokenController {
     }
 
     /**
-     * Extract email from token from [request], then invalidate the refresh token associated with this email.
+     * Extract email from access token from [request], then invalidate the refresh token associated with this email.
      */
     @PostMapping("/logout")
     fun logout(request: HttpServletRequest, response: HttpServletResponse) {
-        val token: String = request.getParameter("token")
-            ?: throw InvalidTokenException("No token found in request body.")
+        val accessToken = getAccessTokenFromRequest(request)
+            ?: throw InvalidTokenException("You need to be logged in to be able to log out.")
 
-        val decodedToken = decodeAndVerifyToken(token)
+        val decodedToken = decodeAndVerifyToken(accessToken)
         val email: String = decodedToken.subject
         invalidateRefreshToken(email)
     }
