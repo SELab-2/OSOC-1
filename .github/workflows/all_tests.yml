@@ -3,9 +3,13 @@ name: Run backend all tests with maven
 on:
   push:
     branches: [ master, development ]
+    paths:
+      - 'backend/**'
   pull_request:
     branches: 
       - '**'
+    paths:
+      - 'backend/**'
 
 jobs:
   container-job:

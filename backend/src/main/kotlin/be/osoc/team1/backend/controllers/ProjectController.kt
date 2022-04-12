@@ -4,9 +4,8 @@ import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.services.ProjectService
-import be.osoc.team1.backend.services.StudentService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,22 +13,28 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.net.URLDecoder
 import java.util.UUID
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/projects")
-class ProjectController(private val service: ProjectService, @Autowired private val studentService: StudentService) {
+class ProjectController(private val service: ProjectService) {
 
     /**
      * Get all projects from service
+     * The results can also be filtered by [name] (default value is empty so no project is excluded).
      */
     @GetMapping
     @Secured("ROLE_COACH")
-    fun getAllProjects(): Iterable<Project> = service.getAllProjects()
+    fun getAllProjects(
+        @RequestParam(defaultValue = "") name: String,
+    ): Iterable<Project> {
+        val decodedName = URLDecoder.decode(name, "UTF-8")
+        return service.getAllProjects(decodedName)
+    }
 
     /**
      * Get a project by its [projectId], if this id doesn't exist the service will return a 404
@@ -47,19 +52,14 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     fun deleteProjectById(@PathVariable projectId: UUID) = service.deleteProjectById(projectId)
 
     /**
-     * Creates a project from the request body, this can also override an already existing project
-     * returns the id of the project
+     * Creates a project from the request body, this can also override an already existing project.
+     * Returns the created project.
      */
     @PostMapping
-    @ResponseStatus(value = HttpStatus.CREATED)
     @Secured("ROLE_ADMIN")
-    fun postProject(
-        @RequestBody project: Project,
-        request: HttpServletRequest,
-        responseHeader: HttpServletResponse
-    ) {
-        val projectId = service.postProject(project)
-        responseHeader.addHeader("Location", request.requestURL.toString() + "/$projectId")
+    fun postProject(@RequestBody project: Project): ResponseEntity<Project> {
+        val createdProject = service.postProject(project)
+        return getObjectCreatedResponse(createdProject.id, createdProject)
     }
 
     /**
@@ -68,28 +68,7 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     @GetMapping("/{projectId}/students")
     @Secured("ROLE_COACH")
     fun getStudentsOfProject(@PathVariable projectId: UUID): Collection<Student> =
-        service.getProjectById(projectId).students
-
-    /**
-     * Assign a student to a project, [studentId] is placed in the request body,
-     * if this [projectId] doesn't exist the service will return a 404
-     */
-    @PostMapping("/{projectId}/students")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @Secured("ROLE_COACH")
-    fun postStudentToProject(@PathVariable projectId: UUID, @RequestBody studentId: UUID) {
-        val student = studentService.getStudentById(studentId)
-        service.addStudentToProject(projectId, student)
-    }
-
-    /**
-     * Deletes a student [studentId] from a project [projectId], if [projectId] or [studentId] doesn't exist the service will return a 404
-     */
-    @DeleteMapping("/{projectId}/students/{studentId}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @Secured("ROLE_COACH")
-    fun deleteStudentFromProject(@PathVariable projectId: UUID, @PathVariable studentId: UUID) =
-        service.removeStudentFromProject(projectId, studentId)
+        service.getStudents(projectId)
 
     /**
      * Gets all coaches of a project, if this [projectId] doesn't exist the service will return a 404
@@ -100,13 +79,14 @@ class ProjectController(private val service: ProjectService, @Autowired private 
         service.getProjectById(projectId).coaches
 
     /**
-     * assign a coach to a project, if this [projectId] doesn't exist the service will return a 404
+     * assign a coach to a project, if a project with [projectId] or a user with [coachId] doesn't exist the service
+     * will return a 404
      */
     @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coach: User) =
-        service.addCoachToProject(projectId, coach)
+    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID) =
+        service.addCoachToProject(projectId, coachId)
 
     /**
      * Deletes a coach [coachId] from a project [projectId], if [projectId] or [coachId] doesn't exist the service will return a 404
@@ -135,4 +115,33 @@ class ProjectController(private val service: ProjectService, @Autowired private 
     @GetMapping("/conflicts")
     @Secured("ROLE_COACH")
     fun getProjectConflicts(): MutableList<ProjectService.Conflict> = service.getConflicts()
+
+    /**
+     * Assigns a student to a position on the project, format:
+     * ```
+     * {
+     *     "student": "STUDENT(Student) ID",
+     *     "position": "POSITION(Position) ID",
+     *     "suggester": "SUGGESTER(User) ID",
+     *     "reason": "REASON(String)"
+     * }
+     * ```
+     * Will return a 404 if any of the ids are invalid. Will throw a 403 if the required conditions for assignment are
+     * not met. These conditions are described in the documentation for [ProjectService.postAssignment].
+     */
+    @PostMapping("/{projectId}/assignments")
+    @Secured("ROLE_COACH")
+    fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) =
+        service.postAssignment(projectId, assignment)
+
+    /**
+     * Removes assignment with [assignmentId] of a student to a position on the project with [projectId]. Will return a
+     * 404 if the specified [assignmentId] is not actually part of this project or if [assignmentId] outright doesn't
+     * exist.
+     */
+    @DeleteMapping("/{projectId}/assignments/{assignmentId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_COACH")
+    fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) =
+        service.deleteAssignment(projectId, assignmentId)
 }

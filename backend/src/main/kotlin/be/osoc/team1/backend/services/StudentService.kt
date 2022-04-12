@@ -11,6 +11,10 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -18,7 +22,37 @@ import java.util.UUID
 @Service
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
-    fun getAllStudents(): Iterable<Student> = repository.findAll()
+    /**
+     * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
+     * Can be filtered by [name] (requested string gets processed to more easily give matches),
+     * [statusFilter] (see if student status matches 1 in the given list),
+     * whether or not the requesting user has already made a suggestion for this student [includeSuggested],
+     * [callee] is the user who made this request
+     */
+    fun getAllStudents(
+        pageNumber: Int,
+        pageSize: Int,
+        sortBy: String,
+        statusFilter: List<StatusEnum>,
+        name: String,
+        includeSuggested: Boolean,
+        callee: User
+    ): Iterable<Student> {
+        val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
+        val pagedResult: Page<Student> = repository.findAll(paging)
+        val studentList = mutableListOf<Student>()
+        for (student in pagedResult.content) {
+            val studentHasStatus = statusFilter.contains(student.status)
+            // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
+            val studentHasMatchingName = (student.firstName + student.lastName).lowercase().replace(" ", "")
+                .contains(name.lowercase().replace(" ", ""))
+            val studentBeenSuggestedByUserCheck = includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
+            if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
+                studentList.add(student)
+            }
+        }
+        return studentList
+    }
 
     /**
      * Get a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student exists.
@@ -37,9 +71,9 @@ class StudentService(private val repository: StudentRepository, private val user
     }
 
     /**
-     * Add the given [student] entity to the database. Returns the student's new id as decided by the database.
+     * Add the given [student] entity to the database. Returns the created student.
      */
-    fun addStudent(student: Student) = repository.save(student).id
+    fun addStudent(student: Student): Student = repository.save(student)
 
     /**
      * Retrieve the student with the specified [studentId], then set his status to [newStatus].

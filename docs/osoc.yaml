@@ -9,6 +9,42 @@ servers:
 paths:
     /students:
         get:
+            parameters:
+              - in: query
+                name: pageNumber
+                schema:
+                  type: integer
+                description: The page number for pagination, using offset pagination (see https://developer.box.com/guides/api-calls/pagination/offset-based/)
+              - in: query
+                name: pageSize
+                schema:
+                  type: integer
+                description: The page size for pagination. For example, if you pass 50 as value, there will be 50 students on one page
+              - in: query
+                name: sortBy
+                schema:
+                  type: string
+                description: The parameter to sort by. Sorting can be done on any parameter. 
+                  The id, firstName and lastName fields are sorted alphabetically. 
+                  Sorting on the status field will first return students with a Yes status, then Maybe, No and finally Undecided. 
+                  Sorting on other parameters is nonsensical. Ties are broken randomly.
+              - in: query
+                name: name
+                schema:
+                  type: string
+                description: Part of a name of a student that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
+              - in: query
+                name: status
+                schema:
+                  type: array
+                  items: 
+                      $ref: '#/components/schemas/Status'
+                description: Status to filter on, only students that have one of the given statuses will be shown (default value is all statuses).
+              - in: query
+                name: includeSuggested
+                schema:
+                  type: boolean
+                description: Whether or not to include students you have already added a suggestion for (default value is true)
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -23,8 +59,7 @@ paths:
         post:
             summary: Add a new student to the database
             description: |
-                Add a student to the database.
-                The id for this student chosen by the database is returned.
+                Add a student to the database. The created student object is returned.
                 Note that no checking is done to see if firstName or lastName qualify as valid 'names',
                 this verification is the responsibility of the caller.
             requestBody:
@@ -34,15 +69,19 @@ paths:
                             $ref: '#/components/schemas/Student'
             responses:
                 '201':
-                    description: successful operation, returns the assigned id of the newly added student.
+                    description: Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Student'
                     headers:
                         Location:
+                            description: url to the newly created student object
                             schema:
-                                description: url to the newly created student object
                                 type: string
                                 format: url
                 '400':
-                    description: Bad Request. Content contains invalid user or user already exists.
+                    description: Bad Request.
     /students/{studentId}:
         get:
             summary: Get Student by id
@@ -113,6 +152,9 @@ paths:
                 '204':
                     description: |
                         The response if there is a student in the database with the given id.
+                '401':
+                    description: |
+                        The response if the currently authenticated user doesn't match the coachId specified in the StatusSuggestion
                 '404':
                     description: |
                         The response if there is no student in the database with the given id.
@@ -144,6 +186,10 @@ paths:
                     description: |
                         The response if the given coach hasn't made a suggestion
                         for the given student.
+                '401':
+                    description: |
+                        The response if the currently authenticated user attempts
+                        to delete a suggestion made by another user.
                 '404':
                     description: |
                         The response if the student specified by the given id
@@ -183,6 +229,12 @@ paths:
     /projects:
         get:
             summary: Get list containing all Project objects
+            parameters:
+              - in: query
+                name: name
+                schema:
+                  type: string
+                description: Part of a name of a project that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
             responses:
                 '200':
                     description: successful operation
@@ -193,7 +245,7 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Project'
         post:
-            summary: Add new project
+            summary: Create a new project. Returns the created project object.
             requestBody:
                 content:
                     application/json:
@@ -201,11 +253,16 @@ paths:
                             $ref: '#/components/schemas/Project'
             responses:
                 '201': 
-                    description: successful operation
+                    description: |
+                        Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Project'
                     headers:
                         Location:
+                            description: url to the newly created project
                             schema:
-                                description: url to the newly created project
                                 type: string
                                 format: url
                 '400':
@@ -329,7 +386,7 @@ paths:
                 '204':
                     description: successful operation
                 '404':
-                    description: No such projectId.
+                    description: No such projectId or coachId.
                 '400':
                     description: Bad Request.
     /projects/{projectId}/coaches/{coachId}:
@@ -367,7 +424,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                        $ref: '#/components/schemas/StudentRole'
+                        $ref: '#/components/schemas/Position'
             responses:
                 '201':
                     description: succesful operation
@@ -410,7 +467,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                        $ref: '#/components/schemas/StudentAssignment'
+                        $ref: '#/components/schemas/Assignment'
             responses:
                 '200':
                     description: succesful operation
@@ -467,14 +524,14 @@ paths:
                             schema: 
                                 type: array
                                 items:
-                                    $ref: '#/components/schemas/StudentRole'
+                                    $ref: '#/components/schemas/Position'
         post:
             summary: Add a new student dev role
             requestBody:
                 content:
                     application/json:
                         schema: 
-                            $ref: '#/components/schemas/StudentRole'
+                            $ref: '#/components/schemas/Position'
             responses:
                 '201':
                     description: | 
@@ -499,7 +556,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/StudentRole'
+                                $ref: '#/components/schemas/Position'
                 '404':
                     description: |
                         Not Found. No such StudentRoleId.
@@ -550,7 +607,7 @@ paths:
             summary: Add a new communication with a student
             description: |
                 Add a communication to the database.
-                The reference for this communication is returned.
+                The created communication object is returned.
             parameters:
               - name: studentId
                 required: true
@@ -565,15 +622,29 @@ paths:
                             $ref: '#/components/schemas/Communication'
             responses:
                 '201':
-                    description: | 
-                        Successful operation. Returns a link to the newly added 
-                        communication in the location header.
+                    description: Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Communication'
+                    headers:
+                        Location:
+                            description: url to the newly created communication
+                            schema:
+                                type: string
+                                format: url
                 '404':
                     description: |
                         The response if there is no student in the database with the given student id.
-    /users:
+    /{organization}/users:
         get:
             summary: Get list containing all users
+            parameters:
+                - name: organization
+                  required: true
+                  in: path
+                  schema:
+                      type: string
             responses:
                 '200':
                     description: OK
@@ -584,7 +655,13 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/User'
         post:
-            summary: add new user to database
+            summary: Add a new user to database
+            parameters:
+                -   name: organization
+                    required: true
+                    in: path
+                    schema:
+                        type: string
             requestBody:
                 content:
                     application/json:
@@ -592,15 +669,15 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '201':
-                    description: succesful operation
+                    description: Succesful operation.
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/User'
                     headers:
                         Location:
-                            schema: 
-                                description: url to the newly created User
+                            description: url to the newly created User
+                            schema:
                                 type: string
                                 format: url
     /users/{userId}:
@@ -677,7 +754,7 @@ paths:
                   in: path
                   schema:
                     type: string
-                    format: uuid            
+                    format: uuid
             requestBody:
                 content:
                     application/json:
@@ -694,7 +771,67 @@ paths:
                 '404':
                     description: NOT FOUND
                 '400':
-                    description: Bad Request.                
+                    description: Bad Request.
+    /login:
+        post:
+            summary: login to the user with the correct email and password
+            requestBody:
+                content:
+                    application/x-www-form-urlencoded:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                password:
+                                    type: string
+            responses:
+                '200':
+                    description: Successful operation.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accessToken:
+                                        type: string
+                                    refreshToken:
+                                        type: string
+                                    accessTokenTTL:
+                                        type: integer
+                                        format: date
+                                    user:
+                                        $ref: '#/components/schemas/User'
+                '401':
+                    description: |
+                        The response if authorization has failed.
+    /token/refresh:
+      post:
+        summary: renew access token using refresh token
+        requestBody:
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                required:
+                  - refreshToken
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    accessToken:
+                      type: string
+                    refreshToken:
+                      type: string
+          '400':
+            description: Bad Request.
 components:
     schemas:
         Student:
@@ -703,6 +840,7 @@ components:
                 - id
                 - firstname
                 - lastname
+                - skills
                 - alumn
                 - status
                 - statusSuggestions
@@ -727,16 +865,20 @@ components:
                 alumn:
                     type: boolean
                     default: false
+                skills:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Skill'
         Project:
             type: object
             required:
                 - id
                 - name
-                - client
+                - clientName
                 - coaches
-                - desc
-                - studentRoles
-                - studentAssignments
+                - description
+                - positions
+                - assignments
             properties:
                 id:
                     type: string
@@ -744,18 +886,22 @@ components:
                     readOnly: true
                 name:
                     type: string
-                client:
+                clientName:
                     type: string # Later on this could be a different schema if clients need to be saved in the database
                 coaches:
                     type: array
                     items:
                         $ref: '#/components/schemas/User'
-                desc:
+                description:
                     type: string
-                studentRoles:
+                positions:
                     type: array
                     items:
-                        $ref: '#/components/schemas/StudentRole'
+                        $ref: '#/components/schemas/Position'
+                assignments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Assignment'
         Communication:
             type: object
             required:
@@ -776,7 +922,7 @@ components:
             type: object
             required:
                 - id
-                - name
+                - username
                 - email
                 - password
                 - role
@@ -785,7 +931,7 @@ components:
                     type: string
                     format: uuid
                     readOnly: true
-                name:
+                username:
                     type: string
                 email:
                     type: string
@@ -812,26 +958,32 @@ components:
                     type: string
                     enum: [Yes, Maybe, No]
                 motivation:
-                    type: string        
-        StudentRole:
+                    type: string
+        Skill:
+          type: object
+          required:
+              - skillName
+          properties:
+              skillName:
+                  type: string
+        Position:
             type: object
             required:
                 - id
-                - title
+                - skill
                 - amount
             properties:
                 id:
                     type: string
                     format: uuid
                     readOnly: true
-                title:
+                skill:
                     type: string
+                    format: uuid
                 amount:
                     type: integer
                     default: 1
-                information:
-                    type: string
-        StudentAssignment:
+        Assignment:
             type: object
             required:
                 - id
@@ -843,16 +995,16 @@ components:
                     type: string
                     format: uuid
                     readOnly: true
-                student: 
+                student:
                     type: string
                     format: uuid
-                role:
+                position:
                     type: string
                     format: uuid
                 suggester:
                     type: string
                     format: uuid
-                information:
+                reason:
                     type: string
         CommunicationType:
             type: string

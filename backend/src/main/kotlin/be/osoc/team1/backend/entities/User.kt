@@ -1,5 +1,7 @@
 package be.osoc.team1.backend.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonView
 import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -26,17 +28,29 @@ enum class Role(private val permissionLevel: Int) {
 /**
  * [User] object containing the [username] of the user, their [email], the [role] of the user which uses an enum class [Role]
  * and a [password]. This password is of type [String] but doesn't have to be the plain text password, it could be the
- * hashed value of the password.
+ * hashed value of the password. Finally, a [User] is also associated with an [organization]. Unlike some other
+ * entities, [User]s are, however, not associated with a specific edition. See the comment
+ * [here](https://github.com/SELab-2/OSOC-1/pull/170#issue-1187899278) for more information on why this is the case.
  */
 @Entity
 @Table(name = "account")
 class User(
+    @field:JsonView(EntityViews.Public::class)
     val username: String,
+
     @Column(unique = true)
+    @field:JsonView(EntityViews.Public::class)
     val email: String,
+
+    @field:JsonView(EntityViews.Public::class)
     var role: Role = Role.Disabled,
-    val password: String
+
+    @field:JsonView(EntityViews.Hidden::class)
+    val password: String,
+    @JsonIgnore
+    val organization: String = "" // TODO: remove hack here
 ) {
     @Id
+    @field:JsonView(EntityViews.Public::class)
     val id: UUID = UUID.randomUUID()
 }

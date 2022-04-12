@@ -3,13 +3,12 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.repositories.CommunicationRepository
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class CommunicationService(private val repository: CommunicationRepository) {
 
     /**
-     * Creates a new communication based on [communication]. Returns the student's new id as decided by the database.
+     * Creates a new communication based on [communication]. Returns the created communication object.
      */
-    fun createCommunication(communication: Communication): UUID = repository.save(communication).id
+    fun createCommunication(communication: Communication): Communication = repository.save(communication)
 }
