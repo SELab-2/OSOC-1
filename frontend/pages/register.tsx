@@ -26,34 +26,24 @@ const register = () => {
   const [validMatch, setValidMatch] = useState(true);
 
   useEffect(() => {
-    setValidName(
-      nameRegex.test(name)
-    );
+    setValidName(nameRegex.test(name));
   }, [name]);
 
   useEffect(() => {
-    setValidEmail(
-      emailRegex.test(email)
-    );
+    setValidEmail(emailRegex.test(email));
   }, [email]);
 
   useEffect(() => {
-    setValidPassword(
-      customPasswordRegex.test(password)
-    );
+    setValidPassword(customPasswordRegex.test(password));
 
-    setValidMatch(
-      customPasswordRegex.test(match)
-      && password === match
-    );
+    setValidMatch(customPasswordRegex.test(match) && password === match);
   }, [password, match]);
 
   const router = useRouter();
 
   const registerUser: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    if (!(validName && validEmail && validPassword && validMatch))
-      return;
+    if (!(validName && validEmail && validPassword && validMatch)) return;
 
     const reqBody = {
       username: name,
@@ -66,23 +56,21 @@ const register = () => {
       resetEmail();
       resetPassword();
       resetMatch();
-    }
+    };
 
     try {
-      await axios.post(
-        Endpoints.USERS,
-        JSON.stringify(reqBody),
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
+      await axios.post(Endpoints.USERS, JSON.stringify(reqBody), {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
       resetForm();
       router.push('/login');
     } catch (err) {
-      toast.error('Unknown error while trying to create Account. Please try again later');
+      toast.error(
+        'Unknown error while trying to create Account. Please try again later'
+      );
     }
   };
 
