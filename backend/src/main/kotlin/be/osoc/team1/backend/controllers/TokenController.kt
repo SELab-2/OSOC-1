@@ -1,11 +1,6 @@
 package be.osoc.team1.backend.controllers
 
-import be.osoc.team1.backend.exceptions.InvalidTokenException
-import be.osoc.team1.backend.security.TokenUtil
-import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
-import be.osoc.team1.backend.security.TokenUtil.getAccessTokenFromRequest
-import be.osoc.team1.backend.security.TokenUtil.invalidateRefreshToken
-import be.osoc.team1.backend.security.TokenUtil.refreshTokenRotation
+import be.osoc.team1.backend.services.TokenService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -14,35 +9,17 @@ import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/token")
-class TokenController {
+class TokenController(private val service: TokenService) {
     /**
-     * Get a new access token using your refresh token.
+     * Get a new access token using the refresh token given in [request].
      */
     @PostMapping("/refresh")
-    fun renewAccessToken(request: HttpServletRequest, response: HttpServletResponse) {
-        val refreshToken: String = request.getParameter("refreshToken")
-            ?: throw InvalidTokenException("No refresh token found in request body.")
-
-        val decodedToken = decodeAndVerifyToken(refreshToken)
-        if (decodedToken.getClaim("isAccessToken").asBoolean()) {
-            throw InvalidTokenException("Expected a refresh token, got an access token.")
-        }
-
-        val email: String = decodedToken.subject
-        val authorities: List<String> = decodedToken.getClaim("authorities").asList(String::class.java)
-        refreshTokenRotation(response, refreshToken, email, authorities, decodedToken.expiresAt)
-    }
+    fun renewAccessToken(request: HttpServletRequest, response: HttpServletResponse) =
+        service.renewAccessToken(request, response)
 
     /**
-     * Extract email from access token from [request], then invalidate the refresh token associated with this email.
+     * Invalidate refresh token of logged in user.
      */
     @PostMapping("/logout")
-    fun logout(request: HttpServletRequest, response: HttpServletResponse) {
-        val accessToken = getAccessTokenFromRequest(request)
-            ?: throw InvalidTokenException("You need to be logged in to be able to log out.")
-
-        val decodedToken = decodeAndVerifyToken(accessToken)
-        val email: String = decodedToken.subject
-        invalidateRefreshToken(email)
-    }
+    fun logout(request: HttpServletRequest, response: HttpServletResponse) = service.logout(request, response)
 }
