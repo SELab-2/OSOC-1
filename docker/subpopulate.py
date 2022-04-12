@@ -56,7 +56,7 @@ projects = []
 for _ in range(10):
     projects.append(requests.post('http://localhost:8080/api/projects', json={
         "clientName": fake.company(), "name": fake.catch_phrase(), "description": fake.bs(), "positions": [{"skill": {"skillName": fake.job()}, "amount": random.randint(1, 7)} for _ in range(5)]}, headers=authheaders).json())
-print(projects)
+
 # users+coaches
 # suggestions to students
 # students to projects
@@ -71,4 +71,4 @@ for proj in projects:
 # print(requests.get('http://localhost:8080/api/students',
 #                    headers=authheaders, params={"pageNumber": 0, "pageSize": 50, "sortBy": "id"}).json())
 # print(requests.get('http://localhost:8080/api/students', headers=authheaders).json())
-print(requests.get('http://localhost:8080/api/projects', headers=authheaders).json())
+# print(requests.get('http://localhost:8080/api/projects', headers=authheaders).json())
