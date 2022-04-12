@@ -51,8 +51,8 @@ for stud in maybe:
 
 # create 10 random projects with 5 random positions
 for _ in range(10):
-    print(requests.post('http://localhost:8080/api/projects', json={
-        "clientName": fake.company(), "name": fake.catch_phrase(), "description": fake.bs(), "positions": [{"skill": {"skillName": fake.job()}, "amount": random.randint(1, 7)} for _ in range(5)]}, headers=authheaders).json())
+    requests.post('http://localhost:8080/api/projects', json={
+        "clientName": fake.company(), "name": fake.catch_phrase(), "description": fake.bs(), "positions": [{"skill": {"skillName": fake.job()}, "amount": random.randint(1, 7)} for _ in range(5)]}, headers=authheaders).json()
 
 # users+coaches
 # suggestions to students
@@ -64,4 +64,4 @@ for _ in range(10):
 # print(requests.get('http://localhost:8080/api/students',
 #                    headers=authheaders, params={"pageNumber": 0, "pageSize": 50, "sortBy": "id"}).json())
 # print(requests.get('http://localhost:8080/api/students', headers=authheaders).json())
-print(requests.get('http://localhost:8080/api/projects', headers=authheaders).json())
+# print(requests.get('http://localhost:8080/api/projects', headers=authheaders).json())
