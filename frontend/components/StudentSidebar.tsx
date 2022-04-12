@@ -8,6 +8,8 @@ import { StatusSuggestionStatus, Student } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
+import { func } from 'prop-types';
+import Select from 'react-select';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 type StudentsSidebarProps = PropsWithChildren<unknown>;
@@ -40,6 +42,15 @@ function searchStudentName(
 const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [showFilter, setShowFilter] = useState(true);
   const [StudentNameSearch, setStudentNameSearch] = useState('' as string);
+  //TODO all these toggles and button states should be one object
+  const [StatusYes, setStatusYes] = useState(false);
+  const [StatusNo, setStatusNo] = useState(false);
+  const [StatusMaybe, setStatusMaybe] = useState(false);
+  const [StatusUndecided, setStatusUndecided] = useState(false);
+  const [OnlyAlumni, setOnlyAlumni] = useState(false);
+  const [OnlyStudentCoach, setOnlyStudentCoach] = useState(false);
+  const [IncludeSuggested, setIncludeSuggested] = useState(false);
+  const [Roles, setRoles] = useState([] as string[]);
   const [students, setStudents]: [Student[], (students: Student[]) => void] =
     useState([] as Student[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
@@ -112,92 +123,34 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       >
         {/* holds drowndown, deselect all, clear all filters */}
         <div className="flex w-full flex-row justify-between">
-          <div className="flex flex-row justify-items-center">
-            {/* This button controls the dropdown */}
-            <Menu as="div" className="relative inline-block text-left">
-              <div>
-                <Menu.Button className="inline-flex w-full justify-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  Select Roles
-                  <ChevronDownIcon
-                    className="-mr-1 ml-2 h-5 w-5"
-                    aria-hidden="true"
-                  />
-                </Menu.Button>
-              </div>
-
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                {/* These are the actual dropdown options */}
-                <Menu.Items className="absolute right-0 z-10 w-full origin-top-right bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <div className="">
-                    <Menu.Item>
-                      {({ active }) => (
-                        <p
-                          className={`${
-                            active
-                              ? 'bg-gray-100 text-gray-900'
-                              : 'text-gray-700'
-                          } block px-4 py-2 text-sm`}
-                        >
-                          opt1
-                        </p>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <p
-                          className={`${
-                            active
-                              ? 'bg-gray-100 text-gray-900'
-                              : 'text-gray-700'
-                          } block px-4 py-2 text-sm`}
-                        >
-                          opt2
-                        </p>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <p
-                          className={`${
-                            active
-                              ? 'bg-gray-100 text-gray-900'
-                              : 'text-gray-700'
-                          } block px-4 py-2 text-sm`}
-                        >
-                          opt3
-                        </p>
-                      )}
-                    </Menu.Item>
-                    {/* Don't know what type this dropdown menu will end up being yet */}
-                    {/*<form method="POST" action="#">*/}
-                    {/*    <Menu.Item>*/}
-                    {/*        {({ active }) => (*/}
-                    {/*            <button*/}
-                    {/*                type="submit"*/}
-                    {/*                className={`${*/}
-                    {/*                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'}*/}
-                    {/*                block px-4 py-2 text-sm`}*/}
-                    {/*            >*/}
-                    {/*                Sign out*/}
-                    {/*            </button>*/}
-                    {/*        )}*/}
-                    {/*    </Menu.Item>*/}
-                    {/*</form>*/}
-                  </div>
-                </Menu.Items>
-              </Transition>
-            </Menu>
-            <button className="ml-2 bg-gray-300 p-2 text-sm text-black">
-              Deselect all
-            </button>
+          {/* This is the dropdown menu to select skills to filter on */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            // className={`max-w-[60%]`}
+          >
+            <Fragment>
+              {/* TODO fix this becoming wider when something is selected */}
+              {/* TODO fix this looking horrible when a lot is selected */}
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                isDisabled={false}
+                isLoading={false}
+                isClearable={true}
+                isRtl={false}
+                isSearchable={true}
+                isMulti={true}
+                name="Skills"
+                options={[
+                  { value: 'chocolate', label: 'Chocolate' },
+                  { value: 'strawberry', label: 'Strawberry' },
+                  { value: 'vanilla', label: 'Vanilla' },
+                ]}
+                placeholder="Select Skills"
+                onChange={(e) => console.log(e.values)}
+              />
+            </Fragment>
           </div>
           <button className="ml-4 bg-gray-300 px-2 text-sm text-black">
             Clear all filters
@@ -213,6 +166,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 name="toggleAlumni"
                 id="toggleAlumni"
                 className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
+                checked={OnlyAlumni}
+                onChange={() => setOnlyAlumni(!OnlyAlumni)}
               />
               <label
                 htmlFor="toggleAlumni"
@@ -231,6 +186,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 name="toggleStudentCoach"
                 id="toggleStudentCoach"
                 className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
+                checked={OnlyStudentCoach}
+                onChange={() => setOnlyStudentCoach(!OnlyStudentCoach)}
               />
               <label
                 htmlFor="toggleStudentCoach"
@@ -249,6 +206,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 name="toggleSuggested"
                 id="toggleSuggested"
                 className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
+                checked={IncludeSuggested}
+                onChange={() => setIncludeSuggested(!IncludeSuggested)}
               />
               <label
                 htmlFor="toggleSuggested"
@@ -266,18 +225,38 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
         {/* holds the filter buttons */}
         <div className="flex flex-col justify-center border-y-2 py-1.5 lg:flex-row">
           <div className="flex grow flex-row justify-between lg:mr-[2.75%] lg:w-1">
-            <button className="w-[44%] bg-gray-300 text-sm text-black">
+            <button
+              className={`${
+                StatusYes ? 'bg-osoc-btn-primary' : 'bg-gray-300'
+              } w-[44%] text-sm text-black`}
+              onClick={() => setStatusYes(!StatusYes)}
+            >
               Yes
             </button>
-            <button className="w-[44%] bg-gray-300 text-sm text-black">
+            <button
+              className={`${
+                StatusNo ? 'bg-osoc-btn-primary' : 'bg-gray-300'
+              } w-[44%] text-sm text-black`}
+              onClick={() => setStatusNo(!StatusNo)}
+            >
               No
             </button>
           </div>
           <div className="mt-2.5 flex grow flex-row justify-between lg:ml-[2.75%] lg:mt-0 lg:w-1">
-            <button className="w-[44%] bg-gray-300 text-sm text-black">
+            <button
+              className={`${
+                StatusMaybe ? 'bg-osoc-btn-primary' : 'bg-gray-300'
+              } w-[44%] text-sm text-black`}
+              onClick={() => setStatusMaybe(!StatusMaybe)}
+            >
               Maybe
             </button>
-            <button className="w-[44%] bg-gray-300 text-sm text-black">
+            <button
+              className={`${
+                StatusUndecided ? 'bg-osoc-btn-primary' : 'bg-gray-300'
+              } w-[44%] text-sm text-black`}
+              onClick={() => setStatusUndecided(!StatusUndecided)}
+            >
               Undecided
             </button>
           </div>
