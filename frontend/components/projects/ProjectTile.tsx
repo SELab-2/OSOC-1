@@ -10,12 +10,16 @@ import {
 import { Icon } from '@iconify/react';
 import { useDrop } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
-import { useEffect } from 'react';
+import { Component, Fragment, useEffect, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
+import Popup from 'reactjs-popup';
+import { Menu, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/solid';
+import Select, { OptionsOrGroups, Options } from 'react-select';
 
 type ProjectProp = {
   project: Project;
@@ -84,7 +88,21 @@ function deleteStudentFromProject(projectId: UUID, assignmentId: UUID) {
     });
 }
 
+const Checkbox = ({ children, ...props }: JSX.IntrinsicElements['input']) => (
+  <label style={{ marginRight: '1em' }}>
+    <input type="checkbox" {...props} />
+    {children}
+  </label>
+);
+
 const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
+  const [open, setOpen]: [boolean, (open: boolean) => void] =
+    useState<boolean>(false);
+  const [student, setStudent] = useState({} as Student);
+  const closeModal = () => setOpen(false);
+  // const [Clearable, setClearable] = useState(false);
+  const [PositionId, setPositionId] = useState('' as UUID);
+  const [Reason, setReason] = useState('' as string);
   const [User] = useUser(); // Needed for the suggester UUID
   useAxiosAuth();
   /**
@@ -99,15 +117,18 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
       canDrop: () => true, // TODO add check to see if student is already part of project
       drop: (item) => {
         // console.log(item);
-        const student = item as Student; // TODO find a way to pass item not as type DragObject but as type Student
+        setStudent(item as Student); // TODO find a way to pass item not as type DragObject but as type Student
+        setOpen(!open);
+        // const student = item as Student; // TODO find a way to pass item not as type DragObject but as type Student
+
         // TODO call a function that creates a pop up thing to choose reason & position
-        postStudentToProject(
-          project.id,
-          student.id,
-          project.positions[0].id,
-          User.id,
-          'a fake reason'
-        );
+        // postStudentToProject(
+        //     project.id,
+        //     student.id,
+        //     project.positions[0].id,
+        //     User.id,
+        //     'a fake reason'
+        // );
         // TODO after that call postStudentToProject with correct information
       },
       collect: (monitor) => ({
@@ -117,6 +138,15 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
     }),
     []
   );
+
+  /**
+   * react-select refuses to work unless you use this weird structure
+   * label is what is shown in the dropdown
+   */
+  const myOptions = [] as Array<any>;
+  project.positions.forEach((position) => {
+    myOptions.push({ value: position.id, label: position.skill.skillName });
+  });
 
   return (
     <div
@@ -154,7 +184,89 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
           />
         ))}
       </div>
+
+      {/* TODO style this entire thing & show what project / student is used */}
+      <Popup
+        open={open}
+        onClose={closeModal}
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col bg-white p-20">
+          <a
+            className="close"
+            onClick={(e) => {
+              e.stopPropagation();
+              closeModal();
+            }}
+          >
+            &times;
+          </a>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              postStudentToProject(
+                project.id,
+                student.id,
+                PositionId,
+                User.id,
+                Reason
+              );
+              setOpen(false);
+            }}
+          >
+            <textarea
+              placeholder="Reason for assignment"
+              className="mt-3 w-full resize-y border-2 border-check-gray"
+              onChange={(e) => setReason(e.target.value || '')}
+            />
+            {/* This is a fix to stop clicking on the clearable closing the entire modal */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <Fragment>
+                <Select
+                  className="basic-single"
+                  classNamePrefix="select"
+                  isDisabled={false}
+                  isLoading={false}
+                  isClearable={true}
+                  isRtl={false}
+                  isSearchable={true}
+                  name="Position"
+                  options={myOptions}
+                  placeholder="Select position"
+                  onChange={(e) => setPositionId(e.value || '')}
+                />
+              </Fragment>
+            </div>
+            <button className={`border-2`} type={`submit`}>
+              Assign student
+            </button>
+          </form>
+        </div>
+      </Popup>
     </div>
+  );
+};
+
+const PositionsDropdownItem: React.FC<PositionProp> = ({
+  position,
+}: PositionProp) => {
+  return (
+    <Menu.Item>
+      {({ active }) => (
+        <p
+          className={`${
+            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+          } block px-4 py-2 text-sm`}
+        >
+          {position.skill.skillName}
+        </p>
+      )}
+    </Menu.Item>
   );
 };
 
