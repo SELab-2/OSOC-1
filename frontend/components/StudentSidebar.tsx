@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import { Project, StatusSuggestionStatus, Student } from '../lib/types';
+import { StatusSuggestionStatus, Student } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
@@ -12,10 +12,34 @@ const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 type StudentsSidebarProps = PropsWithChildren<unknown>;
 
+// TODO show/handle errors
+// TODO this is full code duplication of projects search atm
+/**
+ * function that allows searching students by name
+ *
+ * @param StudentNameSearch = (part of) the name of a student
+ * @param setStudents       = callback to set the results
+ */
+function searchStudentName(
+  StudentNameSearch: string,
+  setStudents: (students: Student[]) => void
+) {
+  axiosAuthenticated
+    .get(Endpoints.STUDENTS, {
+      params: { name: StudentNameSearch },
+    })
+    .then((response) => {
+      setStudents(response.data as Student[]);
+    })
+    .catch((ex) => {
+      console.log(ex);
+    });
+}
+
 // TODO no actual functionality implemented yet
 const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [showFilter, setShowFilter] = useState(true);
-
+  const [StudentNameSearch, setStudentNameSearch] = useState('' as string);
   const [students, setStudents]: [Student[], (students: Student[]) => void] =
     useState([] as Student[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
@@ -27,7 +51,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     axiosAuthenticated
       .get<Student[]>(Endpoints.STUDENTS)
       .then((response) => {
-        setStudents(response.data);
+        setStudents(response.data as Student[]);
         setLoading(false);
       })
       .catch((ex) => {
@@ -45,19 +69,25 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     // holds searchbar + hide filter button
     <div className="mt-[50px] sm:mt-0">
       <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
+        {/* TODO add an easy reset/undo search button */}
         {/* The students searchbar */}
         <div className="justify-left md:w-[calc(100% - 200px)] mb-3 flex w-[80%] md:ml-0 lg:mb-0 ">
           <div className="relative w-full">
             <input
-              type="search"
+              type="text"
               className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
               id="StudentsSearch"
               placeholder="Search students by name"
+              onChange={(e) => setStudentNameSearch(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key == 'Enter') {
+                  searchStudentName(StudentNameSearch, setStudents);
+                }
+              }}
             />
-            {/* TODO add actual onclick search */}
             <i
-              className="absolute bottom-1.5 right-2 opacity-20"
-              // onClick={() => }
+              className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
+              onClick={() => searchStudentName(StudentNameSearch, setStudents)}
             >
               {magnifying_glass}
             </i>

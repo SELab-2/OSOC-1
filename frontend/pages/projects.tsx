@@ -6,7 +6,7 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
-import { Project, UserRole } from '../lib/types';
+import { Project, UserRole, UUID } from '../lib/types';
 import axios, { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import useAxiosAuth from '../hooks/useAxiosAuth';
@@ -17,13 +17,36 @@ const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
 /**
+ * function that allows searching projects by name
+ *
+ * @param ProjectSearch = (part of) the name of a project
+ * @param setProjects   = callback to set the results
+ */
+// TODO show/handle errors
+function searchProject(
+  ProjectSearch: string,
+  setProjects: (projects: Project[]) => void
+) {
+  axiosAuthenticated
+    .get(Endpoints.PROJECTS, {
+      params: { name: ProjectSearch },
+    })
+    .then((response) => {
+      setProjects(response.data as Project[]);
+    })
+    .catch((ex) => {
+      console.log(ex);
+    });
+}
+
+/**
  * Projects page for OSOC application
  * @returns Projects page
  */
 const Projects: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
-
+  const [ProjectSearch, setProjectSearch] = useState('' as string);
   const [projects, setProjects]: [Project[], (projects: Project[]) => void] =
     useState([] as Project[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
@@ -36,7 +59,7 @@ const Projects: NextPage = () => {
       .get<Project[]>(Endpoints.PROJECTS)
       .then((response) => {
         // console.log(response.data);
-        setProjects(response.data);
+        setProjects(response.data as Project[]);
         setLoading(false);
       })
       .catch((ex) => {
@@ -87,19 +110,25 @@ const Projects: NextPage = () => {
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_out}</i>
               </div>
 
+              {/* TODO add an easy reset/undo search button */}
               {/* This is the projects searchbar */}
               <div className="ml-6 flex w-full justify-center md:mx-6 md:mr-4">
                 <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
                   <input
-                    type="search"
+                    type="text"
                     className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
                     id="ProjectsSearch"
                     placeholder="Search projects by name"
+                    onChange={(e) => setProjectSearch(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key == 'Enter') {
+                        searchProject(ProjectSearch, setProjects);
+                      }
+                    }}
                   />
-                  {/* TODO add actual onclick search */}
                   <i
-                    className="absolute bottom-1.5 right-2 opacity-20"
-                    // onClick={() => }
+                    className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                    onClick={() => searchProject(ProjectSearch, setProjects)}
                   >
                     {magnifying_glass}
                   </i>

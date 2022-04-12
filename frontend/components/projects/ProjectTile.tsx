@@ -10,16 +10,14 @@ import {
 import { Icon } from '@iconify/react';
 import { useDrop } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
-import { Component, Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 import Popup from 'reactjs-popup';
-import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/solid';
-import Select, { OptionsOrGroups, Options } from 'react-select';
+import Select from 'react-select';
 
 type ProjectProp = {
   project: Project;
@@ -33,9 +31,11 @@ type PositionProp = {
   position: Position;
 };
 
+// TODO find out what types these are
 type AssignmentProp = {
   assignment: Assignment;
-  projectId: UUID;
+  setOpenUnassignment: (openUnAssignment: boolean) => void;
+  setAssignmentId: (AssignmentId: UUID) => void;
 };
 
 /**
@@ -75,6 +75,14 @@ function postStudentToProject(
     });
 }
 
+// TODO when delete is finished, should update the project frontend view & also the student filter
+// TODO should show success / error
+/**
+ * This function sends an authenticated DELETE request to remove an assignment from a project
+ *
+ * @param projectId     = the UUID of the project to remove the assignment from
+ * @param assignmentId  = the UUID of the assignment to remove
+ */
 function deleteStudentFromProject(projectId: UUID, assignmentId: UUID) {
   axiosAuthenticated
     .delete(
@@ -88,48 +96,36 @@ function deleteStudentFromProject(projectId: UUID, assignmentId: UUID) {
     });
 }
 
-const Checkbox = ({ children, ...props }: JSX.IntrinsicElements['input']) => (
-  <label style={{ marginRight: '1em' }}>
-    <input type="checkbox" {...props} />
-    {children}
-  </label>
-);
-
 const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
-  const [open, setOpen]: [boolean, (open: boolean) => void] =
-    useState<boolean>(false);
+  const [openAssignment, setOpenAssignment]: [
+    boolean,
+    (openAssignment: boolean) => void
+  ] = useState<boolean>(false);
+  const closeAssignmentModal = () => setOpenAssignment(false);
+  const [openUnassignment, setOpenUnassignment]: [
+    boolean,
+    (openUnassignment: boolean) => void
+  ] = useState<boolean>(false);
+  const closeUnassignmentModal = () => setOpenUnassignment(false);
+  const [AssignmentId, setAssignmentId] = useState('' as UUID);
   const [student, setStudent] = useState({} as Student);
-  const closeModal = () => setOpen(false);
-  // const [Clearable, setClearable] = useState(false);
   const [PositionId, setPositionId] = useState('' as UUID);
   const [Reason, setReason] = useState('' as string);
-  const [User] = useUser(); // Needed for the suggester UUID
+  const [User] = useUser();
   useAxiosAuth();
+
   /**
-   * This hook catches the dropped studentTile
+   * This catches the dropped studentTile
    * The studentTile passes its student as the DragObject to this function on drop
    * Then we allow the user to choose a position & reason, then post student to project
    */
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: ItemTypes.STUDENTTILE,
-      // accept: Student,
-      canDrop: () => true, // TODO add check to see if student is already part of project
+      canDrop: () => true, // TODO add check to see if student is already part of project & if any positions are left
       drop: (item) => {
-        // console.log(item);
         setStudent(item as Student); // TODO find a way to pass item not as type DragObject but as type Student
-        setOpen(!open);
-        // const student = item as Student; // TODO find a way to pass item not as type DragObject but as type Student
-
-        // TODO call a function that creates a pop up thing to choose reason & position
-        // postStudentToProject(
-        //     project.id,
-        //     student.id,
-        //     project.positions[0].id,
-        //     User.id,
-        //     'a fake reason'
-        // );
-        // TODO after that call postStudentToProject with correct information
+        setOpenAssignment(true); // This opens the popup window to select position & type reason
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
@@ -141,7 +137,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
 
   /**
    * react-select refuses to work unless you use this weird structure
-   * label is what is shown in the dropdown
+   * label is what is shown in the dropdown, value is used to pass to assign function
    */
   const myOptions = [] as Array<any>;
   project.positions.forEach((position) => {
@@ -179,16 +175,18 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
         {project.assignments.map((assignment) => (
           <ProjectAssignmentsList
             key={assignment.id}
-            projectId={project.id}
             assignment={assignment}
+            setOpenUnassignment={setOpenUnassignment}
+            setAssignmentId={setAssignmentId}
           />
         ))}
       </div>
 
       {/* TODO style this entire thing & show what project / student is used */}
+      {/* This is the popup to assign a student to a project */}
       <Popup
-        open={open}
-        onClose={closeModal}
+        open={openAssignment}
+        onClose={closeAssignmentModal}
         data-backdrop="static"
         data-keyboard="false"
       >
@@ -197,7 +195,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
             className="close"
             onClick={(e) => {
               e.stopPropagation();
-              closeModal();
+              closeAssignmentModal();
             }}
           >
             &times;
@@ -213,7 +211,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
                 User.id,
                 Reason
               );
-              setOpen(false);
+              closeAssignmentModal();
             }}
           >
             <textarea
@@ -248,25 +246,44 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
           </form>
         </div>
       </Popup>
-    </div>
-  );
-};
 
-const PositionsDropdownItem: React.FC<PositionProp> = ({
-  position,
-}: PositionProp) => {
-  return (
-    <Menu.Item>
-      {({ active }) => (
-        <p
-          className={`${
-            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-          } block px-4 py-2 text-sm`}
-        >
-          {position.skill.skillName}
-        </p>
-      )}
-    </Menu.Item>
+      {/* TODO style this entire thing & show what project / student is used */}
+      {/* This is the popup to remove a student assignment */}
+      <Popup
+        open={openUnassignment}
+        onClose={closeUnassignmentModal}
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col bg-white p-20">
+          <a
+            className="close"
+            onClick={(e) => {
+              e.stopPropagation();
+              closeUnassignmentModal();
+            }}
+          >
+            &times;
+          </a>
+          <p>Are you sure you wish to remove this student from this project?</p>
+          <button
+            onClick={() => closeUnassignmentModal()}
+            className={`border-2`}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              closeUnassignmentModal();
+              deleteStudentFromProject(project.id, AssignmentId);
+            }}
+            className={`border-2`}
+          >
+            Confirm
+          </button>
+        </div>
+      </Popup>
+    </div>
   );
 };
 
@@ -287,8 +304,9 @@ const ProjectPositionsList: React.FC<PositionProp> = ({
 };
 
 const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
-  projectId,
   assignment,
+  setAssignmentId,
+  setOpenUnassignment,
 }: AssignmentProp) => {
   return (
     <div className="flex flex-row justify-between pb-4">
@@ -314,7 +332,10 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
       </div>
       <div className="flex flex-col justify-center">
         <i
-          onClick={() => deleteStudentFromProject(projectId, assignment.id)}
+          onClick={() => {
+            setAssignmentId(assignment.id);
+            setOpenUnassignment(true);
+          }}
           className="icon-xcircle-red text-2xl"
         >
           {xmark_circle}
