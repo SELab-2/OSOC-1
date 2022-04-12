@@ -8,6 +8,7 @@ import useUser from '../hooks/useUser';
 import { UserRole } from '../lib/types';
 import axios from '../lib/axios';
 import Endpoints from '../lib/endpoints';
+import usePersistentInput from '../hooks/usePersistentInput';
 
 /**
  * Login page for OSOC application
@@ -19,7 +20,7 @@ import Endpoints from '../lib/endpoints';
  * @returns Login Page
  */
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [email, resetEmail, emailProps] = usePersistentInput('email', '');
   const [password, setPassword] = useState('');
 
   const [, setUser] = useUser();
@@ -53,6 +54,9 @@ const Login = () => {
             refreshToken,
           });
 
+          resetEmail();
+          setPassword('');
+
           if (user.role === UserRole.Disabled) {
             router.push('/wait');
           } else {
@@ -77,8 +81,7 @@ const Login = () => {
               className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
               name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...emailProps}
             />
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
