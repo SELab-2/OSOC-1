@@ -1,7 +1,7 @@
 import { ChangeEvent } from "react";
 import useLocalStorage from "./useLocalStorage";
 
-const usePersistentInput = (key: string, initValue: unknown) => {
+const usePersistentInput = (key: string, initValue: string) => {
   const [value, setValue] = useLocalStorage(key, initValue);
 
   const reset = () => setValue(initValue);
