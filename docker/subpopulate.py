@@ -3,8 +3,10 @@ import requests
 import random
 from faker import Faker
 fake = Faker()
-token = requests.post('http://localhost:8080/api/login',
-                      data={"email": "tester@mail.com", "password": "tester"}).json()["accessToken"]
+login = requests.post('http://localhost:8080/api/login',
+                      data={"email": "tester@mail.com", "password": "tester"}).json()
+token = login["accessToken"]
+testerid = login["user"]["id"]
 
 # adding devs
 authheaders = {'Authorization': f'Basic {token}',
@@ -50,18 +52,23 @@ for stud in maybe:
         f'http://localhost:8080/api/students/{stud["id"]}/status', json="Maybe", headers=authheaders)
 
 # create 10 random projects with 5 random positions
+projects = []
 for _ in range(10):
-    requests.post('http://localhost:8080/api/projects', json={
-        "clientName": fake.company(), "name": fake.catch_phrase(), "description": fake.bs(), "positions": [{"skill": {"skillName": fake.job()}, "amount": random.randint(1, 7)} for _ in range(5)]}, headers=authheaders).json()
-
+    projects.append(requests.post('http://localhost:8080/api/projects', json={
+        "clientName": fake.company(), "name": fake.catch_phrase(), "description": fake.bs(), "positions": [{"skill": {"skillName": fake.job()}, "amount": random.randint(1, 7)} for _ in range(5)]}, headers=authheaders).json())
+print(projects)
 # users+coaches
 # suggestions to students
 # students to projects
+for proj in projects:
+    for stud in random.sample(yes, 10):
+        requests.post(f'http://localhost:8080/api/projects/{proj["id"]}/assignments', json={
+            "student": stud["id"], "position": random.choice(proj["positions"])["id"], "suggester": testerid, "reason": fake.paragraph(nb_sentences=4)}, headers=authheaders)
 # communications to students
-# conflicts
+# conflicts (force atleast 2 conflicts)
 
 
 # print(requests.get('http://localhost:8080/api/students',
 #                    headers=authheaders, params={"pageNumber": 0, "pageSize": 50, "sortBy": "id"}).json())
 # print(requests.get('http://localhost:8080/api/students', headers=authheaders).json())
-# print(requests.get('http://localhost:8080/api/projects', headers=authheaders).json())
+print(requests.get('http://localhost:8080/api/projects', headers=authheaders).json())
