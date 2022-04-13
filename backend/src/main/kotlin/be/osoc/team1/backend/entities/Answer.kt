@@ -19,7 +19,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
     private val skillQuestionKey = "question_3X4q1V"
 
     override fun deserialize(parser: JsonParser, context: DeserializationContext): Student {
-        val rootNode : JsonNode = parser.codec.readTree(parser)
+        val rootNode: JsonNode = parser.codec.readTree(parser)
         val fields = rootNode.get("data").get("fields").toList()
         val answerMap = mutableMapOf<String, Answer>()
         for (field in fields) {
@@ -70,8 +70,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
                     return Answer(key, label, listOf(text), optionId)
             }
             throw FailedOperationException("The specified option '$optionId' in the answer of the question with '$key' was not found in the associated 'options' field")
-        }
-        else if (type == "CHECKBOXES" && key.length == 15) {
+        } else if (type == "CHECKBOXES" && key.length == 15) {
             val valueIds = valueNode.toSet().map { it.asText() }
             val valueList = mutableListOf<String>()
             val options = node.get("options").toSet()
@@ -82,8 +81,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
                     valueList.add(text)
             }
             return Answer(key, label, valueList)
-        }
-        else if (type == "FILE_UPLOAD") {
+        } else if (type == "FILE_UPLOAD") {
             val fileUrls = valueNode.toList().map { it.get("url").asText() }
             return Answer(key, label, fileUrls)
         }
@@ -104,9 +102,10 @@ class Answer(
     val key: String,
     val question: String,
     @ElementCollection
-    val answer:  Collection<String>,
+    val answer: Collection<String>,
     @JsonIgnore
-    val optionId: String = "") {
+    val optionId: String = ""
+) {
     @Id
     val id: UUID = UUID.randomUUID()
 }
