@@ -168,7 +168,7 @@ const Users: NextPage = () => {
     const getUsers = async () => {
       const response = await axiosAuth.get('/bogus' + Endpoints.USERS);
       if (isMounted) setUsers(response.data as User[]);
-    }
+    };
 
     try {
       getUsers();
@@ -180,19 +180,18 @@ const Users: NextPage = () => {
 
     return () => {
       isMounted = false;
-    }
-
+    };
   }, []);
 
   return (
     <div className="h-screen">
       <Header />
       <div className="mx-auto mt-16 mb-32 w-3/5 p-0">
-        {
-        loading
-        ? (
+        {loading ? (
           <div className="relative top-1/2 translate-y-1/2">
-            <p className="text-2xl text-center opacity-75 mb-4">Fetching Users...</p>
+            <p className="mb-4 text-center text-2xl opacity-75">
+              Fetching Users...
+            </p>
             <SpinnerCircular
               size={100}
               thickness={80}
@@ -201,19 +200,14 @@ const Users: NextPage = () => {
               className="mx-auto"
             />
           </div>
-        )
-        : error
-          ? (
-            <>
-            <Error
-              error={error}
-              className="mb-4"
-            />
+        ) : error ? (
+          <>
+            <Error error={error} className="mb-4" />
             <UserTable users={users} />
-            </>
-          )
-          : <UserTable users={users} />
-        }
+          </>
+        ) : (
+          <UserTable users={users} />
+        )}
       </div>
     </div>
   );
