@@ -116,7 +116,7 @@ class ProjectService(
             for (student in getStudents(project)) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())
-                studentsMap[student.id]?.add("$baseUrl/projects/" + project.id)
+                studentsMap[student.id]!!.add("$baseUrl/projects/" + project.id)
             }
         }
         val conflicts = mutableListOf<Conflict>()
