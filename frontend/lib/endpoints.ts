@@ -10,7 +10,7 @@ const baseURL = envURL.replace(/\/$/, '');
  */
 type Endpoints = typeof Endpoints[keyof typeof Endpoints];
 const Endpoints = {
-  USERS: baseURL + '/users',
+  USERS: '/users',
   LOGIN: '/login',
   REFRESH: '/token/refresh',
 } as const;
