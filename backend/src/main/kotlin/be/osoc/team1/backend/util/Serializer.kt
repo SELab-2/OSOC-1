@@ -2,22 +2,13 @@ package be.osoc.team1.backend.util
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 /**
  * This class is used to serialize a [T] object when it is used as a reference.
  * This makes sure it gets turned into the rest API url.
  */
-open class Serializer<T>(private val genFunc: (T) -> String, t: Class<T>?) : StdSerializer<T>(t) {
-    constructor(func: (T) -> String) : this(func, null) {}
+open class Serializer<T>(private val genFunc: (T) -> String) : BaseSerializer<T>() {
 
-    override fun serialize(item: T?, gen: JsonGenerator?, provider: SerializerProvider?) {
-        val baseUrl: String = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+    override fun serialize(item: T?, gen: JsonGenerator?, provider: SerializerProvider?) =
         gen!!.writeObject(baseUrl + genFunc(item!!))
-    }
-
-    companion object {
-        private const val serialVersionUID = 1L
-    }
 }
