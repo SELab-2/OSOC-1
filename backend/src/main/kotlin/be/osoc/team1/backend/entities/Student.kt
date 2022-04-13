@@ -124,17 +124,21 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
     private val skillQuestionKey = "question_3X4q1V"
 
     override fun deserialize(parser: JsonParser, context: DeserializationContext): Student {
-        val node : JsonNode = parser.codec.readTree(parser)
-        val fields = node.get("data").get("fields").toList()
-        val answers = fields.map { processQuestionNode(it) }
+        val rootNode : JsonNode = parser.codec.readTree(parser)
+        val fields = rootNode.get("data").get("fields").toList()
+        val answerMap = mutableMapOf<String, Answer>()
+        for (field in fields) {
+            val answer = processQuestionNode(field)
+            answerMap[answer.key] = answer
+        }
 
-        val firstnameAnswer = answers.find { it.key == nameQuestionKey }
+        val firstnameAnswer = answerMap[nameQuestionKey]
             ?: throw FailedOperationException("Could not find firstname question!")
-        val lastnameAnswer = answers.find { it.key == lastnameQuestionKey }
+        val lastnameAnswer = answerMap[lastnameQuestionKey]
             ?: throw FailedOperationException("Could not find lastname question!")
-        val alumnAnswer = answers.find { it.key == alumnQuestionKey }
+        val alumnAnswer = answerMap[alumnQuestionKey]
             ?: throw FailedOperationException("Could not find alumni question!")
-        val skillAnswer = answers.find { it.key == skillQuestionKey }
+        val skillAnswer = answerMap[skillQuestionKey]
             ?: throw FailedOperationException("Could not find skill question!")
 
         return Student(
@@ -142,7 +146,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
             lastnameAnswer.answer.first(),
             skillAnswer.answer.map { Skill(it) }.toSortedSet(),
             alumnAnswer.optionId == alumnYesId,
-            answers
+            answerMap.values.toList()
         )
     }
 
@@ -199,7 +203,7 @@ class Answer(
     val question: String,
     @ElementCollection
     val answer:  Collection<String>,
-    val optionId: String = "") { //TODO: Possibly use optional for optionId
+    val optionId: String = "") {
     @Id
     val id: UUID = UUID.randomUUID()
 }
