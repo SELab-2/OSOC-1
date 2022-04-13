@@ -30,6 +30,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
@@ -176,12 +178,13 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `addStudent should return created student`() {
+        val studentJsonForm = Files.readAllBytes(Paths.get(this::class.java.classLoader.getResource("student_test_form.json").toURI()))
         every { studentService.addStudent(any()) } returns testStudent
         val mvcResult =
             mockMvc.perform(
                 post("/students")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(jsonRepresentation)
+                    .content(studentJsonForm)
             )
                 .andExpect(status().isCreated)
                 .andReturn()
