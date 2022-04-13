@@ -27,7 +27,7 @@ const Students: NextPage = () => {
           <section
             className={`${
               showSidebar ? 'visible' : 'hidden'
-            } relative mt-[14px] w-full bg-osoc-neutral-bg p-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
+            } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
           >
             {/* button to close sidebar on mobile */}
             <div
