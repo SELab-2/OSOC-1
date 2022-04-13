@@ -42,6 +42,7 @@ class Assignment(
     @OneToOne
     @JsonSerialize(using = UserSerializer::class)
     val suggester: User,
+
     val reason: String
 ) {
     @Id
