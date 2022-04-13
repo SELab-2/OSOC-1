@@ -19,17 +19,17 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 /**
  * function that allows searching projects by name
  *
- * @param ProjectSearch - (part of) the name of a project
+ * @param projectSearch - (part of) the name of a project
  * @param setProjects   - callback to set the results
  */
 // TODO show/handle errors
 function searchProject(
-  ProjectSearch: string,
+  projectSearch: string,
   setProjects: (projects: Project[]) => void
 ) {
   axiosAuthenticated
     .get(Endpoints.PROJECTS, {
-      params: { name: ProjectSearch },
+      params: { name: projectSearch },
     })
     .then((response) => {
       setProjects(response.data as Project[]);
@@ -46,7 +46,7 @@ function searchProject(
 const Projects: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
-  const [ProjectSearch, setProjectSearch] = useState('' as string);
+  const [projectSearch, setProjectSearch] = useState('' as string);
   const [projects, setProjects]: [Project[], (projects: Project[]) => void] =
     useState([] as Project[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
@@ -122,13 +122,13 @@ const Projects: NextPage = () => {
                     onChange={(e) => setProjectSearch(e.target.value)}
                     onKeyPress={(e) => {
                       if (e.key == 'Enter') {
-                        searchProject(ProjectSearch, setProjects);
+                        searchProject(projectSearch, setProjects);
                       }
                     }}
                   />
                   <i
                     className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
-                    onClick={() => searchProject(ProjectSearch, setProjects)}
+                    onClick={() => searchProject(projectSearch, setProjects)}
                   >
                     {magnifying_glass}
                   </i>

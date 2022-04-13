@@ -19,6 +19,7 @@ const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 import Popup from 'reactjs-popup';
 import Select from 'react-select';
 
+// Using projectInput and not just project to avoid confusion
 type ProjectProp = {
   projectInput: Project;
 };
@@ -35,7 +36,7 @@ type PositionProp = {
 type AssignmentProp = {
   assignment: Assignment;
   setOpenUnassignment: (openUnAssignment: boolean) => void;
-  setAssignmentId: (AssignmentId: UUID) => void;
+  setAssignmentId: (assignmentId: UUID) => void;
 };
 
 /**
@@ -47,7 +48,7 @@ type AssignmentProp = {
  *                      this position is already part of the needed project positions
  * @param suggesterId - the UUID of the currently authenticated User
  * @param reason      - the reason for assigning this student to this project
- * @param setProject  - callback for reloadProject that is called after this POST completes
+ * @param setMyProject  - callback for reloadProject that is called after this POST completes
  */
 // TODO when post is finished, should update the project frontend view & also the student filter
 // TODO should show success / error
@@ -57,7 +58,7 @@ function postStudentToProject(
   positionId: UUID,
   suggesterId: UUID,
   reason: string,
-  setProject: (MyProject: Project) => void
+  setMyProject: (myProject: Project) => void
 ) {
   axiosAuthenticated
     .post(
@@ -71,7 +72,7 @@ function postStudentToProject(
     )
     .then((response) => {
       console.log(response);
-      reloadProject(projectId, setProject);
+      reloadProject(projectId, setMyProject);
     })
     .catch((ex) => {
       console.log(ex);
@@ -85,12 +86,12 @@ function postStudentToProject(
  *
  * @param projectId     - the UUID of the project to remove the assignment from
  * @param assignmentId  - the UUID of the assignment to remove
- * @param setProject    - callback for reloadProject that is called after this DELETE completes
+ * @param setMyProject    - callback for reloadProject that is called after this DELETE completes
  */
 function deleteStudentFromProject(
   projectId: UUID,
   assignmentId: UUID,
-  setProject: (MyProject: Project) => void
+  setMyProject: (myProject: Project) => void
 ) {
   axiosAuthenticated
     .delete(
@@ -98,7 +99,7 @@ function deleteStudentFromProject(
     )
     .then((response) => {
       console.log(response);
-      reloadProject(projectId, setProject);
+      reloadProject(projectId, setMyProject);
     })
     .catch((ex) => {
       console.log(ex);
@@ -107,12 +108,12 @@ function deleteStudentFromProject(
 
 function reloadProject(
   projectId: UUID,
-  setProject: (MyProject: Project) => void
+  setMyProject: (myProject: Project) => void
 ) {
   axiosAuthenticated
     .get<Project>(Endpoints.PROJECTS + '/' + projectId)
     .then((response) => {
-      setProject(response.data as Project);
+      setMyProject(response.data as Project);
     })
     .catch((ex) => {
       console.log(ex);
@@ -120,8 +121,8 @@ function reloadProject(
 }
 
 const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
-  const [MyProject, setProject]: [Project, (MyProject: Project) => void] =
-    useState(projectInput as Project);
+  const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
+    useState(projectInput as Project); // using different names to avoid confusion
   const [openAssignment, setOpenAssignment]: [
     boolean,
     (openAssignment: boolean) => void
@@ -132,17 +133,17 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
     (openUnassignment: boolean) => void
   ] = useState<boolean>(false);
   const closeUnassignmentModal = () => setOpenUnassignment(false);
-  const [AssignmentId, setAssignmentId] = useState('' as UUID);
+  const [assignmentId, setAssignmentId] = useState('' as UUID);
   const [student, setStudent] = useState({} as Student);
-  const [PositionId, setPositionId] = useState('' as UUID);
-  const [Reason, setReason] = useState('' as string);
-  const [User] = useUser();
+  const [positionId, setPositionId] = useState('' as UUID);
+  const [reason, setReason] = useState('' as string);
+  const [currentUser] = useUser();
   useAxiosAuth();
 
   /**
    * This catches the dropped studentTile
    * The studentTile passes its student as the DragObject to this function on drop
-   * Then we allow the user to choose a position & reason, then post student to project
+   * Then we allow the suggester to choose a position & reason, then assign student to project
    */
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
@@ -165,7 +166,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
    * label is what is shown in the dropdown, value is used to pass to assign function
    */
   const myOptions = [] as Array<{ value: string; label: string }>;
-  MyProject.positions.forEach((position) => {
+  myProject.positions.forEach((position) => {
     myOptions.push({ value: position.id, label: position.skill.skillName });
   });
 
@@ -178,10 +179,10 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}
         <div className="flex min-w-[40%] flex-col xl:min-w-[50%]">
-          <p className="text-lg font-bold">{MyProject.name}</p>
-          <p>{MyProject.clientName}</p>
+          <p className="text-lg font-bold">{myProject.name}</p>
+          <p>{myProject.clientName}</p>
           <div className="flex flex-row">
-            {MyProject.coaches.map((user) => (
+            {myProject.coaches.map((user) => (
               <ProjectCoachesList key={user.id} user={user} />
             ))}
           </div>
@@ -189,7 +190,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
 
         {/* right part of header */}
         <div className="flex flex-col pt-1">
-          {MyProject.positions.map((position) => (
+          {myProject.positions.map((position) => (
             <ProjectPositionsList key={position.id} position={position} />
           ))}
         </div>
@@ -197,7 +198,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
 
       {/* assigned students list */}
       <div className="flex flex-col">
-        {MyProject.assignments.map((assignment) => (
+        {myProject.assignments.map((assignment) => (
           <ProjectAssignmentsList
             key={assignment.id}
             assignment={assignment}
@@ -230,12 +231,12 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
             onSubmit={(e) => {
               e.preventDefault();
               postStudentToProject(
-                MyProject.id,
+                myProject.id,
                 student.id,
-                PositionId,
-                User.id,
-                Reason,
-                setProject
+                positionId,
+                currentUser.id,
+                reason,
+                setMyProject
               );
               closeAssignmentModal();
             }}
@@ -301,7 +302,11 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           <button
             onClick={() => {
               closeUnassignmentModal();
-              deleteStudentFromProject(MyProject.id, AssignmentId, setProject);
+              deleteStudentFromProject(
+                myProject.id,
+                assignmentId,
+                setMyProject
+              );
             }}
             className={`border-2`}
           >
