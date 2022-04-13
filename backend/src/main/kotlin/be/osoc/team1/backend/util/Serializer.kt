@@ -14,11 +14,7 @@ open class Serializer<T>(private val genFunc: (T) -> String, t: Class<T>?) : Std
 
     override fun serialize(item: T?, gen: JsonGenerator?, provider: SerializerProvider?) {
         val baseUrl: String = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
-        if (gen != null) {
-            if (item != null) {
-                gen.writeObject(baseUrl + genFunc(item))
-            }
-        }
+        gen!!.writeObject(baseUrl + genFunc(item!!))
     }
 
     companion object {

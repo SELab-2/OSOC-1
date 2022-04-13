@@ -52,4 +52,16 @@ class SerializationTests {
         assertThat(json).extractingJsonPathValue("$.assignments[0].student").isEqualTo("https://example.com/api/students/" + testStudent.id)
         assertThat(json).extractingJsonPathValue("$.assignments[0].suggester").isEqualTo("https://example.com/api/users/" + testUser.id)
     }
+
+    @Test
+    fun `Serialization of Project returns the correct result when it's empty`() {
+        val testProject = Project(
+            "Test", "Client", "a test project"
+        )
+        val json: JsonContent<Project> = jacksonTester!!.write(testProject)
+
+        assertThat(json).extractingJsonPathValue("$.coaches").isEqualTo(mutableListOf<User>())
+        assertThat(json).extractingJsonPathValue("$.assignments[0].student").isEqualTo(null)
+        assertThat(json).extractingJsonPathValue("$.assignments[0].suggester").isEqualTo(null)
+    }
 }
