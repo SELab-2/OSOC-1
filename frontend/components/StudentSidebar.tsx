@@ -2,62 +2,111 @@ import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
 import StudentTiles from './students/StudentTiles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/solid';
 import { StatusSuggestionStatus, Student } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
-import { func } from 'prop-types';
 import Select from 'react-select';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 type StudentsSidebarProps = PropsWithChildren<unknown>;
 
-// TODO show/handle errors
-// TODO this is full code duplication of projects search atm
 /**
  * function that allows searching students by name
  *
- * @param StudentNameSearch = (part of) the name of a student
- * @param setStudents       = callback to set the results
+ * @param StudentNameSearch       = (part of) the name of a student
+ * @param Skills                  = list of skills to include, student has to have one of these
+ * @param StudentSearchParameters = record containing the possible filters boolean
+ * @param setStudents             = callback to set the results
  */
-function searchStudentName(
+// TODO show/handle errors
+// TODO add Skills, alumn & studentcoach filter when implemented in backend
+// TODO add pagination once fully implemented in backed
+function searchStudent(
   StudentNameSearch: string,
+  Skills: Array<{ value: string; label: string }>,
+  StudentSearchParameters: Record<string, boolean>,
   setStudents: (students: Student[]) => void
 ) {
+  console.log(Skills);
   axiosAuthenticated
     .get(Endpoints.STUDENTS, {
-      params: { name: StudentNameSearch },
+      params: {
+        name: StudentNameSearch,
+        includeSuggested: StudentSearchParameters.IncludeSuggested,
+        status: getStatusFilterList(StudentSearchParameters),
+      },
     })
     .then((response) => {
       setStudents(response.data as Student[]);
+      console.log(response);
     })
     .catch((ex) => {
       console.log(ex);
     });
 }
 
-// TODO no actual functionality implemented yet
+/**
+ * function to map the boolean status states onto a string
+ *
+ * @param StudentSearchParameters = Record that contains the four possible statuses: StatusYes, StatusNo, StatusMaybe, StatusUndecided
+ */
+function getStatusFilterList(
+  StudentSearchParameters: Record<string, boolean>
+): string {
+  let stringList = '';
+  stringList += StudentSearchParameters.StatusYes ? 'Yes,' : '';
+  stringList += StudentSearchParameters.StatusNo ? 'No,' : '';
+  stringList += StudentSearchParameters.StatusMaybe ? 'Maybe,' : '';
+  stringList += StudentSearchParameters.StatusUndecided ? 'Undecided,' : '';
+  return stringList;
+}
+
+// TODO add documentation
 const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [showFilter, setShowFilter] = useState(true);
+
+  // Split this from StudentSearchParameters to avoid typing hacks
+  const [Skills, setSkills] = useState(
+    [] as Array<{ value: string; label: string }>
+  );
+
+  // Split this to avoid making new object every type action & control when to call filter
   const [StudentNameSearch, setStudentNameSearch] = useState('' as string);
-  //TODO all these toggles and button states should be one object
-  const [StatusYes, setStatusYes] = useState(false);
-  const [StatusNo, setStatusNo] = useState(false);
-  const [StatusMaybe, setStatusMaybe] = useState(false);
-  const [StatusUndecided, setStatusUndecided] = useState(false);
-  const [OnlyAlumni, setOnlyAlumni] = useState(false);
-  const [OnlyStudentCoach, setOnlyStudentCoach] = useState(false);
-  const [IncludeSuggested, setIncludeSuggested] = useState(false);
-  const [Roles, setRoles] = useState([] as string[]);
+
   const [students, setStudents]: [Student[], (students: Student[]) => void] =
     useState([] as Student[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true); // TODO use this for styling
   const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
 
+  const defaultStudentSearchParameters = {
+    StatusYes: true,
+    StatusNo: true,
+    StatusMaybe: true,
+    StatusUndecided: true,
+    OnlyAlumni: false,
+    OnlyStudentCoach: false,
+    ExcludeSuggested: false,
+  } as Record<string, boolean>;
+
+  const [StudentSearchParameters, setStudentSearchParameters] = useState(
+    defaultStudentSearchParameters
+  );
+
+  const handleSearchChange = (parameter: string, value: boolean) => {
+    const newStudentSearchParameters = { ...StudentSearchParameters };
+    newStudentSearchParameters[parameter] = value;
+    setStudentSearchParameters(newStudentSearchParameters);
+  };
+
+  const clearFilters = () => {
+    setStudentSearchParameters(defaultStudentSearchParameters);
+    setSkills([] as Array<{ value: string; label: string }>);
+  };
+
   useAxiosAuth();
+  // TODO this should just call searchStudent since this ignores current filters on reload
   useEffect(() => {
     axiosAuthenticated
       .get<Student[]>(Endpoints.STUDENTS)
@@ -74,6 +123,18 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
         setLoading(false);
       });
   }, []);
+
+  /**
+   * when a search parameter changes, call the function to reload results
+   */
+  useEffect(() => {
+    searchStudent(
+      StudentNameSearch,
+      Skills,
+      StudentSearchParameters,
+      setStudents
+    );
+  }, [StudentSearchParameters, Skills]);
 
   return (
     // TODO test with a long list for autoscroll etc this should be separate from projects scroll but no longer
@@ -92,13 +153,25 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
               onChange={(e) => setStudentNameSearch(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key == 'Enter') {
-                  searchStudentName(StudentNameSearch, setStudents);
+                  searchStudent(
+                    StudentNameSearch,
+                    Skills,
+                    StudentSearchParameters,
+                    setStudents
+                  );
                 }
               }}
             />
             <i
               className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
-              onClick={() => searchStudentName(StudentNameSearch, setStudents)}
+              onClick={() =>
+                searchStudent(
+                  StudentNameSearch,
+                  Skills,
+                  StudentSearchParameters,
+                  setStudents
+                )
+              }
             >
               {magnifying_glass}
             </i>
@@ -142,17 +215,27 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 isSearchable={true}
                 isMulti={true}
                 name="Skills"
+                value={Skills}
                 options={[
                   { value: 'chocolate', label: 'Chocolate' },
                   { value: 'strawberry', label: 'Strawberry' },
                   { value: 'vanilla', label: 'Vanilla' },
-                ]}
+                ]} // TODO fix this once backend has getAllSKills endpoint implemented
                 placeholder="Select Skills"
-                onChange={(e) => console.log(e.values)}
+                onChange={(e) =>
+                  setSkills(
+                    e.map((x) => {
+                      return { value: x.value, label: x.label };
+                    })
+                  )
+                }
               />
             </Fragment>
           </div>
-          <button className="ml-4 bg-gray-300 px-2 text-sm text-black">
+          <button
+            className="ml-4 bg-gray-300 px-2 text-sm text-black"
+            onClick={() => clearFilters()}
+          >
             Clear all filters
           </button>
         </div>
@@ -166,8 +249,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 name="toggleAlumni"
                 id="toggleAlumni"
                 className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
-                checked={OnlyAlumni}
-                onChange={() => setOnlyAlumni(!OnlyAlumni)}
+                checked={StudentSearchParameters.OnlyAlumni}
+                onChange={() =>
+                  handleSearchChange(
+                    'OnlyAlumni',
+                    !StudentSearchParameters.OnlyAlumni
+                  )
+                }
               />
               <label
                 htmlFor="toggleAlumni"
@@ -186,8 +274,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 name="toggleStudentCoach"
                 id="toggleStudentCoach"
                 className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
-                checked={OnlyStudentCoach}
-                onChange={() => setOnlyStudentCoach(!OnlyStudentCoach)}
+                checked={StudentSearchParameters.OnlyStudentCoach}
+                onChange={() =>
+                  handleSearchChange(
+                    'OnlyStudentCoach',
+                    !StudentSearchParameters.OnlyStudentCoach
+                  )
+                }
               />
               <label
                 htmlFor="toggleStudentCoach"
@@ -206,8 +299,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 name="toggleSuggested"
                 id="toggleSuggested"
                 className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
-                checked={IncludeSuggested}
-                onChange={() => setIncludeSuggested(!IncludeSuggested)}
+                checked={StudentSearchParameters.ExcludeSuggested}
+                onChange={() =>
+                  handleSearchChange(
+                    'ExcludeSuggested',
+                    !StudentSearchParameters.ExcludeSuggested
+                  )
+                }
               />
               <label
                 htmlFor="toggleSuggested"
@@ -227,17 +325,31 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
           <div className="flex grow flex-row justify-between lg:mr-[2.75%] lg:w-1">
             <button
               className={`${
-                StatusYes ? 'bg-osoc-btn-primary' : 'bg-gray-300'
+                StudentSearchParameters.StatusYes
+                  ? 'bg-osoc-btn-primary'
+                  : 'bg-gray-300'
               } w-[44%] text-sm text-black`}
-              onClick={() => setStatusYes(!StatusYes)}
+              onClick={() =>
+                handleSearchChange(
+                  'StatusYes',
+                  !StudentSearchParameters.StatusYes
+                )
+              }
             >
               Yes
             </button>
             <button
               className={`${
-                StatusNo ? 'bg-osoc-btn-primary' : 'bg-gray-300'
+                StudentSearchParameters.StatusNo
+                  ? 'bg-osoc-btn-primary'
+                  : 'bg-gray-300'
               } w-[44%] text-sm text-black`}
-              onClick={() => setStatusNo(!StatusNo)}
+              onClick={() =>
+                handleSearchChange(
+                  'StatusNo',
+                  !StudentSearchParameters.StatusNo
+                )
+              }
             >
               No
             </button>
@@ -245,17 +357,31 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
           <div className="mt-2.5 flex grow flex-row justify-between lg:ml-[2.75%] lg:mt-0 lg:w-1">
             <button
               className={`${
-                StatusMaybe ? 'bg-osoc-btn-primary' : 'bg-gray-300'
+                StudentSearchParameters.StatusMaybe
+                  ? 'bg-osoc-btn-primary'
+                  : 'bg-gray-300'
               } w-[44%] text-sm text-black`}
-              onClick={() => setStatusMaybe(!StatusMaybe)}
+              onClick={() =>
+                handleSearchChange(
+                  'StatusMaybe',
+                  !StudentSearchParameters.StatusMaybe
+                )
+              }
             >
               Maybe
             </button>
             <button
               className={`${
-                StatusUndecided ? 'bg-osoc-btn-primary' : 'bg-gray-300'
+                StudentSearchParameters.StatusUndecided
+                  ? 'bg-osoc-btn-primary'
+                  : 'bg-gray-300'
               } w-[44%] text-sm text-black`}
-              onClick={() => setStatusUndecided(!StatusUndecided)}
+              onClick={() =>
+                handleSearchChange(
+                  'StatusUndecided',
+                  !StudentSearchParameters.StatusUndecided
+                )
+              }
             >
               Undecided
             </button>

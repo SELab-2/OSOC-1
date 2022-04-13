@@ -5,6 +5,8 @@ import StudentView from '../components/student/StudentView';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
 import { StatusSuggestionStatus } from '../lib/types';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -19,48 +21,49 @@ const Students: NextPage = () => {
   return (
     <div className="min-w-screen flex min-h-screen flex-col items-center">
       <Header />
-
-      <main className="flex w-full flex-row">
-        {/* Holds the sidebar with search, filter and student results */}
-        <section
-          className={`${
-            showSidebar ? 'visible' : 'hidden'
-          } relative mt-[14px] w-full bg-osoc-neutral-bg p-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
-        >
-          {/* button to close sidebar on mobile */}
-          <div
+      <DndProvider backend={HTML5Backend}>
+        <main className="flex w-full flex-row">
+          {/* Holds the sidebar with search, filter and student results */}
+          <section
             className={`${
               showSidebar ? 'visible' : 'hidden'
-            } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+            } relative mt-[14px] w-full bg-osoc-neutral-bg p-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
           >
-            <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
-          </div>
-          <StudentSidebar />
-        </section>
-
-        {/* Holds main student content */}
-        <section
-          className={`${
-            showSidebar ? 'hidden' : 'visible'
-          } mt-[30px] w-full md:visible md:block`}
-        >
-          <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
-            {/* button to open sidebar on mobile */}
+            {/* button to close sidebar on mobile */}
             <div
               className={`${
-                showSidebar ? 'hidden' : 'visible w-auto'
-              } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                showSidebar ? 'visible' : 'hidden'
+              } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
             >
-              <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_out}</i>
+              <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
             </div>
-          </div>
+            <StudentSidebar />
+          </section>
 
-          {/* This contains the actual student info */}
-          <div>
-            <StudentView student={student} />
-          </div>
-        </section>
-      </main>
+          {/* Holds main student content */}
+          <section
+            className={`${
+              showSidebar ? 'hidden' : 'visible'
+            } mt-[30px] w-full md:visible md:block`}
+          >
+            <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
+              {/* button to open sidebar on mobile */}
+              <div
+                className={`${
+                  showSidebar ? 'hidden' : 'visible w-auto'
+                } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+              >
+                <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_out}</i>
+              </div>
+            </div>
+
+            {/* This contains the actual student info */}
+            <div>
+              <StudentView student={student} />
+            </div>
+          </section>
+        </main>
+      </DndProvider>
     </div>
   );
 };
@@ -90,6 +93,7 @@ const student = {
       motivation: 'Dit is een motivatie voor no',
     },
   ],
+  skills: [],
   alumn: true,
   tallyForm: {
     livingBelgium: true,

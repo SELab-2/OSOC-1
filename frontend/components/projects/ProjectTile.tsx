@@ -139,7 +139,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
    * react-select refuses to work unless you use this weird structure
    * label is what is shown in the dropdown, value is used to pass to assign function
    */
-  const myOptions = [] as Array<any>;
+  const myOptions = [] as Array<{ value: string; label: string }>;
   project.positions.forEach((position) => {
     myOptions.push({ value: position.id, label: position.skill.skillName });
   });
@@ -236,7 +236,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ project }: ProjectProp) => {
                   name="Position"
                   options={myOptions}
                   placeholder="Select position"
-                  onChange={(e) => setPositionId(e.value || '')}
+                  onChange={(e) => setPositionId(e ? e.value || '' : '')}
                 />
               </Fragment>
             </div>
