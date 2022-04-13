@@ -15,10 +15,8 @@ open class ListSerializer<T>(private val genFunc: (T) -> String, t: Class<List<T
     override fun serialize(items: List<T>?, gen: JsonGenerator?, provider: SerializerProvider?) {
         val baseUrl: String = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
         gen!!.writeStartArray()
-        if (items != null) {
-            for (s in items) {
-                gen.writeObject(baseUrl + genFunc(s))
-            }
+        for (s in items!!) {
+            gen.writeObject(baseUrl + genFunc(s))
         }
         gen.writeEndArray()
     }
