@@ -41,12 +41,12 @@ type AssignmentProp = {
 /**
  * This function sends an authenticated POST request to add a student to a project via an assignment
  *
- * @param projectId   = the UUID of the project to add a student to
- * @param studentId   = the UUID of the student to add to a project
- * @param positionId  = the UUID of the position to assign the student
+ * @param projectId   - the UUID of the project to add a student to
+ * @param studentId   - the UUID of the student to add to a project
+ * @param positionId  - the UUID of the position to assign the student
  *                      this position is already part of the needed project positions
- * @param suggesterId = the UUID of the currently authenticated User
- * @param reason      = the reason for assigning this student to this project
+ * @param suggesterId - the UUID of the currently authenticated User
+ * @param reason      - the reason for assigning this student to this project
  */
 // TODO when post is finished, should update the project frontend view & also the student filter
 // TODO should show success / error
@@ -80,8 +80,8 @@ function postStudentToProject(
 /**
  * This function sends an authenticated DELETE request to remove an assignment from a project
  *
- * @param projectId     = the UUID of the project to remove the assignment from
- * @param assignmentId  = the UUID of the assignment to remove
+ * @param projectId     - the UUID of the project to remove the assignment from
+ * @param assignmentId  - the UUID of the assignment to remove
  */
 function deleteStudentFromProject(projectId: UUID, assignmentId: UUID) {
   axiosAuthenticated

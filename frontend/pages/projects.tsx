@@ -19,8 +19,8 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 /**
  * function that allows searching projects by name
  *
- * @param ProjectSearch = (part of) the name of a project
- * @param setProjects   = callback to set the results
+ * @param ProjectSearch - (part of) the name of a project
+ * @param setProjects   - callback to set the results
  */
 // TODO show/handle errors
 function searchProject(

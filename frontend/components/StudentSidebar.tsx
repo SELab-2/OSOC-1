@@ -14,10 +14,10 @@ type StudentsSidebarProps = PropsWithChildren<unknown>;
 /**
  * function that allows searching students by name
  *
- * @param StudentNameSearch       = (part of) the name of a student
- * @param Skills                  = list of skills to include, student has to have one of these
- * @param StudentSearchParameters = record containing the possible filters boolean
- * @param setStudents             = callback to set the results
+ * @param StudentNameSearch       - (part of) the name of a student
+ * @param Skills                  - list of skills to include, student has to have one of these
+ * @param StudentSearchParameters - record containing the possible filters boolean
+ * @param setStudents             - callback to set the results
  */
 // TODO show/handle errors
 // TODO add Skills, alumn & studentcoach filter when implemented in backend
@@ -33,7 +33,7 @@ function searchStudent(
     .get(Endpoints.STUDENTS, {
       params: {
         name: StudentNameSearch,
-        includeSuggested: StudentSearchParameters.IncludeSuggested,
+        includeSuggested: !StudentSearchParameters.ExcludeSuggested,
         status: getStatusFilterList(StudentSearchParameters),
       },
     })
@@ -49,7 +49,7 @@ function searchStudent(
 /**
  * function to map the boolean status states onto a string
  *
- * @param StudentSearchParameters = Record that contains the four possible statuses: StatusYes, StatusNo, StatusMaybe, StatusUndecided
+ * @param StudentSearchParameters - Record that contains the four possible statuses: StatusYes, StatusNo, StatusMaybe, StatusUndecided
  */
 function getStatusFilterList(
   StudentSearchParameters: Record<string, boolean>
@@ -88,6 +88,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     OnlyAlumni: false,
     OnlyStudentCoach: false,
     ExcludeSuggested: false,
+    ExcludeAssigned: false,
   } as Record<string, boolean>;
 
   const [StudentSearchParameters, setStudentSearchParameters] = useState(
@@ -313,7 +314,32 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
               />
             </div>
             <label htmlFor="toggleSuggested" className="text-sm">
-              Include students you&rsquo;ve made a suggestion for
+              Exclude students you&rsquo;ve made a suggestion for
+            </label>
+          </div>
+
+          <div className="flex w-full flex-row flex-wrap">
+            <div className="relative mr-2 inline-block w-10 select-none transition duration-200 ease-in">
+              <input
+                type="checkbox"
+                name="toggleAssigned"
+                id="toggleAssigned"
+                className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
+                checked={StudentSearchParameters.ExcludeAssigned}
+                onChange={() =>
+                  handleSearchChange(
+                    'ExcludeAssigned',
+                    !StudentSearchParameters.ExcludeAssigned
+                  )
+                }
+              />
+              <label
+                htmlFor="toggleAssigned"
+                className="toggle-label block h-5 cursor-pointer overflow-hidden rounded-full border-2 border-gray-300 bg-white"
+              />
+            </div>
+            <label htmlFor="toggleAssigned" className="text-sm">
+              Exclude students already assigned
             </label>
           </div>
         </div>
