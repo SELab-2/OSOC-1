@@ -156,11 +156,13 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         val type = node.get("type").asText()
         assert(key.length == 15 || key.length == 52)
 
-        if (node.get("value").isNull)
+        val valueNode = node.get("value")
+
+        if (valueNode.isNull)
             return Answer(key, label, listOf())
 
         if (type == "MULTIPLE_CHOICE") {
-            val optionId = node.get("value").asText()
+            val optionId = valueNode.asText()
             val options = node.get("options").toList()
             for(optionNode in options) {
                 val id = optionNode.get("id").asText()
@@ -170,8 +172,8 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
             }
             throw FailedOperationException("The specified option '$optionId' in the answer of the question with '$key' was not found in the associated 'options' field")
         }
-        else if(type == "CHECKBOXES" && key.length == 15) {
-            val valueIds = node.get("value").toList().map { it.asText() }
+        else if (type == "CHECKBOXES" && key.length == 15) {
+            val valueIds = valueNode.toSet().map { it.asText() }
             val valueList = mutableListOf<String>()
             val options = node.get("options").toSet()
             for(optionNode in options) {
@@ -182,8 +184,12 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
             }
             return Answer(key, label, valueList)
         }
+        else if (type == "FILE_UPLOAD") {
+            val fileUrls = valueNode.toList().map { it.get("url").asText() }
+            return Answer(key, label, fileUrls)
+        }
 
-        return Answer(key, label, listOf(node.get("value").asText()))
+        return Answer(key, label, listOf(valueNode.asText()))
     }
 }
 
