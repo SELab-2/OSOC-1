@@ -56,3 +56,9 @@
   border-radius: 18px;
   border: 1px solid #cfcece;
 }
+
+.sidebar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+}
