@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
@@ -22,6 +23,7 @@ import java.security.Principal
 import java.util.UUID
 
 @RestController
+@RequestMapping("/{edition}/students")
 class StudentController(
     private val service: StudentService,
     private val userDetailService: OsocUserDetailService
@@ -36,7 +38,7 @@ class StudentController(
      * by [status] (default value allows all statuses) by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for)
      */
-    @GetMapping("/{edition}/students")
+    @GetMapping
     @Secured("ROLE_COACH")
     fun getAllStudents(
         @RequestParam(defaultValue = "0") pageNumber: Int,
@@ -59,18 +61,20 @@ class StudentController(
      * Returns the student with the corresponding [studentId]. If no such student exists, returns a
      * "404: Not Found" message instead.
      */
-    @GetMapping("/students/{studentId}")
+    @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
-    fun getStudentById(@PathVariable studentId: UUID): Student = service.getStudentById(studentId)
+    fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
+        service.getStudentById(studentId)
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
      * "404: Not Found" message instead.
      */
-    @DeleteMapping("/students/{studentId}")
+    @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun deleteStudentById(@PathVariable studentId: UUID) = service.deleteStudentById(studentId)
+    fun deleteStudentById(@PathVariable studentId: UUID, @PathVariable edition: String) =
+        service.deleteStudentById(studentId)
 
     /**
      * Add a student to the database. The student should be passed in the request body as a JSON
@@ -87,7 +91,7 @@ class StudentController(
      * header. No checking is done to see if firstName or lastName qualify as valid 'names'. This
      * verification is the responsibility of the caller.
      */
-    @PostMapping("/{edition}/students")
+    @PostMapping
     @Secured("ROLE_COACH")
     fun addStudent(
         @RequestBody studentRegistration: StudentRegistration,
@@ -117,10 +121,10 @@ class StudentController(
      * Any other input value will result in a "400: Bad Request" response. These values are also
      * case-sensitive.
      */
-    @PostMapping("/students/{studentId}/status")
+    @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum) =
+    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
         service.setStudentStatus(studentId, status)
 
     /**
@@ -144,13 +148,14 @@ class StudentController(
      * this includes the "Undecided" value, which is a valid value in other endpoints. This is
      * because a user cannot suggest changing the status of a student to "Undecided".
      */
-    @PostMapping("/students/{studentId}/suggestions")
+    @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
     fun addStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @RequestBody statusSuggestion: StatusSuggestion,
-        principal: Principal
+        @PathVariable edition: String,
+        principal: Principal,
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
         if (statusSuggestion.coachId != user.id)
@@ -169,12 +174,13 @@ class StudentController(
      * user attempts to remove a [StatusSuggestion] that was not made by them a "401: Unauthorized"
      * is returned.
      */
-    @DeleteMapping("/students/{studentId}/suggestions/{coachId}")
+    @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
     fun deleteStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @PathVariable coachId: UUID,
+        @PathVariable edition: String,
         principal: Principal
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)

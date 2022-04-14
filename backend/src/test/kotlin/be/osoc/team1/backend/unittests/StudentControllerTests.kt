@@ -161,7 +161,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getStudentById returns student if student with given id exists`() {
         every { studentService.getStudentById(studentId) } returns testStudent
-        mockMvc.perform(get("/students/$studentId"))
+        mockMvc.perform(get("$editionUrl/$studentId"))
             .andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
@@ -170,20 +170,20 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getStudentById returns 404 Not Found if student with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { studentService.getStudentById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(get("/students/$differentId")).andExpect(status().isNotFound)
+        mockMvc.perform(get("$editionUrl/$differentId")).andExpect(status().isNotFound)
     }
 
     @Test
     fun `deleteStudentById succeeds if student with given id exists`() {
         every { studentService.deleteStudentById(studentId) } just Runs
-        mockMvc.perform(delete("/students/$studentId")).andExpect(status().isNoContent)
+        mockMvc.perform(delete("$editionUrl/$studentId")).andExpect(status().isNoContent)
     }
 
     @Test
     fun `deleteStudentById returns 404 Not Found if student with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { studentService.deleteStudentById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(delete("/students/$differentId")).andExpect(status().isNotFound)
+        mockMvc.perform(delete("$editionUrl/$differentId")).andExpect(status().isNotFound)
     }
 
     @Test
@@ -206,7 +206,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val status = StatusEnum.Yes
         every { studentService.setStudentStatus(studentId, status) } just Runs
         mockMvc.perform(
-            post("/students/$studentId/status")
+            post("$editionUrl/$studentId/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(status))
         )
@@ -218,7 +218,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val status = StatusEnum.Yes
         every { studentService.setStudentStatus(studentId, status) }.throws(InvalidIdException())
         mockMvc.perform(
-            post("/students/$studentId/status")
+            post("$editionUrl/$studentId/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(status))
         )
@@ -229,7 +229,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `addStudentStatusSuggestion succeeds when student with given id exists`() {
         every { studentService.addStudentStatusSuggestion(studentId, any()) } just Runs
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
                 .principal(token)
@@ -242,7 +242,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.addStudentStatusSuggestion(studentId, any()) }
             .throws(InvalidStudentIdException())
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
                 .principal(token)
@@ -255,7 +255,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.addStudentStatusSuggestion(studentId, any()) }
             .throws(ForbiddenOperationException())
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
                 .principal(token)
@@ -268,7 +268,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .throws(InvalidUserIdException())
 
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
                 .principal(token)
@@ -281,7 +281,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             User("other user", "email", Role.Coach, "password")
 
         mockMvc.perform(
-            post("/students/$studentId/suggestions")
+            post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testSuggestion))
                 .principal(token)
@@ -293,7 +293,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.deleteStudentStatusSuggestion(studentId, coachId) } just Runs
 
         mockMvc.perform(
-            delete("/students/$studentId/suggestions/$coachId")
+            delete("$editionUrl/$studentId/suggestions/$coachId")
                 .principal(token)
         ).andExpect(status().isNoContent)
     }
@@ -304,7 +304,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .throws(InvalidStudentIdException())
 
         mockMvc.perform(
-            delete("/students/$studentId/suggestions/$coachId")
+            delete("$editionUrl/$studentId/suggestions/$coachId")
                 .principal(token)
         ).andExpect(status().isNotFound)
     }
@@ -315,7 +315,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .throws(FailedOperationException())
 
         mockMvc.perform(
-            delete("/students/$studentId/suggestions/$coachId")
+            delete("$editionUrl/$studentId/suggestions/$coachId")
                 .principal(token)
         ).andExpect(status().isBadRequest)
     }
@@ -326,7 +326,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .throws(InvalidUserIdException())
 
         mockMvc.perform(
-            delete("/students/$studentId/suggestions/$coachId")
+            delete("$editionUrl/$studentId/suggestions/$coachId")
                 .principal(token)
         ).andExpect(status().isNotFound)
     }
@@ -337,7 +337,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             User("other user", "email", Role.Coach, "password")
 
         mockMvc.perform(
-            delete("/students/$studentId/suggestions/$coachId")
+            delete("$editionUrl/$studentId/suggestions/$coachId")
                 .principal(token)
         ).andExpect(status().isUnauthorized)
     }
