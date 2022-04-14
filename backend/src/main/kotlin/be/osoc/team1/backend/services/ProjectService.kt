@@ -22,17 +22,12 @@ class ProjectService(
     private val userService: UserService
 ) {
     /**
-     * Get all projects that are a part of the OSOC edition named [editionName] by the given [organization].
+     * Get all projects that are a part of the given OSOC [edition].
      * The projects can also be filtered by the optional [searchQuery] parameter.
      * See the documentation of the [nameMatchesSearchQuery] function to understand how the filtering is done.
      */
-    fun getAllProjects(
-        organization: String,
-        editionName: String,
-        searchQuery: String = ""
-    ): Iterable<Project> =
-        repository.findByOrganizationAndEditionName(organization, editionName)
-            .filter { nameMatchesSearchQuery(it.name, searchQuery) }
+    fun getAllProjects(edition: String, searchQuery: String = ""): Iterable<Project> =
+        repository.findByEdition(edition).filter { nameMatchesSearchQuery(it.name, searchQuery) }
 
     /**
      * Get a project by its [id], if this id doesn't exist throw an [InvalidProjectIdException]
@@ -104,9 +99,9 @@ class ProjectService(
     /**
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
      */
-    fun getConflicts(organization: String, editionName: String): MutableList<Conflict> {
+    fun getConflicts(edition: String): MutableList<Conflict> {
         val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
-        for (project in getAllProjects(organization, editionName)) {
+        for (project in getAllProjects(edition)) {
             for (student in getStudents(project)) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())

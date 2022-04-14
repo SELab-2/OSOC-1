@@ -6,6 +6,7 @@ import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.services.ProjectService
+import java.net.URLDecoder
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -17,25 +18,23 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.net.URLDecoder
 import java.util.UUID
 
 @RestController
 class ProjectController(private val service: ProjectService) {
 
     /**
-     * Get all projects that are a part of the OSOC edition named [editionName] by the given [organization].
+     * Get all projects that are a part of the given OSOC [edition].
      * The results can also be filtered by [name] (default value is empty so no project is excluded).
      */
-    @GetMapping("/{organization}/{editionName}/projects")
+    @GetMapping("/{edition}/projects")
     @Secured("ROLE_COACH")
     fun getAllProjects(
         @RequestParam(defaultValue = "") name: String,
-        @PathVariable organization: String,
-        @PathVariable editionName: String
+        @PathVariable edition: String
     ): Iterable<Project> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllProjects(organization, editionName, decodedName)
+        return service.getAllProjects(edition, decodedName)
     }
 
     /**
@@ -57,23 +56,22 @@ class ProjectController(private val service: ProjectService) {
      * Creates a project from the request body, this can also override an already existing project.
      * Returns the created project in the response body, with a link pointing to the resource in the Location header.
      */
-    @PostMapping("/{organization}/{editionName}/projects")
+    @PostMapping("/{edition}/projects")
     @Secured("ROLE_ADMIN")
     fun postProject(
         @RequestBody projectRegistration: ProjectRegistration,
-        @PathVariable organization: String,
-        @PathVariable editionName: String
+        @PathVariable edition: String
     ): ResponseEntity<Project> {
         val project = Project(
             projectRegistration.name, projectRegistration.description, projectRegistration.clientName,
-            organization, editionName,
+            edition,
             projectRegistration.coaches, projectRegistration.positions, projectRegistration.assignments
         )
         val createdProject = service.postProject(project)
         return getObjectCreatedResponse(createdProject.id, createdProject)
     }
 
-    // Needed to avoid the caller having to pass the organization/editionName in the URL and the request body.
+    // Needed to avoid the caller having to pass the edition in both the URL and the request body.
     class ProjectRegistration(
         name: String,
         clientName: String,
@@ -81,7 +79,7 @@ class ProjectController(private val service: ProjectService) {
         coaches: MutableCollection<User> = mutableListOf(),
         positions: Collection<Position> = listOf(),
         assignments: MutableCollection<Assignment> = mutableListOf()
-    ) : Project(name, clientName, description, "", "", coaches, positions, assignments)
+    ) : Project(name, clientName, description, "", coaches, positions, assignments)
 
     /**
      * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
@@ -133,13 +131,10 @@ class ProjectController(private val service: ProjectService) {
      * ]
      * ```
      */
-    @GetMapping("/{organization}/{editionName}/projects/conflicts")
+    @GetMapping("/{edition}/projects/conflicts")
     @Secured("ROLE_COACH")
-    fun getProjectConflicts(
-        @PathVariable organization: String,
-        @PathVariable editionName: String
-    ): MutableList<ProjectService.Conflict> =
-        service.getConflicts(organization, editionName)
+    fun getProjectConflicts(@PathVariable edition: String): MutableList<ProjectService.Conflict> =
+        service.getConflicts(edition)
 
     /**
      * Assigns a student to a position on the project, format:

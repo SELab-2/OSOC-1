@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository
 import java.util.UUID
 
 interface ProjectRepository : CrudRepository<Project, UUID> {
-    fun findByOrganizationAndEditionName(organization: String, editionName: String): Collection<Project>
+    fun findByEdition(edition: String): Collection<Project>
 }

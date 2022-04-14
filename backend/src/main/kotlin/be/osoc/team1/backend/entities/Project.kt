@@ -55,14 +55,14 @@ class Assignment(
  * A project also has [coaches], which is a list of coaches who will be aiding with this project.
  * A project also has [positions] that will have to be filled by students.
  * The assignment of students to these positions on the project is represented by [assignments].
+ * A project belongs to a particular [edition] of OSOC.
  */
 @Entity
 open class Project(
     val name: String,
     val clientName: String,
     val description: String,
-    val organization: String,
-    val editionName: String,
+    val edition: String,
 
     @OneToMany(cascade = [CascadeType.ALL])
     @JsonSerialize(using = UserListSerializer::class)
