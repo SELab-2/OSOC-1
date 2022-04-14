@@ -27,16 +27,16 @@ class SerializationTests {
     @BeforeEach
     fun setMockRequest() {
         val mockRequest = MockHttpServletRequest()
-        mockRequest.setScheme("https")
-        mockRequest.setServerName("example.com")
-        mockRequest.setServerPort(-1)
-        mockRequest.setContextPath("/api")
+        mockRequest.scheme = "https"
+        mockRequest.serverName = "example.com"
+        mockRequest.serverPort = -1
+        mockRequest.contextPath = "/api"
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(mockRequest))
     }
 
     @Test
     fun `Serialization of Project returns the correct result`() {
-        val testStudent = Student("Jitse", "Willaert")
+        val testStudent = Student("Jitse", "Willaert", "testEdition")
         val testPosition = Position(Skill("backend"), 2)
         val testUser = User("suggester", "email", Role.Coach, "password")
         val testProject = Project(

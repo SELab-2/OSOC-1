@@ -45,12 +45,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val studentId = UUID.randomUUID()
     private val testCoach = User("coach", "email", Role.Coach, "password")
     private val coachId = testCoach.id
-    private val testOrganization = "testOrganization"
-    private val testEditionName = "testEditionName"
-    private val testStudent = Student("Tom", "Alard", testOrganization, testEditionName)
+    private val testEdition = "testEdition"
+    private val testStudent = Student("Tom", "Alard", testEdition)
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
-    private val editionUrl = "/$testOrganization/$testEditionName/students"
+    private val editionUrl = "/$testEdition/students"
     private val defaultStatusFilter =
         listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
     private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
@@ -64,7 +63,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents should not fail`() {
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testEdition, testCoach)
         } returns emptyList()
         mockMvc.perform(
             get(editionUrl)
@@ -77,7 +76,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getAllStudents paging returns the correct amount`() {
         val testList = listOf(testStudent)
         every {
-            studentService.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testEdition, testCoach)
         } returns testList
         mockMvc.perform(
             get("$editionUrl?pageNumber=0&pageSize=1")
@@ -89,29 +88,29 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents status filtering parses the correct statuses`() {
-        val testStudent1 = Student("L1", "VC", testOrganization, testEditionName)
+        val testStudent1 = Student("L1", "VC", testEdition)
         testStudent1.status = StatusEnum.Yes
-        val testStudent2 = Student("L2", "VC", testOrganization, testEditionName)
+        val testStudent2 = Student("L2", "VC", testEdition)
         testStudent2.status = StatusEnum.No
-        val testStudent3 = Student("L3", "VC", testOrganization, testEditionName)
+        val testStudent3 = Student("L3", "VC", testEdition)
         testStudent3.status = StatusEnum.Maybe
-        val testStudent4 = Student("L4", "VC", testOrganization, testEditionName)
+        val testStudent4 = Student("L4", "VC", testEdition)
         testStudent4.status = StatusEnum.Undecided
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testEdition, testCoach)
         } returns listOf(testStudent1)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testEdition, testCoach)
         } returns listOf(testStudent2)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testEdition, testCoach)
         } returns listOf(testStudent3)
         every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testEdition, testCoach)
         } returns listOf(testStudent4)
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testEdition, testCoach)
         } returns allStudents
         mockMvc.perform(get("$editionUrl?status=Yes").principal(token))
             .andExpect(status().isOk)
@@ -132,13 +131,13 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents name filtering parses the correct name`() {
-        val testList = listOf(Student("_", "_", testOrganization, testEditionName))
-        val testList2 = listOf(Student("_2", "_2", testOrganization, testEditionName))
+        val testList = listOf(Student("_", "_", testEdition))
+        val testList2 = listOf(Student("_2", "_2", testEdition))
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars", true, testEdition, testCoach)
         } returns testList
         every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars test", true, testOrganization, testEditionName, testCoach)
+            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars test", true, testEdition, testCoach)
         } returns testList2
         // tests the url parsing + with url encoding
         mockMvc.perform(get("$editionUrl?name=lars").principal(token))
@@ -151,8 +150,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents include filtering parses the boolean correctly`() {
-        val testList = listOf(Student("test", "testie", testOrganization, testEditionName))
-        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testOrganization, testEditionName, testCoach) } returns
+        val testList = listOf(Student("test", "testie", testEdition))
+        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testEdition, testCoach) } returns
             testList
         mockMvc.perform(get("$editionUrl?includeSuggested=false").principal(token))
             .andExpect(status().isOk)
