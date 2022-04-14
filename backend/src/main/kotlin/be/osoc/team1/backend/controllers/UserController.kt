@@ -13,28 +13,26 @@ import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-/**
- * [User]s are associated with an organization, but not an edition.
- * See the documentation of [User] for more information. A couple of the methods do not actually use
- * the organization [PathVariable]. This was done to have a consistent base URL for the caller.
- */
+
 @RestController
+@RequestMapping("/users")
 class UserController(private val service: UserService) {
     /**
-     * Get all [User] objects stored in the database who are a part of the given [organization].
+     * Get all [User] objects stored in the database.
      */
-    @GetMapping("/{organization}/users")
+    @GetMapping
     @Secured("ROLE_COACH")
-    fun getAllUsers(@PathVariable organization: String) = service.getAllUsers(organization)
+    fun getAllUsers() = service.getAllUsers()
 
     /**
      * Get a [User] object using their [id]. If the user does not exist 404 will be returned.
      */
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     @Secured("ROLE_COACH")
     fun getUserById(@PathVariable id: UUID): User = service.getUserById(id)
 
@@ -42,7 +40,7 @@ class UserController(private val service: UserService) {
      * Update a user, if the user does not exist yet a 404 will be returned. The response will contain a Location header
      * containing the url to the updated resource and the created object in the body.
      */
-    @PatchMapping("/users/{id}")
+    @PatchMapping("/{id}")
     @Secured("ROLE_ADMIN")
     fun patchUser(@PathVariable id: UUID, @RequestBody user: User): ResponseEntity<User> {
         if (id != user.id)
@@ -55,7 +53,7 @@ class UserController(private val service: UserService) {
     /**
      * Delete user with [id]. If the user does not exist a 404 will be returned.
      */
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun deleteUser(@PathVariable id: UUID) =
@@ -65,18 +63,18 @@ class UserController(private val service: UserService) {
      * Register a new [User]. The created user will be returned. The response will also contain a
      * Location header containing the url to the newly created resource.
      */
-    @PostMapping("/{organization}/users")
+    @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    fun postUser(@RequestBody userRegistration: User, @PathVariable organization: String): ResponseEntity<User> {
-        val createdUser = service.registerUser(userRegistration, organization)
+    fun postUser(@RequestBody userRegistration: User): ResponseEntity<User> {
+        val createdUser = service.registerUser(userRegistration)
         return getObjectCreatedResponse(createdUser.id, createdUser)
     }
 
     /**
      * Change the role of a user with [id] to be [role]. If the user does not exist a 404 will be returned.
-     * Attempting to demote the last remaining [Role.Admin] [User] of an organization will result in a 403.
+     * Attempting to demote the last remaining [Role.Admin] [User] will result in a 403.
      */
-    @PostMapping("/users/{id}/role")
+    @PostMapping("/{id}/role")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun postUserRole(@PathVariable id: UUID, @RequestBody role: Role) =
