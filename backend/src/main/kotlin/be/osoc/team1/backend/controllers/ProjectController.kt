@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
@@ -21,13 +22,14 @@ import java.net.URLDecoder
 import java.util.UUID
 
 @RestController
+@RequestMapping("/{edition}/projects")
 class ProjectController(private val service: ProjectService) {
 
     /**
      * Get all projects that are a part of the given OSOC [edition].
      * The results can also be filtered by [name] (default value is empty so no project is excluded).
      */
-    @GetMapping("/{edition}/projects")
+    @GetMapping
     @Secured("ROLE_COACH")
     fun getAllProjects(
         @RequestParam(defaultValue = "") name: String,
@@ -40,14 +42,14 @@ class ProjectController(private val service: ProjectService) {
     /**
      * Get a project by its [projectId], if this id doesn't exist the service will return a 404
      */
-    @GetMapping("/projects/{projectId}")
+    @GetMapping("/{projectId}")
     @Secured("ROLE_COACH")
     fun getProjectById(@PathVariable projectId: UUID): Project = service.getProjectById(projectId)
 
     /**
      * Deletes a project with its [projectId], if this [projectId] doesn't exist the service will return a 404
      */
-    @DeleteMapping("/projects/{projectId}")
+    @DeleteMapping("/{projectId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun deleteProjectById(@PathVariable projectId: UUID) = service.deleteProjectById(projectId)
@@ -56,7 +58,7 @@ class ProjectController(private val service: ProjectService) {
      * Creates a project from the request body, this can also override an already existing project.
      * Returns the created project in the response body, with a link pointing to the resource in the Location header.
      */
-    @PostMapping("/{edition}/projects")
+    @PostMapping
     @Secured("ROLE_ADMIN")
     fun postProject(
         @RequestBody projectRegistration: ProjectRegistration,
@@ -84,36 +86,36 @@ class ProjectController(private val service: ProjectService) {
     /**
      * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
      */
-    @GetMapping("/projects/{projectId}/students")
+    @GetMapping("/{projectId}/students")
     @Secured("ROLE_COACH")
-    fun getStudentsOfProject(@PathVariable projectId: UUID): Collection<Student> =
+    fun getStudentsOfProject(@PathVariable projectId: UUID, @PathVariable edition: String): Collection<Student> =
         service.getStudents(projectId)
 
     /**
      * Gets all coaches of a project, if this [projectId] doesn't exist the service will return a 404
      */
-    @GetMapping("/projects/{projectId}/coaches")
+    @GetMapping("/{projectId}/coaches")
     @Secured("ROLE_COACH")
-    fun getCoachesOfProject(@PathVariable projectId: UUID): Collection<User> =
+    fun getCoachesOfProject(@PathVariable projectId: UUID, @PathVariable edition: String): Collection<User> =
         service.getProjectById(projectId).coaches
 
     /**
      * assign a coach to a project, if a project with [projectId] or a user with [coachId] doesn't exist the service
      * will return a 404
      */
-    @PostMapping("/projects/{projectId}/coaches")
+    @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID) =
+    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID, @PathVariable edition: String) =
         service.addCoachToProject(projectId, coachId)
 
     /**
      * Deletes a coach [coachId] from a project [projectId], if [projectId] or [coachId] doesn't exist the service will return a 404
      */
-    @DeleteMapping("/projects/{projectId}/coaches/{coachId}")
+    @DeleteMapping("/{projectId}/coaches/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID) =
+    fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID, @PathVariable edition: String) =
         service.removeCoachFromProject(projectId, coachId)
 
     /**
@@ -131,7 +133,7 @@ class ProjectController(private val service: ProjectService) {
      * ]
      * ```
      */
-    @GetMapping("/{edition}/projects/conflicts")
+    @GetMapping("/conflicts")
     @Secured("ROLE_COACH")
     fun getProjectConflicts(@PathVariable edition: String): MutableList<ProjectService.Conflict> =
         service.getConflicts(edition)
@@ -149,9 +151,13 @@ class ProjectController(private val service: ProjectService) {
      * Will return a 404 if any of the ids are invalid. Will throw a 403 if the required conditions for assignment are
      * not met. These conditions are described in the documentation for [ProjectService.postAssignment].
      */
-    @PostMapping("/projects/{projectId}/assignments")
+    @PostMapping("/{projectId}/assignments")
     @Secured("ROLE_COACH")
-    fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) =
+    fun postAssignment(
+        @PathVariable projectId: UUID,
+        @RequestBody assignment: ProjectService.AssignmentPost,
+        @PathVariable edition: String
+    ) =
         service.postAssignment(projectId, assignment)
 
     /**
@@ -159,9 +165,9 @@ class ProjectController(private val service: ProjectService) {
      * 404 if the specified [assignmentId] is not actually part of this project or if [assignmentId] outright doesn't
      * exist.
      */
-    @DeleteMapping("/projects/{projectId}/assignments/{assignmentId}")
+    @DeleteMapping("/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) =
+    fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID, @PathVariable edition: String) =
         service.deleteAssignment(projectId, assignmentId)
 }
