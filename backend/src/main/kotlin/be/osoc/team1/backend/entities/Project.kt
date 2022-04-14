@@ -1,5 +1,9 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.util.StudentSerializer
+import be.osoc.team1.backend.util.UserListSerializer
+import be.osoc.team1.backend.util.UserSerializer
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
@@ -29,11 +33,16 @@ class Position(
 @Entity
 class Assignment(
     @OneToOne
+    @JsonSerialize(using = StudentSerializer::class)
     val student: Student,
+
     @OneToOne
     val position: Position,
+
     @OneToOne
+    @JsonSerialize(using = UserSerializer::class)
     val suggester: User,
+
     val reason: String
 ) {
     @Id
@@ -56,6 +65,7 @@ open class Project(
     val editionName: String,
 
     @OneToMany(cascade = [CascadeType.ALL])
+    @JsonSerialize(using = UserListSerializer::class)
     val coaches: MutableCollection<User> = mutableListOf(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val positions: Collection<Position> = listOf(),

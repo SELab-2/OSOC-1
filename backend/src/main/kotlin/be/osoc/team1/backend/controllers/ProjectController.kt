@@ -123,12 +123,12 @@ class ProjectController(private val service: ProjectService) {
      * ```
      * [
      *     {
-     *         "student": "(STUDENT 1 ID)",
-     *         "projects": ["(PROJECT 1 ID)", "(PROJECT 2 ID)"]
+     *         "student": "(STUDENT 1 URL)",
+     *         "projects": ["(PROJECT 1 URL)", "(PROJECT 2 URL)"]
      *     },
      *     {
-     *         "student": "(STUDENT 2 ID)",
-     *         "projects": ["(PROJECT 1 ID)", "(PROJECT 2 ID)"]
+     *         "student": "(STUDENT 2 URL)",
+     *         "projects": ["(PROJECT 1 URL)", "(PROJECT 2  URL)"]
      *     }
      * ]
      * ```
