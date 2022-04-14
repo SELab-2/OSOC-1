@@ -3,7 +3,7 @@
 # REQUIRED PACKAGES "docker, curl"
 
 if ! [ $(id -u) = 0 ]; then
-   echo "The script need to be run as root." >&2
+   echo "The script needs to be run as root." >&2
    exit 1
 fi
 # DOCKER
@@ -31,8 +31,6 @@ printf "Creating first admin: "
 curl -s --location --request POST 'http://localhost:8080/api/osoc/users' --header 'Content-Type: application/json' --data-raw '{ "username": "tester", "email": "tester@mail.com", "password": "tester" }' > /dev/null
 # make him admin
 sudo docker exec -it osoc_postgres_container_local_dev psql -U postgres osoc -c "UPDATE account SET role=0;" > /dev/null
-# get his accesstoken
-# token=$(curl -s --location --request POST 'http://localhost:8080/api/login' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'email=tester@mail.com' --data-urlencode 'password=tester' | jq -r '.accessToken')
 printf "created\n"
 
 # ADD DATA
@@ -45,9 +43,8 @@ printf "added\n"
 printf "Killing backend: "
 ./mvnw spring-boot:stop > /dev/null
 printf "killed\n"
-printf "\nYou can now run the application to test stuff\n"
+printf "\nYou can now run the application to test the added data\n"
 echo "The login detail of the first admin are the following"
 echo "  username:     tester"
 echo "  email:        tester@mail.com"
 printf "  password:     tester\n\n"
-# echo "Current accesstoken: $token"

@@ -11,7 +11,7 @@ testerid = login["user"]["id"]
 authheaders = {'Authorization': f'Basic {token}',
                'Content-Type': 'application/json'}
 
-# bdding devs :)
+# adding devs :)
 requests.post('http://localhost:8080/api/students',
               json={"firstName": "Lars", "lastName": "Van Cauter"}, headers={'Authorization': f'Basic {token}', 'Content-Type': 'application/json'})
 requests.post('http://localhost:8080/api/students',
@@ -35,11 +35,11 @@ for _ in range(1000):
 yes = requests.get('http://localhost:8080/api/students',
                    headers=authheaders, params={"pageNumber": 0, "pageSize": 50, "sortBy": "id"}).json()
 no = requests.get('http://localhost:8080/api/students',
-                  headers=authheaders, params={"pageNumber": 0, "pageSize": 50, "sortBy": "firstName"}).json()
+                  headers=authheaders, params={"pageNumber": 1, "pageSize": 50, "sortBy": "id"}).json()
 maybe = requests.get('http://localhost:8080/api/students',
-                     headers=authheaders, params={"pageNumber": 0, "pageSize": 50, "sortBy": "lastName"}).json()
+                     headers=authheaders, params={"pageNumber": 2, "pageSize": 50, "sortBy": "id"}).json()
 
-# create 50 yes, no and maybe students (maybe these overlap, but doesn't really matter)
+# create 50 yes, no and maybe students
 for stud in yes:
     requests.post(
         f'http://localhost:8080/api/students/{stud["id"]}/status', json="Yes", headers=authheaders)
