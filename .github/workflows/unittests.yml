@@ -26,26 +26,27 @@ jobs:
     env:
       GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 
-    # Service containers to run with `container-job`
-    services:
-      # Label used to access the service container
-      # Need to actually run a postgres container to allow app to build
-      postgres:
-        image: postgres
-        ports:
-          - 5432
-
-        env:
-          POSTGRES_USER: ${{ secrets.database_username }}
-          POSTGRES_PASSWORD: ${{ secrets.database_password }}
-          POSTGRES_DB: ${{ secrets.database_name }}
-
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+#    # Service containers to run with `container-job`
+#    services:
+#      # Label used to access the service container
+#      # Need to actually run a postgres container to allow app to build
+#      postgres:
+#        image: postgres
+#        ports:
+#          - 5432
+#
+#        env:
+#          POSTGRES_USER: ${{ secrets.database_username }}
+#          POSTGRES_PASSWORD: ${{ secrets.database_password }}
+#          POSTGRES_DB: ${{ secrets.database_name }}
+#
+#        # Set health checks to wait until postgres has started
+#        options: >-
+#          --health-cmd pg_isready
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
+#          --rm
 
     steps:
       - uses: actions/checkout@v2

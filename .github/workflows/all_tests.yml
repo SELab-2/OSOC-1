@@ -3,13 +3,13 @@ name: Run backend all tests with maven
 on:
   push:
     branches: [ master, development ]
-#    paths:
-#      - 'backend/**'
+    paths:
+      - 'backend/**'
   pull_request:
     branches: 
       - '**'
-#    paths:
-#      - 'backend/**'
+    paths:
+      - 'backend/**'
 
 jobs:
   container-job:
@@ -41,6 +41,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          --rm
 
     steps:
       - uses: actions/checkout@v2
