@@ -83,6 +83,7 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
  * I.e. there could be two students in the database with [firstName] "Tom" and [lastName] "Alard".
  * A student also has a [status], see the documentation of [StatusEnum] for more information on what it represents.
  * Whether a student is an alumn can be indicated by the [alumn] boolean (default false).
+ * A student belongs to a particular [edition] of OSOC.
  * Finally, each student keeps a [MutableList] of [StatusSuggestion]s.
  */
 @Entity
@@ -91,9 +92,7 @@ class Student(
     val lastName: String,
 
     @JsonIgnore
-    val organization: String,
-    @JsonIgnore
-    val editionName: String,
+    val edition: String,
 
     @ManyToMany(cascade = [CascadeType.ALL])
     val skills: Set<Skill> = sortedSetOf(),

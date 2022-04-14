@@ -7,5 +7,5 @@ import org.springframework.data.repository.PagingAndSortingRepository
 import java.util.UUID
 
 interface StudentRepository : PagingAndSortingRepository<Student, UUID> {
-    fun findByOrganizationAndEditionName(organization: String, editionName: String, pageable: Pageable): Page<Student>
+    fun findByEdition(edition: String, pageable: Pageable): Page<Student>
 }

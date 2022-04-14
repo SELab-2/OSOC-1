@@ -23,7 +23,7 @@ import java.util.UUID
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
     /**
-     * Get all students of the edition [editionName] from the given [organization],
+     * Get all students of the edition [edition],
      * who are within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
      * Can be filtered by [name] (requested string gets processed to more easily give matches),
      * [statusFilter] (see if student status matches 1 in the given list),
@@ -37,12 +37,11 @@ class StudentService(private val repository: StudentRepository, private val user
         statusFilter: List<StatusEnum>,
         name: String,
         includeSuggested: Boolean,
-        organization: String,
-        editionName: String,
+        edition: String,
         callee: User
     ): Iterable<Student> {
         val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
-        val pagedResult: Page<Student> = repository.findByOrganizationAndEditionName(organization, editionName, paging)
+        val pagedResult: Page<Student> = repository.findByEdition(edition, paging)
         val studentList = mutableListOf<Student>()
         for (student in pagedResult.content) {
             val studentHasStatus = statusFilter.contains(student.status)

@@ -6,6 +6,8 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
+import java.net.URLDecoder
+import java.security.Principal
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -17,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.net.URLDecoder
-import java.security.Principal
 import java.util.UUID
 
 @RestController
@@ -28,16 +28,15 @@ class StudentController(
 ) {
 
     /**
-     * Get a list of all students in the database who are a part of the OSOC edition
-     * named [editionName] by the given [organization]. This request cannot fail. There are default
-     * values applied for paging ([pageNumber], [pageSize] and [sortBy]), these can be modified by
-     * adding request parameters to the url.
+     * Get a list of all students in the database who are a part of the given OSOC [edition].
+     * This request cannot fail. There are default values applied for paging ([pageNumber], [pageSize] and [sortBy]).
+     * These can be modified by adding request parameters to the url.
      *
      * The results can also be filtered by [name] (default value is empty so no student is excluded),
      * by [status] (default value allows all statuses) by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for)
      */
-    @GetMapping("/{organization}/{editionName}/students")
+    @GetMapping("/{edition}/students")
     @Secured("ROLE_COACH")
     fun getAllStudents(
         @RequestParam(defaultValue = "0") pageNumber: Int,
@@ -46,14 +45,13 @@ class StudentController(
         @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
-        @PathVariable organization: String,
-        @PathVariable editionName: String,
+        @PathVariable edition: String,
         principal: Principal
     ): Iterable<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
         return service.getAllStudents(
-            pageNumber, pageSize, sortBy, status, decodedName, includeSuggested, organization,
-            editionName, userDetailService.getUserFromPrincipal(principal)
+            pageNumber, pageSize, sortBy, status, decodedName, includeSuggested,
+            edition, userDetailService.getUserFromPrincipal(principal)
         )
     }
 
@@ -89,19 +87,18 @@ class StudentController(
      * header. No checking is done to see if firstName or lastName qualify as valid 'names'. This
      * verification is the responsibility of the caller.
      */
-    @PostMapping("/{organization}/{editionName}/students")
+    @PostMapping("/{edition}/students")
     @Secured("ROLE_COACH")
     fun addStudent(
         @RequestBody studentRegistration: StudentRegistration,
-        @PathVariable organization: String,
-        @PathVariable editionName: String
+        @PathVariable edition: String
     ): ResponseEntity<Student> {
-        val student = Student(studentRegistration.firstName, studentRegistration.lastName, organization, editionName)
+        val student = Student(studentRegistration.firstName, studentRegistration.lastName, edition)
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
 
-    // Needed to avoid the caller having to pass the organization/editionName in the URL and the request body.
+    // Needed to avoid the caller having to pass the edition in both the URL and the request body.
     data class StudentRegistration(val firstName: String, val lastName: String)
 
     /**
