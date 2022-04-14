@@ -636,15 +636,9 @@ paths:
                 '404':
                     description: |
                         The response if there is no student in the database with the given student id.
-    /{organization}/users:
+    /users:
         get:
             summary: Get list containing all users
-            parameters:
-                - name: organization
-                  required: true
-                  in: path
-                  schema:
-                      type: string
             responses:
                 '200':
                     description: OK
@@ -656,12 +650,6 @@ paths:
                                     $ref: '#/components/schemas/User'
         post:
             summary: Add a new user to database
-            parameters:
-                -   name: organization
-                    required: true
-                    in: path
-                    schema:
-                        type: string
             requestBody:
                 content:
                     application/json:
