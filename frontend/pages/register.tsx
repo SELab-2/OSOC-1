@@ -1,6 +1,6 @@
 import FormContainer from '../components/FormContainer';
 import Link from 'next/link';
-import { FormEventHandler, useEffect, useState } from 'react';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import Endpoints from '../lib/endpoints';
@@ -14,6 +14,8 @@ import { customPasswordRegex, emailRegex, nameRegex } from '../lib/regex';
  * @returns Register Page
  */
 const register = () => {
+  const nameRef = useRef<HTMLInputElement>(null);
+
   const [name, resetName, nameProps] = useInput('');
   const [email, resetEmail, emailProps] = useInput('');
   const [password, resetPassword, passwordProps] = useInput('');
@@ -24,6 +26,10 @@ const register = () => {
   const [validEmail, setValidEmail] = useState(true);
   const [validPassword, setValidPassword] = useState(true);
   const [validMatch, setValidMatch] = useState(true);
+
+  useEffect(() => {
+    nameRef?.current?.focus();
+  }, []);
 
   useEffect(() => {
     setValidName(nameRegex.test(name));
@@ -88,6 +94,7 @@ const register = () => {
               } p-1 text-sm`}
               name="name"
               type="text"
+              ref={nameRef}
               {...nameProps}
             />
           </label>

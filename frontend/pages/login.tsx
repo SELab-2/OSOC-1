@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FormEventHandler, useState } from 'react';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import FormContainer from '../components/FormContainer';
 import useTokens from '../hooks/useTokens';
@@ -20,6 +20,8 @@ import usePersistentInput from '../hooks/usePersistentInput';
  * @returns Login Page
  */
 const Login = () => {
+  const emailRef = useRef<HTMLInputElement>(null);
+
   const [email, resetEmail, emailProps] = usePersistentInput('email', '');
   const [password, setPassword] = useState('');
 
@@ -27,6 +29,10 @@ const Login = () => {
   const [, setTokens] = useTokens();
 
   const router = useRouter();
+
+  useEffect(() => {
+    emailRef?.current?.focus();
+  }, []);
 
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -82,6 +88,7 @@ const Login = () => {
               name="email"
               type="email"
               {...emailProps}
+              ref={emailRef}
             />
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
