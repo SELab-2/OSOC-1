@@ -1,6 +1,5 @@
 package be.osoc.team1.backend.entities
 
-import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.UUID

@@ -1,8 +1,6 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.StatusEnum
-import be.osoc.team1.backend.entities.Student
-import be.osoc.team1.backend.entities.User
 
 private fun preprocess(string: String) = string.lowercase().replace(" ", "")
 
@@ -21,7 +19,7 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
     val startOfPaging = pageNumber * pageSize
 
     fun <T> paginate(collection: List<T>): List<T> {
-        val endOfPaging = Integer.min(collection.size - 1, startOfPaging + pageSize)
+        val endOfPaging = Integer.min(collection.size, startOfPaging + pageSize) - 1
         return collection.slice(startOfPaging..endOfPaging)
     }
 
@@ -34,20 +32,5 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
 }
 
 data class StudentFilter(val statusFilter: List<StatusEnum>, val nameQuery: String, val includeSuggested: Boolean)
-
-fun filterStudents(students: Iterable<Student>, filters: StudentFilter, callee: User): List<Student> {
-    val filteredStudents = mutableListOf<Student>()
-    for (student in students) {
-        val studentHasStatus = filters.statusFilter.contains(student.status)
-        val fullName = "${student.firstName} ${student.lastName}"
-        val studentHasMatchingName = nameMatchesSearchQuery(fullName, filters.nameQuery)
-        val studentBeenSuggestedByUserCheck =
-            filters.includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
-        if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
-            filteredStudents.add(student)
-        }
-    }
-    return filteredStudents
-}
 
 fun <T> List<T>.page(pager: Pager) = pager.paginate(this)

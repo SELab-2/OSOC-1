@@ -4,6 +4,7 @@ import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.filterByName
+import be.osoc.team1.backend.entities.filterByStatus
 import be.osoc.team1.backend.entities.filterBySuggested
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
@@ -58,6 +59,7 @@ class StudentController(
         return service.getAllStudents(Sort.by(sortBy))
             .filterByName(decodedName)
             .filterBySuggested(includeSuggested, userDetailService.getUserFromPrincipal(principal))
+            .filterByStatus(status)
             .page(Pager(pageNumber, pageSize))
     }
 
