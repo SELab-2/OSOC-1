@@ -226,18 +226,13 @@ paths:
                         The response if there is no student in the database with the given id.
                 '400':
                     description: Bad Request.
-    /{organization}/{editionName}/projects:
+    /{edition}/projects:
         get:
             summary: Get list containing all Project objects
             parameters:
                 -   in: path
                     required: true
-                    name: organization
-                    schema:
-                        type: string
-                -   in: path
-                    required: true
-                    name: editionName
+                    name: edition
                     schema:
                         type: string
                 -   in: query
@@ -262,12 +257,7 @@ paths:
             parameters:
                 -   in: path
                     required: true
-                    name: organization
-                    schema:
-                        type: string
-                -   in: path
-                    required: true
-                    name: editionName
+                    name: edition
                     schema:
                         type: string
             requestBody:
@@ -520,18 +510,13 @@ paths:
                     description: succesful operation
                 '404':
                     description: Not Found. No such projectId or assignmentId.
-    /{organization}/{editionName}/projects/conflicts:
+    /{edition}/projects/conflicts:
         get:
             summary: Get all project-conflicts (a conflict occurs when a student is assigned to multiple projects at the same time)
             parameters:
                 -   in: path
                     required: true
-                    name: organization
-                    schema:
-                        type: string
-                -   in: path
-                    required: true
-                    name: editionName
+                    name: edition
                     schema:
                         type: string
             responses:
