@@ -3,6 +3,7 @@ package be.osoc.team1.backend.entities
 import be.osoc.team1.backend.util.StudentSerializer
 import be.osoc.team1.backend.util.UserListSerializer
 import be.osoc.team1.backend.util.UserSerializer
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 import javax.persistence.CascadeType
@@ -62,6 +63,8 @@ open class Project(
     val name: String,
     val clientName: String,
     val description: String,
+
+    @JsonIgnore
     val edition: String,
 
     @OneToMany(cascade = [CascadeType.ALL])
