@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# REQUIRED PACKAGES "docker, jq, curl"
+# REQUIRED PACKAGES "docker, curl"
 
 if ! [ $(id -u) = 0 ]; then
    echo "The script need to be run as root." >&2
