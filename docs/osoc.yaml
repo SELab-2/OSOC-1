@@ -526,8 +526,8 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Conflict'
                             example:
-                                student: "abb97568-ac54-11ec-b909-0242ac120002"
-                                projects: [ "afc1e1cc-ac54-11ec-b909-0242ac120002","b6a81d12-ac54-11ec-b909-0242ac120002" ]
+                                student: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
+                                projects: ["https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
     /studentRoles:
         get:
             summary: Get all types of student Roles that are currently in the database.
@@ -653,15 +653,9 @@ paths:
                 '404':
                     description: |
                         The response if there is no student in the database with the given student id.
-    /{organization}/users:
+    /users:
         get:
             summary: Get list containing all users
-            parameters:
-                - name: organization
-                  required: true
-                  in: path
-                  schema:
-                      type: string
             responses:
                 '200':
                     description: OK
@@ -673,12 +667,6 @@ paths:
                                     $ref: '#/components/schemas/User'
         post:
             summary: Add a new user to database
-            parameters:
-                -   name: organization
-                    required: true
-                    in: path
-                    schema:
-                        type: string
             requestBody:
                 content:
                     application/json:

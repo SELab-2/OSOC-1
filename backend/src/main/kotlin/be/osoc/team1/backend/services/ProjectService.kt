@@ -13,6 +13,7 @@ import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.UUID
 
 @Service
@@ -109,19 +110,20 @@ class ProjectService(
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
      */
     fun getConflicts(): MutableList<Conflict> {
-        val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
+        val baseUrl: String = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+        val studentsMap = mutableMapOf<UUID, MutableList<String>>()
         for (project in getAllProjects("")) {
             for (student in getStudents(project)) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())
-                studentsMap[student.id]?.add(project.id)
+                studentsMap[student.id]!!.add("$baseUrl/projects/" + project.id)
             }
         }
         val conflicts = mutableListOf<Conflict>()
         for ((studentId, projectIds) in studentsMap.entries) {
             if (projectIds.size > 1) {
                 // this student has a conflict
-                conflicts.add(Conflict(studentId, projectIds))
+                conflicts.add(Conflict("$baseUrl/students/$studentId", projectIds))
             }
         }
         return conflicts
@@ -162,6 +164,6 @@ class ProjectService(
         repository.save(project)
     }
 
-    data class Conflict(val student: UUID, val projects: MutableList<UUID> = mutableListOf())
+    data class Conflict(val student: String, val projects: MutableList<String> = mutableListOf())
     data class AssignmentPost(val student: UUID, val position: UUID, val suggester: UUID, val reason: String)
 }

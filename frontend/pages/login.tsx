@@ -3,10 +3,18 @@ import { useRouter } from 'next/router';
 import { FormEventHandler, useState } from 'react';
 import toast from 'react-hot-toast';
 import FormContainer from '../components/FormContainer';
+import useTokens from '../hooks/useTokens';
+import useUser from '../hooks/useUser';
+import { UserRole } from '../lib/types';
+import axios from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 
 /**
  * Login page for OSOC application
+ *
+ * @remarks
+ * The login page sets the correct user and tokens in the {@link AuthProvider} on valid login and
+ * it's context.
  *
  * @returns Login Page
  */
@@ -14,32 +22,46 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [, setUser] = useUser();
+  const [, setTokens] = useTokens();
+
   const router = useRouter();
 
-  const loginUser: FormEventHandler<HTMLFormElement> = async (e) => {
+  const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
     if (email && password) {
-      const params = new URLSearchParams({
-        email,
-        password,
-      });
+      try {
+        const response = await axios.post(
+          Endpoints.LOGIN,
+          new URLSearchParams({
+            email,
+            password,
+          }),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          }
+        );
 
-      const request = fetch(Endpoints.LOGIN, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params,
-      });
+        if (response?.data) {
+          const { accessToken, refreshToken, user } = response.data;
+          setUser(user);
+          setTokens({
+            accessToken,
+            refreshToken,
+          });
 
-      const response = await request;
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        router.push('/wait');
-      } else {
+          if (user.role === UserRole.Disabled) {
+            router.push('/wait');
+          } else {
+            router.push('/');
+          }
+        } else {
+          toast.error('Something went wrong trying to process the request.');
+        }
+      } catch (err) {
         toast.error('An error occurred while trying to log in.');
       }
     }
@@ -48,7 +70,7 @@ const Login = () => {
   return (
     <>
       <FormContainer pageTitle="LOGIN">
-        <form className="mb-1 w-11/12 max-w-md" onSubmit={loginUser}>
+        <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             Email Address
             <input

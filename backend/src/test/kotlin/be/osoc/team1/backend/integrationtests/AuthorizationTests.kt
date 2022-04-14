@@ -52,26 +52,25 @@ class AuthorizationTests {
     @Autowired
     private lateinit var userRepository: UserRepository
 
-    private val testOrganization = "testOrganization"
     private val testEditionName = "testEditionName"
-    private val studentBaseUrl = "/$testOrganization/$testEditionName/students"
+    private val studentBaseUrl = "/$testEditionName/students"
 
     private val adminPassword = "adminPassword"
     private val adminEmail = "admin@admin.com"
     private val encodedAdminPassword = BCryptPasswordEncoder().encode(adminPassword)
-    private val adminUser = User("admin", adminEmail, Role.Admin, encodedAdminPassword, testOrganization)
+    private val adminUser = User("admin", adminEmail, Role.Admin, encodedAdminPassword)
 
     private val coachPassword = "coachPassword"
     private val coachEmail = "coach@coach.com"
     private val encodedCoachPassword = BCryptPasswordEncoder().encode(coachPassword)
-    private val coachUser = User("coach", coachEmail, Role.Coach, encodedCoachPassword, testOrganization)
+    private val coachUser = User("coach", coachEmail, Role.Coach, encodedCoachPassword)
 
     private val disabledPassword = "disabledPassword"
     private val disabledEmail = "disabled@disabled.com"
     private val encodedDisabledPassword = BCryptPasswordEncoder().encode(disabledPassword)
-    private val disabledUser = User("disabled", disabledEmail, Role.Disabled, encodedDisabledPassword, testOrganization)
+    private val disabledUser = User("disabled", disabledEmail, Role.Disabled, encodedDisabledPassword)
 
-    private val testStudent = Student("Test", "Student", testOrganization, testEditionName)
+    private val testStudent = Student("Test", "Student", testEditionName)
 
     /**
      * Log in with given email and password via post request to /login
