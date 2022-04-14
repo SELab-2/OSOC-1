@@ -281,10 +281,15 @@ paths:
                                 format: url
                 '400':
                     description: Bad Request.
-    /projects/{projectId}:
+    /{edition}/projects/{projectId}:
         get:
             summary: Get Project by id
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
@@ -314,10 +319,15 @@ paths:
                     description: successful operation
                 '404':
                     description: Not Found. No such projectId.
-    /projects/{projectId}/students:
+    /{edition}/projects/{projectId}/students:
         get:
             summary: Get all students from a project
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
@@ -358,10 +368,15 @@ paths:
                     description: Not Found. No such projectId.
                 '400':
                     description: Bad Request.
-    /projects/{projectId}/students/{studentId}:
+    /{edition}/projects/{projectId}/students/{studentId}:
         delete:
             summary: Remove student from project
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
@@ -379,10 +394,15 @@ paths:
                     description: successful operation
                 '404':
                     description: Not Found. No such projectId or studentId.
-    /projects/{projectId}/coaches:
+    /{edition}/projects/{projectId}/coaches:
         post:
             summary: Assign a coach to project
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
@@ -403,10 +423,15 @@ paths:
                     description: No such projectId or coachId.
                 '400':
                     description: Bad Request.
-    /projects/{projectId}/coaches/{coachId}:
+    /{edition}/projects/{projectId}/coaches/{coachId}:
         delete:
             summary: Remove a coach from a project
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
@@ -424,10 +449,15 @@ paths:
                     description: successful operation
                 '404':
                     description: Not Found. No such projectId or coachId.
-    /projects/{projectId}/devroles:
+    /{edition}/projects/{projectId}/devroles:
         post:
             summary: Add a new student developer role to a project
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
@@ -446,10 +476,15 @@ paths:
                     description: Not Found. No such projectId.
                 '400':
                     description: Bad Request.
-    /projects/{projectId}/devroles/{devroleId}:
+    /{edition}/projects/{projectId}/devroles/{devroleId}:
         delete:
             summary: Remove a student developer role from a project
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
@@ -467,10 +502,15 @@ paths:
                     description: succesful operation
                 '404':
                     description: Not Found. No such projectId or devroleId.
-    /projects/{projectId}/assignments:
+    /{edition}/projects/{projectId}/assignments:
         post:
             summary: Add a new student developer assignment
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
@@ -489,10 +529,15 @@ paths:
                     description: Not Found. No such projectId.
                 '400':
                     description: Bad Request.
-    /projects/{projectId}/assignments/{assignmentId}:
+    /{edition}/projects/{projectId}/assignments/{assignmentId}:
         delete:
             summary: Remove a student developer assignment from a project
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   name: projectId
                     required: true
                     in: path
