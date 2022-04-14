@@ -57,5 +57,6 @@ module.exports = {
   ],
   rules: {
     'tsdoc/syntax': 'warn',
+    "@typescript-eslint/ban-ts-comment": "off"
   }
 };
