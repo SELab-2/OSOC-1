@@ -65,23 +65,25 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents should not fail`() {
-        every { studentService.getAllStudents(defaultPager, defaultSort, defaultStudentFilter, testCoach) } returns
-            emptyList()
+        every { studentService.getAllStudents(defaultSort) } returns emptyList()
         mockMvc.perform(get("/students").principal(TestingAuthenticationToken(null, null))).andExpect(status().isOk)
     }
 
     @Test
     fun `getAllStudents paging returns the correct amount`() {
         val testList = listOf(testStudent)
-        every { studentService.getAllStudents(Pager(0, 1), defaultSort, defaultStudentFilter, testCoach) } returns
-            testList
+        every { studentService.getAllStudents(defaultSort) } returns listOf(
+            testStudent,
+            Student("Foo", "Bar"),
+            Student("Fooo", "Baar")
+        )
         mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(TestingAuthenticationToken(null, null)))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
 
     @Test
-    fun `getAllStudents status filtering parses the correct statuses`() {
+    fun `getAllStudents status filtering parses the correct statuses and filters accordingly`() {
         val testStudent1 = Student("L1", "VC")
         testStudent1.status = StatusEnum.Yes
         val testStudent2 = Student("L2", "VC")
@@ -91,46 +93,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testStudent4 = Student("L4", "VC")
         testStudent4.status = StatusEnum.Undecided
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
-        every {
-            studentService.getAllStudents(
-                defaultPager,
-                defaultSort,
-                StudentFilter(listOf(StatusEnum.Yes), "", true),
-                testCoach
-            )
-        } returns listOf(testStudent1)
-        every {
-            studentService.getAllStudents(
-                defaultPager,
-                defaultSort,
-                StudentFilter(listOf(StatusEnum.No), "", true),
-                testCoach
-            )
-        } returns listOf(testStudent2)
-        every {
-            studentService.getAllStudents(
-                defaultPager,
-                defaultSort,
-                StudentFilter(listOf(StatusEnum.Maybe), "", true),
-                testCoach
-            )
-        } returns listOf(testStudent3)
-        every {
-            studentService.getAllStudents(
-                defaultPager,
-                defaultSort,
-                StudentFilter(listOf(StatusEnum.Undecided), "", true),
-                testCoach
-            )
-        } returns listOf(testStudent4)
-        every {
-            studentService.getAllStudents(
-                defaultPager,
-                defaultSort,
-                defaultStudentFilter,
-                testCoach
-            )
-        } returns allStudents
+        every { studentService.getAllStudents(defaultSort) } returns allStudents
         mockMvc.perform(get("/students?status=Yes").principal(TestingAuthenticationToken(null, null)))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent1))))
@@ -156,49 +119,61 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `getAllStudents name filtering parses the correct name`() {
-        val testList = listOf(Student("_", "_"))
-        val testList2 = listOf(Student("_2", "_2"))
-        every {
-            studentService.getAllStudents(
-                defaultPager,
-                defaultSort,
-                StudentFilter(defaultStatusFilter, "lars", true),
-                testCoach
+    fun `getAllStudents paging with filtering returns the correct amount`() {
+        val testStudent1 = Student("ATestoon", "Tamzia")
+        testStudent1.status = StatusEnum.Maybe
+        val testStudent2 = Student("BTestien", "Tamzia")
+        testStudent2.status = StatusEnum.Yes
+        val testStudent3 = Student("CTestaan", "Tamzia")
+        testStudent3.status = StatusEnum.Yes
+        val allStudents = listOf(testStudent1, testStudent2, testStudent3)
+
+        every { studentService.getAllStudents(Sort.by("name")) } returns allStudents
+        mockMvc.perform(
+            get("/students?status=Yes&sortBy=name&pageSize=2").principal(
+                TestingAuthenticationToken(
+                    null,
+                    null
+                )
             )
-        } returns testList
-        every {
-            studentService.getAllStudents(
-                defaultPager,
-                defaultSort,
-                StudentFilter(defaultStatusFilter, "lars test", true),
-                testCoach
-            )
-        } returns testList2
-        // tests the url parsing + with url encoding
-        mockMvc.perform(get("/students?name=lars").principal(TestingAuthenticationToken(null, null)))
+        )
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
-        mockMvc.perform(get("/students?name=lars%20test").principal(TestingAuthenticationToken(null, null)))
-            .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent2, testStudent3))))
     }
 
     @Test
-    fun `getAllStudents include filtering parses the boolean correctly`() {
-        val testList = listOf(Student("test", "testie"))
-        every {
-            studentService.getAllStudents(
-                defaultPager,
-                defaultSort,
-                StudentFilter(defaultStatusFilter, "", false),
-                testCoach
-            )
-        } returns
-            testList
+    fun `getAllStudents name filtering returns only students with those names`() {
+        val testStudent = Student("Lars", "Cauter")
+        val testStudent2 = Student("Sral", "Retuac")
+        val testStudent3 = Student("Arsl", "Auterc")
+        val testStudent4 = Student("Rsla", "Uterca")
+        val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
+        every { studentService.getAllStudents(defaultSort) } returns allStudents
+        mockMvc.perform(get("/students?name=lars").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent))))
+        mockMvc.perform(get("/students?name=ars").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent, testStudent3))))
+        mockMvc.perform(get("/students?name=uter").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent, testStudent3, testStudent4))))
+        mockMvc.perform(get("/students?name=").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(allStudents)))
+    }
+
+    @Test
+    fun `getAllStudents include filtering works`() {
+        val testStudent = Student("Lars", "Van")
+        testStudent.statusSuggestions.add(StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "Nice!"))
+        every { studentService.getAllStudents(defaultSort) } returns listOf(testStudent)
         mockMvc.perform(get("/students?includeSuggested=false").principal(TestingAuthenticationToken(null, null)))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf<Student>())))
+        mockMvc.perform(get("/students?includeSuggested=true").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent))))
     }
 
     @Test
