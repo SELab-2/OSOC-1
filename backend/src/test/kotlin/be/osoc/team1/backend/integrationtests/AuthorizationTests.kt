@@ -7,7 +7,6 @@ import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.ConfigUtil
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
-import java.net.URI
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
@@ -24,6 +23,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.net.URI
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
