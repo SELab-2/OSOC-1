@@ -7,6 +7,7 @@ import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.ConfigUtil
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
+import java.net.URI
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
@@ -23,11 +24,10 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.testcontainers.junit.jupiter.Testcontainers
-import java.net.URI
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthorizationTests() {
+class AuthorizationTests {
 
     @AfterEach
     fun cleanup() {
@@ -413,7 +413,7 @@ class AuthorizationTests() {
     @Test
     fun `CORS using not allowed origin gives error`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
-        authHeaders.add(HttpHeaders.ORIGIN, "http://notallowed.com")
+        authHeaders.add(HttpHeaders.ORIGIN, "https://notallowed.com")
         val request = HttpEntity("", authHeaders)
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 403)
