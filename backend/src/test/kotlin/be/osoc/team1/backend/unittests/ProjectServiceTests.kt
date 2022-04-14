@@ -27,29 +27,22 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
 
 class ProjectServiceTests {
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Lars", "Van Cauter", "")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
+    private val testEdition = "testEdition"
     private val testSkill = Skill("Backend")
     private val testSkill2 = Skill("Frontend")
     private val testProject = Project(
-        "Test",
-        "Client",
-        "a test project",
+        "Test", "Client", "a test project", testEdition,
         mutableListOf(testCoach),
         listOf(Position(testSkill, 1), Position(testSkill2, 1))
     )
     private val savedProject = Project(
-        "Saved",
-        "Client",
-        "a saved project",
-        mutableListOf(testCoach)
+        "Saved", "Client", "a saved project", testEdition, mutableListOf(testCoach)
     )
     private val suggester = User("username", "email", Role.Coach, "password")
 
@@ -60,7 +53,7 @@ class ProjectServiceTests {
             if (projectAlreadyExists) testProject else null
         every { repository.deleteById(any()) } just Runs
         every { repository.save(any()) } returns savedProject
-        every { repository.findAll() } returns listOf(testProject)
+        every { repository.findByEdition(testEdition) } returns listOf(testProject)
         return repository
     }
 
@@ -82,23 +75,23 @@ class ProjectServiceTests {
     @Test
     fun `getAllProjects does not fail`() {
         val service = ProjectService(getRepository(true), mockk(), getUserService())
-        assertEquals(listOf(testProject), service.getAllProjects(""))
+        assertEquals(listOf(testProject), service.getAllProjects(testEdition))
     }
 
     @Test
     fun `getAllProjects name filtering returns only projects with those names`() {
-        val testProject = Project("Lars", "Client", "Cauter")
-        val testProject2 = Project("Sral", "Client", "Retuac")
-        val testProject3 = Project("Arsl", "Client", "Auterc")
-        val testProject4 = Project("Rsla", "Client", "Uterca")
+        val testProject = Project("Lars", "Client", "Cauter", testEdition)
+        val testProject2 = Project("Sral", "Client", "Retuac", testEdition)
+        val testProject3 = Project("Arsl", "Client", "Auterc", testEdition)
+        val testProject4 = Project("Rsla", "Client", "Uterca", testEdition)
         val repository: ProjectRepository = mockk()
         val allProjects = listOf(testProject, testProject2, testProject3, testProject4)
-        every { repository.findAll() } returns allProjects
+        every { repository.findByEdition(testEdition) } returns allProjects
         val service = ProjectService(repository, mockk(), getUserService())
-        assertEquals(listOf(testProject), service.getAllProjects("lars"))
-        assertEquals(listOf(testProject, testProject3), service.getAllProjects("ars"))
-        assertEquals(listOf<Project>(), service.getAllProjects("uter"))
-        assertEquals(allProjects, service.getAllProjects(""))
+        assertEquals(listOf(testProject), service.getAllProjects(testEdition, "lars"))
+        assertEquals(listOf(testProject, testProject3), service.getAllProjects(testEdition, "ars"))
+        assertEquals(listOf<Project>(), service.getAllProjects(testEdition, "uter"))
+        assertEquals(allProjects, service.getAllProjects(testEdition))
     }
 
     @Test
@@ -188,63 +181,49 @@ class ProjectServiceTests {
         val position = Position(Skill("backend"), 2)
         val suggester = User("suggester", "email", Role.Coach, "password")
         val testProjectConflict = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason")
             )
         )
         val testProjectConflict2 = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")
             )
         )
         val testProjectConflict3 = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent2, position, suggester, "reason"),
                 Assignment(testStudent3, position, suggester, "reason")
             )
         )
         val repository = getRepository(true)
-        every { repository.findAll() } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
+        every { repository.findByEdition(testEdition) } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
         val service = ProjectService(repository, mockk(), getUserService())
-
-        val mockRequest = MockHttpServletRequest()
-        mockRequest.setScheme("https")
-        mockRequest.setServerName("example.com")
-        mockRequest.setServerPort(-1)
-        mockRequest.setContextPath("/api")
-        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(mockRequest))
-
-        val conflictlist = service.getConflicts()
+        val conflictList = service.getConflicts(testEdition)
         assert(
-            conflictlist[0] == ProjectService.Conflict(
-                "https://example.com/api/students/" + testStudent.id,
-                mutableListOf(
-                    "https://example.com/api/projects/" + testProjectConflict.id,
-                    "https://example.com/api/projects/" + testProjectConflict2.id
-                )
+            conflictList[0] == ProjectService.Conflict(
+                testStudent.id,
+                mutableListOf(testProjectConflict.id, testProjectConflict2.id)
             )
         )
         assert(
-            conflictlist[1] == ProjectService.Conflict(
-                "https://example.com/api/students/" + testStudent2.id,
-                mutableListOf(
-                    "https://example.com/api/projects/" + testProjectConflict2.id,
-                    "https://example.com/api/projects/" + testProjectConflict3.id
-                )
+            conflictList[1] == ProjectService.Conflict(
+                testStudent2.id,
+                mutableListOf(testProjectConflict2.id, testProjectConflict3.id)
             )
         )
-        assert(conflictlist.size == 2)
+        assert(conflictList.size == 2)
     }
 
     @Test
     fun `Conflicts dataclass one argument constructor test`() {
-        val conflict = ProjectService.Conflict("https://example.com/api/students/" + testStudent.id)
-        assert(conflict.student == "https://example.com/api/students/" + testStudent.id)
-        assert(conflict.projects == mutableListOf<String>())
+        val conflict = ProjectService.Conflict(testStudent.id)
+        assert(conflict.student == testStudent.id)
+        assert(conflict.projects == mutableListOf<UUID>())
     }
 
     @Test
@@ -337,7 +316,7 @@ class ProjectServiceTests {
         val testStudent2 = Student("Lars2", "Van Cauter2", "")
         val position = Position(Skill("backend"), 2)
         val testProject = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", "",
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")

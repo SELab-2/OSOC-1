@@ -416,7 +416,7 @@ class AuthorizationTests {
     @Test
     fun `CORS using not allowed origin gives error`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
-        authHeaders.add(HttpHeaders.ORIGIN, "http://notallowed.com")
+        authHeaders.add(HttpHeaders.ORIGIN, "https://notallowed.com")
         val request = HttpEntity("", authHeaders)
         val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 403)

@@ -235,15 +235,23 @@ paths:
                         The response if there is no student in the database with the given id.
                 '400':
                     description: Bad Request.
-    /projects:
+    /{edition}/projects:
         get:
             summary: Get list containing all Project objects
             parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
                 -   in: query
+                    required: true
                     name: name
                     schema:
                         type: string
-                    description: Part of a name of a project that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
+                    description: |
+                        Part of a name of a project that you want to filter on
+                        (this string will be made lowercase and spaces will be removed).
             responses:
                 '200':
                     description: successful operation
@@ -255,6 +263,12 @@ paths:
                                     $ref: '#/components/schemas/Project'
         post:
             summary: Create a new project. Returns the created project object.
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
             requestBody:
                 content:
                     application/json:
@@ -505,9 +519,15 @@ paths:
                     description: succesful operation
                 '404':
                     description: Not Found. No such projectId or assignmentId.
-    /projects/conflicts:
+    /{edition}/projects/conflicts:
         get:
             summary: Get all project-conflicts (a conflict occurs when a student is assigned to multiple projects at the same time)
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
             responses:
                 '200':
                     description: successful operation

@@ -32,27 +32,29 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var projectService: ProjectService
 
     private val testId = UUID.randomUUID()
-    private val testProject = Project("Proj", "Client", "desc")
+    private val testEdition = "testEdition"
+    private val editionUrl = "/$testEdition/projects"
+    private val testProject = Project("Proj", "Client", "desc", testEdition)
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testProject)
 
     @Test
     fun `getAllProjects should not fail`() {
-        every { projectService.getAllProjects("") } returns emptyList()
-        mockMvc.perform(get("/projects")).andExpect(status().isOk)
+        every { projectService.getAllProjects(testEdition) } returns emptyList()
+        mockMvc.perform(get(editionUrl)).andExpect(status().isOk)
     }
 
     @Test
     fun `getAllProjects name filtering parses the correct name`() {
-        val testList = listOf(Project("_", "_", "_"))
-        val testList2 = listOf(Project("_2", "_2", "_2"))
-        every { projectService.getAllProjects("lars") } returns testList
-        every { projectService.getAllProjects("lars test") } returns testList2
+        val testList = listOf(Project("_", "_", "_", testEdition))
+        val testList2 = listOf(Project("_2", "_2", "_2", testEdition))
+        every { projectService.getAllProjects(testEdition, "lars") } returns testList
+        every { projectService.getAllProjects(testEdition, "lars test") } returns testList2
         // tests the url parsing + with encoding
-        mockMvc.perform(get("/projects?name=lars"))
+        mockMvc.perform(get("$editionUrl?name=lars"))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
-        mockMvc.perform(get("/projects?name=lars%20test"))
+        mockMvc.perform(get("$editionUrl?name=lars%20test"))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
     }
@@ -91,7 +93,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `postProject should return created project`() {
         every { projectService.postProject(any()) } returns testProject
         mockMvc.perform(
-            post("/projects")
+            post(editionUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isCreated).andExpect(content().string(jsonRepresentation))
@@ -180,19 +182,11 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
         val testStudent = Student("Lars", "Van Cauter", "")
-        val testProjectConflict = Project("Test", "Client", "a test project")
-        val testProjectConflict2 = Project("Test", "Client", "a test project")
-        val result = mutableListOf(
-            ProjectService.Conflict(
-                "https://example.com/api/students/" + testStudent.id,
-                mutableListOf(
-                    "https://example.com/api/projects/" + testProjectConflict.id,
-                    "https://example.com/api/projects/" + testProjectConflict2.id
-                )
-            )
-        )
-        every { projectService.getConflicts() } returns result
-        mockMvc.perform(get("/projects/conflicts"))
+        val testProjectConflict = Project("Test", "Client", "a test project", testEdition)
+        val testProjectConflict2 = Project("Test", "Client", "a test project", testEdition)
+        val result = mutableListOf(ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
+        every { projectService.getConflicts(testEdition) } returns result
+        mockMvc.perform(get("$editionUrl/conflicts"))
             .andExpect(status().isOk)
             .andExpect(content().string(objectMapper.writeValueAsString(result)))
     }

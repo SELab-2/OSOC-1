@@ -40,10 +40,8 @@ class SerializationTests {
         val testPosition = Position(Skill("backend"), 2)
         val testUser = User("suggester", "email", Role.Coach, "password")
         val testProject = Project(
-            "Test", "Client", "a test project",
-            assignments = mutableListOf(
-                Assignment(testStudent, testPosition, testUser, "reason")
-            ),
+            "Test", "Client", "a test project", "testEdition",
+            assignments = mutableListOf(Assignment(testStudent, testPosition, testUser, "reason")),
             coaches = mutableListOf(testUser)
         )
         val json: JsonContent<Project> = jacksonTester!!.write(testProject)
@@ -55,9 +53,7 @@ class SerializationTests {
 
     @Test
     fun `Serialization of Project returns the correct result when it's empty`() {
-        val testProject = Project(
-            "Test", "Client", "a test project"
-        )
+        val testProject = Project("Test", "Client", "a test project", "testEdition")
         val json: JsonContent<Project> = jacksonTester!!.write(testProject)
 
         assertThat(json).extractingJsonPathValue("$.coaches").isEqualTo(mutableListOf<User>())
