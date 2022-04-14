@@ -44,7 +44,8 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping("/{projectId}")
     @Secured("ROLE_COACH")
-    fun getProjectById(@PathVariable projectId: UUID): Project = service.getProjectById(projectId)
+    fun getProjectById(@PathVariable projectId: UUID, @PathVariable edition: String): Project =
+        service.getProjectById(projectId)
 
     /**
      * Deletes a project with its [projectId], if this [projectId] doesn't exist the service will return a 404
@@ -52,7 +53,8 @@ class ProjectController(private val service: ProjectService) {
     @DeleteMapping("/{projectId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun deleteProjectById(@PathVariable projectId: UUID) = service.deleteProjectById(projectId)
+    fun deleteProjectById(@PathVariable projectId: UUID, @PathVariable edition: String) =
+        service.deleteProjectById(projectId)
 
     /**
      * Creates a project from the request body, this can also override an already existing project.
