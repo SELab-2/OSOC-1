@@ -33,18 +33,16 @@ class ProjectServiceTests {
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Lars", "Van Cauter")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
-    private val testOrganization = "testOrganization"
-    private val testEditionName = "testEditionName"
+    private val testEdition = "testEdition"
     private val testSkill = Skill("Backend")
     private val testSkill2 = Skill("Frontend")
     private val testProject = Project(
-        "Test", "Client", "a test project", testOrganization, testEditionName,
+        "Test", "Client", "a test project", testEdition,
         mutableListOf(testCoach),
         listOf(Position(testSkill, 1), Position(testSkill2, 1))
     )
     private val savedProject = Project(
-        "Saved", "Client", "a saved project", testOrganization, testEditionName,
-        mutableListOf(testCoach)
+        "Saved", "Client", "a saved project", testEdition, mutableListOf(testCoach)
     )
     private val suggester = User("username", "email", Role.Coach, "password")
 
@@ -55,7 +53,7 @@ class ProjectServiceTests {
             if (projectAlreadyExists) testProject else null
         every { repository.deleteById(any()) } just Runs
         every { repository.save(any()) } returns savedProject
-        every { repository.findByOrganizationAndEditionName(testOrganization, testEditionName) } returns listOf(testProject)
+        every { repository.findByEdition(testEdition) } returns listOf(testProject)
         return repository
     }
 
@@ -77,23 +75,23 @@ class ProjectServiceTests {
     @Test
     fun `getAllProjects does not fail`() {
         val service = ProjectService(getRepository(true), mockk(), getUserService())
-        assertEquals(listOf(testProject), service.getAllProjects(testOrganization, testEditionName))
+        assertEquals(listOf(testProject), service.getAllProjects(testEdition))
     }
 
     @Test
     fun `getAllProjects name filtering returns only projects with those names`() {
-        val testProject = Project("Lars", "Client", "Cauter", testOrganization, testEditionName)
-        val testProject2 = Project("Sral", "Client", "Retuac", testOrganization, testEditionName)
-        val testProject3 = Project("Arsl", "Client", "Auterc", testOrganization, testEditionName)
-        val testProject4 = Project("Rsla", "Client", "Uterca", testOrganization, testEditionName)
+        val testProject = Project("Lars", "Client", "Cauter", testEdition)
+        val testProject2 = Project("Sral", "Client", "Retuac", testEdition)
+        val testProject3 = Project("Arsl", "Client", "Auterc", testEdition)
+        val testProject4 = Project("Rsla", "Client", "Uterca", testEdition)
         val repository: ProjectRepository = mockk()
         val allProjects = listOf(testProject, testProject2, testProject3, testProject4)
-        every { repository.findByOrganizationAndEditionName(testOrganization, testEditionName) } returns allProjects
+        every { repository.findByEdition(testEdition) } returns allProjects
         val service = ProjectService(repository, mockk(), getUserService())
-        assertEquals(listOf(testProject), service.getAllProjects(testOrganization, testEditionName, "lars"))
-        assertEquals(listOf(testProject, testProject3), service.getAllProjects(testOrganization, testEditionName, "ars"))
-        assertEquals(listOf<Project>(), service.getAllProjects(testOrganization, testEditionName, "uter"))
-        assertEquals(allProjects, service.getAllProjects(testOrganization, testEditionName))
+        assertEquals(listOf(testProject), service.getAllProjects(testEdition, "lars"))
+        assertEquals(listOf(testProject, testProject3), service.getAllProjects(testEdition, "ars"))
+        assertEquals(listOf<Project>(), service.getAllProjects(testEdition, "uter"))
+        assertEquals(allProjects, service.getAllProjects(testEdition))
     }
 
     @Test
@@ -183,29 +181,29 @@ class ProjectServiceTests {
         val position = Position(Skill("backend"), 2)
         val suggester = User("suggester", "email", Role.Coach, "password")
         val testProjectConflict = Project(
-            "Test", "Client", "a test project", testOrganization, testEditionName,
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason")
             )
         )
         val testProjectConflict2 = Project(
-            "Test", "Client", "a test project", testOrganization, testEditionName,
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")
             )
         )
         val testProjectConflict3 = Project(
-            "Test", "Client", "a test project", testOrganization, testEditionName,
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent2, position, suggester, "reason"),
                 Assignment(testStudent3, position, suggester, "reason")
             )
         )
         val repository = getRepository(true)
-        every { repository.findByOrganizationAndEditionName(testOrganization, testEditionName) } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
+        every { repository.findByEdition(testEdition) } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
         val service = ProjectService(repository, mockk(), getUserService())
-        val conflictList = service.getConflicts(testOrganization, testEditionName)
+        val conflictList = service.getConflicts(testEdition)
         assert(
             conflictList[0] == ProjectService.Conflict(
                 testStudent.id,
@@ -318,7 +316,7 @@ class ProjectServiceTests {
         val testStudent2 = Student("Lars2", "Van Cauter2")
         val position = Position(Skill("backend"), 2)
         val testProject = Project(
-            "Test", "Client", "a test project", "", "",
+            "Test", "Client", "a test project", "",
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")
