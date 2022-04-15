@@ -23,12 +23,12 @@ class CommunicationController(
 ) {
 
     /**
-     * Gets all communications that belong to a student, if this [studentId] doesn't exist the service will return a 404
+     * Gets all communications that belong to a student, if this [communicationId] doesn't exist the service will return a 404
      */
-    @GetMapping("/{studentId}")
+    @GetMapping("/{communicationId}")
     @Secured("ROLE_COACH")
-    fun getCommunicationsByStudentId(@PathVariable studentId: UUID): Collection<Communication> =
-        studentService.getStudentById(studentId).communications
+    fun getCommunicationsById(@PathVariable communicationId: UUID): Communication =
+        communicationService.getCommunicationById(communicationId)
 
     /**
      * Add a communication to the database. The communication should be passed in the request body

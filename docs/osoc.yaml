@@ -879,7 +879,8 @@ components:
                 coaches:
                     type: array
                     items:
-                        $ref: '#/components/schemas/User'
+                      type: string
+                      format: 'https://example.com/api/users/{userId}'
                 description:
                     type: string
                 positions:
