@@ -12,7 +12,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.util.Optional
 
 class EditionServiceTests {
 
@@ -21,7 +20,7 @@ class EditionServiceTests {
     @Test
     fun `makeEditionInactive inactivates edition if it is active`() {
         val repository = mockk<EditionRepository>()
-        every { repository.findById(testEdition.name) } returns Optional.of(testEdition)
+        every { repository.existsById(testEdition.name) } returns true
         every { repository.delete(testEdition) } just Runs
         val service = EditionService(repository)
         service.makeEditionInactive(testEdition)
@@ -31,7 +30,7 @@ class EditionServiceTests {
     @Test
     fun `makeEditionInactive fails if edition is already inactive`() {
         val repository = mockk<EditionRepository>()
-        every { repository.findById(testEdition.name) } returns Optional.empty()
+        every { repository.existsById(testEdition.name) } returns false
         val service = EditionService(repository)
         assertThrows<FailedOperationException> { service.makeEditionInactive(testEdition) }
     }
@@ -39,7 +38,7 @@ class EditionServiceTests {
     @Test
     fun `makeEditionActive activates edition if it is inactive and there is no other active edition`() {
         val repository = mockk<EditionRepository>()
-        every { repository.findById(testEdition.name) } returns Optional.empty()
+        every { repository.existsById(testEdition.name) } returns false
         every { repository.findAll() } returns emptyList()
         every { repository.save(testEdition) } returns testEdition
         val service = EditionService(repository)
@@ -50,7 +49,7 @@ class EditionServiceTests {
     @Test
     fun `makeEditionActive fails if edition is already active`() {
         val repository = mockk<EditionRepository>()
-        every { repository.findById(testEdition.name) } returns Optional.of(testEdition)
+        every { repository.existsById(testEdition.name) } returns true
         val service = EditionService(repository)
         assertThrows<FailedOperationException> { service.makeEditionActive(testEdition) }
     }
@@ -58,7 +57,7 @@ class EditionServiceTests {
     @Test
     fun `makeEditionActive fails if there is another active edition`() {
         val repository = mockk<EditionRepository>()
-        every { repository.findById(testEdition.name) } returns Optional.empty()
+        every { repository.existsById(testEdition.name) } returns false
         every { repository.findAll() } returns listOf(ActiveEdition("Another active edition"))
         val service = EditionService(repository)
         assertThrows<ForbiddenOperationException> { service.makeEditionActive(testEdition) }

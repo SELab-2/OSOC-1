@@ -14,7 +14,7 @@ class EditionService(val repository: EditionRepository) {
      * [edition] is already inactive (and thus not present in the database).
      */
     fun makeEditionInactive(edition: ActiveEdition) {
-        if (repository.findById(edition.name).isEmpty) {
+        if (!repository.existsById(edition.name)) {
             throw FailedOperationException("The given edition is already inactive.")
         }
         repository.delete(edition)
@@ -27,7 +27,7 @@ class EditionService(val repository: EditionRepository) {
      * Throws a [ForbiddenOperationException] if there is already another active edition in the database.
      */
     fun makeEditionActive(edition: ActiveEdition) {
-        if (repository.findById(edition.name).isPresent) {
+        if (repository.existsById(edition.name)) {
             throw FailedOperationException("The given edition is already active.")
         }
         if (repository.findAll().count() == 1) {
