@@ -20,8 +20,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 
 class UserServiceTests {
-    private val testOrganization = "test_organization"
-    private val testUser = User("Test", "test@email.com", Role.Admin, "password", testOrganization)
+    private val testUser = User("Test", "test@email.com", Role.Admin, "password")
     private val testId = testUser.id
 
     private fun getRepository(userAlreadyExists: Boolean): UserRepository {
@@ -30,7 +29,7 @@ class UserServiceTests {
         every { repository.findByIdOrNull(testId) } returns if (userAlreadyExists) testUser else null
         every { repository.deleteById(testId) } just Runs
         every { repository.save(testUser) } returns testUser
-        every { repository.findByOrganization(testOrganization) } returns listOf(testUser)
+        every { repository.findAll() } returns listOf(testUser)
         return repository
     }
 
@@ -43,7 +42,7 @@ class UserServiceTests {
     @Test
     fun `getAllUsers does not fail`() {
         val service = UserService(getRepository(true), getPasswordEncoder())
-        assertEquals(service.getAllUsers(testOrganization), listOf(testUser))
+        assertEquals(service.getAllUsers(), listOf(testUser))
     }
 
     @Test
@@ -81,7 +80,7 @@ class UserServiceTests {
         val testUser2 = User("username", "email", Role.Disabled, "password")
         every { repository.save(capture(slot)) } returns testUser2
 
-        service.registerUser(testUser2, "organization")
+        service.registerUser(testUser2)
 
         verify { repository.save(any()) }
         val capturedUser = slot.captured
@@ -89,7 +88,6 @@ class UserServiceTests {
         assertEquals("email", capturedUser.email)
         assertEquals(Role.Disabled, capturedUser.role)
         assertEquals("Encoded password", capturedUser.password)
-        assertEquals(capturedUser.organization, "organization")
     }
 
     @Test
@@ -100,14 +98,14 @@ class UserServiceTests {
         every { repository.save(any()) }.throws(DataIntegrityViolationException("Duplicate email"))
 
         val testUser2 = User("username", "email", Role.Disabled, "password")
-        assertThrows<ForbiddenOperationException> { service.registerUser(testUser2, "organization") }
+        assertThrows<ForbiddenOperationException> { service.registerUser(testUser2) }
     }
 
     @Test
     fun `changeRole does not fail when a user with id exists and admin changes the role`() {
         val repository = getRepository(true)
-        val otherAdmin = User("Other admin", "otherAdmin@email.com", Role.Admin, "password", testOrganization)
-        every { repository.findByOrganizationAndRole(testOrganization, Role.Admin) } returns listOf(testUser, otherAdmin)
+        val otherAdmin = User("Other admin", "otherAdmin@email.com", Role.Admin, "password")
+        every { repository.findByRole(Role.Admin) } returns listOf(testUser, otherAdmin)
         val service = UserService(repository, getPasswordEncoder())
         service.changeRole(testId, Role.Coach)
         verify { repository.save(testUser) }
@@ -118,7 +116,7 @@ class UserServiceTests {
     @Test
     fun `changeRole fails when demoting the last admin`() {
         val repository = getRepository(true)
-        every { repository.findByOrganizationAndRole(testOrganization, Role.Admin) } returns listOf(testUser)
+        every { repository.findByRole(Role.Admin) } returns listOf(testUser)
         val service = UserService(repository, getPasswordEncoder())
         assertThrows<ForbiddenOperationException> { service.changeRole(testId, Role.Coach) }
     }
