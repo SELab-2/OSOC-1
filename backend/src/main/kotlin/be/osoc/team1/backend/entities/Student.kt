@@ -61,8 +61,6 @@ enum class SuggestionEnum {
 class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motivation: String) {
 
     @Id
-    @JsonIgnore
-    // Only used as a primary key, ignored otherwise.
     val id: UUID = UUID.randomUUID()
 
     @ManyToOne(fetch = FetchType.LAZY)
