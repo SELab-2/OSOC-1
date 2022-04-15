@@ -805,6 +805,15 @@ paths:
                 '401':
                     description: |
                         The response if authorization has failed.
+    /logout:
+      post:
+        summary: log user out. invalidate http session, refresh token and redirect to /login?logout
+        responses:
+          '302':
+            description: logout successful, redirect to /login?logout
+          '400':
+            description:
+              Bad Request.
     /token/refresh:
       post:
         summary: renew access token using refresh token
@@ -830,24 +839,6 @@ paths:
                       type: string
                     refreshToken:
                       type: string
-          '400':
-            description: Bad Request.
-    /token/logout:
-      post:
-        summary: invalidate refresh token associated with given email
-        requestBody:
-          content:
-            application/x-www-form-urlencoded:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                required:
-                  - token
-        responses:
-          '200':
-            description: OK
           '400':
             description: Bad Request.
 components:
