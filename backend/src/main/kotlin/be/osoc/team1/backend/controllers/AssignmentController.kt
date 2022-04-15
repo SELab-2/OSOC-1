@@ -7,12 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/assignments")
-class AssignmentController(
-        private val service: AssignmentService) {
+class AssignmentController(private val service: AssignmentService) {
 
     /**
      * Returns the assignment with the corresponding [assignmentId]. If no such assignment exists, returns a

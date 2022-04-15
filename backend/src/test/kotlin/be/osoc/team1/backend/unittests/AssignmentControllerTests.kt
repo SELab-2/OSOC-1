@@ -1,7 +1,12 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.AssignmentController
-import be.osoc.team1.backend.entities.*
+import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
+import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.Skill
+import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.AssignmentService
 import be.osoc.team1.backend.util.PositionSerializer
@@ -11,8 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import junit.runner.Version
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,9 +27,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess.Item
-import org.springframework.test.web.servlet.request.RequestPostProcessor
-
 
 @UnsecuredWebMvcTest(AssignmentController::class)
 class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
@@ -58,7 +58,7 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val jsonRepresentation = objectMapper.writeValueAsString(testAssignment)
         every { assignmentService.getAssignmentById(testId) } returns testAssignment
         mockMvc.perform(get("/assignments/$testId")).andExpect(status().isOk)
-                .andExpect(content().json(jsonRepresentation))
+            .andExpect(content().json(jsonRepresentation))
     }
 
     @Test
@@ -66,6 +66,6 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val differentId = UUID.randomUUID()
         every { assignmentService.getAssignmentById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/assignments/$differentId"))
-                .andExpect(status().isNotFound)
+            .andExpect(status().isNotFound)
     }
 }

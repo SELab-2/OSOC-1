@@ -1,7 +1,12 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StudentController
-import be.osoc.team1.backend.entities.*
+import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.StatusEnum
+import be.osoc.team1.backend.entities.StatusSuggestion
+import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.SuggestionEnum
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
@@ -9,9 +14,7 @@ import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
-import be.osoc.team1.backend.util.*
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -30,8 +33,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ser.std.StdDelegatingSerializer
-import java.util.*
+import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
 @UnsecuredWebMvcTest(StudentController::class)

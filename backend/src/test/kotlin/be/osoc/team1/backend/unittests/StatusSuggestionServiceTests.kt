@@ -1,11 +1,9 @@
 package be.osoc.team1.backend.unittests
 
-import be.osoc.team1.backend.entities.*
-import be.osoc.team1.backend.exceptions.InvalidPositionIdException
+import be.osoc.team1.backend.entities.StatusSuggestion
+import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.InvalidStatusSuggestionIdException
-import be.osoc.team1.backend.repositories.PositionRepository
 import be.osoc.team1.backend.repositories.StatusSuggestionRepository
-import be.osoc.team1.backend.services.PositionService
 import be.osoc.team1.backend.services.StatusSuggestionService
 import io.mockk.Runs
 import io.mockk.every
@@ -15,7 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import java.util.*
+import java.util.UUID
 
 class StatusSuggestionServiceTests {
     private val testId = UUID.randomUUID()

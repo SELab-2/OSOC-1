@@ -5,7 +5,7 @@ import be.osoc.team1.backend.exceptions.InvalidCommunicationIdException
 import be.osoc.team1.backend.repositories.CommunicationRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class CommunicationService(private val repository: CommunicationRepository) {

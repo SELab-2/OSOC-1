@@ -3,10 +3,8 @@ package be.osoc.team1.backend.unittests
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.CommunicationTypeEnum
 import be.osoc.team1.backend.exceptions.InvalidCommunicationIdException
-import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.services.CommunicationService
-import be.osoc.team1.backend.services.ProjectService
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -16,7 +14,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import java.util.*
+import java.util.UUID
 
 class CommunicationServiceTests {
     private val testId = UUID.randomUUID()

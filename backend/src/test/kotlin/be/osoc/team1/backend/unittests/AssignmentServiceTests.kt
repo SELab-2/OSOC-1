@@ -1,6 +1,11 @@
 package be.osoc.team1.backend.unittests
 
-import be.osoc.team1.backend.entities.*
+import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
+import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.Skill
+import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidAssignmentIdException
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.AssignmentService
@@ -12,7 +17,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import java.util.*
+import java.util.UUID
 
 class AssignmentServiceTests {
     private val testId = UUID.randomUUID()

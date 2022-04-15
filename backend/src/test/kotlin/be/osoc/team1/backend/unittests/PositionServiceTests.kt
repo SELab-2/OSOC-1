@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.unittests
 
-import be.osoc.team1.backend.entities.*
+import be.osoc.team1.backend.entities.Position
+import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.repositories.PositionRepository
 import be.osoc.team1.backend.services.PositionService
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import java.util.*
+import java.util.UUID
 
 class PositionServiceTests {
     private val testId = UUID.randomUUID()

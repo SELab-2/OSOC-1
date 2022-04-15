@@ -11,7 +11,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
-import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -40,7 +39,7 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getCommunicationById returns communication if communication with given id exists`() {
         every { communicationService.getCommunicationById(testId) } returns testCommunication
         mockMvc.perform(get("/communications/$testId")).andExpect(status().isOk)
-                .andExpect(content().json(jsonRepresentation))
+            .andExpect(content().json(jsonRepresentation))
     }
 
     @Test
@@ -48,7 +47,7 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
         val differentId = UUID.randomUUID()
         every { communicationService.getCommunicationById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/communications/$differentId"))
-                .andExpect(status().isNotFound)
+            .andExpect(status().isNotFound)
     }
 
     @Test

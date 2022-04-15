@@ -7,12 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/positions")
-class PositionController(
-        private val service: PositionService) {
+class PositionController(private val service: PositionService) {
 
     /**
      * Returns the position with the corresponding [positionId]. If no such position exists, returns a

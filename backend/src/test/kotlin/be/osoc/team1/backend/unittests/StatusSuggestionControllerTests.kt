@@ -1,7 +1,8 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StatusSuggestionController
-import be.osoc.team1.backend.entities.*
+import be.osoc.team1.backend.entities.StatusSuggestion
+import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.StatusSuggestionService
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -18,7 +19,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
-
 
 @UnsecuredWebMvcTest(StatusSuggestionController::class)
 class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
@@ -41,7 +41,7 @@ class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
         val jsonRepresentation = objectMapper.writeValueAsString(testStatusSuggestion)
         every { statusSuggestionService.getStatusSuggestionById(testId) } returns testStatusSuggestion
         mockMvc.perform(get("/statusSuggestions/$testId")).andExpect(status().isOk)
-                .andExpect(content().json(jsonRepresentation))
+            .andExpect(content().json(jsonRepresentation))
     }
 
     @Test
@@ -49,6 +49,6 @@ class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
         val differentId = UUID.randomUUID()
         every { statusSuggestionService.getStatusSuggestionById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/statusSuggestions/$differentId"))
-                .andExpect(status().isNotFound)
+            .andExpect(status().isNotFound)
     }
 }

@@ -1,6 +1,11 @@
 package be.osoc.team1.backend.entities
 
-import be.osoc.team1.backend.util.*
+import be.osoc.team1.backend.util.AssignmentListSerializer
+import be.osoc.team1.backend.util.PositionListSerializer
+import be.osoc.team1.backend.util.PositionSerializer
+import be.osoc.team1.backend.util.StudentSerializer
+import be.osoc.team1.backend.util.UserListSerializer
+import be.osoc.team1.backend.util.UserSerializer
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 import javax.persistence.CascadeType

@@ -1,7 +1,8 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.PositionController
-import be.osoc.team1.backend.entities.*
+import be.osoc.team1.backend.entities.Position
+import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.PositionService
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -18,7 +19,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
-
 
 @UnsecuredWebMvcTest(PositionController::class)
 class PositionControllerTests(@Autowired private val mockMvc: MockMvc) {
@@ -41,7 +41,7 @@ class PositionControllerTests(@Autowired private val mockMvc: MockMvc) {
         val jsonRepresentation = objectMapper.writeValueAsString(testPosition)
         every { positionService.getPositionById(testId) } returns testPosition
         mockMvc.perform(get("/positions/$testId")).andExpect(status().isOk)
-                .andExpect(content().json(jsonRepresentation))
+            .andExpect(content().json(jsonRepresentation))
     }
 
     @Test
@@ -49,6 +49,6 @@ class PositionControllerTests(@Autowired private val mockMvc: MockMvc) {
         val differentId = UUID.randomUUID()
         every { positionService.getPositionById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/positions/$differentId"))
-                .andExpect(status().isNotFound)
+            .andExpect(status().isNotFound)
     }
 }
