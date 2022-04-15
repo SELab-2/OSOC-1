@@ -76,14 +76,14 @@ class ProjectController(private val service: ProjectService) {
     }
 
     // Needed to avoid the caller having to pass the edition in both the URL and the request body.
-    class ProjectRegistration(
-        name: String,
-        clientName: String,
-        description: String,
-        coaches: MutableCollection<User> = mutableListOf(),
-        positions: Collection<Position> = listOf(),
-        assignments: MutableCollection<Assignment> = mutableListOf()
-    ) : Project(name, clientName, description, "", coaches, positions, assignments)
+    data class ProjectRegistration(
+        val name: String,
+        val clientName: String,
+        val description: String,
+        val coaches: MutableCollection<User> = mutableListOf(),
+        val positions: Collection<Position> = listOf(),
+        val assignments: MutableCollection<Assignment> = mutableListOf()
+    )
 
     /**
      * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
