@@ -32,15 +32,14 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var userService: UserService
 
-    private val testOrganization = "test_organization"
-    private val testUser = User("Test", "test@email.com", Role.Admin, "password", testOrganization)
+    private val testUser = User("Test", "test@email.com", Role.Admin, "password")
     private val testId = testUser.id
     private val testUserJsonRepresentation = ObjectMapper().writeValueAsString(testUser)
 
     @Test
     fun `getAllUsers should not fail`() {
-        every { userService.getAllUsers(testOrganization) } returns emptyList()
-        mockMvc.perform(get("/$testOrganization/users"))
+        every { userService.getAllUsers() } returns emptyList()
+        mockMvc.perform(get("/users"))
             .andExpect(status().isOk)
             .andExpect(content().json(ObjectMapper().writeValueAsString(emptyList<User>())))
     }
@@ -109,9 +108,9 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     fun `postUser should return created user`() {
         // This is a hack but password encoding really doesn't matter for what this is testing
         every { passwordEncoder.encode("password") } returns ""
-        every { userService.registerUser(any(), testOrganization) } returns testUser
+        every { userService.registerUser(any()) } returns testUser
         mockMvc.perform(
-            post("/$testOrganization/users")
+            post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
         ).andExpect(status().isCreated).andExpect(content().string(testUserJsonRepresentation))
