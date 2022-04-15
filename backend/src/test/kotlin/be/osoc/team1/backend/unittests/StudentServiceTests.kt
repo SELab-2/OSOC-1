@@ -14,7 +14,6 @@ import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.Pager
-import be.osoc.team1.backend.services.StudentFilter
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.UserService
 import io.mockk.Runs
@@ -38,8 +37,6 @@ class StudentServiceTests {
     private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
     private val userService = mockk<UserService>()
     private val defaultStatusFilter = listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
-    private val defaultStudentFilter = StudentFilter(defaultStatusFilter, "", true)
-    private val defaultPager = Pager(0, 50)
     private val defaultSort = Sort.by("id")
 
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
@@ -233,5 +230,15 @@ class StudentServiceTests {
         val service = StudentService(getRepository(false), userService)
         val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
         assertThrows<InvalidStudentIdException> { service.addCommunicationToStudent(studentId, testCommunication) }
+    }
+
+    @Test
+    fun `pager class paginates collections correctly`() {
+        val pager = Pager(0, 1)
+        val student1 = Student("Testoon", "Tamzia")
+        val student2 = Student("Testien", "Tamzia")
+        val student3 = Student("Testaan", "Tamzia")
+        val collection = listOf(student1, student2, student3)
+        assertEquals(listOf(student1), pager.paginate(collection))
     }
 }

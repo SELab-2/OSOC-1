@@ -13,8 +13,6 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.services.OsocUserDetailService
-import be.osoc.team1.backend.services.Pager
-import be.osoc.team1.backend.services.StudentFilter
 import be.osoc.team1.backend.services.StudentService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -53,8 +51,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
     private val defaultStatusFilter =
         listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
-    private val defaultStudentFilter = StudentFilter(defaultStatusFilter, "", true)
-    private val defaultPager = Pager(0, 50)
+    private val defaultPrincipal = TestingAuthenticationToken(null, null)
     private val defaultSort = Sort.by("id")
     private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
 
@@ -66,7 +63,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents should not fail`() {
         every { studentService.getAllStudents(defaultSort) } returns emptyList()
-        mockMvc.perform(get("/students").principal(TestingAuthenticationToken(null, null))).andExpect(status().isOk)
+        mockMvc.perform(get("/students").principal(defaultPrincipal)).andExpect(status().isOk)
     }
 
     @Test
@@ -77,7 +74,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             Student("Foo", "Bar"),
             Student("Fooo", "Baar")
         )
-        mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(testList)))
     }
@@ -94,26 +91,19 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         testStudent4.status = StatusEnum.Undecided
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
         every { studentService.getAllStudents(defaultSort) } returns allStudents
-        mockMvc.perform(get("/students?status=Yes").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?status=Yes").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent1))))
-        mockMvc.perform(get("/students?status=No").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?status=No").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent2))))
-        mockMvc.perform(get("/students?status=Maybe").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?status=Maybe").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent3))))
-        mockMvc.perform(get("/students?status=Undecided").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?status=Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent4))))
-        mockMvc.perform(
-            get("/students?status=Yes,No,Maybe,Undecided").principal(
-                TestingAuthenticationToken(
-                    null,
-                    null
-                )
-            )
-        )
+        mockMvc.perform(get("/students?status=Yes,No,Maybe,Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(allStudents)))
     }
@@ -129,14 +119,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val allStudents = listOf(testStudent1, testStudent2, testStudent3)
 
         every { studentService.getAllStudents(Sort.by("name")) } returns allStudents
-        mockMvc.perform(
-            get("/students?status=Yes&sortBy=name&pageSize=2").principal(
-                TestingAuthenticationToken(
-                    null,
-                    null
-                )
-            )
-        )
+        mockMvc.perform(get("/students?status=Yes&sortBy=name&pageSize=2").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent2, testStudent3))))
     }
@@ -149,16 +132,16 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testStudent4 = Student("Rsla", "Uterca")
         val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
         every { studentService.getAllStudents(defaultSort) } returns allStudents
-        mockMvc.perform(get("/students?name=lars").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?name=lars").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent))))
-        mockMvc.perform(get("/students?name=ars").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?name=ars").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent, testStudent3))))
-        mockMvc.perform(get("/students?name=uter").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?name=uter").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent, testStudent3, testStudent4))))
-        mockMvc.perform(get("/students?name=").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?name=").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(allStudents)))
     }
@@ -168,10 +151,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testStudent = Student("Lars", "Van")
         testStudent.statusSuggestions.add(StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "Nice!"))
         every { studentService.getAllStudents(defaultSort) } returns listOf(testStudent)
-        mockMvc.perform(get("/students?includeSuggested=false").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?includeSuggested=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf<Student>())))
-        mockMvc.perform(get("/students?includeSuggested=true").principal(TestingAuthenticationToken(null, null)))
+        mockMvc.perform(get("/students?includeSuggested=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent))))
     }

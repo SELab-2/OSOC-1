@@ -15,14 +15,25 @@ private fun preprocess(string: String) = string.lowercase().replace(" ", "")
 fun nameMatchesSearchQuery(name: String, searchQuery: String): Boolean =
     preprocess(name).contains(preprocess(searchQuery))
 
+/**
+ * [Pager] is used as a data-storing class that can paginate collections given a [pageNumber] and a [pageSize]
+ */
 class Pager(val pageNumber: Int, val pageSize: Int) {
     val startOfPaging = pageNumber * pageSize
 
+    /**
+     * Paginate a [collection] based on [pageNumber] and [pageSize]
+     * if [pageNumber] is greater than the length of the collection the length of the collection will be used
+     */
     fun <T> paginate(collection: List<T>): List<T> {
         val endOfPaging = Integer.min(collection.size, startOfPaging + pageSize) - 1
         return collection.slice(startOfPaging..endOfPaging)
     }
 
+    /**
+     * This overwrite is necessary for the test classes,
+     * without it the mockk won't recognize a [Pager] based on its arguments and will therefor fail
+     */
     override fun equals(other: Any?): Boolean {
         if (other is Pager) {
             return pageNumber == other.pageNumber && pageSize == other.pageSize
