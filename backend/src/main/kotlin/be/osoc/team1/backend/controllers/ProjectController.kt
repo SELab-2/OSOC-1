@@ -45,7 +45,7 @@ class ProjectController(private val service: ProjectService) {
     @GetMapping("/{projectId}")
     @Secured("ROLE_COACH")
     fun getProjectById(@PathVariable projectId: UUID, @PathVariable edition: String): Project =
-        service.getProjectById(projectId)
+        service.getProjectById(projectId, edition)
 
     /**
      * Deletes a project with its [projectId], if this [projectId] doesn't exist the service will return a 404
@@ -54,7 +54,7 @@ class ProjectController(private val service: ProjectService) {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun deleteProjectById(@PathVariable projectId: UUID, @PathVariable edition: String) =
-        service.deleteProjectById(projectId)
+        service.deleteProjectById(projectId, edition)
 
     /**
      * Creates a project from the request body, this can also override an already existing project.
@@ -76,14 +76,14 @@ class ProjectController(private val service: ProjectService) {
     }
 
     // Needed to avoid the caller having to pass the edition in both the URL and the request body.
-    class ProjectRegistration(
-        name: String,
-        clientName: String,
-        description: String,
-        coaches: MutableCollection<User> = mutableListOf(),
-        positions: Collection<Position> = listOf(),
-        assignments: MutableCollection<Assignment> = mutableListOf()
-    ) : Project(name, clientName, description, "", coaches, positions, assignments)
+    data class ProjectRegistration(
+        val name: String,
+        val clientName: String,
+        val description: String,
+        val coaches: MutableCollection<User> = mutableListOf(),
+        val positions: Collection<Position> = listOf(),
+        val assignments: MutableCollection<Assignment> = mutableListOf()
+    )
 
     /**
      * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
@@ -91,7 +91,7 @@ class ProjectController(private val service: ProjectService) {
     @GetMapping("/{projectId}/students")
     @Secured("ROLE_COACH")
     fun getStudentsOfProject(@PathVariable projectId: UUID, @PathVariable edition: String): Collection<Student> =
-        service.getStudents(projectId)
+        service.getStudents(projectId, edition)
 
     /**
      * Gets all coaches of a project, if this [projectId] doesn't exist the service will return a 404
@@ -99,7 +99,7 @@ class ProjectController(private val service: ProjectService) {
     @GetMapping("/{projectId}/coaches")
     @Secured("ROLE_COACH")
     fun getCoachesOfProject(@PathVariable projectId: UUID, @PathVariable edition: String): Collection<User> =
-        service.getProjectById(projectId).coaches
+        service.getProjectById(projectId, edition).coaches
 
     /**
      * assign a coach to a project, if a project with [projectId] or a user with [coachId] doesn't exist the service
@@ -109,7 +109,7 @@ class ProjectController(private val service: ProjectService) {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID, @PathVariable edition: String) =
-        service.addCoachToProject(projectId, coachId)
+        service.addCoachToProject(projectId, coachId, edition)
 
     /**
      * Deletes a coach [coachId] from a project [projectId], if [projectId] or [coachId] doesn't exist the service will return a 404
@@ -118,7 +118,7 @@ class ProjectController(private val service: ProjectService) {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID, @PathVariable edition: String) =
-        service.removeCoachFromProject(projectId, coachId)
+        service.removeCoachFromProject(projectId, coachId, edition)
 
     /**
      * Returns conflicts of students being assigned to multiple projects, format:
@@ -160,7 +160,7 @@ class ProjectController(private val service: ProjectService) {
         @RequestBody assignment: ProjectService.AssignmentPost,
         @PathVariable edition: String
     ) =
-        service.postAssignment(projectId, assignment)
+        service.postAssignment(projectId, assignment, edition)
 
     /**
      * Removes assignment with [assignmentId] of a student to a position on the project with [projectId]. Will return a
@@ -171,5 +171,5 @@ class ProjectController(private val service: ProjectService) {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
     fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID, @PathVariable edition: String) =
-        service.deleteAssignment(projectId, assignmentId)
+        service.deleteAssignment(projectId, assignmentId, edition)
 }

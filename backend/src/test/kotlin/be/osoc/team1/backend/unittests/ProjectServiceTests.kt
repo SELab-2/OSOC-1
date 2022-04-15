@@ -27,6 +27,9 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
 
 class ProjectServiceTests {
@@ -48,8 +51,8 @@ class ProjectServiceTests {
 
     private fun getRepository(projectAlreadyExists: Boolean): ProjectRepository {
         val repository: ProjectRepository = mockk()
-        every { repository.existsById(any()) } returns projectAlreadyExists
-        every { repository.findByIdOrNull(any()) } returns
+        every { repository.existsByIdAndEdition(any(), testEdition) } returns projectAlreadyExists
+        every { repository.findByIdAndEdition(any(), testEdition) } returns
             if (projectAlreadyExists) testProject else null
         every { repository.deleteById(any()) } just Runs
         every { repository.save(any()) } returns savedProject
@@ -97,27 +100,27 @@ class ProjectServiceTests {
     @Test
     fun `getProjectById succeeds when project with id exists`() {
         val service = ProjectService(getRepository(true), mockk(), getUserService())
-        assertEquals(testProject, service.getProjectById(testId))
+        assertEquals(testProject, service.getProjectById(testId, testEdition))
     }
 
     @Test
     fun `getProjectById fails when no project with that id exists`() {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
-        assertThrows<InvalidProjectIdException> { service.getProjectById(testId) }
+        assertThrows<InvalidProjectIdException> { service.getProjectById(testId, testEdition) }
     }
 
     @Test
     fun `deleteProjectById succeeds when project with id exists`() {
         val repo = getRepository(true)
         val service = ProjectService(repo, mockk(), getUserService())
-        service.deleteProjectById(testId)
+        service.deleteProjectById(testId, testEdition)
         verify { repo.deleteById(testId) }
     }
 
     @Test
     fun `deleteProjectById fails when no project with that id exists`() {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
-        assertThrows<InvalidProjectIdException> { service.deleteProjectById(testId) }
+        assertThrows<InvalidProjectIdException> { service.deleteProjectById(testId, testEdition) }
     }
 
     @Test
@@ -130,21 +133,21 @@ class ProjectServiceTests {
     fun `patchProject updates project when project with same id exists`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), getUserService())
-        service.patchProject(testProject)
+        service.patchProject(testProject, testEdition)
         verify { repository.save(testProject) }
     }
 
     @Test
     fun `patchProject fails when no project with same id exists`() {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
-        assertThrows<InvalidProjectIdException> { service.patchProject(testProject) }
+        assertThrows<InvalidProjectIdException> { service.patchProject(testProject, testEdition) }
     }
 
     @Test
     fun `addCoachToProject runs`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), getUserService())
-        service.addCoachToProject(testProject.id, testCoach.id)
+        service.addCoachToProject(testProject.id, testCoach.id, testEdition)
         verify { repository.save(testProject) }
     }
 
@@ -153,7 +156,7 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
         val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
         assertThrows<InvalidProjectIdException> {
-            service.addCoachToProject(testProject.id, coach.id)
+            service.addCoachToProject(testProject.id, coach.id, testEdition)
         }
     }
 
@@ -161,7 +164,7 @@ class ProjectServiceTests {
     fun `removeCoachFromProject succeeds when coach is in project`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), getUserService())
-        service.removeCoachFromProject(testProject.id, testCoach.id)
+        service.removeCoachFromProject(testProject.id, testCoach.id, testEdition)
         verify { repository.save(testProject) }
     }
 
@@ -169,7 +172,7 @@ class ProjectServiceTests {
     fun `removeCoachFromProject fails when coach is not in project`() {
         val service = ProjectService(getRepository(true), mockk(), getUserService())
         assertThrows<FailedOperationException> {
-            service.removeCoachFromProject(testProject.id, UUID.randomUUID())
+            service.removeCoachFromProject(testProject.id, UUID.randomUUID(), testEdition)
         }
     }
 
@@ -203,17 +206,30 @@ class ProjectServiceTests {
         val repository = getRepository(true)
         every { repository.findByEdition(testEdition) } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
         val service = ProjectService(repository, mockk(), getUserService())
+
+        val mockRequest = MockHttpServletRequest()
+        mockRequest.scheme = "https"
+        mockRequest.serverName = "example.com"
+        mockRequest.serverPort = -1
+        mockRequest.contextPath = "/api"
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(mockRequest))
         val conflictList = service.getConflicts(testEdition)
         assert(
             conflictList[0] == ProjectService.Conflict(
-                testStudent.id,
-                mutableListOf(testProjectConflict.id, testProjectConflict2.id)
+                "https://example.com/api/students/" + testStudent.id,
+                mutableListOf(
+                    "https://example.com/api/projects/" + testProjectConflict.id,
+                    "https://example.com/api/projects/" + testProjectConflict2.id
+                )
             )
         )
         assert(
             conflictList[1] == ProjectService.Conflict(
-                testStudent2.id,
-                mutableListOf(testProjectConflict2.id, testProjectConflict3.id)
+                "https://example.com/api/students/" + testStudent2.id,
+                mutableListOf(
+                    "https://example.com/api/projects/" + testProjectConflict2.id,
+                    "https://example.com/api/projects/" + testProjectConflict3.id
+                )
             )
         )
         assert(conflictList.size == 2)
@@ -221,9 +237,9 @@ class ProjectServiceTests {
 
     @Test
     fun `Conflicts dataclass one argument constructor test`() {
-        val conflict = ProjectService.Conflict(testStudent.id)
-        assert(conflict.student == testStudent.id)
-        assert(conflict.projects == mutableListOf<UUID>())
+        val conflict = ProjectService.Conflict("https://example.com/api/students/" + testStudent.id)
+        assert(conflict.student == "https://example.com/api/students/" + testStudent.id)
+        assert(conflict.projects == mutableListOf<String>())
     }
 
     @Test
@@ -235,7 +251,7 @@ class ProjectServiceTests {
             suggester.id,
             "reason"
         )
-        service.postAssignment(testProject.id, assignmentPost)
+        service.postAssignment(testProject.id, assignmentPost, testEdition)
     }
 
     @Test
@@ -248,7 +264,7 @@ class ProjectServiceTests {
             suggester.id,
             "reason"
         )
-        assertThrows<InvalidPositionIdException> { service.postAssignment(testProject.id, assignmentPost) }
+        assertThrows<InvalidPositionIdException> { service.postAssignment(testProject.id, assignmentPost, testEdition) }
     }
 
     @Test
@@ -262,7 +278,7 @@ class ProjectServiceTests {
         )
         val assignment = Assignment(testStudent, testProject.positions.first(), suggester, "reason")
         testProject.assignments.add(assignment)
-        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
+        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost, testEdition) }
         testProject.assignments.remove(assignment)
     }
 
@@ -278,14 +294,14 @@ class ProjectServiceTests {
         )
         val assignment = Assignment(testStudent, positionIterator.next(), suggester, "reason")
         testProject.assignments.add(assignment)
-        service.postAssignment(testProject.id, assignmentPost)
+        service.postAssignment(testProject.id, assignmentPost, testEdition)
         testProject.assignments.remove(assignment)
     }
 
     @Test
     fun `deleteAssignment fails if the assignment is not part of the project`() {
         val service = ProjectService(getRepository(true), getStudentService(true), getUserService(suggester))
-        assertThrows<InvalidAssignmentIdException> { service.deleteAssignment(testProject.id, UUID.randomUUID()) }
+        assertThrows<InvalidAssignmentIdException> { service.deleteAssignment(testProject.id, UUID.randomUUID(), testEdition) }
     }
 
     @Test
@@ -301,7 +317,7 @@ class ProjectServiceTests {
         every { assignmentRepository.findByIdOrNull(assignment.id) } returns assignment
 
         testProject.assignments.add(assignment)
-        service.deleteAssignment(testProject.id, assignment.id)
+        service.deleteAssignment(testProject.id, assignment.id, testEdition)
         testProject.assignments.remove(assignment)
     }
 
@@ -332,7 +348,7 @@ class ProjectServiceTests {
             getStudentService(true),
             getUserService(suggester)
         )
-        assertEquals(mutableListOf<Student>(), service.getStudents(testProject.id))
+        assertEquals(mutableListOf<Student>(), service.getStudents(testProject.id, testEdition))
     }
 
     @Test
@@ -342,6 +358,6 @@ class ProjectServiceTests {
             getStudentService(true),
             getUserService(suggester)
         )
-        assertThrows<InvalidProjectIdException> { service.getStudents(testProject.id) }
+        assertThrows<InvalidProjectIdException> { service.getStudents(testProject.id, testEdition) }
     }
 }

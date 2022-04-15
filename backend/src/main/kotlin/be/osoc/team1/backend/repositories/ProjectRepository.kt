@@ -6,4 +6,6 @@ import java.util.UUID
 
 interface ProjectRepository : CrudRepository<Project, UUID> {
     fun findByEdition(edition: String): Collection<Project>
+    fun existsByIdAndEdition(id: UUID, edition: String): Boolean
+    fun findByIdAndEdition(id: UUID, edition: String): Project?
 }

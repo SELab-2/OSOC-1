@@ -59,7 +59,7 @@ class Assignment(
  * A project belongs to a particular [edition] of OSOC.
  */
 @Entity
-open class Project(
+class Project(
     val name: String,
     val clientName: String,
     val description: String,
