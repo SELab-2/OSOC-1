@@ -839,6 +839,8 @@ paths:
                       type: string
                     refreshToken:
                       type: string
+                    accessTokenTTL:
+                      type: integer
           '400':
             description: Bad Request.
 components:
