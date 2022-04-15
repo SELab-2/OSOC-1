@@ -32,7 +32,7 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
 
     /**
      * This overwrite is necessary for the test classes,
-     * without it the mockk won't recognize a [Pager] based on its arguments and will therefor fail
+     * without it the mockk won't recognize a [Pager] based on its arguments and will therefore fail
      */
     override fun equals(other: Any?): Boolean {
         if (other is Pager) {
