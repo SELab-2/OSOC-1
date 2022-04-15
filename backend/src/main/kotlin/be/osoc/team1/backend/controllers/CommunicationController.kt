@@ -23,7 +23,8 @@ class CommunicationController(
 ) {
 
     /**
-     * Gets all communications that belong to a student, if this [communicationId] doesn't exist the service will return a 404
+     * Returns the communication with the corresponding [communicationId]. If no such communication exists, returns a
+     * "404: Not Found" message instead.
      */
     @GetMapping("/{communicationId}")
     @Secured("ROLE_COACH")
