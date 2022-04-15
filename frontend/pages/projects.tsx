@@ -5,13 +5,16 @@ import ProjectTiles from '../components/projects/ProjectTiles';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { Project, UserRole, UUID } from '../lib/types';
+import {Fragment, useEffect, useState} from 'react';
+import {Project, Skill, UserRole, UUID} from '../lib/types';
 import axios, { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import Popup from "reactjs-popup";
+import Select from "react-select";
+import {number} from "prop-types";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -46,12 +49,45 @@ function searchProject(
 const Projects: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
+  const [showCreateProject, setShowCreateProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState('' as string);
   const [projects, setProjects]: [Project[], (projects: Project[]) => void] =
     useState([] as Project[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true);
   const [error, setError]: [string, (error: string) => void] = useState('');
+
+  type positionForm = {
+    amount: number;
+    skill: Skill;
+  }
+
+  const defaultPosition = {
+    amount:0,
+    skill:{skillName:''}
+  }
+
+  const defaultprojectForm = {
+    projectName: '',
+    clientName: '',
+    description: '',
+    coachIds: [],
+    positions: [defaultPosition] as positionForm[],
+  } as Record<string, string|string[]|positionForm[]>;
+
+  const [projectForm, setProjectForm] = useState(defaultprojectForm);
+
+  const addPositionDropdown = () => {
+    const newProjectForm = { ...projectForm };
+    (newProjectForm['positions'] as positionForm[]).push(defaultPosition as positionForm);
+    setProjectForm(newProjectForm);
+  }
+
+  const handleProjectFormChange = (parameter: string, value: string|string[]|positionForm[]) => {
+    const newProjectForm = { ...projectForm };
+    newProjectForm[parameter] = value;
+    setProjectForm(newProjectForm);
+  };
 
   useAxiosAuth();
   useEffect(() => {
@@ -110,7 +146,10 @@ const Projects: NextPage = () => {
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_out}</i>
               </div>
 
+              <div className={`flex flex-row`}>
+
               {/* TODO add an easy reset/undo search button */}
+              {/* TODO either move search icon left and add xmark to the right or vice versa */}
               {/* This is the projects searchbar */}
               <div className="ml-6 flex w-full justify-center md:mx-6 md:mr-4">
                 <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
@@ -134,6 +173,16 @@ const Projects: NextPage = () => {
                   </i>
                 </div>
               </div>
+
+                <button
+                    className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300"
+                    type="submit"
+                    onClick={() => setShowCreateProject(true)}
+                >
+                  Create new project
+                </button>
+
+              </div>
             </div>
 
             {/* This contains the project tiles */}
@@ -141,6 +190,109 @@ const Projects: NextPage = () => {
           </section>
         </main>
       </DndProvider>
+      {/* TODO style this entire thing and add required fields */}
+      {/* This is the popup to create a new project */}
+      <Popup
+          open={showCreateProject}
+          onClose={() => setShowCreateProject(false)}
+          data-backdrop="static"
+          data-keyboard="false"
+      >
+        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col bg-white p-20">
+          <a
+              className="close"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowCreateProject(false);
+              }}
+          >
+            &times;
+          </a>
+          <h3>Create New Project</h3>
+          <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                // TODO add submit function
+                // TODO don't forget to reset projectForm to default afterwards
+                setShowCreateProject(false);
+              }}
+          >
+
+            <label className="">
+              Project Name
+              <input
+                  className="border-2"
+                  name="projectName"
+                  type="text"
+                  value={projectForm.projectName as string}
+                  onChange={(e) => handleProjectFormChange('projectName', e.target.value)}
+              />
+            </label>
+
+            <label className="">
+              Client Name
+              <input
+                  className="border-2"
+                  name="clientName"
+                  type="text"
+                  value={projectForm.clientName as string}
+                  onChange={(e) => handleProjectFormChange('clientName', e.target.value)}
+              />
+            </label>
+            {/* This is a fix to stop clicking on the clearable closing the entire modal */}
+            <div
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+            >
+              <Fragment>
+
+                {(projectForm.positions as positionForm[]).map((position, i) => {
+                  return (
+                      <div className="" key={i}>
+                        <Select
+                            className="basic-single"
+                            classNamePrefix="select"
+                            isDisabled={false}
+                            isLoading={false}
+                            isClearable={true}
+                            isRtl={false}
+                            isSearchable={true}
+                            name={`"Position-" +${i}`}
+                            options={[
+                              { value: 'chocolate', label: 'Chocolate' },
+                              { value: 'strawberry', label: 'Strawberry' },
+                              { value: 'vanilla', label: 'Vanilla' },
+                            ]} // TODO fix this once backend has getAllSKills endpoint implemented
+                            placeholder="Select position"
+                            // onChange={(e) => setPositionId(e ? e.value || '' : '')}
+                        />
+                        {/*TODO add amount input*/}
+                        {/*TODO add remove this dropdown button*/}
+                      </div>
+                  );
+                })}
+              </Fragment>
+              <button onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                addPositionDropdown();
+              }} className="btn btn-primary">
+                + Add
+              </button>
+            </div>
+
+            <textarea
+                placeholder="Project description"
+                className="mt-3 w-full resize-y border-2 border-check-gray"
+                onChange={(e) => handleProjectFormChange('description',e.target.value || '')}
+            />
+
+            <button className={`border-2`} type={`submit`}>
+              Create Project
+            </button>
+          </form>
+        </div>
+      </Popup>
     </div>
   );
 };
