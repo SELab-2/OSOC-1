@@ -16,10 +16,4 @@ class TokenController(private val service: TokenService) {
     @PostMapping("/refresh")
     fun renewAccessToken(request: HttpServletRequest, response: HttpServletResponse) =
         service.renewAccessToken(request, response)
-
-    /**
-     * Invalidate refresh token of logged in user.
-     */
-    @PostMapping("/logout")
-    fun logout(request: HttpServletRequest, response: HttpServletResponse) = service.logout(request, response)
 }

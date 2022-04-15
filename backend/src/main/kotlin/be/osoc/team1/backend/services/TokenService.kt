@@ -27,16 +27,4 @@ class TokenService {
         val authorities: List<String> = decodedToken.getClaim("authorities").asList(String::class.java)
         refreshTokenRotation(response, refreshToken, email, authorities, decodedToken.expiresAt)
     }
-
-    /**
-     * Extract email from access token from [request], then invalidate the refresh token associated with this email.
-     */
-    fun logout(request: HttpServletRequest, response: HttpServletResponse) {
-        val accessToken = getAccessTokenFromRequest(request)
-            ?: throw InvalidTokenException("You need to be logged in to be able to log out.")
-
-        val decodedToken = decodeAndVerifyToken(accessToken)
-        val email: String = decodedToken.subject
-        invalidateRefreshToken(email)
-    }
 }
