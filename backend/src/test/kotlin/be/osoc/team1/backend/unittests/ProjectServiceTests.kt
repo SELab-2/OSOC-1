@@ -27,6 +27,9 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
 
 class ProjectServiceTests {
@@ -203,17 +206,30 @@ class ProjectServiceTests {
         val repository = getRepository(true)
         every { repository.findByEdition(testEdition) } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
         val service = ProjectService(repository, mockk(), getUserService())
+
+        val mockRequest = MockHttpServletRequest()
+        mockRequest.scheme = "https"
+        mockRequest.serverName = "example.com"
+        mockRequest.serverPort = -1
+        mockRequest.contextPath = "/api"
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(mockRequest))
         val conflictList = service.getConflicts(testEdition)
         assert(
             conflictList[0] == ProjectService.Conflict(
-                testStudent.id,
-                mutableListOf(testProjectConflict.id, testProjectConflict2.id)
+                "https://example.com/api/students/" + testStudent.id,
+                mutableListOf(
+                    "https://example.com/api/projects/" + testProjectConflict.id,
+                    "https://example.com/api/projects/" + testProjectConflict2.id
+                )
             )
         )
         assert(
             conflictList[1] == ProjectService.Conflict(
-                testStudent2.id,
-                mutableListOf(testProjectConflict2.id, testProjectConflict3.id)
+                "https://example.com/api/students/" + testStudent2.id,
+                mutableListOf(
+                    "https://example.com/api/projects/" + testProjectConflict2.id,
+                    "https://example.com/api/projects/" + testProjectConflict3.id
+                )
             )
         )
         assert(conflictList.size == 2)
@@ -221,9 +237,9 @@ class ProjectServiceTests {
 
     @Test
     fun `Conflicts dataclass one argument constructor test`() {
-        val conflict = ProjectService.Conflict(testStudent.id)
-        assert(conflict.student == testStudent.id)
-        assert(conflict.projects == mutableListOf<UUID>())
+        val conflict = ProjectService.Conflict("https://example.com/api/students/" + testStudent.id)
+        assert(conflict.student == "https://example.com/api/students/" + testStudent.id)
+        assert(conflict.projects == mutableListOf<String>())
     }
 
     @Test

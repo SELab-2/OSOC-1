@@ -184,11 +184,17 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testStudent = Student("Lars", "Van Cauter")
         val testProjectConflict = Project("Test", "Client", "a test project", testEdition)
         val testProjectConflict2 = Project("Test", "Client", "a test project", testEdition)
-        val result = mutableListOf(ProjectService.Conflict(testStudent.id, mutableListOf(testProjectConflict.id, testProjectConflict2.id)))
+        val result = mutableListOf(
+            ProjectService.Conflict(
+                "https://example.com/api/students/" + testStudent.id,
+                mutableListOf(
+                    "https://example.com/api/projects/" + testProjectConflict.id,
+                    "https://example.com/api/projects/" + testProjectConflict2.id
+                )
+            )
+        )
         every { projectService.getConflicts(testEdition) } returns result
-        mockMvc.perform(get("$editionUrl/conflicts"))
-            .andExpect(status().isOk)
-            .andExpect(content().string(objectMapper.writeValueAsString(result)))
+        mockMvc.perform(get("/$editionUrl/conflicts"))
     }
 
     @Test
