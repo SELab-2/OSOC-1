@@ -11,7 +11,6 @@ import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -32,13 +31,14 @@ class ProjectService(
     /**
      * Get a project by its [id], if this id doesn't exist throw an [InvalidProjectIdException]
      */
-    fun getProjectById(id: UUID): Project = repository.findByIdOrNull(id) ?: throw InvalidProjectIdException()
+    fun getProjectById(id: UUID, edition: String): Project =
+        repository.findByIdAndEdition(id, edition) ?: throw InvalidProjectIdException()
 
     /**
      * Deletes a project by its [id], if this id doesn't exist throw an [InvalidProjectIdException]
      */
-    fun deleteProjectById(id: UUID) {
-        if (!repository.existsById(id))
+    fun deleteProjectById(id: UUID, edition: String) {
+        if (!repository.existsByIdAndEdition(id, edition))
             throw InvalidProjectIdException()
 
         repository.deleteById(id)
@@ -52,8 +52,8 @@ class ProjectService(
     /**
      * Updates a project based on [project], if [project] is not in [repository] throw [InvalidProjectIdException]
      */
-    fun patchProject(project: Project) {
-        if (!repository.existsById(project.id))
+    fun patchProject(project: Project, edition: String) {
+        if (!repository.existsByIdAndEdition(project.id, edition))
             throw InvalidProjectIdException()
 
         repository.save(project)
@@ -64,8 +64,8 @@ class ProjectService(
      * if [projectId] is not in [repository] throw [InvalidProjectIdException]
      * If there is no user with [coachId] a [InvalidUserIdException] will be thrown.
      */
-    fun addCoachToProject(projectId: UUID, coachId: UUID) {
-        val project = getProjectById(projectId)
+    fun addCoachToProject(projectId: UUID, coachId: UUID, edition: String) {
+        val project = getProjectById(projectId, edition)
         val coach = userService.getUserById(coachId)
         project.coaches.add(coach)
         repository.save(project)
@@ -76,16 +76,16 @@ class ProjectService(
      * if [projectId] is not in [repository] throw [InvalidProjectIdException]
      * if [coachId] not assigned to project throw [FailedOperationException]
      */
-    fun removeCoachFromProject(projectId: UUID, coachId: UUID) {
-        val project: Project = getProjectById(projectId)
+    fun removeCoachFromProject(projectId: UUID, coachId: UUID, edition: String) {
+        val project: Project = getProjectById(projectId, edition)
         if (!project.coaches.removeIf { it.id == coachId }) {
             throw FailedOperationException("Given coach is not assigned to project")
         }
         repository.save(project)
     }
 
-    fun getStudents(projectId: UUID): List<Student> =
-        getStudents(getProjectById(projectId))
+    fun getStudents(projectId: UUID, edition: String): List<Student> =
+        getStudents(getProjectById(projectId, edition))
 
     fun getStudents(project: Project): List<Student> {
         val students = mutableListOf<Student>()
@@ -124,8 +124,8 @@ class ProjectService(
      * [InvalidAssignmentIdException] will be thrown if specified position is not part of the specified project. If the
      * specified student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
      */
-    fun postAssignment(projectId: UUID, assignmentForm: AssignmentPost) {
-        val project = getProjectById(projectId)
+    fun postAssignment(projectId: UUID, assignmentForm: AssignmentPost, edition: String) {
+        val project = getProjectById(projectId, edition)
         val position = project.positions.find { it.id == assignmentForm.position }
             ?: throw InvalidPositionIdException("The specified position is not part of the specified project.")
 
@@ -144,8 +144,8 @@ class ProjectService(
      * assignment is not part of the project, or it just outright doesn't exist then an [InvalidAssignmentIdException]
      * will be thrown.
      */
-    fun deleteAssignment(projectId: UUID, assignmentId: UUID) {
-        val project = getProjectById(projectId)
+    fun deleteAssignment(projectId: UUID, assignmentId: UUID, edition: String) {
+        val project = getProjectById(projectId, edition)
         val assignment = project.assignments.find { it.id == assignmentId }
             ?: throw InvalidAssignmentIdException("The specified assignment is not part of the specified project!")
 
