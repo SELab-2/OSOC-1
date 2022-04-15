@@ -28,7 +28,7 @@ class CommunicationController(
      */
     @GetMapping("/{communicationId}")
     @Secured("ROLE_COACH")
-    fun getCommunicationsById(@PathVariable communicationId: UUID): Communication =
+    fun getCommunicationById(@PathVariable communicationId: UUID): Communication =
         communicationService.getCommunicationById(communicationId)
 
     /**

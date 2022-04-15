@@ -20,6 +20,6 @@ class StatusSuggestionController(
      */
     @GetMapping("/{statusSuggestionId}")
     @Secured("ROLE_COACH")
-    fun getCommunicationsById(@PathVariable statusSuggestionId: UUID): StatusSuggestion =
+    fun getStatusSuggestionById(@PathVariable statusSuggestionId: UUID): StatusSuggestion =
             service.getStatusSuggestionById(statusSuggestionId)
 }
