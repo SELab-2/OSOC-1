@@ -51,7 +51,6 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
 
         http.authorizeRequests().antMatchers(*ConfigUtil.urlsOpenToAll).permitAll()
         http.authorizeRequests().antMatchers(HttpMethod.POST, *ConfigUtil.urlsOpenToAllToPostTo).permitAll()
-        http.authorizeRequests().antMatchers(*ConfigUtil.urlsOpenToLoggedInUsers).hasAnyAuthority("ROLE_DISABLED")
         http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_COACH")
 
         http.logout { it.addLogoutHandler(TokenLogoutHandler()) }

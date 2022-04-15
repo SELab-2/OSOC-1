@@ -2,8 +2,6 @@ package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.exceptions.InvalidTokenException
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
-import be.osoc.team1.backend.security.TokenUtil.getAccessTokenFromRequest
-import be.osoc.team1.backend.security.TokenUtil.invalidateRefreshToken
 import be.osoc.team1.backend.security.TokenUtil.refreshTokenRotation
 import org.springframework.stereotype.Service
 import javax.servlet.http.HttpServletRequest
