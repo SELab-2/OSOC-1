@@ -27,10 +27,10 @@ class SerializationTests {
     @BeforeEach
     fun setMockRequest() {
         val mockRequest = MockHttpServletRequest()
-        mockRequest.setScheme("https")
-        mockRequest.setServerName("example.com")
-        mockRequest.setServerPort(-1)
-        mockRequest.setContextPath("/api")
+        mockRequest.scheme = "https"
+        mockRequest.serverName = "example.com"
+        mockRequest.serverPort = -1
+        mockRequest.contextPath = "/api"
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(mockRequest))
     }
 
@@ -39,18 +39,16 @@ class SerializationTests {
         val testStudent = Student("Jitse", "Willaert")
         val testPosition = Position(Skill("backend"), 2)
         val testUser = User("suggester", "email", Role.Coach, "password")
+        val testAssignment = Assignment(testStudent, testPosition, testUser, "reason")
         val testProject = Project(
             "Test", "Client", "a test project",
-            assignments = mutableListOf(
-                Assignment(testStudent, testPosition, testUser, "reason")
-            ),
+            assignments = mutableListOf(testAssignment),
             coaches = mutableListOf(testUser)
         )
         val json: JsonContent<Project> = jacksonTester!!.write(testProject)
 
         assertThat(json).extractingJsonPathValue("$.coaches").isEqualTo(mutableListOf("https://example.com/api/users/" + testUser.id))
-        assertThat(json).extractingJsonPathValue("$.assignments[0].student").isEqualTo("https://example.com/api/students/" + testStudent.id)
-        assertThat(json).extractingJsonPathValue("$.assignments[0].suggester").isEqualTo("https://example.com/api/users/" + testUser.id)
+        assertThat(json).extractingJsonPathValue("$.assignments[0]").isEqualTo("https://example.com/api/assignments/" + testAssignment.id)
     }
 
     @Test
@@ -59,9 +57,7 @@ class SerializationTests {
             "Test", "Client", "a test project"
         )
         val json: JsonContent<Project> = jacksonTester!!.write(testProject)
-
         assertThat(json).extractingJsonPathValue("$.coaches").isEqualTo(mutableListOf<User>())
-        assertThat(json).extractingJsonPathValue("$.assignments[0].student").isEqualTo(null)
-        assertThat(json).extractingJsonPathValue("$.assignments[0].suggester").isEqualTo(null)
+        assertThat(json).extractingJsonPathValue("$.assignments[0]").isEqualTo(null)
     }
 }
