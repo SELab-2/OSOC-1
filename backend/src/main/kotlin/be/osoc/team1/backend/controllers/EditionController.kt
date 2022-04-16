@@ -3,6 +3,7 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.services.EditionService
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,18 +19,21 @@ class EditionController(val service: EditionService) {
      * or a 404 (NOT FOUND) if there is no such [Edition].
      */
     @GetMapping("/{edition}")
+    @Secured("ROLE_ADMIN")
     fun getEdition(@PathVariable edition: String): Edition = service.getEdition(edition)
 
     /**
      * Returns the currently active edition, or null if there is no active edition.
      */
     @GetMapping("/editions/active")
+    @Secured("ROLE_ADMIN")
     fun getActiveEdition(): Edition? = service.getActiveEdition()
 
     /**
      * Returns all editions that are currently inactive.
      */
     @GetMapping("/editions/inactive")
+    @Secured("ROLE_ADMIN")
     fun getInactiveEditions(): Iterable<Edition> = service.getInactiveEditions()
 
     /**
@@ -38,6 +42,7 @@ class EditionController(val service: EditionService) {
      * or a 403 (FORBIDDEN) if there is already another active edition.
      */
     @PostMapping("/{edition}/activate")
+    @Secured("ROLE_ADMIN")
     fun makeEditionActive(@PathVariable edition: String) = service.makeEditionActive(edition)
 
     /**
@@ -45,6 +50,7 @@ class EditionController(val service: EditionService) {
      * Returns a 400 (BAD REQUEST) if it is already inactive.
      */
     @PostMapping("/{edition}/inactivate")
+    @Secured("ROLE_ADMIN")
     fun makeEditionInactive(@PathVariable edition: String) = service.makeEditionInactive(edition)
 
     /**
@@ -52,5 +58,6 @@ class EditionController(val service: EditionService) {
      */
     @DeleteMapping("/{edition}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Secured("ROLE_ADMIN")
     fun deleteEdition(@PathVariable edition: String) = service.deleteEdition(edition)
 }
