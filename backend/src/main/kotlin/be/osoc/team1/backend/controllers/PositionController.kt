@@ -7,4 +7,4 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/positions")
-class PositionController(service: PositionService): BaseController<Position>(service)
+class PositionController(service: PositionService) : BaseController<Position>(service)

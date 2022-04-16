@@ -22,10 +22,10 @@ open class BaseService<T>(open val repository: CrudRepository<T, UUID>) {
 }
 
 @Service
-class AssignmentService(repository: AssignmentRepository): BaseService<Assignment>(repository)
+class AssignmentService(repository: AssignmentRepository) : BaseService<Assignment>(repository)
 
 @Service
-class PositionService(repository: PositionRepository): BaseService<Position>(repository)
+class PositionService(repository: PositionRepository) : BaseService<Position>(repository)
 
 @Service
-class StatusSuggestionService(repository: StatusSuggestionRepository): BaseService<StatusSuggestion>(repository)
+class StatusSuggestionService(repository: StatusSuggestionRepository) : BaseService<StatusSuggestion>(repository)

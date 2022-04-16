@@ -7,4 +7,4 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/statusSuggestions")
-class StatusSuggestionController(service: StatusSuggestionService): BaseController<StatusSuggestion>(service)
+class StatusSuggestionController(service: StatusSuggestionService) : BaseController<StatusSuggestion>(service)

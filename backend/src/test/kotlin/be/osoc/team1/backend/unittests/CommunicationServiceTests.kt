@@ -2,7 +2,6 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.CommunicationTypeEnum
-import be.osoc.team1.backend.exceptions.InvalidCommunicationIdException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.services.CommunicationService

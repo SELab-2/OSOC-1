@@ -7,4 +7,4 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/assignments")
-class AssignmentController(service: AssignmentService): BaseController<Assignment>(service)
+class AssignmentController(service: AssignmentService) : BaseController<Assignment>(service)
