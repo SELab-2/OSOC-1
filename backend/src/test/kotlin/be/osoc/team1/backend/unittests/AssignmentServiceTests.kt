@@ -6,7 +6,7 @@ import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
-import be.osoc.team1.backend.exceptions.InvalidAssignmentIdException
+import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.AssignmentService
 import io.mockk.Runs
@@ -39,12 +39,12 @@ class AssignmentServiceTests {
     @Test
     fun `getAssignmentById succeeds when assignment with id exists`() {
         val service = AssignmentService(getRepository(true))
-        Assertions.assertEquals(testAssignment, service.getAssignmentById(testId))
+        Assertions.assertEquals(testAssignment, service.getById(testId))
     }
 
     @Test
     fun `getAssignmentById fails when no assignment with that id exists`() {
         val service = AssignmentService(getRepository(false))
-        assertThrows<InvalidAssignmentIdException> { service.getAssignmentById(testId) }
+        assertThrows<InvalidIdException> { service.getById(testId) }
     }
 }

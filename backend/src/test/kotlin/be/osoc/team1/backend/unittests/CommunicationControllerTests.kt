@@ -37,7 +37,7 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getCommunicationById returns communication if communication with given id exists`() {
-        every { communicationService.getCommunicationById(testId) } returns testCommunication
+        every { communicationService.getById(testId) } returns testCommunication
         mockMvc.perform(get("/communications/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
@@ -45,7 +45,7 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getCommunicationById returns 404 Not Found if communication with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { communicationService.getCommunicationById(differentId) }.throws(InvalidIdException())
+        every { communicationService.getById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/communications/$differentId"))
             .andExpect(status().isNotFound)
     }

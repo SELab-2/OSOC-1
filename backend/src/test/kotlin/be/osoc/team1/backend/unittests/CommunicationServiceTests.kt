@@ -3,6 +3,7 @@ package be.osoc.team1.backend.unittests
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.CommunicationTypeEnum
 import be.osoc.team1.backend.exceptions.InvalidCommunicationIdException
+import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.services.CommunicationService
 import io.mockk.Runs
@@ -33,13 +34,13 @@ class CommunicationServiceTests {
     @Test
     fun `getCommunicationById succeeds when communication with id exists`() {
         val service = CommunicationService(getRepository(true))
-        Assertions.assertEquals(testCommunication, service.getCommunicationById(testId))
+        Assertions.assertEquals(testCommunication, service.getById(testId))
     }
 
     @Test
     fun `getCommunicationById fails when no communication with that id exists`() {
         val service = CommunicationService(getRepository(false))
-        assertThrows<InvalidCommunicationIdException> { service.getCommunicationById(testId) }
+        assertThrows<InvalidIdException> { service.getById(testId) }
     }
 
     @Test

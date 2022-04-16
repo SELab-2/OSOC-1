@@ -2,7 +2,7 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Skill
-import be.osoc.team1.backend.exceptions.InvalidPositionIdException
+import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.PositionRepository
 import be.osoc.team1.backend.services.PositionService
 import io.mockk.Runs
@@ -32,12 +32,12 @@ class PositionServiceTests {
     @Test
     fun `getPositionById succeeds when position with id exists`() {
         val service = PositionService(getRepository(true))
-        Assertions.assertEquals(testPosition, service.getPositionById(testId))
+        Assertions.assertEquals(testPosition, service.getById(testId))
     }
 
     @Test
     fun `getPositionById fails when no position with that id exists`() {
         val service = PositionService(getRepository(false))
-        assertThrows<InvalidPositionIdException> { service.getPositionById(testId) }
+        assertThrows<InvalidIdException> { service.getById(testId) }
     }
 }

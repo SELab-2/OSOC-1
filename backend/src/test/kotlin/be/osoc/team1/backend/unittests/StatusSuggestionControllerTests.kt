@@ -39,7 +39,7 @@ class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getStatusSuggestionById returns statusSuggestion if statusSuggestion with given id exists`() {
         val jsonRepresentation = objectMapper.writeValueAsString(testStatusSuggestion)
-        every { statusSuggestionService.getStatusSuggestionById(testId) } returns testStatusSuggestion
+        every { statusSuggestionService.getById(testId) } returns testStatusSuggestion
         mockMvc.perform(get("/statusSuggestions/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
@@ -47,7 +47,7 @@ class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getStatusSuggestionById returns 404 Not Found if statusSuggestion with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { statusSuggestionService.getStatusSuggestionById(differentId) }.throws(InvalidIdException())
+        every { statusSuggestionService.getById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/statusSuggestions/$differentId"))
             .andExpect(status().isNotFound)
     }

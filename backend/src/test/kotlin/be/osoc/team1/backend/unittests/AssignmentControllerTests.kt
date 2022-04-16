@@ -56,7 +56,7 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAssignmentById returns assignment if assignment with given id exists`() {
         val jsonRepresentation = objectMapper.writeValueAsString(testAssignment)
-        every { assignmentService.getAssignmentById(testId) } returns testAssignment
+        every { assignmentService.getById(testId) } returns testAssignment
         mockMvc.perform(get("/assignments/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
@@ -64,7 +64,7 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAssignmentById returns 404 Not Found if assignment with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { assignmentService.getAssignmentById(differentId) }.throws(InvalidIdException())
+        every { assignmentService.getById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/assignments/$differentId"))
             .andExpect(status().isNotFound)
     }

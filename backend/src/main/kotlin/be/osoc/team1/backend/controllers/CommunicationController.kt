@@ -20,16 +20,7 @@ import java.util.UUID
 class CommunicationController(
     private val communicationService: CommunicationService,
     private val studentService: StudentService
-) {
-
-    /**
-     * Returns the communication with the corresponding [communicationId]. If no such communication exists, returns a
-     * "404: Not Found" message instead.
-     */
-    @GetMapping("/{communicationId}")
-    @Secured("ROLE_COACH")
-    fun getCommunicationById(@PathVariable communicationId: UUID): Communication =
-        communicationService.getCommunicationById(communicationId)
+): BaseController<Communication>(communicationService) {
 
     /**
      * Add a communication to the database. The communication should be passed in the request body

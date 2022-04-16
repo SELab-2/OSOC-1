@@ -39,7 +39,7 @@ class PositionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getPositionById returns position if position with given id exists`() {
         val jsonRepresentation = objectMapper.writeValueAsString(testPosition)
-        every { positionService.getPositionById(testId) } returns testPosition
+        every { positionService.getById(testId) } returns testPosition
         mockMvc.perform(get("/positions/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
@@ -47,7 +47,7 @@ class PositionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getPositionById returns 404 Not Found if position with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { positionService.getPositionById(differentId) }.throws(InvalidIdException())
+        every { positionService.getById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/positions/$differentId"))
             .andExpect(status().isNotFound)
     }
