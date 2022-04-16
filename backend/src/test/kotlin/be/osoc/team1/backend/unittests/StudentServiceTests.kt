@@ -241,4 +241,24 @@ class StudentServiceTests {
         val collection = listOf(student1, student2, student3)
         assertEquals(listOf(student1), pager.paginate(collection))
     }
+
+    @Test
+    fun `pager class returns less items than requested if the collection is smaller`() {
+        val pager = Pager(0, 5)
+        val student1 = Student("Testoon", "Tamzia")
+        val student2 = Student("Testien", "Tamzia")
+        val student3 = Student("Testaan", "Tamzia")
+        val collection = listOf(student1, student2, student3)
+        assertEquals(collection, pager.paginate(collection))
+    }
+
+    @Test
+    fun `pager class returns empty list when start of paging-request is out of bounds`() {
+        val pager = Pager(1, 5)
+        val student1 = Student("Testoon", "Tamzia")
+        val student2 = Student("Testien", "Tamzia")
+        val student3 = Student("Testaan", "Tamzia")
+        val collection = listOf(student1, student2, student3)
+        assertEquals(listOf<Student>(), pager.paginate(collection))
+    }
 }

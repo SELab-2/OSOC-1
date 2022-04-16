@@ -16,7 +16,7 @@ fun nameMatchesSearchQuery(name: String, searchQuery: String): Boolean =
     preprocess(name).contains(preprocess(searchQuery))
 
 /**
- * [Pager] is used as a data-storing class that can paginate collections given a [pageNumber] and a [pageSize]
+ * [Pager] is used as a data-storing class that can paginate collections given a [pageNumber] (starts at zero) and a [pageSize] (both are expected to be positive)
  */
 class Pager(val pageNumber: Int, val pageSize: Int) {
     val startOfPaging = pageNumber * pageSize
