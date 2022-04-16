@@ -11,6 +11,9 @@ import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.Id
 
+/**
+ * A deserializer that takes a tally form and extracts the required information to construct a [Student] object.
+ */
 class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
     private val nameQuestionKey = "question_nroEGL"
     private val lastnameQuestionKey = "question_w4KjAo"
@@ -47,7 +50,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
 
     /**
      * This function takes a [JsonNode] representing a question as an input, it will return an [Answer] object.
-     * A question node has a key, label, type, value and depending on the type an options field.
+     * A question node has a key, label, type, value and depending on the type, an options field.
      */
     private fun processQuestionNode(node: JsonNode): Answer {
         val key = node.get("key").asText()
@@ -91,7 +94,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
 }
 
 /**
- * A [Answer] object stores an answer to a [question]. Because these questions sometimes have multiple answers, for
+ * An [Answer] object stores an answer to a [question]. Because these questions sometimes have multiple answers, for
  * example when you can select multiple options the [answer] is stored as a list of strings. In the case of
  * MULTIPLE_CHOICE questions in which there are multiple options and one answer an optionId is stored, this is used
  * for the alumni question. We use the id instead of just comparing the string with the hope that if answer were to

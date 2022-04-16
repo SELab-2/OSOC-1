@@ -3,6 +3,7 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.TallyDeserializer
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
@@ -71,15 +72,9 @@ class StudentController(
     fun deleteStudentById(@PathVariable studentId: UUID) = service.deleteStudentById(studentId)
 
     /**
-     * Add a student to the database. The student should be passed in the request body as a JSON
-     * object and should have the following format:
-     *
-     * ```
-     * {
-     *     "firstName": "(INSERT FIRST NAME)",
-     *     "lastName": "(INSERT LAST NAME)"
-     * }
-     * ```
+     * Add a student to the database. The student should be passed in the request body as a JSON representation of a
+     * tally form submission. The form is expected to contain certain specific questions, these are specified in the
+     * [TallyDeserializer] class.
      *
      * The location of the newly created student is then returned to the API caller in the location
      * header. No checking is done to see if firstName or lastName qualify as valid 'names'. This
