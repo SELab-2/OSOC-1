@@ -214,9 +214,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val studentJsonForm = Files.readAllBytes(Paths.get(this::class.java.classLoader.getResource(filename).toURI()))
         every { studentService.addStudent(any()) } returns testStudent
         mockMvc.perform(
-                post("/students")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(studentJsonForm)
+            post("/students")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(studentJsonForm)
             ).andExpect(status().isBadRequest)
     }
     @Test
