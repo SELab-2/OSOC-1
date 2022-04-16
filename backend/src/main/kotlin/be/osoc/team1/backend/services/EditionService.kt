@@ -3,6 +3,7 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.EditionRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -34,12 +35,27 @@ class EditionService(val repository: EditionRepository) {
 
     /**
      * Given a currently active [Edition] identified by the given [editionName], make it inactive.
-     * Throws a [FailedOperationException] if there is no [Edition] in the database with the given [editionName].
+     * Throws an [InvalidIdException] if there is no [Edition] in the database with the given [editionName],
+     * or a [FailedOperationException] if the edition is already inactive.
      */
     fun makeEditionInactive(editionName: String) {
         val edition = repository.findByIdOrNull(editionName)
-            ?: throw FailedOperationException("The given edition does not exist.")
+            ?: throw InvalidIdException("The given edition does not exist.")
+        if (!edition.isActive) {
+            throw FailedOperationException("The given edition is already inactive.")
+        }
         edition.isActive = false
         repository.save(edition)
+    }
+
+    /**
+     * Deletes the [Edition] identified by the given [editionName] from the database.
+     * Throws an [InvalidIdException] if the edition does not exist.
+     */
+    fun deleteEdition(editionName: String) {
+        if (!repository.existsById(editionName)) {
+            throw InvalidIdException("The given edition does not exist.")
+        }
+        repository.deleteById(editionName)
     }
 }

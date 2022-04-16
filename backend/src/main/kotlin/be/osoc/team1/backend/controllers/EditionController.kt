@@ -2,27 +2,28 @@ package be.osoc.team1.backend.controllers
 
 import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.services.EditionService
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping("/editions")
 class EditionController(val service: EditionService) {
 
     /**
      * Returns the currently active edition, or null if there is no active edition.
      */
-    @GetMapping("/active")
+    @GetMapping("/editions/active")
     fun getActiveEdition(): Edition? = service.getActiveEdition()
 
     /**
      * Returns all editions that are currently inactive.
      */
-    @GetMapping("/inactive")
+    @GetMapping("/editions/inactive")
     fun getInactiveEditions(): Iterable<Edition> = service.getInactiveEditions()
 
     /**
@@ -34,8 +35,16 @@ class EditionController(val service: EditionService) {
     fun makeEditionActive(@PathVariable edition: String) = service.makeEditionActive(edition)
 
     /**
-     * Inactivate the given [edition]. Returns a 400 (BAD REQUEST) if the [edition] is already inactive.
+     * Inactivate the given [edition]. Returns a 404 (NOT FOUND) if the [edition] does not exist
+     * or a 400 (BAD REQUEST) if it is already inactive.
      */
     @PostMapping("/{edition}/inactivate")
     fun makeEditionInactive(@PathVariable edition: String) = service.makeEditionInactive(edition)
+
+    /**
+     * Removes the given [edition] from the database. Returns a 404 (NOT FOUND) if the [edition] does not exist.
+     */
+    @DeleteMapping("/{edition}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    fun deleteEdition(@PathVariable edition: String) = service.deleteEdition(edition)
 }
