@@ -76,6 +76,30 @@ paths:
                 404:
                     description: The edition does not exist
     /{edition}:
+        get:
+            parameters:
+                -   in: path
+                    name: edition
+                    schema:
+                        type: string
+            summary: Get the given edition
+            description: |
+                Returns the Edition object with the given edition name, 
+                or a 404 (NOT FOUND) if there is no such Edition.
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    name:
+                                        type: string
+                                    isActive:
+                                        type: boolean
+                404:
+                    description: The edition does not exist
         delete:
             parameters:
                 -   in: path
