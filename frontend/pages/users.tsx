@@ -26,6 +26,18 @@ const Users: NextPage = () => {
   const [users, setUsers] = useState([] as User[]);
 
   /**
+   * Filtered list of users
+   */
+  const [filteredUsers, setFilteredUsers] = useState([] as User[]);
+
+  /**
+   * name filter on users
+   * 
+   * {@label USERS_PAGE_FILTER}
+   */
+  const [nameFilter, setNameFilter] = useState('');
+
+  /**
    * Global error to show on the page in big red error box
    * 
    * {@label USERS_PAGE_ERROR}
@@ -65,6 +77,26 @@ const Users: NextPage = () => {
   }, [router, user]);
 
   /**
+   * Update the filtered users with the new users/filters
+   */
+  useEffect(() => {
+    
+    const filterUsers: () => User[] = () => {
+      const normalizedNameFilter = nameFilter.trim().toLowerCase();
+      return users.filter((val: User) => {
+        return val.username.trim().toLowerCase().includes(normalizedNameFilter); 
+      });
+    }
+    
+    if (nameFilter) {
+      const _filteredUsers = filterUsers();
+      setFilteredUsers(_filteredUsers);
+    } else {
+      setFilteredUsers(users);
+    }
+  }, [users, nameFilter]);
+
+  /**
    * Fetch all users from backend and update user state
    * 
    * runs on mount
@@ -77,6 +109,7 @@ const Users: NextPage = () => {
         const response = await axiosAuth.get(Endpoints.USERS);
         if (isMounted) {
           setUsers(response.data as User[]);
+          setFilteredUsers(response.data as User[]);
           setLoading(false);
         }
       } catch (err) {
@@ -121,9 +154,11 @@ const Users: NextPage = () => {
             <>
             {error && (<Error error={error} className="mb-4" />)}
             <UserTable 
-            users={users.filter(Boolean)}
+            users={filteredUsers.filter(Boolean)}
             updateUsersLocal={updateUserLocal}
             setGlobalError={setError}
+            setFilter={setNameFilter}
+            nameFilter={nameFilter}
           />
           </>
         )

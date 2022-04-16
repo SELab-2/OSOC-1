@@ -1,6 +1,7 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { User, UserRole, UUID } from '../../lib/types';
 import UserTableRow from './UsertableRow';
+import { SearchIcon } from "@heroicons/react/outline";
 
 type UserTableProps = {
   /**
@@ -21,6 +22,20 @@ type UserTableProps = {
    * @see {@link USERS_PAGE_ERROR}
    */
   setGlobalError: Dispatch<SetStateAction<string>>;
+
+  /**
+   * Function to update filter string
+   * 
+   * @see {@link USERS_PAGE_FILTER}
+   */
+  setFilter: Dispatch<SetStateAction<string>>;
+
+  /**
+   * string
+   * 
+   * @see {@link USERS_PAGE_FILTER}
+   */
+  nameFilter: string;
 }
 
 /**
@@ -29,14 +44,42 @@ type UserTableProps = {
  * @param UserTableProps - properties used in User Table
  * @returns User Table component
  */
-const UserTable: React.FC<UserTableProps> = ({ users, updateUsersLocal, setGlobalError }: UserTableProps) => {
+const UserTable: React.FC<UserTableProps> = ({ users, updateUsersLocal, setGlobalError, setFilter, nameFilter }: UserTableProps) => {
+  const filterRef = useRef<HTMLInputElement>(null);
+
+  const [showFilter, setShowFilter] = useState(false);
+
+  useEffect(() => {
+    if (showFilter) {
+      filterRef?.current?.focus();
+    } else {
+      setFilter('');
+    }
+  }, [showFilter]);
 
   return (
     <table className="w-full table-fixed">
       <thead className="sticky top-0 bg-white">
       <tr>
-        <th className="w-1/4 text-left text-lg py-4">
-          Name
+        <th className="w-1/4 py-4">
+          <div className="flex flex-row items-center justify-start">
+            {
+              showFilter 
+              ? (
+              <input
+                type="text"
+                className="border-2"
+                ref={filterRef}
+                value={nameFilter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+              )
+              : (<p className="text-left text-lg">Name</p>)
+            }
+            <div className="w-fit h-fit hover:cursor-pointer ml-2" onClick={() => setShowFilter(!showFilter)}>
+              <SearchIcon className="h-4 w-4"/>
+            </div>
+          </div>
         </th>
         <th className="w-1/2 text-lg text-left">
           Email
