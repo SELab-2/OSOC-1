@@ -6,6 +6,7 @@ import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.services.ProjectService
+import java.net.URLDecoder
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.net.URLDecoder
 import java.util.UUID
 
 @RestController
@@ -40,7 +40,8 @@ class ProjectController(private val service: ProjectService) {
     }
 
     /**
-     * Get a project by its [projectId], if this id doesn't exist the service will return a 404
+     * Get a project by its [projectId]. If there is no project with the given [projectId] and [edition],
+     * return a 404 (NOT FOUND).
      */
     @GetMapping("/{projectId}")
     @Secured("ROLE_COACH")
@@ -48,7 +49,8 @@ class ProjectController(private val service: ProjectService) {
         service.getProjectById(projectId, edition)
 
     /**
-     * Deletes a project with its [projectId], if this [projectId] doesn't exist the service will return a 404
+     * Deletes a project with its [projectId]. If there is no project with the given [projectId] and [edition],
+     * return a 404 (NOT FOUND).
      */
     @DeleteMapping("/{projectId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -86,7 +88,8 @@ class ProjectController(private val service: ProjectService) {
     )
 
     /**
-     * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
+     * Gets all students assigned to a project. If there is no project with the given [projectId] and [edition],
+     * return a 404 (NOT FOUND).
      */
     @GetMapping("/{projectId}/students")
     @Secured("ROLE_COACH")
@@ -94,7 +97,8 @@ class ProjectController(private val service: ProjectService) {
         service.getStudents(projectId, edition)
 
     /**
-     * Gets all coaches of a project, if this [projectId] doesn't exist the service will return a 404
+     * Gets all coaches of a project. If there is no project with the given [projectId] and [edition],
+     * return a 404 (NOT FOUND).
      */
     @GetMapping("/{projectId}/coaches")
     @Secured("ROLE_COACH")
@@ -102,8 +106,8 @@ class ProjectController(private val service: ProjectService) {
         service.getProjectById(projectId, edition).coaches
 
     /**
-     * assign a coach to a project, if a project with [projectId] or a user with [coachId] doesn't exist the service
-     * will return a 404
+     * assign a coach to a project. If a project with [projectId] and [edition] or a user with [coachId]
+     * doesn't exist the service will return a 404.
      */
     @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -112,7 +116,9 @@ class ProjectController(private val service: ProjectService) {
         service.addCoachToProject(projectId, coachId, edition)
 
     /**
-     * Deletes a coach [coachId] from a project [projectId], if [projectId] or [coachId] doesn't exist the service will return a 404
+     * Delete the coach identified by [coachId] from the project identified by [projectId].
+     * If there is no project with the given [projectId] and [edition], or the coach doesn't exist,
+     * the service will return a 404 (NOT FOUND).
      */
     @DeleteMapping("/{projectId}/coaches/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
