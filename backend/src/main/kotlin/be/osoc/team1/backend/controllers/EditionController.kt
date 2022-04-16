@@ -15,6 +15,13 @@ import org.springframework.web.bind.annotation.RestController
 class EditionController(val service: EditionService) {
 
     /**
+     * Returns the [Edition] object with the given [edition] name,
+     * or a 404 (NOT FOUND) if there is no such [Edition].
+     */
+    @GetMapping("/{edition}")
+    fun getEdition(@PathVariable edition: String): Edition = service.getEdition(edition)
+
+    /**
      * Returns the currently active edition, or null if there is no active edition.
      */
     @GetMapping("/editions/active")

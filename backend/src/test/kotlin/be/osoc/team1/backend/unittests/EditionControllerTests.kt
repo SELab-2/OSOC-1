@@ -28,11 +28,27 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val editionName = "edition"
 
     @Test
-    fun `getActiveEdition returns the active edition if it exists`() {
-        val activeEdition = Edition("edition", true)
-        // You can't use Jackson here, as it will rename the 'isActive' field to 'active' for some reason.
+    fun `getEdition returns the edition if it exists`() {
+        val edition = Edition(editionName, true)
+        // We can't use Jackson here, as it will rename the 'isActive' field to 'active' for some reason.
         // See: https://stackoverflow.com/questions/32270422/jackson-renames-primitive-boolean-field-by-removing-is
-        val expected = "{\"name\":\"edition\",\"isActive\":true}"
+        val expected = "{\"name\":\"$editionName\",\"isActive\":true}"
+        every { editionService.getEdition(editionName) } returns edition
+        mockMvc.perform(get("/$editionName"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(expected))
+    }
+
+    @Test
+    fun `getEdition returns 404 (NOT FOUND) if the edition does not exist`() {
+        every { editionService.getEdition(editionName) }.throws(InvalidIdException())
+        mockMvc.perform(get("/$editionName")).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `getActiveEdition returns the active edition if it exists`() {
+        val activeEdition = Edition(editionName, true)
+        val expected = "{\"name\":\"$editionName\",\"isActive\":true}"
         every { editionService.getActiveEdition() } returns activeEdition
         mockMvc.perform(get("/editions/active"))
             .andExpect(status().isOk)
@@ -51,8 +67,6 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getInactiveEditions returns all inactive editions`() {
         val inactiveEdition1 = Edition("edition1", false)
         val inactiveEdition2 = Edition("edition2", false)
-        // You can't use Jackson here, as it will rename the 'isActive' field to 'active' for some reason.
-        // See: https://stackoverflow.com/questions/32270422/jackson-renames-primitive-boolean-field-by-removing-is
         val expected = "[{\"name\":\"edition1\",\"isActive\":false},{\"name\":\"edition2\",\"isActive\":false}]"
         every { editionService.getInactiveEditions() } returns listOf(inactiveEdition1, inactiveEdition2)
         mockMvc.perform(get("/editions/inactive"))

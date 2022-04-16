@@ -3,6 +3,7 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidEditionIdException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.EditionRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class EditionService(val repository: EditionRepository) {
+
+    fun getEdition(editionName: String): Edition = repository.findByIdOrNull(editionName)
+        ?: throw InvalidEditionIdException()
 
     fun getActiveEdition(): Edition? = repository.findAll().firstOrNull(Edition::isActive)
 
@@ -40,7 +44,7 @@ class EditionService(val repository: EditionRepository) {
      */
     fun makeEditionInactive(editionName: String) {
         val edition = repository.findByIdOrNull(editionName)
-            ?: throw InvalidIdException("The given edition does not exist.")
+            ?: throw InvalidEditionIdException()
         if (!edition.isActive) {
             throw FailedOperationException("The given edition is already inactive.")
         }
