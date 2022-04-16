@@ -57,7 +57,6 @@ projects = []
 for _ in range(10):
     projects.append(requests.post('http://localhost:8080/api/projects', json={
         "clientName": fake.company(), "name": fake.catch_phrase(), "description": fake.bs(), "positions": [{"skill": {"skillName": fake.job()}, "amount": random.randint(1, 7)} for _ in range(5)]}, headers=authheaders).json())
-print(requests.get('http://localhost:8080/api/projects', headers=authheaders).json())
 
 # users+coaches
 users = []
