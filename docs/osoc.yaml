@@ -21,7 +21,7 @@ paths:
                             schema:
                                 type: string
                                 nullable: true
-                                default: "/path/to/edition"
+                                default: edition name
     /editions/inactive:
         get:
             summary: Get all inactive editions
@@ -35,7 +35,7 @@ paths:
                                 type: array
                                 items:
                                     type: string
-                                    default: "/path/to/edition"
+                                    default: edition name
     /{edition}/activate:
         post:
             parameters:
