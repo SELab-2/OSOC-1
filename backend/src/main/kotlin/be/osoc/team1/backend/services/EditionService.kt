@@ -39,12 +39,11 @@ class EditionService(val repository: EditionRepository) {
 
     /**
      * Given a currently active [Edition] identified by the given [editionName], make it inactive.
-     * Throws an [InvalidIdException] if there is no [Edition] in the database with the given [editionName],
-     * or a [FailedOperationException] if the edition is already inactive.
+     * If there is no [Edition] with that [editionName], it will be created automatically.
+     * Throws a [FailedOperationException] if the edition is already inactive.
      */
     fun makeEditionInactive(editionName: String) {
-        val edition = repository.findByIdOrNull(editionName)
-            ?: throw InvalidEditionIdException()
+        val edition = repository.findByIdOrNull(editionName) ?: Edition(editionName, true)
         if (!edition.isActive) {
             throw FailedOperationException("The given edition is already inactive.")
         }

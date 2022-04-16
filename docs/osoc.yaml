@@ -66,6 +66,7 @@ paths:
             summary: Inactivate the given edition
             description: |
                 Inactivate the given active edition.
+                If this edition does not exist yet, it will be automatically created.
                 Only GET and DELETE endpoints can be used on active editions,
                 and only by users with Admin permissions.
             responses:
@@ -73,8 +74,6 @@ paths:
                     description: Successful operation
                 400:
                     description: The edition is already inactive
-                404:
-                    description: The edition does not exist
     /{edition}:
         get:
             parameters:

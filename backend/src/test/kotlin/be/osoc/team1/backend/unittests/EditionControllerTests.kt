@@ -83,12 +83,6 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `makeEditionInactive returns 404 (NOT FOUND) if the edition does not exist`() {
-        every { editionService.makeEditionInactive(editionName) }.throws(InvalidIdException())
-        mockMvc.perform(post("/$editionName/inactivate")).andExpect(status().isNotFound)
-    }
-
-    @Test
     fun `makeEditionInactive returns 400 (BAD REQUEST) if the edition is already inactive`() {
         every { editionService.makeEditionInactive(editionName) }.throws(FailedOperationException())
         mockMvc.perform(post("/$editionName/inactivate")).andExpect(status().isBadRequest)

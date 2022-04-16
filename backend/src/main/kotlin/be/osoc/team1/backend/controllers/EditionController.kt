@@ -41,8 +41,8 @@ class EditionController(val service: EditionService) {
     fun makeEditionActive(@PathVariable edition: String) = service.makeEditionActive(edition)
 
     /**
-     * Inactivate the given [edition]. Returns a 404 (NOT FOUND) if the [edition] does not exist
-     * or a 400 (BAD REQUEST) if it is already inactive.
+     * Inactivate the given [edition]. If this [edition] does not exist yet, it will be automatically created.
+     * Returns a 400 (BAD REQUEST) if it is already inactive.
      */
     @PostMapping("/{edition}/inactivate")
     fun makeEditionInactive(@PathVariable edition: String) = service.makeEditionInactive(edition)

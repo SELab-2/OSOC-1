@@ -33,11 +33,13 @@ class EditionServiceTests {
     }
 
     @Test
-    fun `makeEditionInactive fails if edition does not exist`() {
+    fun `makeEditionInactive inactivates edition if it does not exist`() {
         val repository = mockk<EditionRepository>()
         every { repository.findByIdOrNull(activeEdition.name) } returns null
+        every { repository.save(inactiveEdition) } returns inactiveEdition
         val service = EditionService(repository)
-        assertThrows<InvalidIdException> { service.makeEditionInactive(activeEdition.name) }
+        service.makeEditionInactive(activeEdition.name)
+        verify { repository.save(inactiveEdition) }
     }
 
     @Test
