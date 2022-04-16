@@ -1,10 +1,35 @@
-import UserTableRow, { User } from './UsertableRow';
+import { Dispatch, SetStateAction } from 'react';
+import { User, UserRole, UUID } from '../../lib/types';
+import UserTableRow from './UsertableRow';
 
 type UserTableProps = {
-  users: User[]
+  /**
+   * Array of all users to show
+   */
+  users: User[];
+
+  /**
+   * Function to update the role of local user object
+   * 
+   * @see {@link USERS_PAGE_USERS}
+   */
+  updateUsersLocal: (id: UUID, role: UserRole) => void;
+
+  /**
+   * Function to update the error message on the users page
+   * 
+   * @see {@link USERS_PAGE_ERROR}
+   */
+  setGlobalError: Dispatch<SetStateAction<string>>;
 }
 
-const UserTable: React.FC<UserTableProps> = ({ users }: UserTableProps) => {
+/**
+ * Table to list all users
+ * 
+ * @param UserTableProps - properties used in User Table
+ * @returns User Table component
+ */
+const UserTable: React.FC<UserTableProps> = ({ users, updateUsersLocal, setGlobalError }: UserTableProps) => {
 
   return (
     <table className="w-full table-fixed">
@@ -24,7 +49,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }: UserTableProps) => {
       <tbody>
       {
         users && users.length
-        ? users.map((user) => <UserTableRow key={user.id} user={user}/>)
+        ? users.map((user) => <UserTableRow key={user.id} user={user} updateUsersLocal={updateUsersLocal} setGlobalError={setGlobalError}/>)
         : (
           <tr className="h-16">
             <td colSpan={3}>
