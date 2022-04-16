@@ -52,5 +52,3 @@ class TokenServiceTests {
         assertDoesNotThrow { tokenService.renewAccessToken(request, response) }
     }
 }
-
-
