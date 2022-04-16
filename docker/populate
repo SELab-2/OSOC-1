@@ -28,7 +28,7 @@ printf "running\n"
 # ADMIN
 # create the first user
 printf "Creating first admin: "
-curl -s --location --request POST 'http://localhost:8080/api/osoc/users' --header 'Content-Type: application/json' --data-raw '{ "username": "tester", "email": "tester@mail.com", "password": "tester" }' > /dev/null
+curl -s --location --request POST 'http://localhost:8080/api/users' --header 'Content-Type: application/json' --data-raw '{ "username": "tester", "email": "tester@mail.com", "password": "tester" }' > /dev/null
 # make him admin
 sudo docker exec -it osoc_postgres_container_local_dev psql -U postgres osoc -c "UPDATE account SET role=0;" > /dev/null
 printf "created\n"

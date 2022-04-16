@@ -57,22 +57,31 @@ projects = []
 for _ in range(10):
     projects.append(requests.post('http://localhost:8080/api/projects', json={
         "clientName": fake.company(), "name": fake.catch_phrase(), "description": fake.bs(), "positions": [{"skill": {"skillName": fake.job()}, "amount": random.randint(1, 7)} for _ in range(5)]}, headers=authheaders).json())
+print(requests.get('http://localhost:8080/api/projects', headers=authheaders).json())
 
 # users+coaches
 users = []
 for _ in range(25):
-    users.append(requests.post('http://localhost:8080/api/osoc/users',
+    users.append(requests.post('http://localhost:8080/api/users',
                                json={"username": fake.user_name(), "email": fake.ascii_company_email(), "password": "suuuuuperseeeeecret", "role": "Coach"}, headers=authheaders).json())
-coachesids = []
+coaches = []
 for user in users:
     role = random.choice(["Disabled", "Coach", "Admin"])
     if role == "Disabled":
         continue
     if role == "Coach":
-        coachesids.append(user["id"])
+        coaches.append(user)
     requests.post(f'http://localhost:8080/api/users/{user["id"]}/role',
                   json=role, headers=authheaders)
+# suggestions to students
+for coach in coaches:
+    coach_token = requests.post('http://localhost:8080/api/login',
+                                data={"email": coach["email"], "password": "suuuuuperseeeeecret"}).json()["accessToken"]
+    for studid in studentsids[:250]:
+        requests.post(f'http://localhost:8080/api/students/{studid}/suggestions', json={"coachId": coach["id"], "status": random.choice(
+            ["Yes", "No", "Maybe"]), "motivation": fake.paragraph(nb_sentences=4)}, headers={'Authorization': f'Basic {coach_token}', 'Content-Type': 'application/json'})
 # students to projects
+print(projects)
 for proj in projects:
     for stud in random.sample(yes, 4):
         requests.post(f'http://localhost:8080/api/projects/{proj["id"]}/assignments', json={
