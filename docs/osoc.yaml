@@ -576,14 +576,14 @@ paths:
                 '404':
                     description: |
                         Not Found. No such StudentRoleId.
-    /communications/{studentId}:
+    /communications/{communicationId}:
         get:
-            summary: Get all registered communications with a student
-            description:  |
-                    Returns all communications that belongs to the student with the corresponding student id.
-                    If no such student exists, returns a "404: Not Found" message instead.
+            summary: Get Communications by id
+            description: |
+                Returns the communication with the corresponding id. If no such communication exists,
+                returns a "404: Not Found" message instead.
             parameters:
-              - name: studentId
+              - name: communicationId
                 required: true
                 in: path
                 schema:
@@ -592,17 +592,16 @@ paths:
             responses:
                 '200':
                     description: |
-                        The response if there is a student in the database with the given id.
-                        Returns the array of communications in the response body.
+                        The response if there is a communication in the database with the given id.
+                        Returns the communication in the response body.
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Communication'
+                                $ref: '#/components/schemas/Communication'
                 '404':
                     description: |
-                        The response if there is no student in the database with the given id.
+                        The response if there is no communication in the database with the given id.
+    /communications/{studentId}:
         post:
             summary: Add a new communication with a student
             description: |
@@ -760,6 +759,81 @@ paths:
                     description: NOT FOUND
                 '400':
                     description: Bad Request.
+    /assignments/{assignmentId}:
+        get:
+            summary: Get Assignment by id
+            description: |
+                Returns the assignment with the corresponding id. If no such assignment exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+              - name: assignmentId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: |
+                        The response if there is a assignment in the database with the given id.
+                        Returns the assignment in the response body.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Assignment'
+                '404':
+                    description: |
+                        The response if there is no assignment in the database with the given id.
+    /positions/{positionId}:
+        get:
+            summary: Get Position by id
+            description: |
+                Returns the position with the corresponding id. If no such position exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+              - name: positionId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: |
+                        The response if there is a position in the database with the given id.
+                        Returns the position in the response body.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Position'
+                '404':
+                    description: |
+                        The response if there is no position in the database with the given id.
+    /statusSuggestions/{statusSuggestionId}:
+        get:
+            summary: Get StatusSuggestions by id
+            description: |
+                Returns the statusSuggestion with the corresponding id. If no such statusSuggestion exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+              - name: statusSuggestionId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: |
+                        The response if there is a statusSuggestion in the database with the given id.
+                        Returns the statusSuggestion in the response body.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusSuggestion'
+                '404':
+                    description: |
+                        The response if there is no statusSuggestion in the database with the given id.
     /login:
         post:
             summary: login to the user with the correct email and password
@@ -832,6 +906,7 @@ components:
                 - alumn
                 - status
                 - statusSuggestions
+                - communications
             properties:
                 id:
                     type: string
@@ -849,7 +924,14 @@ components:
                     readOnly: true
                     type: array
                     items:
-                        $ref: '#/components/schemas/StatusSuggestion'
+                        type: string
+                        format: 'https://example.com/api/statusSuggestions/{statusSuggestionId}'
+                communications:
+                    readOnly: true
+                    type: array
+                    items:
+                        type: string
+                        format: 'https://example.com/api/communications/{communicationId}'
                 alumn:
                     type: boolean
                     default: false
@@ -863,8 +945,8 @@ components:
                 - id
                 - name
                 - clientName
-                - coaches
                 - description
+                - coaches
                 - positions
                 - assignments
             properties:
@@ -876,20 +958,23 @@ components:
                     type: string
                 clientName:
                     type: string # Later on this could be a different schema if clients need to be saved in the database
+                description:
+                    type: string
                 coaches:
                     type: array
                     items:
-                        $ref: '#/components/schemas/User'
-                description:
-                    type: string
+                        type: string
+                        format: 'https://example.com/api/users/{coachId}'
                 positions:
                     type: array
                     items:
-                        $ref: '#/components/schemas/Position'
+                        type: string
+                        format: 'https://example.com/api/positions/{positionId}'
                 assignments:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Assignment'
+                        type: string
+                        format: 'https://example.com/api/assignments/{assignmentId}'
         Communication:
             type: object
             required:
@@ -966,18 +1051,17 @@ components:
                     format: uuid
                     readOnly: true
                 skill:
-                    type: string
-                    format: uuid
+                    $ref: '#/components/schemas/Skill'
                 amount:
                     type: integer
-                    default: 1
         Assignment:
             type: object
             required:
                 - id
                 - student
-                - role
+                - position
                 - suggester
+                - reason
             properties:
                 id:
                     type: string
@@ -985,13 +1069,13 @@ components:
                     readOnly: true
                 student:
                     type: string
-                    format: uuid
+                    format: 'https://example.com/api/students/{studentId}'
                 position:
                     type: string
-                    format: uuid
+                    format: 'https://example.com/api/positions/{positionId}'
                 suggester:
                     type: string
-                    format: uuid
+                    format: 'https://example.com/api/users/{suggesterId}'
                 reason:
                     type: string
         CommunicationType:

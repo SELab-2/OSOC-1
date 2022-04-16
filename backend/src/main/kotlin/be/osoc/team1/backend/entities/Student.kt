@@ -1,6 +1,9 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.util.CommunicationListSerializer
+import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
@@ -61,8 +64,6 @@ enum class SuggestionEnum {
 class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motivation: String) {
 
     @Id
-    @JsonIgnore
-    // Only used as a primary key, ignored otherwise.
     val id: UUID = UUID.randomUUID()
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -100,8 +101,10 @@ class Student(
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JsonSerialize(using = StatusSuggestionListSerializer::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
 }
