@@ -7,6 +7,90 @@ info:
 servers:
     -   url: 'http://localhost:8080/api'
 paths:
+    /editions/active:
+        get:
+            summary: Get the active edition or null
+            description: |
+                Returns the currently active edition,
+                or null if there is no active edition.
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                nullable: true
+                                default: "/path/to/edition"
+    /editions/inactive:
+        get:
+            summary: Get all inactive editions
+            description: Returns all editions that are currently inactive
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    default: "/path/to/edition"
+    /{edition}/activate:
+        post:
+            parameters:
+                -   in: path
+                    name: edition
+                    schema:
+                        type: string
+            summary: Activate the given edition
+            description: |
+                Activate the given edition, making it the active edition.
+                If this edition does not exist yet, it will be automatically created.
+                There can only be one active edition at a time.
+                All endpoints can be used on active editions.
+            responses:
+                200:
+                    description: Successful operation
+                400:
+                    description: The edition is already active
+                403:
+                    description: There is another active edition
+    /{edition}/inactivate:
+        post:
+            parameters:
+                -   in: path
+                    name: edition
+                    schema:
+                        type: string
+            summary: Inactivate the given edition
+            description: |
+                Inactivate the given active edition.
+                Only GET and DELETE endpoints can be used on active editions,
+                and only by users with Admin permissions.
+            responses:
+                200:
+                    description: Successful operation
+                400:
+                    description: The edition is already inactive
+                404:
+                    description: The edition does not exist
+    /{edition}:
+        delete:
+            parameters:
+                -   in: path
+                    name: edition
+                    schema:
+                        type: string
+            summary: Delete the given edition
+            description: |
+                Deletes the given edition from the database.
+                If this edition does not exist, returns a 404 (NOT FOUND) instead.
+            responses:
+                204:
+                    description: Successful operation
+                404:
+                    description: The edition does not exist
     /{edition}/students:
         get:
             parameters:
