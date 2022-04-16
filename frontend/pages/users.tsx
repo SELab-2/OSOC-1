@@ -12,15 +12,15 @@ import useUser from '../hooks/useUser';
 import axios, { AxiosError } from 'axios';
 
 /**
- * 
+ *
  * {@label USERS_PAGE}
- * 
+ *
  * @returns the users page
  */
 const Users: NextPage = () => {
   /**
    * Users to show on the page
-   * 
+   *
    * {@label USERS_PAGE_USERS}
    */
   const [users, setUsers] = useState([] as User[]);
@@ -32,19 +32,19 @@ const Users: NextPage = () => {
 
   /**
    * name filter on users
-   * 
+   *
    * {@label USERS_PAGE_FILTER}
    */
   const [nameFilter, setNameFilter] = useState('');
 
   /**
    * Global error to show on the page in big red error box
-   * 
+   *
    * {@label USERS_PAGE_ERROR}
    */
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  
+
   const axiosAuth = useAxiosAuth();
   const router = useRouter();
   const [user] = useUser();
@@ -62,12 +62,12 @@ const Users: NextPage = () => {
       return val;
     });
     setUsers(updatedUsers);
-  }
+  };
 
   /**
    * Check to see if the current user is allowed to access this page.
    * If not, we push them to the login page (for now)
-   * 
+   *
    * runs when `router` or `user` is updated
    */
   useEffect(() => {
@@ -80,14 +80,13 @@ const Users: NextPage = () => {
    * Update the filtered users with the new users/filters
    */
   useEffect(() => {
-    
     const filterUsers: () => User[] = () => {
       const normalizedNameFilter = nameFilter.trim().toLowerCase();
       return users.filter((val: User) => {
-        return val.username.trim().toLowerCase().includes(normalizedNameFilter); 
+        return val.username.trim().toLowerCase().includes(normalizedNameFilter);
       });
-    }
-    
+    };
+
     if (nameFilter) {
       const _filteredUsers = filterUsers();
       setFilteredUsers(_filteredUsers);
@@ -98,7 +97,7 @@ const Users: NextPage = () => {
 
   /**
    * Fetch all users from backend and update user state
-   * 
+   *
    * runs on mount
    */
   useEffect(() => {
@@ -117,7 +116,7 @@ const Users: NextPage = () => {
           const _err = err as AxiosError;
           if (_err.response?.status === 400) router.push('/login'); // error when trying to refresh refreshtoken
           if (isMounted) {
-            setError(_err.response?.statusText || "An unknown error occurred");
+            setError(_err.response?.statusText || 'An unknown error occurred');
           }
         } else {
           console.error(err);
@@ -136,7 +135,7 @@ const Users: NextPage = () => {
   return (
     <div className="h-screen">
       <Header />
-      <div className="w-11/12 mx-auto mt-16 mb-32 md:w-3/5 p-0">
+      <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
         {loading ? (
           <div className="relative top-1/2 translate-y-1/2">
             <p className="mb-4 text-center text-2xl opacity-75">
@@ -151,18 +150,17 @@ const Users: NextPage = () => {
             />
           </div>
         ) : (
-            <>
-            {error && (<Error error={error} className="mb-4" />)}
-            <UserTable 
-            users={filteredUsers.filter(Boolean)}
-            updateUsersLocal={updateUserLocal}
-            setGlobalError={setError}
-            setFilter={setNameFilter}
-            nameFilter={nameFilter}
-          />
+          <>
+            {error && <Error error={error} className="mb-4" />}
+            <UserTable
+              users={filteredUsers.filter(Boolean)}
+              updateUsersLocal={updateUserLocal}
+              setGlobalError={setError}
+              setFilter={setNameFilter}
+              nameFilter={nameFilter}
+            />
           </>
-        )
-      }
+        )}
       </div>
     </div>
   );
