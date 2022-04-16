@@ -21,7 +21,7 @@ class TokenServiceTests {
     private val testAuthorities = listOf("ROLE_COACH")
 
     @Test
-    fun `renewAccessToken fails if no refresh token given`() {
+    fun `renewAccessToken fails if no token given`() {
         val request = MockHttpServletRequest()
         val response = MockHttpServletResponse()
         val exception = assertThrows<InvalidTokenException> { tokenService.renewAccessToken(request, response) }
@@ -32,7 +32,6 @@ class TokenServiceTests {
     fun `renewAccessToken fails if access token given`() {
         val request = MockHttpServletRequest()
         val response = MockHttpServletResponse()
-
         val accessToken = TokenUtil.createAccessAndRefreshToken(testEmail, testAuthorities).accessToken
         request.addParameter("refreshToken", accessToken)
 
@@ -44,14 +43,12 @@ class TokenServiceTests {
     fun `renewAccessToken does not fail`() {
         val request = MockHttpServletRequest()
         val response = MockHttpServletResponse()
-
         val refreshToken = TokenUtil.createAccessAndRefreshToken(testEmail, testAuthorities).refreshToken
         request.addParameter("refreshToken", refreshToken)
         val expirationDate = decodeAndVerifyToken(refreshToken).expiresAt
 
         mockkObject(TokenUtil)
         every { refreshTokenRotation(response, refreshToken, testEmail, testAuthorities, expirationDate) } returns Unit
-
         assertDoesNotThrow { tokenService.renewAccessToken(request, response) }
     }
 }
