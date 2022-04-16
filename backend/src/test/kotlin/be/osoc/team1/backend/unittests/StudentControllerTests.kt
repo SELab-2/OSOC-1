@@ -217,7 +217,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             post("/students")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(studentJsonForm)
-            ).andExpect(status().isBadRequest)
+        ).andExpect(status().isBadRequest)
     }
     @Test
     fun `addStudent should fail when firstname question is not given`() {
