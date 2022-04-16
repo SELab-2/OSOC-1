@@ -46,22 +46,6 @@
             "text": "Back-end developer"
           }
         ]
-      },
-      {
-        "key": "question_wz7eGE",
-        "label": "Have you participated in osoc before?",
-        "type": "MULTIPLE_CHOICE",
-        "value": "689451da-305b-451a-8039-c748ff06ec82",
-        "options": [
-          {
-            "id": "41576a04-8f7a-4276-93b4-0dcc0c75bf0b",
-            "text": "No, it's my first time participating in osoc"
-          },
-          {
-            "id": "689451da-305b-451a-8039-c748ff06ec82",
-            "text": "Yes, I have been part of osoc before"
-          }
-        ]
       }
     ]
   }

@@ -188,7 +188,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `addStudent should return created student`() {
         val studentJsonForm =
-            Files.readAllBytes(Paths.get(this::class.java.classLoader.getResource("student_test_form.json").toURI()))
+            Files.readAllBytes(Paths.get(this::class.java.classLoader.getResource("student_test_forms/student_test_form.json").toURI()))
         val slot = slot<Student>()
         every { studentService.addStudent(capture(slot)) } returns testStudent
         val mvcResult =
@@ -208,6 +208,35 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
         val locationHeader = mvcResult.response.getHeader("Location")
         assert(locationHeader!!.endsWith("/students/${testStudent.id}"))
+    }
+
+    private fun testInvalidTallyForm(filename: String) {
+        val studentJsonForm = Files.readAllBytes(Paths.get(this::class.java.classLoader.getResource(filename).toURI()))
+        every { studentService.addStudent(any()) } returns testStudent
+        mockMvc.perform(
+                post("/students")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(studentJsonForm)
+            ).andExpect(status().isBadRequest)
+    }
+    @Test
+    fun `addStudent should fail when firstname question is not given`() {
+        testInvalidTallyForm("student_test_forms/student_test_form_no_firstname.json")
+    }
+
+    @Test
+    fun `addStudent should fail when lastname question is not given`() {
+        testInvalidTallyForm("student_test_forms/student_test_form_no_lastname.json")
+    }
+
+    @Test
+    fun `addStudent should fail when alumni question is not given`() {
+        testInvalidTallyForm("student_test_forms/student_test_form_no_alumni.json")
+    }
+
+    @Test
+    fun `addStudent should fail when skill question is not given`() {
+        testInvalidTallyForm("student_test_forms/student_test_form_no_skill.json")
     }
 
     @Test
