@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
@@ -32,6 +33,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.nio.file.Files
 import java.nio.file.Paths
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
@@ -49,13 +52,14 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val coachId = testCoach.id
     private val testStudent = Student("Tom", "Alard")
     private val objectMapper = ObjectMapper()
-    private val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
     private val defaultStatusFilter =
         listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
     private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
 
     @BeforeEach
     fun beforeEach() {
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest()))
+
         every { userDetailService.getUserFromPrincipal(any()) } returns testCoach
     }
 
@@ -150,6 +154,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getStudentById returns student if student with given id exists`() {
+        val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
+
         every { studentService.getStudentById(studentId) } returns testStudent
         mockMvc.perform(get("/students/$studentId"))
             .andExpect(status().isOk)
