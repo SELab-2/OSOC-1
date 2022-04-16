@@ -87,7 +87,7 @@ class ProjectService(
 
     fun getStudents(projectId: UUID, edition: String): List<Student> = getStudents(getProjectById(projectId, edition))
 
-    fun getStudents(project: Project): List<Student> = project.assignments.map { it.student }.distinct()
+    fun getStudents(project: Project): List<Student> = project.assignments.map(Assignment::student).distinct()
 
     /**
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
