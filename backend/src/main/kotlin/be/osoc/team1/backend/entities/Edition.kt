@@ -9,4 +9,8 @@ import javax.persistence.Id
  * to one, there should only be at most one edition in the database with [isActive] set to true.
  */
 @Entity
-class Edition(@Id val name: String, var isActive: Boolean)
+class Edition(@Id val name: String, var isActive: Boolean) {
+    // Needed for tests
+    override fun equals(other: Any?): Boolean =
+        other is Edition && name == other.name && isActive == other.isActive
+}
