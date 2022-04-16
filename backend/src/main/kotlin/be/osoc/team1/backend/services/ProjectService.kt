@@ -30,13 +30,15 @@ class ProjectService(
         repository.findByEdition(edition).filter { nameMatchesSearchQuery(it.name, searchQuery) }
 
     /**
-     * Get a project by its [id], if this id doesn't exist throw an [InvalidProjectIdException]
+     * Get a project by its [id]. If there is no project with the given [id] and [edition],
+     * throw an [InvalidProjectIdException].
      */
     fun getProjectById(id: UUID, edition: String): Project =
         repository.findByIdAndEdition(id, edition) ?: throw InvalidProjectIdException()
 
     /**
-     * Deletes a project by its [id], if this id doesn't exist throw an [InvalidProjectIdException]
+     * Deletes a project by its [id]. If there is no project with the given [id] and [edition],
+     * throw an [InvalidProjectIdException].
      */
     fun deleteProjectById(id: UUID, edition: String) {
         if (!repository.existsByIdAndEdition(id, edition))
@@ -51,7 +53,8 @@ class ProjectService(
     fun postProject(project: Project): Project = repository.save(project)
 
     /**
-     * Updates a project based on [project], if [project] is not in [repository] throw [InvalidProjectIdException]
+     * Updates a project based on [project]. If there is no project with the same id as the given project
+     * and the given [edition], throw an [InvalidProjectIdException].
      */
     fun patchProject(project: Project, edition: String) {
         if (!repository.existsByIdAndEdition(project.id, edition))
@@ -61,8 +64,8 @@ class ProjectService(
     }
 
     /**
-     * Adds a coach to project based on [projectId],
-     * if [projectId] is not in [repository] throw [InvalidProjectIdException]
+     * Adds a coach to project based on [projectId].
+     * If there is no project with the given [projectId] and [edition], throw an [InvalidProjectIdException].
      * If there is no user with [coachId] a [InvalidUserIdException] will be thrown.
      */
     fun addCoachToProject(projectId: UUID, coachId: UUID, edition: String) {
@@ -73,9 +76,9 @@ class ProjectService(
     }
 
     /**
-     * removes a coach from project based on [projectId] and [coachId],
-     * if [projectId] is not in [repository] throw [InvalidProjectIdException]
-     * if [coachId] not assigned to project throw [FailedOperationException]
+     * removes a coach from project based on [projectId] and [coachId].
+     * If there is no project with the given [projectId] and [edition], throw an [InvalidProjectIdException].
+     * if [coachId] not assigned to project throw [FailedOperationException].
      */
     fun removeCoachFromProject(projectId: UUID, coachId: UUID, edition: String) {
         val project: Project = getProjectById(projectId, edition)
@@ -116,7 +119,7 @@ class ProjectService(
      * Assigns a student to a specific position on the project with [projectId]. A [ForbiddenOperationException] will be
      * thrown if the student was already assigned this position. A
      * [InvalidAssignmentIdException] will be thrown if specified position is not part of the specified project. If the
-     * specified student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
+     * specified project, student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
      */
     fun postAssignment(projectId: UUID, assignmentForm: AssignmentPost, edition: String) {
         val project = getProjectById(projectId, edition)
@@ -136,7 +139,7 @@ class ProjectService(
     /**
      * Unassign a student by removing the assignment with [assignmentId] from the project with [projectId]. If this
      * assignment is not part of the project, or it just outright doesn't exist then an [InvalidAssignmentIdException]
-     * will be thrown.
+     * will be thrown. If there is no project with the given [projectId] and [edition], throw an [InvalidProjectIdException].
      */
     fun deleteAssignment(projectId: UUID, assignmentId: UUID, edition: String) {
         val project = getProjectById(projectId, edition)
