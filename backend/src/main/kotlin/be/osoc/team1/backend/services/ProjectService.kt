@@ -85,17 +85,9 @@ class ProjectService(
         repository.save(project)
     }
 
-    fun getStudents(projectId: UUID, edition: String): List<Student> =
-        getStudents(getProjectById(projectId, edition))
+    fun getStudents(projectId: UUID, edition: String): List<Student> = getStudents(getProjectById(projectId, edition))
 
-    fun getStudents(project: Project): List<Student> {
-        val students = mutableListOf<Student>()
-        for (assignment in project.assignments) {
-            if (!students.contains(assignment.student))
-                students.add(assignment.student)
-        }
-        return students
-    }
+    fun getStudents(project: Project): List<Student> = project.assignments.map { it.student }.distinct()
 
     /**
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
