@@ -834,6 +834,32 @@ paths:
                 '404':
                     description: |
                         The response if there is no statusSuggestion in the database with the given id.
+    /answers/{answerId}:
+        get:
+            summary: Get Answer by id
+            description: |
+                Returns the Answer with the corresponding id. If no such Answer exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+              - name: answerId
+                required: true
+                in: path
+                schema:
+                  type: string
+                  format: uuid
+            responses:
+              '200':
+                description: |
+                  The response if there is an answer in the database with the given id.
+                  Returns the Answer in the response body.
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Answer'
+              '404':
+                description: |
+                  The response if there is no Answer in the database with the given id.
+
     /login:
         post:
             summary: login to the user with the correct email and password
@@ -943,7 +969,9 @@ components:
                 answers:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Answer'
+                      type: string
+                      format: 'https://example.com/api/answers/{answerId}'
+                      example: 'https://example.com/api/answers/{answerId}'
                 skills:
                     type: array
                     items:
@@ -1141,6 +1169,7 @@ components:
           properties:
               skillName:
                   type: string
+                  example: "Back-end developer"
         Position:
             type: object
             required:
