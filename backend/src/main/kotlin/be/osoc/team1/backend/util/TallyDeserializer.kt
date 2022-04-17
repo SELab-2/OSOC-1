@@ -58,7 +58,6 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         val key = node.get("key").asText()
         val label = node.get("label").asText()
         val type = node.get("type").asText()
-        assert(key.length == 15 || key.length == 52)
 
         val valueNode = node.get("value")
 
