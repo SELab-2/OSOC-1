@@ -47,6 +47,15 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
     /**
      * This function takes in a [JsonNode] representing a question, and it will return an [Answer] object.
      * This [node] has a key, label, type, value and depending on the type, an options field.
+     * The [node] object should look like this:
+     * ```
+     * {
+     *     "key": QUESTION_KEY,
+     *     "label": QUESTION_LABEL,
+     *     "type": QUESTION_TYPE,
+     *     "value": VALUE_OBJECT
+     * }
+     * ```
      */
     private fun processQuestionNode(node: JsonNode): Answer {
         val key = node.get("key").asText()
@@ -58,7 +67,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         if (valueNode.isNull)
             return Answer(key, label, listOf())
 
-        return when(type) {
+        return when (type) {
             "MULTIPLE_CHOICE" -> getAnswerMultipleChoice(node, valueNode, key, label)
             "CHECKBOXES" -> Answer(key, label, getAnswerListCheckboxes(node, valueNode, key))
             "FILE_UPLOAD" -> Answer(key, label, getAnswerListFileUpload(valueNode))
@@ -66,14 +75,22 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         }
     }
 
+    /**
+     * Extract the answer and optionId out of a json object called [node] which represents a question.
+     * This function assumes the question is of type MULTIPLE_CHOICE.
+     */
     private fun getAnswerMultipleChoice(node: JsonNode, valueNode: JsonNode, key: String, label: String): Answer {
         val optionId = valueNode.asText()
         val options = node.get("options").toSet()
-        val optionNode = options.find { it.get("id").asText() == optionId } ?:
-            throw FailedOperationException("The specified option '$optionId' in the answer of the question with '$key' was not found in the associated 'options' field")
+        val optionNode = options.find { it.get("id").asText() == optionId }
+            ?: throw FailedOperationException("The specified option '$optionId' in the answer of the question with '$key' was not found in the associated 'options' field")
         return Answer(key, label, listOf(optionNode.get("text").asText()), optionId)
     }
 
+    /**
+     * Extract the answers out of a json object called [node] which represents a question.
+     * This function assumes the question is of type CHECKBOXES.
+     */
     private fun getAnswerListCheckboxes(node: JsonNode, valueNode: JsonNode, key: String): List<String> {
         if (key.length != 15)
             return listOf(valueNode.asText())
@@ -88,6 +105,20 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         return valueList
     }
 
+    /**
+     * Extract the urls out of a [valueNode] json array containing file upload objects.
+     * These file upload objects are structured like this:
+     * ```
+     * {
+     *     "id": ID,
+     *     "name": FILENAME,
+     *     "url": URL,
+     *     "mimeType": MIMETYPE,
+     *     "size": SIZE_IN_BYTES
+     * }
+     * ```
+     * This function assumes that [valueNode] is "value" property of a question of type FILE_UPLOAD.
+     */
     private fun getAnswerListFileUpload(valueNode: JsonNode): List<String> {
         return valueNode.toList().map { it.get("url").asText() }
     }
