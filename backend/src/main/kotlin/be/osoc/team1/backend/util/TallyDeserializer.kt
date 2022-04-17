@@ -1,15 +1,13 @@
-package be.osoc.team1.backend.entities
+package be.osoc.team1.backend.util
 
+import be.osoc.team1.backend.entities.Answer
+import be.osoc.team1.backend.entities.Skill
+import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.FailedOperationException
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import java.util.UUID
-import javax.persistence.ElementCollection
-import javax.persistence.Entity
-import javax.persistence.Id
 
 /**
  * A deserializer that takes a tally form and extracts the required information to construct a [Student] object.
@@ -95,24 +93,4 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
 
         return Answer(key, label, listOf(valueNode.asText()))
     }
-}
-
-/**
- * An [Answer] object stores an answer to a [question]. Because these questions sometimes have multiple answers, for
- * example when you can select multiple options the [answer] is stored as a list of strings. In the case of
- * MULTIPLE_CHOICE questions in which there are multiple options and one answer an optionId is stored, this is used
- * for the alumni question. We use the id instead of just comparing the string with the hope that if answer were to
- * change slightly in the form the id would still match, and we wouldn't have to update the code.
- */
-@Entity
-class Answer(
-    val key: String,
-    val question: String,
-    @ElementCollection
-    val answer: Collection<String>,
-    @JsonIgnore
-    val optionId: String = ""
-) {
-    @Id
-    val id: UUID = UUID.randomUUID()
 }

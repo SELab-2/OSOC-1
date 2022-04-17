@@ -3,11 +3,13 @@ package be.osoc.team1.backend.entities
 import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
+import be.osoc.team1.backend.util.TallyDeserializer
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 import javax.persistence.CascadeType
+import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.Id
@@ -77,6 +79,26 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
     // in this article, because I couldn't get the code to work when the mappedBy attribute was added
     // to the @OneToMany side of the relation.
     var student: Student? = null
+}
+
+/**
+ * An [Answer] object stores an answer to a [question]. Because these questions sometimes have multiple answers, for
+ * example when you can select multiple options the [answer] is stored as a list of strings. In the case of
+ * MULTIPLE_CHOICE questions in which there are multiple options and one answer an optionId is stored, this is used
+ * for the alumni question. We use the id instead of just comparing the string with the hope that if answer were to
+ * change slightly in the form the id would still match, and we wouldn't have to update the code.
+ */
+@Entity
+class Answer(
+    val key: String,
+    val question: String,
+    @ElementCollection
+    val answer: Collection<String>,
+    @JsonIgnore
+    val optionId: String = ""
+) {
+    @Id
+    val id: UUID = UUID.randomUUID()
 }
 
 /**
