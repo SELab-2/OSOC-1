@@ -13,7 +13,7 @@ const Endpoints = {
   USERS: baseURL + '/users',
   LOGIN: '/login',
   REFRESH: '/token/refresh',
-  EDITIONS: ''
+  EDITIONS: '',
 } as const;
 
 export default Endpoints;
