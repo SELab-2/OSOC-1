@@ -18,6 +18,7 @@ import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.util.TallyDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -202,9 +203,19 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         }
     }
 
+    private fun setFieldValueFromTallyForm(rootNode: JsonNode, key: String, value: String?) {
+        val iter = rootNode.get("data").get("fields").elements()
+        while(iter.hasNext()) {
+            val field = iter.next()
+            if (field.get("key").asText() == key) {
+                (field as ObjectNode).put("value", value)
+            }
+        }
+    }
+
     @Test
     fun `addStudent should return created student`() {
-        val node = jsonNodeFromFile("student_test_forms/student_test_form.json")
+        val node = jsonNodeFromFile("student_test_form.json")
         val slot = slot<Student>()
         every { studentService.addStudent(capture(slot)) } returns testStudent
         val mvcResult =
@@ -236,7 +247,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
     @Test
     fun `addStudent should fail when firstname question is not given`() {
-        val node = jsonNodeFromFile("student_test_forms/student_test_form.json")
+        val node = jsonNodeFromFile("student_test_form.json")
         removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.firstnameQuestion)
 
         testInvalidTallyForm(node)
@@ -244,12 +255,15 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `addStudent should fail when answer to firstname question is empty`() {
-        testInvalidTallyForm(jsonNodeFromFile("student_test_forms/student_test_form_firstname_empty.json"))
+        val node = jsonNodeFromFile("student_test_form.json")
+        setFieldValueFromTallyForm(node, TallyDeserializer.TallyKeys.firstnameQuestion, null)
+
+        testInvalidTallyForm(node)
     }
 
     @Test
     fun `addStudent should fail when lastname question is not given`() {
-        val node = jsonNodeFromFile("student_test_forms/student_test_form.json")
+        val node = jsonNodeFromFile("student_test_form.json")
         removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.lastnameQuestion)
 
         testInvalidTallyForm(node)
@@ -257,7 +271,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `addStudent should fail when alumni question is not given`() {
-        val node = jsonNodeFromFile("student_test_forms/student_test_form.json")
+        val node = jsonNodeFromFile("student_test_form.json")
         removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.alumnQuestion)
 
         testInvalidTallyForm(node)
@@ -265,7 +279,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `addStudent should fail when skill question is not given`() {
-        val node = jsonNodeFromFile("student_test_forms/student_test_form.json")
+        val node = jsonNodeFromFile("student_test_form.json")
         removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.skillQuestion)
 
         testInvalidTallyForm(node)
@@ -273,7 +287,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `addStudent should fail when an option is used as a value not present in the options list with MULTIPLE_CHOICE`() {
-        testInvalidTallyForm(jsonNodeFromFile("student_test_forms/student_test_form_invalid_option.json"))
+        val node = jsonNodeFromFile("student_test_form.json")
+        setFieldValueFromTallyForm(node, TallyDeserializer.TallyKeys.alumnQuestion, "689451da-305b-451a-8039-c748ff06ec83")
+
+        testInvalidTallyForm(node)
     }
 
     @Test
