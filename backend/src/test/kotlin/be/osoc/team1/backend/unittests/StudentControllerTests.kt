@@ -225,6 +225,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `addStudent should fail when answer to firstname question is empty`() {
+        testInvalidTallyForm("student_test_forms/student_test_form_firstname_empty.json")
+    }
+
+    @Test
     fun `addStudent should fail when lastname question is not given`() {
         testInvalidTallyForm("student_test_forms/student_test_form_no_lastname.json")
     }
