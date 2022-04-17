@@ -196,7 +196,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     private fun removeFieldFromTallyForm(rootNode: JsonNode, key: String) {
         val iter = rootNode.get("data").get("fields").elements()
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             val field = iter.next()
             if (field.get("key").asText() == key)
                 iter.remove()
@@ -205,7 +205,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     private fun setFieldValueFromTallyForm(rootNode: JsonNode, key: String, value: String?) {
         val iter = rootNode.get("data").get("fields").elements()
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             val field = iter.next()
             if (field.get("key").asText() == key) {
                 (field as ObjectNode).put("value", value)
