@@ -29,6 +29,11 @@ type URTProps = {
    * @see {@link USERS_PAGE_ERROR}
    */
   setGlobalError: Dispatch<SetStateAction<string>>;
+
+  /**
+   * if the logged in user is an admin
+   */
+  isAdmin: boolean;
 }
 
 /**
@@ -36,7 +41,7 @@ type URTProps = {
  * @param URTProps - component properties, @see {@link URTProps}
  * @returns User Table Row component
  */
-const UserTableRow: React.FC<URTProps> = ({ user, updateUsersLocal, setGlobalError }: URTProps) => {
+const UserTableRow: React.FC<URTProps> = ({ user, updateUsersLocal, setGlobalError, isAdmin }: URTProps) => {
 
   /**
    * individual row error (e.g. when an error occurs trying to update the role)
@@ -113,15 +118,25 @@ const UserTableRow: React.FC<URTProps> = ({ user, updateUsersLocal, setGlobalErr
             </div>
           )
         }
-        <select value={ user.role } onChange={ (e) => updateRole(user.id, e.target.value as UserRole) }>
-          {
-            Object.keys(UserRole).map((_role, idx) => (
-              <option key={idx} value={ _role }>
-                { _role }
-              </option>
-            ))
-          }
-        </select>
+        {
+          isAdmin
+          ? (
+            <select value={ user.role } onChange={ (e) => updateRole(user.id, e.target.value as UserRole) }>
+            {
+              Object.keys(UserRole).map((_role, idx) => (
+                <option key={idx} value={ _role }>
+                  { _role }
+                </option>
+              ))
+            }
+          </select>
+          )
+        : (
+          <div>
+            <p>{ user.role }</p>
+          </div>
+        )
+        }
       </div>
     </td>
   </tr>

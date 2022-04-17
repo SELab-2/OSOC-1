@@ -31,11 +31,16 @@ type UserTableProps = {
   setFilter: Dispatch<SetStateAction<string>>;
 
   /**
-   * string
+   * string containing the name filter
    * 
    * @see {@link USERS_PAGE_FILTER}
    */
   nameFilter: string;
+
+  /**
+   * if the logged in user is an admin
+   */
+  isAdmin: boolean;
 }
 
 /**
@@ -44,7 +49,7 @@ type UserTableProps = {
  * @param UserTableProps - properties used in User Table
  * @returns User Table component
  */
-const UserTable: React.FC<UserTableProps> = ({ users, updateUsersLocal, setGlobalError, setFilter, nameFilter }: UserTableProps) => {
+const UserTable: React.FC<UserTableProps> = ({ users, updateUsersLocal, setGlobalError, setFilter, nameFilter, isAdmin }: UserTableProps) => {
   const filterRef = useRef<HTMLInputElement>(null);
 
   const [showFilter, setShowFilter] = useState(false);
@@ -92,7 +97,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, updateUsersLocal, setGloba
       <tbody>
       {
         users && users.length
-        ? users.map((user) => <UserTableRow key={user.id} user={user} updateUsersLocal={updateUsersLocal} setGlobalError={setGlobalError}/>)
+        ? users.map((user) => <UserTableRow key={user.id} user={user} updateUsersLocal={updateUsersLocal} setGlobalError={setGlobalError} isAdmin={isAdmin} />)
         : (
           <tr className="h-16">
             <td colSpan={3}>
