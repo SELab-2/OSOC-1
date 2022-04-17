@@ -28,27 +28,21 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
             answerMap[answer.key] = answer
         }
 
-        val firstnameAnswer = answerMap[nameQuestionKey]
-            ?: throw FailedOperationException("Could not find firstname question!")
-        val lastnameAnswer = answerMap[lastnameQuestionKey]
-            ?: throw FailedOperationException("Could not find lastname question!")
-        val alumnAnswer = answerMap[alumnQuestionKey]
-            ?: throw FailedOperationException("Could not find alumni question!")
-        val skillAnswer = answerMap[skillQuestionKey]
-            ?: throw FailedOperationException("Could not find skill question!")
-
         try {
             return Student(
-                firstnameAnswer.answer.first(),
-                lastnameAnswer.answer.first(),
-                skillAnswer.answer.map { Skill(it) }.toSortedSet(),
-                alumnAnswer.optionId == alumnYesId,
+                getAnswerForKey(answerMap, nameQuestionKey, "firstname").answer.first(),
+                getAnswerForKey(answerMap, lastnameQuestionKey, "lastname").answer.first(),
+                getAnswerForKey(answerMap, skillQuestionKey, "skill").answer.map { Skill(it) }.toSortedSet(),
+                getAnswerForKey(answerMap, alumnQuestionKey, "alumni").optionId == alumnYesId,
                 answerMap.values.toList()
             )
         } catch (_: NoSuchElementException) {
             throw FailedOperationException("The firstname ore lastname answer was found to be empty!")
         }
     }
+
+    private fun getAnswerForKey(answerMap: Map<String, Answer>, key: String, questionName: String): Answer =
+        answerMap[key] ?: throw FailedOperationException("Could not find $questionName question!")
 
     /**
      * This function takes a [JsonNode] representing a question as an input, it will return an [Answer] object.
