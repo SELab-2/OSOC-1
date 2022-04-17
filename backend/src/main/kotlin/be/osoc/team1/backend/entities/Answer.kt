@@ -39,13 +39,17 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         val skillAnswer = answerMap[skillQuestionKey]
             ?: throw FailedOperationException("Could not find skill question!")
 
-        return Student(
-            firstnameAnswer.answer.first(),
-            lastnameAnswer.answer.first(),
-            skillAnswer.answer.map { Skill(it) }.toSortedSet(),
-            alumnAnswer.optionId == alumnYesId,
-            answerMap.values.toList()
-        )
+        try {
+            return Student(
+                firstnameAnswer.answer.first(),
+                lastnameAnswer.answer.first(),
+                skillAnswer.answer.map { Skill(it) }.toSortedSet(),
+                alumnAnswer.optionId == alumnYesId,
+                answerMap.values.toList()
+            )
+        } catch (_: NoSuchElementException) {
+            throw FailedOperationException("The firstname ore lastname answer was found to be empty!")
+        }
     }
 
     /**
