@@ -71,7 +71,7 @@ const Users: NextPage = () => {
    * runs when `router` or `user` is updated
    */
   useEffect(() => {
-    if (!user || ! [UserRole.Admin, UserRole.Coach].includes(user.role)) {
+    if (!user || ![UserRole.Admin, UserRole.Coach].includes(user.role)) {
       router.push('/login');
     }
   }, [router, user]);
@@ -158,7 +158,7 @@ const Users: NextPage = () => {
               setGlobalError={setError}
               setFilter={setNameFilter}
               nameFilter={nameFilter}
-              isAdmin={ user.role === UserRole.Admin }
+              isAdmin={user.role === UserRole.Admin}
             />
           </>
         )}
