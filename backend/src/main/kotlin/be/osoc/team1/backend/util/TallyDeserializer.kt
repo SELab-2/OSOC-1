@@ -52,7 +52,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
 
     /**
      * This function takes a [JsonNode] representing a question as an input, it will return an [Answer] object.
-     * A question node has a key, label, type, value and depending on the type, an options field.
+     * This [node] has a key, label, type, value and depending on the type, an options field.
      */
     private fun processQuestionNode(node: JsonNode): Answer {
         val key = node.get("key").asText()
@@ -64,32 +64,37 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         if (valueNode.isNull)
             return Answer(key, label, listOf())
 
-        if (type == "MULTIPLE_CHOICE") {
-            val optionId = valueNode.asText()
-            val options = node.get("options").toList()
-            for (optionNode in options) {
-                val id = optionNode.get("id").asText()
-                val text = optionNode.get("text").asText()
-                if (optionId == id)
-                    return Answer(key, label, listOf(text), optionId)
-            }
-            throw FailedOperationException("The specified option '$optionId' in the answer of the question with '$key' was not found in the associated 'options' field")
-        } else if (type == "CHECKBOXES" && key.length == 15) {
-            val valueIds = valueNode.toSet().map { it.asText() }
-            val valueList = mutableListOf<String>()
-            val options = node.get("options").toSet()
-            for (optionNode in options) {
-                val id = optionNode.get("id").asText()
-                val text = optionNode.get("text").asText()
-                if (valueIds.contains(id))
-                    valueList.add(text)
-            }
-            return Answer(key, label, valueList)
-        } else if (type == "FILE_UPLOAD") {
-            val fileUrls = valueNode.toList().map { it.get("url").asText() }
-            return Answer(key, label, fileUrls)
+        return when(type) {
+            "MULTIPLE_CHOICE" -> getAnswerMultipleChoice(node, valueNode, key, label)
+            "CHECKBOXES" -> Answer(key, label, getAnswerListCheckboxes(node, valueNode, key))
+            "FILE_UPLOAD" -> Answer(key, label, getAnswerListFileUpload(valueNode))
+            else -> Answer(key, label, listOf(valueNode.asText()))
         }
+    }
 
-        return Answer(key, label, listOf(valueNode.asText()))
+    private fun getAnswerMultipleChoice(node: JsonNode, valueNode: JsonNode, key: String, label: String): Answer {
+        val optionId = valueNode.asText()
+        val options = node.get("options").toSet()
+        val optionNode = options.find { it.get("id").asText() == optionId } ?:
+            throw FailedOperationException("The specified option '$optionId' in the answer of the question with '$key' was not found in the associated 'options' field")
+        return Answer(key, label, listOf(optionNode.get("text").asText()), optionId)
+    }
+
+    private fun getAnswerListCheckboxes(node: JsonNode, valueNode: JsonNode, key: String): List<String> {
+        if (key.length != 15)
+            return listOf(valueNode.asText())
+
+        val valueList = mutableListOf<String>()
+        val valueIds = valueNode.toSet().map { it.asText() }
+        for (optionNode in node.get("options").toSet()) {
+            val id = optionNode.get("id").asText()
+            if (valueIds.contains(id))
+                valueList.add(optionNode.get("text").asText())
+        }
+        return valueList
+    }
+
+    private fun getAnswerListFileUpload(valueNode: JsonNode): List<String> {
+        return valueNode.toList().map { it.get("url").asText() }
     }
 }
