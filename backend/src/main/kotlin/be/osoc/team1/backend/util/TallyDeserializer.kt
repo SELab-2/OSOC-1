@@ -45,7 +45,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         answerMap[key] ?: throw FailedOperationException("Could not find $questionName question!")
 
     /**
-     * This function takes a [JsonNode] representing a question as an input, it will return an [Answer] object.
+     * This function takes in a [JsonNode] representing a question, and it will return an [Answer] object.
      * This [node] has a key, label, type, value and depending on the type, an options field.
      */
     private fun processQuestionNode(node: JsonNode): Answer {

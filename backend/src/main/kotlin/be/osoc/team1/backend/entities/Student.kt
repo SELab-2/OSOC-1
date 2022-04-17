@@ -83,10 +83,10 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
 
 /**
  * An [Answer] object stores an answer to a [question]. Because these questions sometimes have multiple answers, for
- * example when you can select multiple options the [answer] is stored as a list of strings. In the case of
- * MULTIPLE_CHOICE questions in which there are multiple options and one answer an optionId is stored, this is used
- * for the alumni question. We use the id instead of just comparing the string with the hope that if answer were to
- * change slightly in the form the id would still match, and we wouldn't have to update the code.
+ * example when you can select multiple options, the [answer] is stored as a list of strings. In the case of
+ * MULTIPLE_CHOICE questions in which there are multiple options and one answer an optionId will be stored. This is used
+ * for the alumni question. We use the id instead of just comparing the string with the hope that if the answer were to
+ * change slightly in the form the id would still remain the same, and we wouldn't have to update the code.
  */
 @Entity
 class Answer(
