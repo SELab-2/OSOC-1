@@ -13,11 +13,13 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
  * A deserializer that takes a tally form and extracts the required information to construct a [Student] object.
  */
 class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
-    private val nameQuestionKey = "question_nroEGL"
-    private val lastnameQuestionKey = "question_w4KjAo"
-    private val alumnQuestionKey = "question_wz7eGE"
-    private val alumnYesId = "689451da-305b-451a-8039-c748ff06ec82"
-    private val skillQuestionKey = "question_3X4q1V"
+    object TallyKeys {
+        const val firstnameQuestion = "question_nroEGL"
+        const val lastnameQuestion = "question_w4KjAo"
+        const val alumnQuestion = "question_wz7eGE"
+        const val alumnYesId = "689451da-305b-451a-8039-c748ff06ec82"
+        const val skillQuestion = "question_3X4q1V"
+    }
 
     override fun deserialize(parser: JsonParser, context: DeserializationContext): Student {
         val rootNode: JsonNode = parser.codec.readTree(parser)
@@ -30,10 +32,10 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
 
         try {
             return Student(
-                getAnswerForKey(answerMap, nameQuestionKey, "firstname").answer.first(),
-                getAnswerForKey(answerMap, lastnameQuestionKey, "lastname").answer.first(),
-                getAnswerForKey(answerMap, skillQuestionKey, "skill").answer.map { Skill(it) }.toSortedSet(),
-                getAnswerForKey(answerMap, alumnQuestionKey, "alumni").optionId == alumnYesId,
+                getAnswerForKey(answerMap, TallyKeys.firstnameQuestion, "firstname").answer.first(),
+                getAnswerForKey(answerMap, TallyKeys.lastnameQuestion, "lastname").answer.first(),
+                getAnswerForKey(answerMap, TallyKeys.skillQuestion, "skill").answer.map { Skill(it) }.toSortedSet(),
+                getAnswerForKey(answerMap, TallyKeys.alumnQuestion, "alumni").optionId == TallyKeys.alumnYesId,
                 answerMap.values.toList()
             )
         } catch (_: NoSuchElementException) {
