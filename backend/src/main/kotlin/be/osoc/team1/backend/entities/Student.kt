@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -96,6 +97,7 @@ class Student(
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JsonSerialize(using = AnswerListSerializer::class)
     val answers: List<Answer> = listOf()
 ) {
 
