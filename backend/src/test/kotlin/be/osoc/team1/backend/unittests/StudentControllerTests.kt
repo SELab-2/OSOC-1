@@ -245,6 +245,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `addStudent should fail when an option is used as a value not present in the options list with MULTIPLE_CHOICE`() {
+        testInvalidTallyForm("student_test_forms/student_test_form_invalid_option.json")
+    }
+
+    @Test
     fun `setStudentStatus succeeds when student with given id exists`() {
         val status = StatusEnum.Yes
         every { studentService.setStudentStatus(studentId, status) } just Runs

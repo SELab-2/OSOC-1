@@ -1,0 +1,68 @@
+{
+  "data": {
+    "fields": [
+      {
+        "key": "question_mO70dA",
+        "label": "Will you live in Belgium in July 2022?*",
+        "type": "MULTIPLE_CHOICE",
+        "value": "b8eb0e38-27a0-5acc-9b20-858b2f5b08ec",
+        "options": [
+          {
+            "id": "b8eb0e38-27a0-4acc-9b20-858b2f5b08ec",
+            "text": "Yes"
+          },
+          {
+            "id": "f10aa8b3-100e-4fa4-b301-21c300f11100",
+            "text": "No"
+          }
+        ]
+      },
+      {
+        "key": "question_nroEGL",
+        "label": "Birth name",
+        "type": "INPUT_TEXT",
+        "value": "Maarten"
+      },
+      {
+        "key": "question_w4KjAo",
+        "label": "Last name",
+        "type": "INPUT_TEXT",
+        "value": "Steevens"
+      },
+      {
+        "key": "question_3X4q1V",
+        "label": "Which role are you applying for?",
+        "type": "CHECKBOXES",
+        "value": [
+          "19b68be9-6c2b-41f8-95f6-439cfb20f792"
+        ],
+        "options": [
+          {
+            "id": "2fd881eb-68de-4012-988d-7957de663c4f",
+            "text": "Front-end developer"
+          },
+          {
+            "id": "19b68be9-6c2b-41f8-95f6-439cfb20f792",
+            "text": "Back-end developer"
+          }
+        ]
+      },
+      {
+        "key": "question_wz7eGE",
+        "label": "Have you participated in osoc before?",
+        "type": "MULTIPLE_CHOICE",
+        "value": "689451da-305b-451a-8039-c748ff06ec82",
+        "options": [
+          {
+            "id": "41576a04-8f7a-4276-93b4-0dcc0c75bf0b",
+            "text": "No, it's my first time participating in osoc"
+          },
+          {
+            "id": "689451da-305b-451a-8039-c748ff06ec82",
+            "text": "Yes, I have been part of osoc before"
+          }
+        ]
+      }
+    ]
+  }
+}
