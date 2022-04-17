@@ -66,7 +66,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Student'
+                            $ref: '#/components/schemas/TallyForm'
             responses:
                 '201':
                     description: Successful operation.
@@ -904,6 +904,7 @@ components:
                 - lastname
                 - skills
                 - alumn
+                - answers
                 - status
                 - statusSuggestions
                 - communications
@@ -914,8 +915,10 @@ components:
                     readOnly: true
                 firstName:
                     type: string
+                    example: "John"
                 lastName:
-                    type: string    
+                    type: string
+                    example: "Doe"
                 status:
                     readOnly: true
                     allOf:
@@ -926,19 +929,118 @@ components:
                     items:
                         type: string
                         format: 'https://example.com/api/statusSuggestions/{statusSuggestionId}'
+                        example: 'https://example.com/api/statusSuggestions/{statusSuggestionId}'
                 communications:
                     readOnly: true
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/communications/{communicationId}'
+                        example: 'https://example.com/api/communications/{communicationId}'
                 alumn:
                     type: boolean
                     default: false
+                answers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Answer'
                 skills:
                     type: array
                     items:
                         $ref: '#/components/schemas/Skill'
+        Answer:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            key:
+              type: string
+              example: "question_3X4q1V"
+            question:
+              type: string
+              example: "Which role are you applying for?"
+            answer:
+              type: array
+              items:
+                type: string
+              example: [ "Front-end Developer", "Back-end Developer" ]
+        TallyForm:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              properties:
+                fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                        example: "question_3X4q1V"
+                      label:
+                        type: string
+                        example: "Which role are you applying for?"
+                      "type":
+                        type: string
+                        example: "CHECKBOXES"
+                      value:
+                        type: object
+                        example: ["19b68be9-6c2b-41f8-95f6-439cfb20f792"]
+                      options:
+                        type: array
+                        items:
+                          type: object
+                          example:
+                            [
+                              {
+                                "id": "2fd881eb-68de-4012-988d-7957de663c4f",
+                                "text": "Front-end developer"
+                              },
+                              {
+                                "id": "19b68be9-6c2b-41f8-95f6-439cfb20f792",
+                                "text": "Back-end developer"
+                              },
+                              {
+                                "id": "d27de5b9-3370-44e6-b114-60ddc243a4d8",
+                                "text": "UX / UI designer"
+                              },
+                              {
+                                "id": "eb4b0022-4673-4f96-9c15-c01d870a253f",
+                                "text": "Graphic designer"
+                              },
+                              {
+                                "id": "f812f2d5-b438-49f4-9d95-0b415add300f",
+                                "text": "Business Modeller"
+                              },
+                              {
+                                "id": "3f34960d-1248-49ca-b6c7-fed702c73979",
+                                "text": "Storyteller"
+                              },
+                              {
+                                "id": "9bcb7761-3c86-4ea2-8abc-d45187a007ee",
+                                "text": "Marketer"
+                              },
+                              {
+                                "id": "5df0feb4-87ce-4767-bf99-092c27bc9b24",
+                                "text": "Copywriter"
+                              },
+                              {
+                                "id": "ee956527-6f34-479e-89a8-feb5e73d8979",
+                                "text": "Video editor"
+                              },
+                              {
+                                "id": "aa26de30-7ec2-4255-a949-0e5388dd58be",
+                                "text": "Photographer"
+                              },
+                              {
+                                "id": "ce472fdf-723c-4b94-bcad-a9136d0d8443",
+                                "text": "Other"
+                              }
+                            ]
         Project:
             type: object
             required:
