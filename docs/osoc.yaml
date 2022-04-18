@@ -53,9 +53,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Student'
+                                $ref: '#/components/schemas/PagedCollection'
         post:
             summary: Add a new student to the database
             description: |
@@ -1095,6 +1093,18 @@ components:
                     items:
                         type: string
                         format: uuid
+        PagedCollection:
+            type: object
+            required:
+                - collection
+                - totalLength
+            properties:
+                collection:
+                    type: array
+                    items: 
+                        $ref: '#/components/schemas/Student'
+                totalLength:
+                    type: integer
     securitySchemes:
         BasicAuth:
             type: http
