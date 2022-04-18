@@ -24,6 +24,7 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
     /**
      * Paginate a [collection] based on [pageNumber] and [pageSize]
      * if [pageNumber] is greater than the length of the collection the length of the collection will be used
+     * returns a [PagedCollection]
      */
     fun <T> paginate(collection: List<T>): PagedCollection<T> {
         val endOfPaging = Integer.min(collection.size, startOfPaging + pageSize) - 1
@@ -43,9 +44,9 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
 }
 
 /**
- * [PagedCollection] is a data class that holds a paginated collection
+ * [PagedCollection] is a data class that holds a paginated [collection] and its pre-pagination length ([totalLength])
  */
-data class PagedCollection<T>(val collection: List<T>, val totalAmount: Int)
+data class PagedCollection<T>(val collection: List<T>, val totalLength: Int)
 
 data class StudentFilter(val statusFilter: List<StatusEnum>, val nameQuery: String, val includeSuggested: Boolean)
 
