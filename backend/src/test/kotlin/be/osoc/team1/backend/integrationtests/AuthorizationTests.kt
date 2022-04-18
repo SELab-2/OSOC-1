@@ -222,8 +222,8 @@ class AuthorizationTests() {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
 
         assert(response.statusCodeValue == 200)
-        assert(JSONArray(response.body).getJSONObject(0).get("firstName") == testStudent.firstName)
-        assert(JSONArray(response.body).getJSONObject(0).get("lastName") == testStudent.lastName)
+        assert(JSONObject(response.body).getJSONArray("collection").getJSONObject(0).get("firstName") == testStudent.firstName)
+        assert(JSONObject(response.body).getJSONArray("collection").getJSONObject(0).get("lastName") == testStudent.lastName)
         logoutHeader(authHeaders)
     }
 
@@ -234,8 +234,8 @@ class AuthorizationTests() {
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
 
         assert(response.statusCodeValue == 200)
-        assert(JSONArray(response.body).getJSONObject(0).get("firstName") == testStudent.firstName)
-        assert(JSONArray(response.body).getJSONObject(0).get("lastName") == testStudent.lastName)
+        assert(JSONObject(response.body).getJSONArray("collection").getJSONObject(0).get("firstName") == testStudent.firstName)
+        assert(JSONObject(response.body).getJSONArray("collection").getJSONObject(0).get("lastName") == testStudent.lastName)
         logoutHeader(authHeaders)
     }
 
