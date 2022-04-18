@@ -63,7 +63,6 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         val key = node.get("key").asText()
         val label = node.get("label").asText()
         val type = node.get("type").asText()
-
         val valueNode = node.get("value")
 
         if (valueNode.isNull)
@@ -121,7 +120,6 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
      * ```
      * This function assumes that [valueNode] is "value" property of a question of type FILE_UPLOAD.
      */
-    private fun getAnswerListFileUpload(valueNode: JsonNode): List<String> {
-        return valueNode.toList().map { it.get("url").asText() }
-    }
+    private fun getAnswerListFileUpload(valueNode: JsonNode): List<String> =
+        valueNode.toList().map { it.get("url").asText() }
 }
