@@ -23,7 +23,8 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
 
     /**
      * Paginate a [collection] based on [pageNumber] and [pageSize]
-     * if [pageNumber] is greater than the length of the collection the length of the collection will be used
+     * If the given [pageNumber] and [pageSize] would refer to a page beyond the total number of results, an empty page will be returned.
+     * If the requested [pageNumber] and [pageSize] would lead to the last page, only the remaining results will be returned in a (shorter) list.
      */
     fun <T> paginate(collection: List<T>): List<T> {
         val endOfPaging = Integer.min(collection.size, startOfPaging + pageSize) - 1
