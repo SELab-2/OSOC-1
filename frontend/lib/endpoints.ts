@@ -1,4 +1,5 @@
-const envURL: string = process.env.NEXT_PUBLIC_API_ENDPOINT || '';
+const envURL: string =
+  process.env.NEXT_PUBLIC_API_ENDPOINT || '';
 const baseURL = envURL.replace(/\/$/, '');
 
 /**
@@ -10,9 +11,12 @@ const baseURL = envURL.replace(/\/$/, '');
  */
 type Endpoints = typeof Endpoints[keyof typeof Endpoints];
 const Endpoints = {
+  BASEURL: baseURL,
   USERS: baseURL + '/users',
   LOGIN: '/login',
   REFRESH: '/token/refresh',
+  PROJECTS: baseURL + '/projects',
+  STUDENTS: baseURL + '/students',
 } as const;
 
 export default Endpoints;

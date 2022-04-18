@@ -14,3 +14,51 @@
   line-height: 0px;
   margin: 0px 8px;
 }
+
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #24a0ed;
+}
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #24a0ed;
+}
+
+.chart-label {
+  transform: translate(-50%, -50%);
+}
+
+.icon-speech-blue > svg > path {
+  fill: #3b82f6;
+}
+.icon-xcircle-red > svg > g {
+  stroke: #ef4444;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.modal > .close {
+  cursor: pointer;
+  position: absolute;
+  display: block;
+  padding: 2px 5px;
+  line-height: 20px;
+  right: -10px;
+  top: -10px;
+  font-size: 24px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #cfcece;
+}
+
+.sidebar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+}
