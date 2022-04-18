@@ -13,6 +13,7 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
+import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.UserService
@@ -239,7 +240,7 @@ class StudentServiceTests {
         val student2 = Student("Testien", "Tamzia")
         val student3 = Student("Testaan", "Tamzia")
         val collection = listOf(student1, student2, student3)
-        assertEquals(listOf(student1), pager.paginate(collection))
+        assertEquals(listOf(student1), pager.paginate(collection).collection)
     }
 
     @Test
@@ -249,7 +250,7 @@ class StudentServiceTests {
         val student2 = Student("Testien", "Tamzia")
         val student3 = Student("Testaan", "Tamzia")
         val collection = listOf(student1, student2, student3)
-        assertEquals(collection, pager.paginate(collection))
+        assertEquals(collection, pager.paginate(collection).collection)
     }
 
     @Test
@@ -259,6 +260,16 @@ class StudentServiceTests {
         val student2 = Student("Testien", "Tamzia")
         val student3 = Student("Testaan", "Tamzia")
         val collection = listOf(student1, student2, student3)
-        assertEquals(listOf<Student>(), pager.paginate(collection))
+        assertEquals(listOf<Student>(), pager.paginate(collection).collection)
+    }
+    @Test
+    fun `pager class returns a pagedcollection with the correct total amount`() {
+        val student1 = Student("Testoon", "Tamzia")
+        val student2 = Student("Testien", "Tamzia")
+        val student3 = Student("Testaan", "Tamzia")
+        val collection = listOf(student1, student2, student3)
+        assertEquals(PagedCollection(collection, 3), Pager(0, 5).paginate(collection))
+        assertEquals(PagedCollection(listOf(student1), 3), Pager(0, 1).paginate(collection))
+        assertEquals(PagedCollection(collection, 3), Pager(0, 3).paginate(collection))
     }
 }
