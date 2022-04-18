@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.entities
 
 import be.osoc.team1.backend.util.AnswerListSerializer
+import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
@@ -136,3 +137,25 @@ class Student(
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
 }
+
+/**
+ * This function will filter [Student]s based on given [statuses]
+ * Only [Student]s who have 1 of the given [statuses] will be kept
+ */
+fun List<Student>.filterByStatus(statuses: List<StatusEnum>) =
+    filter { student: Student -> statuses.contains(student.status) }
+
+/**
+ * This function will filter [Student]s based on given [nameQuery]
+ * Only [Student]s whose preprocessed name matches the preprocessed [nameQuery] will be kept (see [nameMatchesSearchQuery])
+ */
+fun List<Student>.filterByName(nameQuery: String) =
+    filter { student: Student -> nameMatchesSearchQuery("${student.firstName} ${student.lastName}", nameQuery) }
+
+/**
+ * This function will filter [Student]s based on given [includeSuggested] boolean
+ * if [includeSuggested] is false only [Student] for which the [callee] hasn't made a suggestion yet will be returned
+ * else return all of the [Student]s
+ */
+fun List<Student>.filterBySuggested(includeSuggested: Boolean, callee: User) =
+    filter { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
