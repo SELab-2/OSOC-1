@@ -98,7 +98,7 @@ class ProjectServiceTests {
         assertEquals(listOf(testProject), service.getAllProjects("lars"))
         assertEquals(listOf(testProject, testProject3), service.getAllProjects("ars"))
         assertEquals(listOf<Project>(), service.getAllProjects("uter"))
-        assertEquals(allProjects, service.getAllProjects(""))
+        assertEquals(allProjects, service.getAllProjects())
     }
 
     @Test
