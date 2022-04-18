@@ -53,7 +53,14 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/PagedCollection'
+                                allOf:
+                                    - $ref: '#/components/schemas/PagedCollection'
+                                    - type: object
+                                      properties:
+                                        collection: 
+                                          type: array
+                                          items: 
+                                            $ref: '#/components/schemas/Student'
         post:
             summary: Add a new student to the database
             description: |
@@ -233,15 +240,30 @@ paths:
                 schema:
                   type: string
                 description: Part of a name of a project that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
+              - in: query
+                name: pageNumber
+                schema:
+                  type: integer
+                description: The page number for pagination, using offset pagination (see https://developer.box.com/guides/api-calls/pagination/offset-based/)
+              - in: query
+                name: pageSize
+                schema:
+                  type: integer
+                description: The page size for pagination. For example, if you pass 50 as value, there will be 50 projects on one page
             responses:
                 '200':
                     description: successful operation
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Project'
+                                allOf:
+                                    - $ref: '#/components/schemas/PagedCollection'
+                                    - type: object
+                                      properties:
+                                        collection:
+                                          type: array
+                                          items: 
+                                            $ref: '#/components/schemas/Project'
         post:
             summary: Create a new project. Returns the created project object.
             requestBody:
@@ -1236,10 +1258,6 @@ components:
                 - collection
                 - totalLength
             properties:
-                collection:
-                    type: array
-                    items: 
-                        $ref: '#/components/schemas/Student'
                 totalLength:
                     type: integer
     securitySchemes:
