@@ -58,7 +58,7 @@ To run the populate script the Faker library is needed on your root user, you ca
 ```sh
 sudo pip3 install Faker
 ```
-Then you can run the it with (make sure your intelij isn't running the application!):
+Then you can run the script with (make sure your intellij isn't running the application!):
 ```sh
 cd docker
 sudo ./populate
