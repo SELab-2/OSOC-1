@@ -58,7 +58,11 @@ To run the populate script the Faker library is needed on your root user, you ca
 ```sh
 sudo pip3 install Faker
 ```
-
+Then you can run the it with (make sure your intelij isn't running the application!):
+```sh
+cd docker
+sudo ./populate
+```
 ## Setting up the first admin
 
 Please make sure a user had been created using the register page or using the POST method onto https://localhost:8080/api/users.
