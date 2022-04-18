@@ -7,7 +7,6 @@ import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.ConfigUtil
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
-import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
