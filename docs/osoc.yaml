@@ -64,9 +64,8 @@ paths:
         post:
             summary: Add a new student to the database
             description: |
-                Add a student to the database. The created student object is returned.
-                Note that no checking is done to see if firstName or lastName qualify as valid 'names',
-                this verification is the responsibility of the caller.
+                Add a student to the database. The requestbody contains a json representation of a tally form.
+                A Student object will be generated from this form, this object will also be returned.
             requestBody:
                 content:
                     application/json:
@@ -230,7 +229,7 @@ paths:
                     description: |
                         The response if there is no student in the database with the given id.
                 '400':
-                    description: Bad Request.                        
+                    description: Bad Request. Requestbody does not contain either "Yes", "No", "Maybe" or "Undecided"       
     /projects:
         get:
             summary: Get list containing all Project objects
@@ -341,53 +340,28 @@ paths:
                                     $ref: '#/components/schemas/Student'
                 '404':
                     description: Not Found. No such projectId. 
-        post:
-            summary: Draft student for project
-            parameters:
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            description: studentId
-                            type: string
-                            format: uuid
-            responses:
-                '204':
-                    description: successful operation
-                '404':
-                    description: Not Found. No such projectId.
-                '400':
-                    description: Bad Request.
-    /projects/{projectId}/students/{studentId}:
-        delete:
-            summary: Remove student from project
-            parameters:
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
-              - name: studentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
-            responses:
-                '204':
-                    description: successful operation
-                '404':
-                    description: Not Found. No such projectId or studentId.
     /projects/{projectId}/coaches:
+        get:
+            summary: Get all coaches of a project
+            parameters:
+              - name: projectId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/User'
         post:
-            summary: Assign a coach to project
+            summary: Assign a coach to a project
+            description: Assign a coach to a project, coachId is given in the requestbody.
             parameters:
               - name: projectId
                 required: true
@@ -430,52 +404,10 @@ paths:
                     description: successful operation
                 '404':
                     description: Not Found. No such projectId or coachId.
-    /projects/{projectId}/devroles:
-        post:
-            summary: Add a new student developer role to a project
-            parameters:
-                - name: projectId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
-            requestBody:
-                content:
-                  application/json:
-                    schema:
-                        $ref: '#/components/schemas/Position'
-            responses:
-                '201':
-                    description: succesful operation
-                '404':
-                    description: Not Found. No such projectId.
-                '400':
-                    description: Bad Request.
-    /projects/{projectId}/devroles/{devroleId}:
-        delete:
-            summary: Remove a student developer role from a project
-            parameters:
-                - name: projectId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
-                - name: devroleId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
-            responses:
-                '204':
-                    description: succesful operation
-                '404':
-                    description: Not Found. No such projectId or devroleId.
     /projects/{projectId}/assignments:
         post:
-            summary: Add a new student developer assignment
+            summary: Add a new student assignment
+            description: Assign a student to a position of a project. Requestbody expects a studentId, a positionId, a userId and a reason.
             parameters:
                 - name: projectId
                   required: true
@@ -497,7 +429,7 @@ paths:
                     description: Bad Request.
     /projects/{projectId}/assignments/{assignmentId}:
         delete:
-            summary: Remove a student developer assignment from a project
+            summary: Remove a student assignment from a project
             parameters:
                 - name: projectId
                   required: true
@@ -528,74 +460,6 @@ paths:
                                 type: array
                                 items:
                                     $ref: '#/components/schemas/Conflict'
-                            example:
-                                student: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
-                                projects: ["https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002"]
-    /studentRoles: 
-        get:
-            summary: Get all types of student Roles that are currently in the database.
-            responses:
-                '200':
-                    description: |
-                        Returns an array all different types of student dev roles that 
-                        are currently present in the database.
-                    content:
-                        application/json:
-                            schema: 
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Position'
-        post:
-            summary: Add a new student dev role
-            requestBody:
-                content:
-                    application/json:
-                        schema: 
-                            $ref: '#/components/schemas/Position'
-            responses:
-                '201':
-                    description: | 
-                        Successful operation. Returns a link to the newly added 
-                        student role in the location header.
-                '400':
-                    description: Bad Request. 
-    /studentRoles/{studentRoleId}: 
-        get:
-            summary: Get a specific student role by id.
-            parameters:
-                - name: studentRoleId
-                  required: true
-                  in: path
-                  schema: 
-                    type: string
-                    format: uuid
-            responses:
-                '200':
-                    description: |
-                        Return the corresponding StudentRole
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Position'
-                '404':
-                    description: |
-                        Not Found. No such StudentRoleId.
-        delete:
-            summary: Remove a specific student role by id.
-            parameters:
-                - name: studentRoleId
-                  required: true
-                  in: path
-                  schema: 
-                    type: string
-                    format: uuid
-            responses:
-                '204':
-                    description: |
-                        Succesful operation.
-                '404':
-                    description: |
-                        Not Found. No such StudentRoleId.
     /communications/{communicationId}:
         get:
             summary: Get Communications by id
@@ -641,7 +505,7 @@ paths:
                             $ref: '#/components/schemas/Communication'
             responses:
                 '201':
-                    description: Successful operation.
+                    description: successful operation
                     content:
                         application/json:
                             schema:
@@ -660,7 +524,7 @@ paths:
             summary: Get list containing all users
             responses:
                 '200':
-                    description: OK
+                    description: succesful operation
                     content:
                         application/json:
                             schema:
@@ -676,7 +540,7 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '201':
-                    description: Succesful operation.
+                    description: succesful operation
                     content:
                         application/json:
                             schema:
@@ -699,7 +563,7 @@ paths:
                     format: uuid
             responses:
                 '200':
-                    description: OK
+                    description: succesful operation.
                     content:
                         application/json:
                             schema:
@@ -722,7 +586,7 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '200':
-                    description: OK
+                    description: succesful operation
                     content:
                         application/json:
                             schema:
@@ -735,9 +599,9 @@ paths:
                                 format: url
 
                 '400':
-                    description: BAD REQUEST
+                    description: Bad request
                 '404':
-                    description: NOT FOUND
+                    description: Not Found. No such userId.
         delete:
             summary: delete user by id
             parameters:
@@ -749,9 +613,9 @@ paths:
                     format: uuid
             responses:
                 '204':
-                    description: OK
+                    description: succesful operation
                 '404':
-                    description: NOT FOUND
+                    description: Not Found. No such userId.
     /users/{userId}/role:
         post:
             summary: change role of user
@@ -770,7 +634,7 @@ paths:
                             enum: [Disabled, Coach, Admin]
             responses:
                 '200':
-                    description: OK
+                    description: succesful operation
                     content:
                         application/json:
                             schema:
@@ -928,7 +792,7 @@ paths:
                   - refreshToken
         responses:
           '200':
-            description: OK
+            description: sucessful operation
             content:
               application/json:
                 schema:
@@ -1112,25 +976,31 @@ components:
                     readOnly: true
                 name:
                     type: string
+                    example: Selection tool
                 clientName:
                     type: string # Later on this could be a different schema if clients need to be saved in the database
+                    example: OSOC
                 description:
                     type: string
+                    example: desc
                 coaches:
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/users/{coachId}'
+                        example: 'https://example.com/api/users/f9cdd786-d6a8-4f34-a796-4d55b099f785'
                 positions:
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/positions/{positionId}'
+                        example: 'https://example.com/api/positions/e1dfbe14-d0eb-4331-9ccf-2210b2e2c652'
                 assignments:
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/assignments/{assignmentId}'
+                        example: 'https://example.com/api/positions/b9e314e7-e5a8-4de1-aeed-7ff5a9106625'
         Communication:
             type: object
             required:
@@ -1144,9 +1014,13 @@ components:
                     readOnly: true
                 message:
                     type: string
+                    example: "Lorum ipsum"
                 type:
                     allOf:
                       - $ref: '#/components/schemas/CommunicationType'
+        CommunicationType:
+            type: string
+            enum: [Email]
         User:
             type: object
             required:
@@ -1162,14 +1036,18 @@ components:
                     readOnly: true
                 username:
                     type: string
+                    example: john_doe
                 email:
                     type: string
+                    example: johndoe@mail.com
                 role:
                     type: string
                     enum: [Disabled, Coach, Admin]
+                    example: Coach
                 password:
                     type: string
                     format: bcrypt
+                    example: $2y$10$jntFfHuty8K6FmacwTES3eRJcIma5Almb8z/aEl/prZ246MXqCE1O
         Status:
             type: string
             enum: [Yes, Maybe, No, Undecided]
@@ -1211,6 +1089,7 @@ components:
                     $ref: '#/components/schemas/Skill'
                 amount:
                     type: integer
+                    example: 1
         Assignment:
             type: object
             required:
@@ -1226,18 +1105,18 @@ components:
                     readOnly: true
                 student:
                     type: string
-                    format: 'https://example.com/api/students/{studentId}'
+                    format: uuid
                 position:
                     type: string
-                    format: 'https://example.com/api/positions/{positionId}'
+                    format: uuid
+                    example: 8b409406-6f82-4f2f-9b02-62326e733877
                 suggester:
                     type: string
-                    format: 'https://example.com/api/users/{suggesterId}'
+                    format: uuid
+                    example: 7116cc59-d205-4e8e-b975-06063e9744a6
                 reason:
                     type: string
-        CommunicationType:
-            type: string
-            enum: [Email]
+                    example: "Lorum ipsum"
         Conflict:
             type: object
             required:
@@ -1247,11 +1126,13 @@ components:
                 student:
                     type: string
                     format: uuid
+                    example: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
                 projects:
                     type: array
                     items:
                         type: string
                         format: uuid
+                    example: ["https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002"]     
         PagedCollection:
             type: object
             required:
@@ -1260,6 +1141,7 @@ components:
             properties:
                 totalLength:
                     type: integer
+                    example: 1
     securitySchemes:
         BasicAuth:
             type: http
