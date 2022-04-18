@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.util
 
+import be.osoc.team1.backend.entities.Answer
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.Position
@@ -32,3 +33,5 @@ class PositionListSerializer : ListSerializer<Position>({ "/positions/" + it.id.
 class StatusSuggestionListSerializer : ListSerializer<StatusSuggestion>({ "/statusSuggestions/" + it.id.toString() })
 
 class UserListSerializer : ListSerializer<User>({ "/users/" + it.id.toString() })
+
+class AnswerListSerializer : ListSerializer<Answer>({ "/answers/" + it.id.toString() })

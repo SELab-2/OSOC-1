@@ -1,9 +1,11 @@
 package be.osoc.team1.backend.services
 
+import be.osoc.team1.backend.entities.Answer
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.repositories.AnswerRepository
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.repositories.PositionRepository
 import be.osoc.team1.backend.repositories.StatusSuggestionRepository
@@ -29,3 +31,6 @@ class PositionService(repository: PositionRepository) : BaseService<Position>(re
 
 @Service
 class StatusSuggestionService(repository: StatusSuggestionRepository) : BaseService<StatusSuggestion>(repository)
+
+@Service
+class AnswerService(repository: AnswerRepository) : BaseService<Answer>(repository)

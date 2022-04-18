@@ -2,6 +2,7 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
@@ -14,11 +15,16 @@ import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.util.TallyDeserializer
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import io.mockk.slot
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,6 +40,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
@@ -193,20 +201,109 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(delete("/students/$differentId")).andExpect(status().isNotFound)
     }
 
+    private fun jsonNodeFromFile(filename: String): JsonNode {
+        val studentJsonForm =
+            Files.readAllBytes(Paths.get(this::class.java.classLoader.getResource(filename).toURI()))
+        return objectMapper.readTree(studentJsonForm)
+    }
+
+    private fun removeFieldFromTallyForm(rootNode: JsonNode, key: String) {
+        val iter = rootNode.get("data").get("fields").elements()
+        while (iter.hasNext()) {
+            val field = iter.next()
+            if (field.get("key").asText() == key)
+                iter.remove()
+        }
+    }
+
+    private fun setFieldValueFromTallyForm(rootNode: JsonNode, key: String, value: String?) {
+        val iter = rootNode.get("data").get("fields").elements()
+        while (iter.hasNext()) {
+            val field = iter.next()
+            if (field.get("key").asText() == key) {
+                (field as ObjectNode).put("value", value)
+            }
+        }
+    }
+
     @Test
     fun `addStudent should return created student`() {
-        val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
-        every { studentService.addStudent(any()) } returns testStudent
+        val node = jsonNodeFromFile("student_test_form.json")
+        val slot = slot<Student>()
+        every { studentService.addStudent(capture(slot)) } returns testStudent
         val mvcResult =
             mockMvc.perform(
                 post("/students")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(jsonRepresentation)
+                    .content(objectMapper.writeValueAsString(node))
             )
                 .andExpect(status().isCreated)
                 .andReturn()
+
+        val capturedStudent = slot.captured
+        assertEquals("Maarten", capturedStudent.firstName)
+        assertEquals("Steevens", capturedStudent.lastName)
+        assert(capturedStudent.skills.contains(Skill("Back-end developer")))
+        assertEquals(true, capturedStudent.alumn)
+
         val locationHeader = mvcResult.response.getHeader("Location")
         assert(locationHeader!!.endsWith("/students/${testStudent.id}"))
+    }
+
+    private fun testInvalidTallyForm(node: JsonNode) {
+        every { studentService.addStudent(any()) } returns testStudent
+        mockMvc.perform(
+            post("/students")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(node))
+        ).andExpect(status().isBadRequest)
+    }
+    @Test
+    fun `addStudent should fail when firstname question is not given`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.firstnameQuestion)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when answer to firstname question is empty`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        setFieldValueFromTallyForm(node, TallyDeserializer.TallyKeys.firstnameQuestion, null)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when lastname question is not given`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.lastnameQuestion)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when alumni question is not given`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.alumnQuestion)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when skill question is not given`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.skillQuestion)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when an option is used as a value not present in the options list with MULTIPLE_CHOICE`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        setFieldValueFromTallyForm(node, TallyDeserializer.TallyKeys.alumnQuestion, "689451da-305b-451a-8039-c748ff06ec83")
+
+        testInvalidTallyForm(node)
     }
 
     @Test
