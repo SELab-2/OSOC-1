@@ -7,10 +7,11 @@ import {
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
 import { StatusSuggestion, Student } from '../../lib/types';
+import Select from 'react-select';
 
 type StudentProp = {
   student: Student;
@@ -22,6 +23,9 @@ type StatusSuggestionProp = {
 
 // TODO no actual functionality present yet
 const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
+  const [adminStatus, setAdminStatus] = useState(
+    {} as { value: string; label: string }
+  );
   return (
     <section className={`flex flex-col-reverse justify-between xl:flex-row`}>
       {/* hold the student information */}
@@ -42,6 +46,7 @@ const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
         </div>
       </div>
 
+      {/* TODO make motivation a required field & add an 'are you sure' popup */}
       {/* holds suggestion controls */}
       <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
         {/* regular coach status suggestion form */}
@@ -70,83 +75,36 @@ const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
         </form>
 
         {/* TODO this should only be visible to admin role */}
+        {/* TODO add form action */}
+        {/* TODO fix this changing width on selection change */}
         {/* admin status selection form */}
         <form className={`mt-10 flex flex-row justify-between border-2 p-2`}>
-          <Menu as="div" className="relative inline-block text-left">
-            <div>
-              <Menu.Button className="inline-flex w-full justify-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                Make permanent selection
-                <ChevronDownIcon
-                  className="-mr-1 ml-2 h-5 w-5"
-                  aria-hidden="true"
-                />
-              </Menu.Button>
-            </div>
-
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              {/* These are the actual dropdown options */}
-              <Menu.Items className="absolute right-0 w-full origin-top-right bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <p
-                        className={`${
-                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                        } block px-4 py-2 text-sm`}
-                      >
-                        opt1
-                      </p>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <p
-                        className={`${
-                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                        } block px-4 py-2 text-sm`}
-                      >
-                        opt2
-                      </p>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <p
-                        className={`${
-                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                        } block px-4 py-2 text-sm`}
-                      >
-                        opt3
-                      </p>
-                    )}
-                  </Menu.Item>
-                  {/* Don't know what type this dropdown menu will end up being yet */}
-                  {/*<form method="POST" action="#">*/}
-                  {/*    <Menu.Item>*/}
-                  {/*        {({ active }) => (*/}
-                  {/*            <button*/}
-                  {/*                type="submit"*/}
-                  {/*                className={`${*/}
-                  {/*                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'}*/}
-                  {/*                block px-4 py-2 text-sm`}*/}
-                  {/*            >*/}
-                  {/*                Sign out*/}
-                  {/*            </button>*/}
-                  {/*        )}*/}
-                  {/*    </Menu.Item>*/}
-                  {/*</form>*/}
-                </div>
-              </Menu.Items>
-            </Transition>
-          </Menu>
+          <Fragment>
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              isDisabled={false}
+              isLoading={false}
+              isClearable={true}
+              isRtl={false}
+              isSearchable={false}
+              isMulti={false}
+              name="adminStatusSelect"
+              options={[
+                { value: 'chocolate', label: 'Chocolate' },
+                { value: 'strawberry', label: 'Strawberry' },
+                { value: 'vanilla', label: 'Vanilla' },
+              ]} // TODO add correct status values n labels from /types StatusSuggestionStatus enum
+              placeholder="Select status"
+              onChange={(e) =>
+                setAdminStatus(
+                  e
+                    ? { value: e.value, label: e.label }
+                    : ({} as { value: string; label: string })
+                )
+              }
+            />
+          </Fragment>
           {/* button to submit the admin status choice */}
           <button
             className={`bg-check-gray px-2 py-[2px] text-sm shadow-md shadow-gray-400`}
