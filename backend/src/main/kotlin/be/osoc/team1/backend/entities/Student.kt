@@ -1,7 +1,7 @@
 package be.osoc.team1.backend.entities
 
-import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
+import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
