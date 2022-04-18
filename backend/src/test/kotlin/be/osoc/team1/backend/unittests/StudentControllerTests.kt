@@ -13,6 +13,7 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.services.OsocUserDetailService
+import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.StudentService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -80,7 +81,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         )
         mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 3))))
     }
 
     @Test
@@ -97,19 +98,19 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort) } returns allStudents
         mockMvc.perform(get("/students?status=Yes").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent1))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent1), 1))))
         mockMvc.perform(get("/students?status=No").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent2))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent2), 1))))
         mockMvc.perform(get("/students?status=Maybe").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent3))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent3), 1))))
         mockMvc.perform(get("/students?status=Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent4))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent4), 1))))
         mockMvc.perform(get("/students?status=Yes,No,Maybe,Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(allStudents)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
     }
 
     @Test
@@ -125,7 +126,19 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(Sort.by("name")) } returns allStudents
         mockMvc.perform(get("/students?status=Yes&sortBy=name&pageSize=2").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent2, testStudent3))))
+            .andExpect(
+                content().json(
+                    objectMapper.writeValueAsString(
+                        PagedCollection(
+                            listOf(
+                                testStudent2,
+                                testStudent3
+                            ),
+                            2
+                        )
+                    )
+                )
+            )
     }
 
     @Test
@@ -138,16 +151,22 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort) } returns allStudents
         mockMvc.perform(get("/students?name=lars").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent), 1))))
         mockMvc.perform(get("/students?name=ars").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent, testStudent3))))
+            .andExpect(
+                content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent, testStudent3), 2)))
+            )
         mockMvc.perform(get("/students?name=uter").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent, testStudent3, testStudent4))))
+            .andExpect(
+                content().json(
+                    objectMapper.writeValueAsString(PagedCollection(listOf(testStudent, testStudent3, testStudent4), 3))
+                )
+            )
         mockMvc.perform(get("/students?name=").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(allStudents)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
     }
 
     @Test
@@ -157,10 +176,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort) } returns listOf(testStudent)
         mockMvc.perform(get("/students?includeSuggested=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf<Student>())))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf<Student>(), 0))))
         mockMvc.perform(get("/students?includeSuggested=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent), 1))))
     }
 
     @Test
