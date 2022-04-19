@@ -25,7 +25,8 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var editionService: EditionService
 
-    private val editionName = "edition"
+    private val editionName = "testEdition"
+    private val editionUrl = "/editions/$editionName"
 
     @Test
     fun `getEdition returns the edition if it exists`() {
@@ -34,7 +35,7 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
         // See: https://stackoverflow.com/questions/32270422/jackson-renames-primitive-boolean-field-by-removing-is
         val expected = "{\"name\":\"$editionName\",\"isActive\":true}"
         every { editionService.getEdition(editionName) } returns edition
-        mockMvc.perform(get("/$editionName"))
+        mockMvc.perform(get(editionUrl))
             .andExpect(status().isOk)
             .andExpect(content().string(expected))
     }
@@ -42,7 +43,7 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getEdition returns 404 (NOT FOUND) if the edition does not exist`() {
         every { editionService.getEdition(editionName) }.throws(InvalidIdException())
-        mockMvc.perform(get("/$editionName")).andExpect(status().isNotFound)
+        mockMvc.perform(get(editionUrl)).andExpect(status().isNotFound)
     }
 
     @Test
@@ -77,7 +78,7 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `makeEditionInactive returns nothing when it succeeds`() {
         every { editionService.makeEditionInactive(editionName) } just Runs
-        mockMvc.perform(post("/$editionName/inactivate"))
+        mockMvc.perform(post("$editionUrl/inactivate"))
             .andExpect(status().isOk)
             .andExpect(content().string(""))
     }
@@ -85,13 +86,13 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `makeEditionInactive returns 400 (BAD REQUEST) if the edition is already inactive`() {
         every { editionService.makeEditionInactive(editionName) }.throws(FailedOperationException())
-        mockMvc.perform(post("/$editionName/inactivate")).andExpect(status().isBadRequest)
+        mockMvc.perform(post("$editionUrl/inactivate")).andExpect(status().isBadRequest)
     }
 
     @Test
     fun `makeEditionActive returns nothing when it succeeds`() {
         every { editionService.makeEditionActive(editionName) } just Runs
-        mockMvc.perform(post("/$editionName/activate"))
+        mockMvc.perform(post("$editionUrl/activate"))
             .andExpect(status().isOk)
             .andExpect(content().string(""))
     }
@@ -99,24 +100,24 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `makeEditionActive returns 400 (BAD REQUEST) if the edition is already active`() {
         every { editionService.makeEditionActive(editionName) }.throws(FailedOperationException())
-        mockMvc.perform(post("/$editionName/activate")).andExpect(status().isBadRequest)
+        mockMvc.perform(post("$editionUrl/activate")).andExpect(status().isBadRequest)
     }
 
     @Test
     fun `makeEditionActive returns 403 (FORBIDDEN) if there is already another active edition`() {
         every { editionService.makeEditionActive(editionName) }.throws(ForbiddenOperationException())
-        mockMvc.perform(post("/$editionName/activate")).andExpect(status().isForbidden)
+        mockMvc.perform(post("$editionUrl/activate")).andExpect(status().isForbidden)
     }
 
     @Test
     fun `deleteEdition returns 204 (NO CONTENT) if the edition existed`() {
         every { editionService.deleteEdition(editionName) } just Runs
-        mockMvc.perform(delete("/$editionName")).andExpect(status().isNoContent)
+        mockMvc.perform(delete(editionUrl)).andExpect(status().isNoContent)
     }
 
     @Test
     fun `deleteEdition returns 404 (NOT FOUND) if the edition did not exist`() {
         every { editionService.deleteEdition(editionName) }.throws(InvalidIdException())
-        mockMvc.perform(delete("/$editionName")).andExpect(status().isNotFound)
+        mockMvc.perform(delete(editionUrl)).andExpect(status().isNotFound)
     }
 }

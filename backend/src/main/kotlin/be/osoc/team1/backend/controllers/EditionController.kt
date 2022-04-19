@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@RequestMapping("/editions")
 class EditionController(val service: EditionService) {
 
     /**
@@ -25,14 +27,14 @@ class EditionController(val service: EditionService) {
     /**
      * Returns the currently active edition, or null if there is no active edition.
      */
-    @GetMapping("/editions/active")
+    @GetMapping("/active")
     @Secured("ROLE_ADMIN")
     fun getActiveEdition(): Edition? = service.getActiveEdition()
 
     /**
      * Returns all editions that are currently inactive.
      */
-    @GetMapping("/editions/inactive")
+    @GetMapping("/inactive")
     @Secured("ROLE_ADMIN")
     fun getInactiveEditions(): Iterable<Edition> = service.getInactiveEditions()
 
