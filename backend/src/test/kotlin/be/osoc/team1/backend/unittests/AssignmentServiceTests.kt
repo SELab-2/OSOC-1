@@ -21,7 +21,7 @@ import java.util.UUID
 
 class AssignmentServiceTests {
     private val testId = UUID.randomUUID()
-    private val testStudent = Student("Jitse", "Willaert")
+    private val testStudent = Student("Jitse", "Willaert", "testEdition")
     private val testSkill = Skill("Test")
     private val testPosition = Position(testSkill, 2)
     private val testSuggester = User("Jitse", "Willaert", Role.Admin, "Test")

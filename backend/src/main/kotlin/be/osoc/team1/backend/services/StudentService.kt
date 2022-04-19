@@ -23,7 +23,8 @@ class StudentService(private val repository: StudentRepository, private val user
      * Get all students sorted using [sortBy].
      * Can be filtered using the List<Student> extension functions.
      */
-    fun getAllStudents(sortBy: Sort, edition: String, callee: User): List<Student> = repository.findAll(sortBy).toList()
+    fun getAllStudents(sortBy: Sort, edition: String): List<Student> =
+        repository.findByEdition(edition, sortBy).toList()
 
     /**
      * Get a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student exists.

@@ -12,6 +12,8 @@ import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.page
 import be.osoc.team1.backend.util.TallyDeserializer
+import java.net.URLDecoder
+import java.security.Principal
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -25,8 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.net.URLDecoder
-import java.security.Principal
 import java.util.UUID
 
 @RestController
@@ -58,13 +58,13 @@ class StudentController(
         principal: Principal
     ): Iterable<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllStudents(
-            Sort.by(sortBy))
+        val callee = userDetailService.getUserFromPrincipal(principal)
+        val pager = Pager(pageNumber, pageSize)
+        return service.getAllStudents(Sort.by(sortBy), edition)
             .filterByName(decodedName)
-            .filterBySuggested( includeSuggested,
-            edition, userDetailService.getUserFromPrincipal(principal)
-        ).filterByStatus(status)
-            .page(Pager(pageNumber, pageSize))
+            .filterBySuggested(includeSuggested, callee)
+            .filterByStatus(status)
+            .page(pager)
     }
 
     /**
@@ -97,16 +97,17 @@ class StudentController(
      */
     @PostMapping
     fun addStudent(
-        @RequestBody studentRegistration: StudentRegistration,
+        @RequestBody studentRegistration: Student,
         @PathVariable edition: String
     ): ResponseEntity<Student> {
-        val student = Student(studentRegistration.firstName, studentRegistration.lastName, edition)
+        val student = Student(
+            studentRegistration.firstName, studentRegistration.lastName,
+            edition,
+            studentRegistration.skills, studentRegistration.alumn, studentRegistration.answers
+        )
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
-
-    // Needed to avoid the caller having to pass the edition in both the URL and the request body.
-    data class StudentRegistration(val firstName: String, val lastName: String)
 
     /**
      * Set the [status] of the student with the given [studentId]. If no such student exists,
