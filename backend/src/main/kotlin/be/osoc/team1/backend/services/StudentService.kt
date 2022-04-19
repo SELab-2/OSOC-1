@@ -11,9 +11,6 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -23,37 +20,10 @@ import java.util.UUID
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
     /**
-     * Get all students of the edition [edition],
-     * who are within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
-     * Can be filtered by [searchQuery] (see the [nameMatchesSearchQuery] function for the details),
-     * [statusFilter] (see if student status matches 1 in the given list),
-     * whether or not the requesting user has already made a suggestion for this student [includeSuggested],
-     * [callee] is the user who made this request
+     * Get all students sorted using [sortBy].
+     * Can be filtered using the List<Student> extension functions.
      */
-    fun getAllStudents(
-        pageNumber: Int,
-        pageSize: Int,
-        sortBy: String,
-        statusFilter: List<StatusEnum>,
-        searchQuery: String,
-        includeSuggested: Boolean,
-        edition: String,
-        callee: User
-    ): Iterable<Student> {
-        val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
-        val pagedResult: Page<Student> = repository.findByEdition(edition, paging)
-        val studentList = mutableListOf<Student>()
-        for (student in pagedResult.content) {
-            val studentHasStatus = statusFilter.contains(student.status)
-            val fullName = "${student.firstName} ${student.lastName}"
-            val studentHasMatchingName = nameMatchesSearchQuery(fullName, searchQuery)
-            val studentBeenSuggestedByUserCheck = includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
-            if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
-                studentList.add(student)
-            }
-        }
-        return studentList
-    }
+    fun getAllStudents(sortBy: Sort, edition: String, callee: User): List<Student> = repository.findAll(sortBy).toList()
 
     /**
      * Get a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student exists.
