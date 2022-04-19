@@ -169,9 +169,9 @@ class ProjectController(private val service: ProjectService) {
         service.postAssignment(projectId, assignment, edition)
 
     /**
-     * Removes assignment with [assignmentId] of a student to a position on the project with [projectId]. Will return a
-     * 404 if the specified [assignmentId] is not actually part of this project or if [assignmentId] outright doesn't
-     * exist.
+     * Removes assignment with [assignmentId] of a student to a position on the project identified with the given
+     * [projectId] and [edition]. Will return a 404 if either the project or the assignment don't exist or
+     * if there is no assignment with that [assignmentId] which is a part of the project.
      */
     @DeleteMapping("/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)

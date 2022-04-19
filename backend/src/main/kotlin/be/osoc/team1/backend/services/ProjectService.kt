@@ -116,10 +116,10 @@ class ProjectService(
     }
 
     /**
-     * Assigns a student to a specific position on the project with [projectId]. A [ForbiddenOperationException] will be
-     * thrown if the student was already assigned this position. A
-     * [InvalidAssignmentIdException] will be thrown if specified position is not part of the specified project. If the
-     * specified project, student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
+     * Assigns a student to a specific position on the project identified with the given [projectId] and [edition].
+     * A [ForbiddenOperationException] will be thrown if the student was already assigned this position.
+     * An [InvalidAssignmentIdException] will be thrown if the position is not part of the the project.
+     * If the project, student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
      */
     fun postAssignment(projectId: UUID, assignmentForm: AssignmentPost, edition: String) {
         val project = getProjectById(projectId, edition)
