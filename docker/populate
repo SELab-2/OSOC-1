@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# REQUIRED PACKAGES "docker, curl"
+
+if ! [ $(id -u) = 0 ]; then
+   echo "The script needs to be run as root." >&2
+   exit 1
+fi
+# DOCKER
+# stop and remove docker if it was running
+printf "Clearing docker: "
+sudo docker container stop osoc_postgres_container_local_dev &> /dev/null
+sudo docker container rm osoc_postgres_container_local_dev &> /dev/null
+printf "done\n"
+# start up docker
+printf "Starting up docker: "
+sudo docker build -t osoc_postgres_image_local_dev:latest . > /dev/null
+sudo docker run -d --name osoc_postgres_container_local_dev -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=osoc osoc_postgres_image_local_dev:latest > /dev/null
+sudo docker container start osoc_postgres_container_local_dev > /dev/null
+printf "done\n"
+
+# starting backend
+printf "Starting backend: "
+cd ../backend
+./mvnw spring-boot:start > /dev/null
+printf "running\n"
+
+# ADMIN
+# create the first user
+printf "Creating first admin: "
+curl -s --location --request POST 'http://localhost:8080/api/users' --header 'Content-Type: application/json' --data-raw '{ "username": "tester", "email": "tester@mail.com", "password": "tester" }' > /dev/null
+# make him admin
+sudo docker exec -it osoc_postgres_container_local_dev psql -U postgres osoc -c "UPDATE account SET role=0;" > /dev/null
+printf "created\n"
+
+# ADD DATA
+printf "Adding other data: "
+# call a python script for convenience
+python3 ../docker/subpopulate.py
+printf "added\n"
+
+# stopping backend
+printf "Killing backend: "
+./mvnw spring-boot:stop > /dev/null
+printf "killed\n"
+printf "\nYou can now run the application to test the added data\n"
+echo "The login detail of the first admin are the following"
+echo "  username:     tester"
+echo "  email:        tester@mail.com"
+printf "  password:     tester\n\n"
