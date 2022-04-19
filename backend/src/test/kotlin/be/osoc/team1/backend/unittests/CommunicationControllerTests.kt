@@ -11,7 +11,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
-import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -37,19 +36,16 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val jsonRepresentation = objectMapper.writeValueAsString(testCommunication)
 
     @Test
-    fun `getCommunicationsByStudentId succeeds if student with given id exists`() {
-        val mutableList: MutableList<Communication> = ArrayList()
-        mutableList.add(testCommunication)
-        every { studentService.getStudentById(testId).communications } returns mutableList
-        mockMvc.perform(get("/communications/$testId"))
-            .andExpect(status().isOk)
-            .andExpect(content().string(containsString("test message")))
+    fun `getCommunicationById returns communication if communication with given id exists`() {
+        every { communicationService.getById(testId) } returns testCommunication
+        mockMvc.perform(get("/communications/$testId")).andExpect(status().isOk)
+            .andExpect(content().json(jsonRepresentation))
     }
 
     @Test
-    fun `getCommunicationsByStudentId returns 404 Not Found if student with given id does not exist`() {
+    fun `getCommunicationById returns 404 Not Found if communication with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { studentService.getStudentById(differentId) }.throws(InvalidIdException())
+        every { communicationService.getById(differentId) }.throws(InvalidIdException())
         mockMvc.perform(get("/communications/$differentId"))
             .andExpect(status().isNotFound)
     }

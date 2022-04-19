@@ -182,7 +182,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Student'
+                            $ref: '#/components/schemas/TallyForm'
             responses:
                 '201':
                     description: Successful operation.
@@ -773,14 +773,15 @@ paths:
                 '404':
                     description: |
                         Not Found. No such StudentRoleId.
-    /communications/{studentId}:
+    /communications/{communicationId}:
         get:
-            summary: Get all registered communications with a student
+            summary: Get Communications by id
             description: |
-                Returns all communications that belongs to the student with the corresponding student id.
-                If no such student exists, returns a "404: Not Found" message instead.
+                Returns the communication with the corresponding  id.
+                If no such communication exists,
+                returns a "404: Not Found" message instead.
             parameters:
-                -   name: studentId
+                -   name: communicationId
                     required: true
                     in: path
                     schema:
@@ -789,17 +790,16 @@ paths:
             responses:
                 '200':
                     description: |
-                        The response if there is a student in the database with the given id.
-                        Returns the array of communications in the response body.
+                        The response if there is a communication in the database with the given id.
+                        Returns the communication in the response body.
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Communication'
+                                $ref: '#/components/schemas/Communication'
                 '404':
                     description: |
-                        The response if there is no student in the database with the given id.
+                        The response if there is no communication in the database with the given id.
+    /communications/{studentId}:
         post:
             summary: Add a new communication with a student
             description: |
@@ -957,6 +957,107 @@ paths:
                     description: NOT FOUND
                 '400':
                     description: Bad Request.
+    /assignments/{assignmentId}:
+        get:
+            summary: Get Assignment by id
+            description: |
+                Returns the assignment with the corresponding id. If no such assignment exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+              - name: assignmentId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: |
+                        The response if there is a assignment in the database with the given id.
+                        Returns the assignment in the response body.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Assignment'
+                '404':
+                    description: |
+                        The response if there is no assignment in the database with the given id.
+    /positions/{positionId}:
+        get:
+            summary: Get Position by id
+            description: |
+                Returns the position with the corresponding id. If no such position exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+              - name: positionId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: |
+                        The response if there is a position in the database with the given id.
+                        Returns the position in the response body.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Position'
+                '404':
+                    description: |
+                        The response if there is no position in the database with the given id.
+    /statusSuggestions/{statusSuggestionId}:
+        get:
+            summary: Get StatusSuggestions by id
+            description: |
+                Returns the statusSuggestion with the corresponding id. If no such statusSuggestion exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+              - name: statusSuggestionId
+                required: true
+                in: path
+                schema:
+                    type: string
+                    format: uuid
+            responses:
+                '200':
+                    description: |
+                        The response if there is a statusSuggestion in the database with the given id.
+                        Returns the statusSuggestion in the response body.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusSuggestion'
+                '404':
+                    description: |
+                        The response if there is no statusSuggestion in the database with the given id.
+    /answers/{answerId}:
+        get:
+            summary: Get Answer by id
+            description: |
+                Returns the Answer with the corresponding id. If no such Answer exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+              - name: answerId
+                required: true
+                in: path
+                schema:
+                  type: string
+                  format: uuid
+            responses:
+              '200':
+                description: |
+                  The response if there is an answer in the database with the given id.
+                  Returns the Answer in the response body.
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Answer'
+              '404':
+                description: |
+                  The response if there is no Answer in the database with the given id.
+
     /login:
         post:
             summary: login to the user with the correct email and password
@@ -1027,8 +1128,10 @@ components:
                 - lastname
                 - skills
                 - alumn
+                - answers
                 - status
                 - statusSuggestions
+                - communications
             properties:
                 id:
                     type: string
@@ -1036,8 +1139,9 @@ components:
                     readOnly: true
                 firstName:
                     type: string
+                    example: "John"
                 lastName:
-                    type: string
+                    type: stringexample: "Doe"
                 status:
                     readOnly: true
                     allOf:
@@ -1046,22 +1150,136 @@ components:
                     readOnly: true
                     type: array
                     items:
-                        $ref: '#/components/schemas/StatusSuggestion'
+                        type: string
+                        format: 'https://example.com/api/statusSuggestions/{statusSuggestionId}'
+                        example: 'https://example.com/api/statusSuggestions/6ea082fd-b0f2-4ec6-a05c-6a4e4a02e4eb'
+                communications:
+                    readOnly: true
+                    type: array
+                    items:
+                        type: string
+                        format: 'https://example.com/api/communications/{communicationId}'
+                        example: 'https://example.com/api/communications/f9cdd786-d6a8-4f34-a796-4d55b099f785'
                 alumn:
                     type: boolean
                     default: false
+                answers:
+                    type: array
+                    items:
+                      type: string
+                      format: 'https://example.com/api/answers/{answerId}'
+                      example: 'https://example.com/api/answers/f7b77e33-e69b-4743-a97e-b21acf542e50'
                 skills:
                     type: array
                     items:
                         $ref: '#/components/schemas/Skill'
+        Answer:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            key:
+              type: string
+              example: "question_3X4q1V"
+            question:
+              type: string
+              example: "Which role are you applying for?"
+            answer:
+              type: array
+              items:
+                type: string
+              example: [ "Front-end Developer", "Back-end Developer" ]
+        TallyForm:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              properties:
+                fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                        example: "question_3X4q1V"
+                      label:
+                        type: string
+                        example: "Which role are you applying for?"
+                      "type":
+                        type: string
+                        example: "CHECKBOXES"
+                      value:
+                        type: object
+                        example: ["19b68be9-6c2b-41f8-95f6-439cfb20f792"]
+                      options:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            text:
+                              type: string
+                        example:
+                          [
+                            {
+                              "id": "2fd881eb-68de-4012-988d-7957de663c4f",
+                              "text": "Front-end developer"
+                            },
+                            {
+                              "id": "19b68be9-6c2b-41f8-95f6-439cfb20f792",
+                              "text": "Back-end developer"
+                            },
+                            {
+                              "id": "d27de5b9-3370-44e6-b114-60ddc243a4d8",
+                              "text": "UX / UI designer"
+                            },
+                            {
+                              "id": "eb4b0022-4673-4f96-9c15-c01d870a253f",
+                              "text": "Graphic designer"
+                            },
+                            {
+                              "id": "f812f2d5-b438-49f4-9d95-0b415add300f",
+                              "text": "Business Modeller"
+                            },
+                            {
+                              "id": "3f34960d-1248-49ca-b6c7-fed702c73979",
+                              "text": "Storyteller"
+                            },
+                            {
+                              "id": "9bcb7761-3c86-4ea2-8abc-d45187a007ee",
+                              "text": "Marketer"
+                            },
+                            {
+                              "id": "5df0feb4-87ce-4767-bf99-092c27bc9b24",
+                              "text": "Copywriter"
+                            },
+                            {
+                              "id": "ee956527-6f34-479e-89a8-feb5e73d8979",
+                              "text": "Video editor"
+                            },
+                            {
+                              "id": "aa26de30-7ec2-4255-a949-0e5388dd58be",
+                              "text": "Photographer"
+                            },
+                            {
+                              "id": "ce472fdf-723c-4b94-bcad-a9136d0d8443",
+                              "text": "Other"
+                            }
+                          ]
         Project:
             type: object
             required:
                 - id
                 - name
                 - clientName
-                - coaches
                 - description
+                - coaches
                 - positions
                 - assignments
             properties:
@@ -1073,20 +1291,23 @@ components:
                     type: string
                 clientName:
                     type: string # Later on this could be a different schema if clients need to be saved in the database
+                description:
+                    type: string
                 coaches:
                     type: array
                     items:
-                        $ref: '#/components/schemas/User'
-                description:
-                    type: string
+                        type: string
+                        format: 'https://example.com/api/users/{coachId}'
                 positions:
                     type: array
                     items:
-                        $ref: '#/components/schemas/Position'
+                        type: string
+                        format: 'https://example.com/api/positions/{positionId}'
                 assignments:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Assignment'
+                        type: string
+                        format: 'https://example.com/api/assignments/{assignmentId}'
         Communication:
             type: object
             required:
@@ -1151,6 +1372,7 @@ components:
           properties:
               skillName:
                   type: string
+                  example: "Back-end developer"
         Position:
             type: object
             required:
@@ -1163,18 +1385,17 @@ components:
                     format: uuid
                     readOnly: true
                 skill:
-                    type: string
-                    format: uuid
+                    $ref: '#/components/schemas/Skill'
                 amount:
                     type: integer
-                    default: 1
         Assignment:
             type: object
             required:
                 - id
                 - student
-                - role
+                - position
                 - suggester
+                - reason
             properties:
                 id:
                     type: string
@@ -1182,13 +1403,13 @@ components:
                     readOnly: true
                 student:
                     type: string
-                    format: uuid
+                    format: 'https://example.com/api/students/{studentId}'
                 position:
                     type: string
-                    format: uuid
+                    format: 'https://example.com/api/positions/{positionId}'
                 suggester:
                     type: string
-                    format: uuid
+                    format: 'https://example.com/api/users/{suggesterId}'
                 reason:
                     type: string
         CommunicationType:

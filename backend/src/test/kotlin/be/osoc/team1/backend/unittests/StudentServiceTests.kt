@@ -13,6 +13,7 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
+import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.UserService
 import io.mockk.Runs
@@ -24,8 +25,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
@@ -38,7 +37,7 @@ class StudentServiceTests {
     private val testCoach = User("", "", Role.Coach, "")
     private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
     private val userService = mockk<UserService>()
-    private val defaultStatusFilter = listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
+    private val defaultSort = Sort.by("id")
 
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
@@ -47,152 +46,15 @@ class StudentServiceTests {
         every { repository.deleteById(studentId) } just Runs
         val differentIdTestStudent = Student("Tom", "Alard", testEdition)
         every { repository.save(testStudent) } returns differentIdTestStudent
-        every { repository.findAll() } returns listOf(testStudent)
-        val paging = PageRequest.of(0, 50, Sort.by("id"))
-        every {
-            repository.findByEdition(testEdition, paging)
-        } returns PageImpl(listOf(testStudent))
+        every { repository.findByEdition(testEdition, defaultSort) } returns listOf(testStudent)
+        every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
         return repository
     }
 
     @Test
     fun `getAllStudents does not fail`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(listOf(testStudent), service.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testEdition, testCoach))
-    }
-
-    @Test
-    fun `getAllStudents paging returns the correct amount`() {
-        val repository: StudentRepository = mockk()
-        val sortBy = "id"
-        val paging = PageRequest.of(0, 1, Sort.by(sortBy))
-        every {
-            repository.findByEdition(testEdition, paging)
-        } returns PageImpl(listOf(testStudent))
-        val service = StudentService(repository, userService)
-        assertEquals(
-            listOf(testStudent),
-            service.getAllStudents(
-                0, 1, "id", defaultStatusFilter, "", true,
-                testEdition, testCoach
-            )
-        )
-    }
-
-    @Test
-    fun `getAllStudents paging should not fail when list is empty`() {
-        val repository: StudentRepository = mockk()
-        val emptyList = emptyList<Student>()
-        val sortBy = "id"
-        val paging = PageRequest.of(0, 1, Sort.by(sortBy))
-        every {
-            repository.findByEdition(testEdition, paging)
-        } returns PageImpl(emptyList)
-        val service = StudentService(repository, userService)
-        assertEquals(
-            emptyList,
-            service.getAllStudents(
-                0, 1, "id", defaultStatusFilter, "", true,
-                testEdition, testCoach
-            )
-        )
-    }
-
-    @Test
-    fun `getAllStudents status filtering returns only students with those statuses`() {
-        val testStudent = Student("Lars", "Cauter", testEdition)
-        val testStudent2 = Student("Sral", "Retuac", testEdition)
-        val testStudent3 = Student("Arsl", "Auterc", testEdition)
-        val testStudent4 = Student("Rsla", "Uterca", testEdition)
-        val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
-        val firstPage = 0
-        val pageSize = 50
-        val sortBy = "id"
-        val paging = PageRequest.of(firstPage, pageSize, Sort.by(sortBy))
-        val repository: StudentRepository = mockk()
-        every {
-            repository.findByEdition(testEdition, paging)
-        } returns PageImpl(allStudents)
-        val service = StudentService(repository, userService)
-        testStudent.status = StatusEnum.Undecided
-        testStudent2.status = StatusEnum.Yes
-        testStudent3.status = StatusEnum.No
-        testStudent4.status = StatusEnum.Maybe
-        val emptyName = ""
-        val includeSuggested = true
-        assertEquals(
-            listOf(testStudent),
-            service.getAllStudents(firstPage, pageSize, sortBy, listOf(StatusEnum.Undecided), emptyName, includeSuggested, testEdition, testCoach)
-        )
-        assertEquals(
-            listOf(testStudent2),
-            service.getAllStudents(firstPage, pageSize, sortBy, listOf(StatusEnum.Yes), emptyName, includeSuggested, testEdition, testCoach)
-        )
-        assertEquals(
-            listOf(testStudent3),
-            service.getAllStudents(firstPage, pageSize, sortBy, listOf(StatusEnum.No), emptyName, includeSuggested, testEdition, testCoach)
-        )
-        assertEquals(
-            listOf(testStudent4),
-            service.getAllStudents(firstPage, pageSize, sortBy, listOf(StatusEnum.Maybe), emptyName, includeSuggested, testEdition, testCoach)
-        )
-        assertEquals(
-            allStudents,
-            service.getAllStudents(firstPage, pageSize, sortBy, defaultStatusFilter, emptyName, includeSuggested, testEdition, testCoach)
-        )
-    }
-
-    @Test
-    fun `getAllStudents name filtering returns only students with those names`() {
-        val testStudent = Student("Lars", "Cauter", testEdition)
-        val testStudent2 = Student("Sral", "Retuac", testEdition)
-        val testStudent3 = Student("Arsl", "Auterc", testEdition)
-        val testStudent4 = Student("Rsla", "Uterca", testEdition)
-        val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
-        val firstPage = 0
-        val pageSize = 50
-        val sortBy = "id"
-        val paging = PageRequest.of(firstPage, pageSize, Sort.by(sortBy))
-        val repository: StudentRepository = mockk()
-        every {
-            repository.findByEdition(testEdition, paging)
-        } returns PageImpl(allStudents)
-        val service = StudentService(repository, userService)
-        val sortByUndecided = listOf(StatusEnum.Undecided)
-        val includeSuggested = true
-        assertEquals(
-            listOf(testStudent),
-            service.getAllStudents(firstPage, pageSize, sortBy, sortByUndecided, "lars", includeSuggested, testEdition, testCoach),
-        )
-        assertEquals(
-            listOf(testStudent, testStudent3),
-            service.getAllStudents(firstPage, pageSize, sortBy, sortByUndecided, "ars", includeSuggested, testEdition, testCoach),
-        )
-        assertEquals(
-            listOf(testStudent, testStudent3, testStudent4),
-            service.getAllStudents(firstPage, pageSize, sortBy, sortByUndecided, "uter", includeSuggested, testEdition, testCoach),
-        )
-        assertEquals(
-            allStudents,
-            service.getAllStudents(firstPage, pageSize, sortBy, sortByUndecided, "", includeSuggested, testEdition, testCoach),
-        )
-    }
-
-    @Test
-    fun `getAllStudents include filtering works`() {
-        val testStudent = Student("Lars", "Van", testEdition)
-        testStudent.statusSuggestions.add(StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "Nice!"))
-        val repository: StudentRepository = mockk()
-        val firstPage = 0
-        val pageSize = 50
-        val sortBy = "id"
-        val paging = PageRequest.of(firstPage, pageSize, Sort.by(sortBy))
-        every {
-            repository.findByEdition(testEdition, paging)
-        } returns PageImpl(listOf(testStudent))
-        val service = StudentService(repository, userService)
-        assertEquals(listOf<Student>(), service.getAllStudents(firstPage, pageSize, sortBy, defaultStatusFilter, "", false, testEdition, testCoach))
-        assertEquals(listOf(testStudent), service.getAllStudents(firstPage, pageSize, sortBy, defaultStatusFilter, "", true, testEdition, testCoach))
+        assertEquals(listOf(testStudent), service.getAllStudents(defaultSort, testEdition))
     }
 
     @Test
@@ -365,5 +227,35 @@ class StudentServiceTests {
         val service = StudentService(getRepository(false), userService)
         val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
         assertThrows<InvalidStudentIdException> { service.addCommunicationToStudent(studentId, testCommunication) }
+    }
+
+    @Test
+    fun `pager class paginates collections correctly`() {
+        val pager = Pager(0, 1)
+        val student1 = Student("Testoon", "Tamzia", testEdition)
+        val student2 = Student("Testien", "Tamzia", testEdition)
+        val student3 = Student("Testaan", "Tamzia", testEdition)
+        val collection = listOf(student1, student2, student3)
+        assertEquals(listOf(student1), pager.paginate(collection))
+    }
+
+    @Test
+    fun `pager class returns less items than requested if the collection is smaller`() {
+        val pager = Pager(0, 5)
+        val student1 = Student("Testoon", "Tamzia", testEdition)
+        val student2 = Student("Testien", "Tamzia", testEdition)
+        val student3 = Student("Testaan", "Tamzia", testEdition)
+        val collection = listOf(student1, student2, student3)
+        assertEquals(collection, pager.paginate(collection))
+    }
+
+    @Test
+    fun `pager class returns empty list when start of paging-request is out of bounds`() {
+        val pager = Pager(1, 5)
+        val student1 = Student("Testoon", "Tamzia", testEdition)
+        val student2 = Student("Testien", "Tamzia", testEdition)
+        val student3 = Student("Testaan", "Tamzia", testEdition)
+        val collection = listOf(student1, student2, student3)
+        assertEquals(listOf<Student>(), pager.paginate(collection))
     }
 }
