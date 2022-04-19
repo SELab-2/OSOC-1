@@ -24,8 +24,6 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.slot
-import java.nio.file.Files
-import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,6 +40,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
@@ -227,9 +227,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val slot = slot<Student>()
         every { studentService.addStudent(capture(slot)) } returns testStudent
         val mvcResult =
-            mockMvc.perform(post(editionUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(node))
+            mockMvc.perform(
+                post(editionUrl)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(node))
             ).andExpect(status().isCreated).andReturn()
 
         val capturedStudent = slot.captured
