@@ -36,7 +36,7 @@ paths:
                                 items:
                                     type: string
                                     default: edition name
-    /{edition}/activate:
+    /editions/{edition}/activate:
         post:
             parameters:
                 -   in: path
@@ -56,7 +56,7 @@ paths:
                     description: The edition is already active
                 403:
                     description: There is another active edition
-    /{edition}/inactivate:
+    /editions/{edition}/inactivate:
         post:
             parameters:
                 -   in: path
@@ -74,7 +74,7 @@ paths:
                     description: Successful operation
                 400:
                     description: The edition is already inactive
-    /{edition}:
+    /editions/{edition}:
         get:
             parameters:
                 -   in: path
@@ -1141,7 +1141,8 @@ components:
                     type: string
                     example: "John"
                 lastName:
-                    type: stringexample: "Doe"
+                    type: string
+                    example: "Doe"
                 status:
                     readOnly: true
                     allOf:
