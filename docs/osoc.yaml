@@ -64,7 +64,7 @@ paths:
         post:
             summary: Add a new student to the database
             description: |
-                Add a student to the database. The requestbody contains a json representation of a tally form.
+                Add a student to the database. The request body contains a json representation of a tally form.
                 A Student object will be generated from this form, this object will also be returned.
             requestBody:
                 content:
@@ -229,7 +229,7 @@ paths:
                     description: |
                         The response if there is no student in the database with the given id.
                 '400':
-                    description: Bad Request. Requestbody does not contain either "Yes", "No", "Maybe" or "Undecided"       
+                    description: Bad Request. Request body does not contain either "Yes", "No", "Maybe" or "Undecided"       
     /projects:
         get:
             summary: Get list containing all Project objects
@@ -361,7 +361,7 @@ paths:
                                     $ref: '#/components/schemas/User'
         post:
             summary: Assign a coach to a project
-            description: Assign a coach to a project, coachId is given in the requestbody.
+            description: Assign a coach to a project, coachId is given in the request body.
             parameters:
               - name: projectId
                 required: true
@@ -407,7 +407,7 @@ paths:
     /projects/{projectId}/assignments:
         post:
             summary: Add a new student assignment
-            description: Assign a student to a position of a project. Requestbody expects a studentId, a positionId, a userId and a reason.
+            description: Assign a student to a position of a project. Request body expects a studentId, a positionId, a userId and a reason.
             parameters:
                 - name: projectId
                   required: true
