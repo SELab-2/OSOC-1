@@ -23,21 +23,11 @@ class ProjectService(
     private val userService: UserService
 ) {
     /**
-     * Get all projects
-     * The results can also be filtered by [name] (requested string gets processed to more easily give matches),
+     * Get all projects. The projects can also be filtered by the optional [searchQuery] parameter.
+     * See the documentation of the [nameMatchesSearchQuery] function to understand how the filtering is done.
      */
-    fun getAllProjects(name: String): Iterable<Project> {
-        val allProjects = repository.findAll()
-        val projectList = mutableListOf<Project>()
-        for (project in allProjects) {
-            val projectHasMatchingName = project.name.lowercase().replace(" ", "")
-                .contains(name.lowercase().replace(" ", ""))
-            if (projectHasMatchingName) {
-                projectList.add(project)
-            }
-        }
-        return projectList
-    }
+    fun getAllProjects(searchQuery: String = ""): Iterable<Project> =
+        repository.findAll().filter { nameMatchesSearchQuery(it.name, searchQuery) }
 
     /**
      * Get a project by its [id], if this id doesn't exist throw an InvalidProjectIdException

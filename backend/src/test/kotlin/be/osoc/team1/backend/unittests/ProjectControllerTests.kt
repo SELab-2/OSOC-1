@@ -14,15 +14,19 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
 
 @UnsecuredWebMvcTest(ProjectController::class)
@@ -34,11 +38,15 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val testId = UUID.randomUUID()
     private val testProject = Project("Proj", "Client", "desc")
     private val objectMapper = ObjectMapper()
-    private val jsonRepresentation = objectMapper.writeValueAsString(testProject)
+
+    @BeforeEach
+    fun beforeEach() {
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest()))
+    }
 
     @Test
     fun `getAllProjects should not fail`() {
-        every { projectService.getAllProjects("") } returns emptyList()
+        every { projectService.getAllProjects() } returns emptyList()
         mockMvc.perform(get("/projects")).andExpect(status().isOk)
     }
 
@@ -59,6 +67,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getProjectById returns project if project with given id exists`() {
+        val jsonRepresentation = objectMapper.writeValueAsString(testProject)
         every { projectService.getProjectById(testId) } returns testProject
         mockMvc.perform(get("/projects/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
@@ -89,6 +98,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `postProject should return created project`() {
+        val jsonRepresentation = objectMapper.writeValueAsString(testProject)
         every { projectService.postProject(any()) } returns testProject
         mockMvc.perform(
             post("/projects")
