@@ -58,7 +58,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val studentId = UUID.randomUUID()
     private val testCoach = User("coach", "email", Role.Coach, "password")
     private val coachId = testCoach.id
-    private val testStudent = Student("Tom", "Alard",)
+    private val testStudent = Student("Tom", "Alard")
     private val objectMapper = ObjectMapper()
     private val defaultStatusFilter =
         listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
@@ -84,8 +84,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testList = listOf(testStudent)
         every { studentService.getAllStudents(defaultSort) } returns listOf(
             testStudent,
-            Student("Foo", "Bar",),
-            Student("Fooo", "Baar",)
+            Student("Foo", "Bar"),
+            Student("Fooo", "Baar")
         )
         mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(defaultPrincipal))
             .andExpect(status().isOk)
@@ -94,13 +94,13 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents status filtering parses the correct statuses and filters accordingly`() {
-        val testStudent1 = Student("L1", "VC",)
+        val testStudent1 = Student("L1", "VC")
         testStudent1.status = StatusEnum.Yes
-        val testStudent2 = Student("L2", "VC",)
+        val testStudent2 = Student("L2", "VC")
         testStudent2.status = StatusEnum.No
-        val testStudent3 = Student("L3", "VC",)
+        val testStudent3 = Student("L3", "VC")
         testStudent3.status = StatusEnum.Maybe
-        val testStudent4 = Student("L4", "VC",)
+        val testStudent4 = Student("L4", "VC")
         testStudent4.status = StatusEnum.Undecided
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
         every { studentService.getAllStudents(defaultSort) } returns allStudents
@@ -123,11 +123,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents paging with filtering returns the correct amount`() {
-        val testStudent1 = Student("ATestoon", "Tamzia",)
+        val testStudent1 = Student("ATestoon", "Tamzia")
         testStudent1.status = StatusEnum.Maybe
-        val testStudent2 = Student("BTestien", "Tamzia",)
+        val testStudent2 = Student("BTestien", "Tamzia")
         testStudent2.status = StatusEnum.Yes
-        val testStudent3 = Student("CTestaan", "Tamzia",)
+        val testStudent3 = Student("CTestaan", "Tamzia")
         testStudent3.status = StatusEnum.Yes
         val allStudents = listOf(testStudent1, testStudent2, testStudent3)
 
@@ -141,10 +141,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents name filtering returns only students with those names`() {
-        val testStudent = Student("Lars", "Cauter",)
-        val testStudent2 = Student("Sral", "Retuac",)
-        val testStudent3 = Student("Arsl", "Auterc",)
-        val testStudent4 = Student("Rsla", "Uterca",)
+        val testStudent = Student("Lars", "Cauter")
+        val testStudent2 = Student("Sral", "Retuac")
+        val testStudent3 = Student("Arsl", "Auterc")
+        val testStudent4 = Student("Rsla", "Uterca")
         val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
         every { studentService.getAllStudents(defaultSort) } returns allStudents
         mockMvc.perform(get("/students?name=lars").principal(defaultPrincipal))
@@ -169,7 +169,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents include filtering works`() {
-        val testStudent = Student("Lars", "Van",)
+        val testStudent = Student("Lars", "Van")
         testStudent.statusSuggestions.add(StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "Nice!"))
         every { studentService.getAllStudents(defaultSort) } returns listOf(testStudent)
         mockMvc.perform(get("/students?includeSuggested=false").principal(defaultPrincipal))

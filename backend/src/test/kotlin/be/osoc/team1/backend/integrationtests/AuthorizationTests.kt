@@ -66,7 +66,7 @@ class AuthorizationTests {
     private val encodedDisabledPassword = BCryptPasswordEncoder().encode(disabledPassword)
     private val disabledUser = User("disabled", disabledEmail, Role.Disabled, encodedDisabledPassword)
 
-    private val testStudent = Student("Test", "Student",)
+    private val testStudent = Student("Test", "Student")
 
     /**
      * Log in with given email and password via post request to /login

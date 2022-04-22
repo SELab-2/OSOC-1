@@ -204,7 +204,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
-        val testStudent = Student("Lars", "Van Cauter",)
+        val testStudent = Student("Lars", "Van Cauter")
         val testProjectConflict = Project("Test", "Client", "a test project", testEdition)
         val testProjectConflict2 = Project("Test", "Client", "a test project", testEdition)
         val result = mutableListOf(

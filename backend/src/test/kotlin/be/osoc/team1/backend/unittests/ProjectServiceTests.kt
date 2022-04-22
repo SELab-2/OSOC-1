@@ -34,7 +34,7 @@ import java.util.UUID
 
 class ProjectServiceTests {
     private val testId = UUID.randomUUID()
-    private val testStudent = Student("Lars", "Van Cauter",)
+    private val testStudent = Student("Lars", "Van Cauter")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
     private val testEdition = "testEdition"
     private val testSkill = Skill("Backend")
@@ -64,7 +64,7 @@ class ProjectServiceTests {
         val service = mockk<StudentService>()
         val skills = mutableSetOf<Skill>()
         if (hasSkill) skills.add(testSkill)
-        val student = Student("firstname", "lastname", skills,)
+        val student = Student("firstname", "lastname", skills)
         every { service.getStudentById(any()) } returns student
         return service
     }
@@ -178,9 +178,9 @@ class ProjectServiceTests {
 
     @Test
     fun `getConflicts returns the correct result`() {
-        val testStudent = Student("Lars", "Van Cauter",)
-        val testStudent2 = Student("Lars2", "Van Cauter2",)
-        val testStudent3 = Student("Lars3", "Van Cauter3",)
+        val testStudent = Student("Lars", "Van Cauter")
+        val testStudent2 = Student("Lars2", "Van Cauter2")
+        val testStudent3 = Student("Lars3", "Van Cauter3")
         val position = Position(Skill("backend"), 2)
         val suggester = User("suggester", "email", Role.Coach, "password")
         val testProjectConflict = Project(
@@ -328,8 +328,8 @@ class ProjectServiceTests {
             getStudentService(true),
             getUserService(suggester)
         )
-        val testStudent = Student("Lars", "Van Cauter",)
-        val testStudent2 = Student("Lars2", "Van Cauter2",)
+        val testStudent = Student("Lars", "Van Cauter")
+        val testStudent2 = Student("Lars2", "Van Cauter2")
         val position = Position(Skill("backend"), 2)
         val testProject = Project(
             "Test", "Client", "a test project", "",

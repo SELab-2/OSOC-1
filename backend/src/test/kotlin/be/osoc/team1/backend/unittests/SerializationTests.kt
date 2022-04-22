@@ -47,7 +47,7 @@ class SerializationTests {
 
     @Test
     fun `Serialization of Project returns the correct result`() {
-        val testStudent = Student("Jitse", "Willaert",)
+        val testStudent = Student("Jitse", "Willaert")
         val testPosition = Position(Skill("backend"), 2)
         val testUser = User("suggester", "email", Role.Coach, "password")
         val testAssignment = Assignment(testStudent, testPosition, testUser, "reason")
@@ -78,7 +78,7 @@ class SerializationTests {
     fun `Serialization of Student returns the correct result`() {
         val testStatusSuggestion = StatusSuggestion(UUID.randomUUID(), SuggestionEnum.Yes, "motivation")
         val testCommunication = Communication("test", CommunicationTypeEnum.Email)
-        val testStudent = Student("Jitse", "Willaert",)
+        val testStudent = Student("Jitse", "Willaert")
         testStudent.communications.add(testCommunication)
         testStudent.statusSuggestions.add(testStatusSuggestion)
         val json: JsonContent<Student> = studentJacksonTester!!.write(testStudent)
@@ -89,7 +89,7 @@ class SerializationTests {
 
     @Test
     fun `Serialization of Student returns the correct result when it's empty`() {
-        val testStudent = Student("Jitse", "Willaert",)
+        val testStudent = Student("Jitse", "Willaert")
         val json: JsonContent<Student> = studentJacksonTester!!.write(testStudent)
 
         assertThat(json).extractingJsonPathValue("$.statusSuggestions").isEqualTo(mutableListOf<String>())
@@ -98,7 +98,7 @@ class SerializationTests {
 
     @Test
     fun `Serialization of Assignment returns the correct result`() {
-        val testStudent = Student("Jitse", "Willaert",)
+        val testStudent = Student("Jitse", "Willaert")
         val testSkill = Skill("Test")
         val testPosition = Position(testSkill, 2)
         val testSuggester = User("Jitse", "Willaert", Role.Admin, "Test")
