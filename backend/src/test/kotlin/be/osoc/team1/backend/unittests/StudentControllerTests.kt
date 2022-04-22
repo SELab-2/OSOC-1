@@ -254,6 +254,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         assertEquals("Steevens", capturedStudent.lastName)
         assert(capturedStudent.skills.contains(Skill("Back-end developer")))
         assertEquals(true, capturedStudent.alumn)
+        assertEquals(false, capturedStudent.possibleStudentCoach)
 
         val locationHeader = mvcResult.response.getHeader("Location")
         assert(locationHeader!!.endsWith("/students/${testStudent.id}"))
