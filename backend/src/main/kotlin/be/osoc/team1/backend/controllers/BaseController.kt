@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-open class BaseController<T>(open val service: BaseService<T, UUID>) {
+abstract class BaseController<T, K>(open val service: BaseService<T, K>) {
 
     /**
      * Returns the T with the corresponding [id]. If no such T exists, returns a
@@ -24,10 +24,10 @@ open class BaseController<T>(open val service: BaseService<T, UUID>) {
      */
     @GetMapping("/{id}")
     @Secured("ROLE_COACH")
-    fun getById(@PathVariable id: UUID): T = service.getById(id)
+    fun getById(@PathVariable id: K): T = service.getById(id)
 }
 
-open class BaseAllController<T, K>(open val service: BaseService<T, K>) {
+abstract class BaseAllController<T, K>(service: BaseService<T, K>) : BaseController<T, K>(service) {
 
     /**
      * Returns all objects of type [T].
@@ -39,15 +39,15 @@ open class BaseAllController<T, K>(open val service: BaseService<T, K>) {
 
 @RestController
 @RequestMapping("/assignments")
-class AssignmentController(service: AssignmentService) : BaseController<Assignment>(service)
+class AssignmentController(service: AssignmentService) : BaseController<Assignment, UUID>(service)
 
 @RestController
 @RequestMapping("/positions")
-class PositionController(service: PositionService) : BaseController<Position>(service)
+class PositionController(service: PositionService) : BaseController<Position, UUID>(service)
 
 @RestController
 @RequestMapping("/statusSuggestions")
-class StatusSuggestionController(service: StatusSuggestionService) : BaseController<StatusSuggestion>(service)
+class StatusSuggestionController(service: StatusSuggestionService) : BaseController<StatusSuggestion, UUID>(service)
 
 @RestController
 @RequestMapping("/skills")

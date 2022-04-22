@@ -19,7 +19,7 @@ import java.util.UUID
 class CommunicationController(
     private val communicationService: CommunicationService,
     private val studentService: StudentService
-) : BaseController<Communication>(communicationService) {
+) : BaseController<Communication, UUID>(communicationService) {
 
     /**
      * Add a communication to the database. The communication should be passed in the request body
