@@ -2,6 +2,7 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
@@ -13,15 +14,22 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.services.OsocUserDetailService
+import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.util.TallyDeserializer
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import io.mockk.slot
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.authentication.TestingAuthenticationToken
@@ -33,6 +41,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.UUID
 
 // See: https://www.baeldung.com/kotlin/spring-boot-testing
@@ -52,6 +62,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val objectMapper = ObjectMapper()
     private val defaultStatusFilter =
         listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
+    private val defaultPrincipal = TestingAuthenticationToken(null, null)
+    private val defaultSort = Sort.by("id")
     private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
 
     @BeforeEach
@@ -63,23 +75,25 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents should not fail`() {
-        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach) } returns
-            emptyList()
-        mockMvc.perform(get("/students").principal(TestingAuthenticationToken(null, null))).andExpect(status().isOk)
+        every { studentService.getAllStudents(defaultSort) } returns emptyList()
+        mockMvc.perform(get("/students").principal(defaultPrincipal)).andExpect(status().isOk)
     }
 
     @Test
     fun `getAllStudents paging returns the correct amount`() {
         val testList = listOf(testStudent)
-        every { studentService.getAllStudents(0, 1, "id", defaultStatusFilter, "", true, testCoach) } returns
-            testList
-        mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(TestingAuthenticationToken(null, null)))
+        every { studentService.getAllStudents(defaultSort) } returns listOf(
+            testStudent,
+            Student("Foo", "Bar"),
+            Student("Fooo", "Baar")
+        )
+        mockMvc.perform(get("/students?pageNumber=0&pageSize=1").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 3))))
     }
 
     @Test
-    fun `getAllStudents status filtering parses the correct statuses`() {
+    fun `getAllStudents status filtering parses the correct statuses and filters accordingly`() {
         val testStudent1 = Student("L1", "VC")
         testStudent1.status = StatusEnum.Yes
         val testStudent2 = Student("L2", "VC")
@@ -89,65 +103,81 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testStudent4 = Student("L4", "VC")
         testStudent4.status = StatusEnum.Undecided
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
-        every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Yes), "", true, testCoach)
-        } returns listOf(testStudent1)
-        every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.No), "", true, testCoach)
-        } returns listOf(testStudent2)
-        every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Maybe), "", true, testCoach)
-        } returns listOf(testStudent3)
-        every {
-            studentService.getAllStudents(0, 50, "id", listOf(StatusEnum.Undecided), "", true, testCoach)
-        } returns listOf(testStudent4)
-        every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", true, testCoach)
-        } returns allStudents
-        mockMvc.perform(get("/students?status=Yes").principal(TestingAuthenticationToken(null, null)))
+        every { studentService.getAllStudents(defaultSort) } returns allStudents
+        mockMvc.perform(get("/students?status=Yes").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent1))))
-        mockMvc.perform(get("/students?status=No").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent1), 1))))
+        mockMvc.perform(get("/students?status=No").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent2))))
-        mockMvc.perform(get("/students?status=Maybe").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent2), 1))))
+        mockMvc.perform(get("/students?status=Maybe").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent3))))
-        mockMvc.perform(get("/students?status=Undecided").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent3), 1))))
+        mockMvc.perform(get("/students?status=Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(listOf(testStudent4))))
-        mockMvc.perform(get("/students?status=Yes,No,Maybe,Undecided").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent4), 1))))
+        mockMvc.perform(get("/students?status=Yes,No,Maybe,Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(allStudents)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
     }
 
     @Test
-    fun `getAllStudents name filtering parses the correct name`() {
-        val testList = listOf(Student("_", "_"))
-        val testList2 = listOf(Student("_2", "_2"))
-        every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars", true, testCoach)
-        } returns testList
-        every {
-            studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "lars test", true, testCoach)
-        } returns testList2
-        // tests the url parsing + with url encoding
-        mockMvc.perform(get("/students?name=lars").principal(TestingAuthenticationToken(null, null)))
+    fun `getAllStudents paging with filtering returns the correct amount`() {
+        val testStudent1 = Student("ATestoon", "Tamzia")
+        testStudent1.status = StatusEnum.Maybe
+        val testStudent2 = Student("BTestien", "Tamzia")
+        testStudent2.status = StatusEnum.Yes
+        val testStudent3 = Student("CTestaan", "Tamzia")
+        testStudent3.status = StatusEnum.Yes
+        val allStudents = listOf(testStudent1, testStudent2, testStudent3)
+
+        every { studentService.getAllStudents(Sort.by("name")) } returns allStudents
+        mockMvc.perform(get("/students?status=Yes&sortBy=name&pageSize=2").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
-        mockMvc.perform(get("/students?name=lars%20test").principal(TestingAuthenticationToken(null, null)))
-            .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
+            .andExpect(
+                content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent2, testStudent3), 2)))
+            )
     }
 
     @Test
-    fun `getAllStudents include filtering parses the boolean correctly`() {
-        val testList = listOf(Student("test", "testie"))
-        every { studentService.getAllStudents(0, 50, "id", defaultStatusFilter, "", false, testCoach) } returns
-            testList
-        mockMvc.perform(get("/students?includeSuggested=false").principal(TestingAuthenticationToken(null, null)))
+    fun `getAllStudents name filtering returns only students with those names`() {
+        val testStudent = Student("Lars", "Cauter")
+        val testStudent2 = Student("Sral", "Retuac")
+        val testStudent3 = Student("Arsl", "Auterc")
+        val testStudent4 = Student("Rsla", "Uterca")
+        val allStudents = listOf(testStudent, testStudent2, testStudent3, testStudent4)
+        every { studentService.getAllStudents(defaultSort) } returns allStudents
+        mockMvc.perform(get("/students?name=lars").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent), 1))))
+        mockMvc.perform(get("/students?name=ars").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(
+                content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent, testStudent3), 2)))
+            )
+        mockMvc.perform(get("/students?name=uter").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(
+                content().json(
+                    objectMapper.writeValueAsString(PagedCollection(listOf(testStudent, testStudent3, testStudent4), 3))
+                )
+            )
+        mockMvc.perform(get("/students?name=").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
+    }
+
+    @Test
+    fun `getAllStudents include filtering works`() {
+        val testStudent = Student("Lars", "Van")
+        testStudent.statusSuggestions.add(StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "Nice!"))
+        every { studentService.getAllStudents(defaultSort) } returns listOf(testStudent)
+        mockMvc.perform(get("/students?includeSuggested=false").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf<Student>(), 0))))
+        mockMvc.perform(get("/students?includeSuggested=true").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent), 1))))
     }
 
     @Test
@@ -180,20 +210,114 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(delete("/students/$differentId")).andExpect(status().isNotFound)
     }
 
+    private fun jsonNodeFromFile(filename: String): JsonNode {
+        val studentJsonForm =
+            Files.readAllBytes(Paths.get(this::class.java.classLoader.getResource(filename).toURI()))
+        return objectMapper.readTree(studentJsonForm)
+    }
+
+    private fun removeFieldFromTallyForm(rootNode: JsonNode, key: String) {
+        val iter = rootNode.get("data").get("fields").elements()
+        while (iter.hasNext()) {
+            val field = iter.next()
+            if (field.get("key").asText() == key)
+                iter.remove()
+        }
+    }
+
+    private fun setFieldValueFromTallyForm(rootNode: JsonNode, key: String, value: String?) {
+        val iter = rootNode.get("data").get("fields").elements()
+        while (iter.hasNext()) {
+            val field = iter.next()
+            if (field.get("key").asText() == key) {
+                (field as ObjectNode).put("value", value)
+            }
+        }
+    }
+
     @Test
     fun `addStudent should return created student`() {
-        val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
-        every { studentService.addStudent(any()) } returns testStudent
+        val node = jsonNodeFromFile("student_test_form.json")
+        val slot = slot<Student>()
+        every { studentService.addStudent(capture(slot)) } returns testStudent
         val mvcResult =
             mockMvc.perform(
                 post("/students")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(jsonRepresentation)
+                    .content(objectMapper.writeValueAsString(node))
             )
                 .andExpect(status().isCreated)
                 .andReturn()
+
+        val capturedStudent = slot.captured
+        assertEquals("Maarten", capturedStudent.firstName)
+        assertEquals("Steevens", capturedStudent.lastName)
+        assert(capturedStudent.skills.contains(Skill("Back-end developer")))
+        assertEquals(true, capturedStudent.alumn)
+
         val locationHeader = mvcResult.response.getHeader("Location")
         assert(locationHeader!!.endsWith("/students/${testStudent.id}"))
+    }
+
+    private fun testInvalidTallyForm(node: JsonNode) {
+        every { studentService.addStudent(any()) } returns testStudent
+        mockMvc.perform(
+            post("/students")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(node))
+        ).andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `addStudent should fail when firstname question is not given`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.firstnameQuestion)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when answer to firstname question is empty`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        setFieldValueFromTallyForm(node, TallyDeserializer.TallyKeys.firstnameQuestion, null)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when lastname question is not given`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.lastnameQuestion)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when alumni question is not given`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.alumnQuestion)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when skill question is not given`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        removeFieldFromTallyForm(node, TallyDeserializer.TallyKeys.skillQuestion)
+
+        testInvalidTallyForm(node)
+    }
+
+    @Test
+    fun `addStudent should fail when an option is used as a value not present in the options list with MULTIPLE_CHOICE`() {
+        val node = jsonNodeFromFile("student_test_form.json")
+        setFieldValueFromTallyForm(
+            node,
+            TallyDeserializer.TallyKeys.alumnQuestion,
+            "689451da-305b-451a-8039-c748ff06ec83"
+        )
+
+        testInvalidTallyForm(node)
     }
 
     @Test

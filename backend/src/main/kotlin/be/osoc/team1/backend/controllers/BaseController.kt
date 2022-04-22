@@ -1,9 +1,11 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.Answer
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusSuggestion
+import be.osoc.team1.backend.services.AnswerService
 import be.osoc.team1.backend.services.AssignmentService
 import be.osoc.team1.backend.services.BaseService
 import be.osoc.team1.backend.services.PositionService
@@ -48,6 +50,10 @@ class PositionController(service: PositionService) : BaseController<Position, UU
 @RestController
 @RequestMapping("/statusSuggestions")
 class StatusSuggestionController(service: StatusSuggestionService) : BaseController<StatusSuggestion, UUID>(service)
+
+@RestController
+@RequestMapping("/answers")
+class AnswerController(service: AnswerService) : BaseController<Answer, UUID>(service)
 
 @RestController
 @RequestMapping("/skills")
