@@ -8,6 +8,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.ProjectService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -53,6 +54,18 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `getAllProjects paging returns the correct amount`() {
+        val testList = listOf(testProject)
+        every { projectService.getAllProjects() } returns listOf(
+            testProject,
+            Project("Foo", "Bar", "desc"),
+            Project("Fooo", "Baar", "desc")
+        )
+        mockMvc.perform(get("/projects?pageNumber=0&pageSize=1"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 3))))
+    }
+    @Test
     fun `getAllProjects name filtering parses the correct name`() {
         val testList = listOf(Project("_", "_", "_", testEdition))
         val testList2 = listOf(Project("_2", "_2", "_2", testEdition))
@@ -61,10 +74,10 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         // tests the url parsing + with encoding
         mockMvc.perform(get("$editionUrl?name=lars"))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 1))))
         mockMvc.perform(get("$editionUrl?name=lars%20test"))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList2, 1))))
     }
 
     @Test
