@@ -52,3 +52,10 @@ data class PagedCollection<T>(val collection: List<T>, val totalLength: Int)
 data class StudentFilter(val statusFilter: List<StatusEnum>, val nameQuery: String, val includeSuggested: Boolean)
 
 fun <T> List<T>.page(pager: Pager) = pager.paginate(this)
+
+fun <T> T.applyIf(condition: Boolean, block: T.() -> Unit): T {
+    return apply {
+        if(condition)
+            block()
+    }
+}

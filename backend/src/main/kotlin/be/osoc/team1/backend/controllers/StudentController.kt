@@ -17,6 +17,7 @@ import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.applyIf
 import be.osoc.team1.backend.services.page
 import be.osoc.team1.backend.util.TallyDeserializer
 import org.springframework.data.domain.Sort
@@ -73,10 +74,10 @@ class StudentController(
             .filterByName(decodedName)
             .filterBySuggested(includeSuggested, userDetailService.getUserFromPrincipal(principal))
             .filterByStatus(status)
-            .apply { if(skills.isNotEmpty()) filterBySkills(skills) }
-            .apply { if(alumnOnly) filterByAlumn() }
-            .apply { if(possibleStudentCoach) filterByStudentCoach() }
-            .apply { if(onlyNotAssigned) filterByNotYetAssigned(assignmentRepository) }
+            .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
+            .applyIf(alumnOnly) { filterByAlumn() }
+            .applyIf(possibleStudentCoach) { filterByStudentCoach() }
+            .applyIf(onlyNotAssigned) { filterByNotYetAssigned(assignmentRepository) }
             .page(Pager(pageNumber, pageSize))
     }
 
