@@ -7,4 +7,5 @@ import java.util.UUID
 
 interface StudentRepository : PagingAndSortingRepository<Student, UUID> {
     fun findByEdition(edition: String, sortBy: Sort): Iterable<Student>
+    fun findByIdAndEdition(id: UUID, edition: String): Student?
 }

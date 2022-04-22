@@ -75,7 +75,7 @@ class StudentController(
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
     fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
-        service.getStudentById(studentId)
+        service.getStudentById(studentId, edition)
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
@@ -130,7 +130,7 @@ class StudentController(
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
-        service.setStudentStatus(studentId, status)
+        service.setStudentStatus(studentId, status, edition)
 
     /**
      * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should
@@ -168,7 +168,7 @@ class StudentController(
                 "The 'coachId' did not equal authenticated user id!"
             )
 
-        service.addStudentStatusSuggestion(studentId, statusSuggestion)
+        service.addStudentStatusSuggestion(studentId, statusSuggestion, edition)
     }
 
     /**
@@ -194,6 +194,6 @@ class StudentController(
                 "The 'coachId' did not equal authenticated user id. You can't remove suggestions from other users!"
             )
 
-        service.deleteStudentStatusSuggestion(studentId, coachId)
+        service.deleteStudentStatusSuggestion(studentId, coachId, edition)
     }
 }
