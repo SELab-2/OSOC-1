@@ -825,10 +825,10 @@ components:
                     readOnly: true
                 firstName:
                     type: string
-                    example: "John"
+                    example: John
                 lastName:
                     type: string
-                    example: "Doe"
+                    example: Doe
                 status:
                     readOnly: true
                     allOf:
@@ -895,7 +895,7 @@ components:
                         example: "question_3X4q1V"
                       label:
                         type: string
-                        example: "Which role are you applying for?"
+                        example: Which role are you applying for?
                       "type":
                         type: string
                         example: "CHECKBOXES"
@@ -1014,7 +1014,7 @@ components:
                     readOnly: true
                 message:
                     type: string
-                    example: "Lorum ipsum"
+                    example: Lorum ipsum
                 type:
                     allOf:
                       - $ref: '#/components/schemas/CommunicationType'
@@ -1073,7 +1073,7 @@ components:
           properties:
               skillName:
                   type: string
-                  example: "Back-end developer"
+                  example: Back-end developer
         Position:
             type: object
             required:
@@ -1105,18 +1105,19 @@ components:
                     readOnly: true
                 student:
                     type: string
-                    format: uuid
+                    format: https://example.com/api/students/{studentId}
+                    example: https://example.com/api/students/8b409406-6f82-4f2f-9b02-62326e733877
                 position:
                     type: string
-                    format: uuid
-                    example: 8b409406-6f82-4f2f-9b02-62326e733877
+                    format: https://example.com/api/positions/{positionId}
+                    example: https://example.com/api/positions/8b409406-6f82-4f2f-9b02-62326e733877
                 suggester:
                     type: string
-                    format: uuid
-                    example: 7116cc59-d205-4e8e-b975-06063e9744a6
+                    format: https://example.com/api/users/{suggesterId}
+                    example: https://example.com/api/users/7116cc59-d205-4e8e-b975-06063e9744a6
                 reason:
                     type: string
-                    example: "Lorum ipsum"
+                    example: Lorum ipsum
         Conflict:
             type: object
             required:
@@ -1125,13 +1126,13 @@ components:
             properties:
                 student:
                     type: string
-                    format: uuid
-                    example: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
+                    format: https://example.com/api/students/{studentId}
+                    example: https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002
                 projects:
                     type: array
                     items:
                         type: string
-                        format: uuid
+                        format: https://example.com/api/projects/{projectId}
                     example: ["https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002"]     
         PagedCollection:
             type: object
