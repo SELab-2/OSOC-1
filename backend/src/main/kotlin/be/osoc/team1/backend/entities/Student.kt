@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
@@ -160,3 +161,25 @@ fun List<Student>.filterByName(nameQuery: String) =
  */
 fun List<Student>.filterBySuggested(includeSuggested: Boolean, callee: User) =
     filter { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
+
+/**
+ * This function will filter [Student]s based on a set of [Skill]s.
+ * Only students that have at least one of these skills will be returned.
+ */
+fun List<Student>.filterBySkills(skills: Set<Skill>) = filter { it.skills.intersect(skills).isNotEmpty() }
+
+/**
+ * This function will filter a list of [Student]s to only return alumni.
+ */
+fun List<Student>.filterByAlumn() = filter { it.alumn }
+
+/**
+ * This function will filter a list of [Student]s to only return students that would like to be a student coach.
+ */
+fun List<Student>.filterByStudentCoach() = filter { it.possibleStudentCoach }
+
+/**
+ * This function will filter a list of [Student]s to only return students who have not yet been assigned to a [Project].
+ */
+fun List<Student>.filterByNotYetAssigned(assignmentRepository: AssignmentRepository) =
+    filter { assignmentRepository.findByStudent(it).isEmpty() }

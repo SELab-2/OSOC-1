@@ -1,12 +1,18 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.filterByAlumn
 import be.osoc.team1.backend.entities.filterByName
+import be.osoc.team1.backend.entities.filterByNotYetAssigned
+import be.osoc.team1.backend.entities.filterBySkills
 import be.osoc.team1.backend.entities.filterByStatus
+import be.osoc.team1.backend.entities.filterByStudentCoach
 import be.osoc.team1.backend.entities.filterBySuggested
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
@@ -34,7 +40,8 @@ import java.util.UUID
 @RequestMapping("/students")
 class StudentController(
     private val service: StudentService,
-    private val userDetailService: OsocUserDetailService
+    private val userDetailService: OsocUserDetailService,
+    private val assignmentRepository: AssignmentRepository
 ) {
 
     /**
@@ -55,14 +62,24 @@ class StudentController(
         @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
+        @RequestParam(defaultValue = "") skills: Set<Skill>,
+        @RequestParam(defaultValue = "false") alumnOnly: Boolean,
+        @RequestParam(defaultValue = "false") possibleStudentCoach: Boolean,
+        @RequestParam(defaultValue = "false") onlyNotAssigned: Boolean,
         principal: Principal
     ): PagedCollection<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllStudents(Sort.by(sortBy))
+        var result = service.getAllStudents(Sort.by(sortBy))
             .filterByName(decodedName)
             .filterBySuggested(includeSuggested, userDetailService.getUserFromPrincipal(principal))
             .filterByStatus(status)
-            .page(Pager(pageNumber, pageSize))
+
+        if (skills.isNotEmpty()) result = result.filterBySkills(skills)
+        if (alumnOnly) result = result.filterByAlumn()
+        if (possibleStudentCoach) result = result.filterByStudentCoach()
+        if (onlyNotAssigned) result = result.filterByNotYetAssigned(assignmentRepository)
+
+        return result.page(Pager(pageNumber, pageSize))
     }
 
     /**
