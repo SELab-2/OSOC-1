@@ -34,7 +34,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
             return Student(
                 getAnswerForKey(answerMap, TallyKeys.firstnameQuestion, "firstname").answer.first(),
                 getAnswerForKey(answerMap, TallyKeys.lastnameQuestion, "lastname").answer.first(),
-                "", // TODO: replace with actual edition somehow
+                "",
                 getAnswerForKey(answerMap, TallyKeys.skillQuestion, "skill").answer.map { Skill(it) }.toSortedSet(),
                 getAnswerForKey(answerMap, TallyKeys.alumnQuestion, "alumni").optionId == TallyKeys.alumnYesId,
                 answerMap.values.toList()
