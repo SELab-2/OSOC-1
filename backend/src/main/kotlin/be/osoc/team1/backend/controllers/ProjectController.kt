@@ -1,5 +1,7 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
@@ -23,84 +25,111 @@ import java.net.URLDecoder
 import java.util.UUID
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/{edition}/projects")
 class ProjectController(private val service: ProjectService) {
 
     /**
-     * Get all projects from service
+     * Get all projects that are a part of the given OSOC [edition].
      * The results can also be filtered by [name] (default value is empty so no project is excluded).
      */
     @GetMapping
     @Secured("ROLE_COACH")
     fun getAllProjects(
         @RequestParam(defaultValue = "") name: String,
+        @PathVariable edition: String,
         @RequestParam(defaultValue = "0") pageNumber: Int,
-        @RequestParam(defaultValue = "50") pageSize: Int,
+        @RequestParam(defaultValue = "50") pageSize: Int
     ): PagedCollection<Project> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllProjects(decodedName).page(Pager(pageNumber, pageSize))
+        return service.getAllProjects(edition, decodedName).page(Pager(pageNumber, pageSize))
     }
 
     /**
-     * Get a project by its [projectId], if this id doesn't exist the service will return a 404
+     * Get a project by its [projectId]. If there is no project with the given [projectId] and [edition],
+     * return a 404 (NOT FOUND).
      */
     @GetMapping("/{projectId}")
     @Secured("ROLE_COACH")
-    fun getProjectById(@PathVariable projectId: UUID): Project = service.getProjectById(projectId)
+    fun getProjectById(@PathVariable projectId: UUID, @PathVariable edition: String): Project =
+        service.getProjectById(projectId, edition)
 
     /**
-     * Deletes a project with its [projectId], if this [projectId] doesn't exist the service will return a 404
+     * Deletes a project with its [projectId]. If there is no project with the given [projectId] and [edition],
+     * return a 404 (NOT FOUND).
      */
     @DeleteMapping("/{projectId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun deleteProjectById(@PathVariable projectId: UUID) = service.deleteProjectById(projectId)
+    fun deleteProjectById(@PathVariable projectId: UUID, @PathVariable edition: String) =
+        service.deleteProjectById(projectId, edition)
 
     /**
      * Creates a project from the request body, this can also override an already existing project.
-     * Returns the created project.
+     * Returns the created project in the response body, with a link pointing to the resource in the Location header.
      */
     @PostMapping
     @Secured("ROLE_ADMIN")
-    fun postProject(@RequestBody project: Project): ResponseEntity<Project> {
+    fun postProject(
+        @RequestBody projectRegistration: ProjectRegistration,
+        @PathVariable edition: String
+    ): ResponseEntity<Project> {
+        val project = Project(
+            projectRegistration.name, projectRegistration.description, projectRegistration.clientName,
+            edition,
+            projectRegistration.coaches, projectRegistration.positions, projectRegistration.assignments
+        )
         val createdProject = service.postProject(project)
         return getObjectCreatedResponse(createdProject.id, createdProject)
     }
 
+    // Needed to avoid the caller having to pass the edition in both the URL and the request body.
+    data class ProjectRegistration(
+        val name: String,
+        val clientName: String,
+        val description: String,
+        val coaches: MutableCollection<User> = mutableListOf(),
+        val positions: Collection<Position> = listOf(),
+        val assignments: MutableCollection<Assignment> = mutableListOf()
+    )
+
     /**
-     * Gets all students assigned to a project, if this [projectId] doesn't exist the service will return a 404
+     * Gets all students assigned to a project. If there is no project with the given [projectId] and [edition],
+     * return a 404 (NOT FOUND).
      */
     @GetMapping("/{projectId}/students")
     @Secured("ROLE_COACH")
-    fun getStudentsOfProject(@PathVariable projectId: UUID): Collection<Student> =
-        service.getStudents(projectId)
+    fun getStudentsOfProject(@PathVariable projectId: UUID, @PathVariable edition: String): Collection<Student> =
+        service.getStudents(projectId, edition)
 
     /**
-     * Gets all coaches of a project, if this [projectId] doesn't exist the service will return a 404
+     * Gets all coaches of a project. If there is no project with the given [projectId] and [edition],
+     * return a 404 (NOT FOUND).
      */
     @GetMapping("/{projectId}/coaches")
     @Secured("ROLE_COACH")
-    fun getCoachesOfProject(@PathVariable projectId: UUID): Collection<User> =
-        service.getProjectById(projectId).coaches
+    fun getCoachesOfProject(@PathVariable projectId: UUID, @PathVariable edition: String): Collection<User> =
+        service.getProjectById(projectId, edition).coaches
 
     /**
-     * assign a coach to a project, if a project with [projectId] or a user with [coachId] doesn't exist the service
-     * will return a 404
+     * assign a coach to a project. If a project with [projectId] and [edition] or a user with [coachId]
+     * doesn't exist the service will return a 404.
      */
     @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID) =
-        service.addCoachToProject(projectId, coachId)
+    fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID, @PathVariable edition: String) =
+        service.addCoachToProject(projectId, coachId, edition)
 
     /**
-     * Deletes a coach [coachId] from a project [projectId], if [projectId] or [coachId] doesn't exist the service will return a 404
+     * Delete the coach identified by [coachId] from the project identified by [projectId].
+     * If there is no project with the given [projectId] and [edition], or the coach doesn't exist,
+     * the service will return a 404 (NOT FOUND).
      */
     @DeleteMapping("/{projectId}/coaches/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID) =
-        service.removeCoachFromProject(projectId, coachId)
+    fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID, @PathVariable edition: String) =
+        service.removeCoachFromProject(projectId, coachId, edition)
 
     /**
      * Returns conflicts of students being assigned to multiple projects, format:
@@ -119,7 +148,8 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping("/conflicts")
     @Secured("ROLE_COACH")
-    fun getProjectConflicts(): MutableList<ProjectService.Conflict> = service.getConflicts()
+    fun getProjectConflicts(@PathVariable edition: String): MutableList<ProjectService.Conflict> =
+        service.getConflicts(edition)
 
     /**
      * Assigns a student to a position on the project, format:
@@ -136,17 +166,21 @@ class ProjectController(private val service: ProjectService) {
      */
     @PostMapping("/{projectId}/assignments")
     @Secured("ROLE_COACH")
-    fun postAssignment(@PathVariable projectId: UUID, @RequestBody assignment: ProjectService.AssignmentPost) =
-        service.postAssignment(projectId, assignment)
+    fun postAssignment(
+        @PathVariable projectId: UUID,
+        @RequestBody assignment: ProjectService.AssignmentPost,
+        @PathVariable edition: String
+    ) =
+        service.postAssignment(projectId, assignment, edition)
 
     /**
-     * Removes assignment with [assignmentId] of a student to a position on the project with [projectId]. Will return a
-     * 404 if the specified [assignmentId] is not actually part of this project or if [assignmentId] outright doesn't
-     * exist.
+     * Removes assignment with [assignmentId] of a student to a position on the project identified with the given
+     * [projectId] and [edition]. Will return a 404 if either the project or the assignment don't exist or
+     * if there is no assignment with that [assignmentId] which is a part of the project.
      */
     @DeleteMapping("/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID) =
-        service.deleteAssignment(projectId, assignmentId)
+    fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID, @PathVariable edition: String) =
+        service.deleteAssignment(projectId, assignmentId, edition)
 }

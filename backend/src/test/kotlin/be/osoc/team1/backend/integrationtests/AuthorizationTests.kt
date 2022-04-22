@@ -26,7 +26,7 @@ import java.net.URI
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthorizationTests() {
+class AuthorizationTests {
 
     @AfterEach
     fun cleanup() {
@@ -412,7 +412,7 @@ class AuthorizationTests() {
     @Test
     fun `CORS using not allowed origin gives error`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
-        authHeaders.add(HttpHeaders.ORIGIN, "http://notallowed.com")
+        authHeaders.add(HttpHeaders.ORIGIN, "https://notallowed.com")
         val request = HttpEntity("", authHeaders)
         val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 403)
