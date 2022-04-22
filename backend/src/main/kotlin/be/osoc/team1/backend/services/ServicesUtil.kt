@@ -53,9 +53,5 @@ data class StudentFilter(val statusFilter: List<StatusEnum>, val nameQuery: Stri
 
 fun <T> List<T>.page(pager: Pager) = pager.paginate(this)
 
-fun <T> T.applyIf(condition: Boolean, block: T.() -> Unit): T {
-    return apply {
-        if(condition)
-            block()
-    }
-}
+fun <T> T.applyIf(condition: Boolean, block: T.() -> T): T =
+    if (condition) this.block() else this
