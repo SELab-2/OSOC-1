@@ -39,7 +39,7 @@ class ProjectController(private val service: ProjectService) {
         @PathVariable edition: String,
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int
-    ): Iterable<Project> {
+    ): PagedCollection<Project> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
         return service.getAllProjects(edition, decodedName).page(Pager(pageNumber, pageSize))
     }

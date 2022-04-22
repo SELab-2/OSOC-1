@@ -56,12 +56,12 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllProjects paging returns the correct amount`() {
         val testList = listOf(testProject)
-        every { projectService.getAllProjects() } returns listOf(
+        every { projectService.getAllProjects(testEdition) } returns listOf(
             testProject,
-            Project("Foo", "Bar", "desc"),
-            Project("Fooo", "Baar", "desc")
+            Project("Foo", "Bar", "desc", testEdition),
+            Project("Fooo", "Baar", "desc", testEdition)
         )
-        mockMvc.perform(get("/projects?pageNumber=0&pageSize=1"))
+        mockMvc.perform(get("$editionUrl?pageNumber=0&pageSize=1"))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 3))))
     }
