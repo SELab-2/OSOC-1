@@ -32,7 +32,7 @@ import java.util.UUID
 
 class StudentServiceTests {
 
-    private val testStudent = Student("Tom", "Alard")
+    private val testStudent = Student("Tom", "Alard",)
     private val studentId = testStudent.id
     private val testCoach = User("", "", Role.Coach, "")
     private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
@@ -45,7 +45,7 @@ class StudentServiceTests {
         every { repository.existsById(studentId) } returns studentAlreadyExists
         every { repository.findByIdOrNull(studentId) } returns if (studentAlreadyExists) testStudent else null
         every { repository.deleteById(studentId) } just Runs
-        val differentIdTestStudent = Student("Tom", "Alard")
+        val differentIdTestStudent = Student("Tom", "Alard",)
         every { repository.save(testStudent) } returns differentIdTestStudent
         every { repository.findAll() } returns listOf(testStudent)
         every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
@@ -236,9 +236,9 @@ class StudentServiceTests {
     @Test
     fun `pager class paginates collections correctly`() {
         val pager = Pager(0, 1)
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia",)
+        val student2 = Student("Testien", "Tamzia",)
+        val student3 = Student("Testaan", "Tamzia",)
         val collection = listOf(student1, student2, student3)
         assertEquals(listOf(student1), pager.paginate(collection).collection)
     }
@@ -246,9 +246,9 @@ class StudentServiceTests {
     @Test
     fun `pager class returns less items than requested if the collection is smaller`() {
         val pager = Pager(0, 5)
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia",)
+        val student2 = Student("Testien", "Tamzia",)
+        val student3 = Student("Testaan", "Tamzia",)
         val collection = listOf(student1, student2, student3)
         assertEquals(collection, pager.paginate(collection).collection)
     }
@@ -256,17 +256,17 @@ class StudentServiceTests {
     @Test
     fun `pager class returns empty list when start of paging-request is out of bounds`() {
         val pager = Pager(1, 5)
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia",)
+        val student2 = Student("Testien", "Tamzia",)
+        val student3 = Student("Testaan", "Tamzia",)
         val collection = listOf(student1, student2, student3)
         assertEquals(listOf<Student>(), pager.paginate(collection).collection)
     }
     @Test
     fun `pager class returns a pagedcollection with the correct total amount`() {
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia",)
+        val student2 = Student("Testien", "Tamzia",)
+        val student3 = Student("Testaan", "Tamzia",)
         val collection = listOf(student1, student2, student3)
         assertEquals(PagedCollection(collection, 3), Pager(0, 5).paginate(collection))
         assertEquals(PagedCollection(listOf(student1), 3), Pager(0, 1).paginate(collection))

@@ -35,7 +35,7 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var assignmentService: AssignmentService
 
     private val testId = UUID.randomUUID()
-    private val testStudent = Student("Jitse", "Willaert")
+    private val testStudent = Student("Jitse", "Willaert",)
     private val testSkill = Skill("Test")
     private val testPosition = Position(testSkill, 2)
     private val testSuggester = User("Jitse", "Willaert", Role.Admin, "Test")
