@@ -5,7 +5,10 @@ import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
+import be.osoc.team1.backend.services.PagedCollection
+import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.ProjectService
+import be.osoc.team1.backend.services.page
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -33,10 +36,12 @@ class ProjectController(private val service: ProjectService) {
     @Secured("ROLE_COACH")
     fun getAllProjects(
         @RequestParam(defaultValue = "") name: String,
-        @PathVariable edition: String
-    ): Iterable<Project> {
+        @PathVariable edition: String,
+        @RequestParam(defaultValue = "0") pageNumber: Int,
+        @RequestParam(defaultValue = "50") pageSize: Int
+    ): PagedCollection<Project> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllProjects(edition, decodedName)
+        return service.getAllProjects(edition, decodedName).page(Pager(pageNumber, pageSize))
     }
 
     /**

@@ -26,8 +26,8 @@ class ProjectService(
      * The projects can also be filtered by the optional [searchQuery] parameter.
      * See the documentation of the [nameMatchesSearchQuery] function to understand how the filtering is done.
      */
-    fun getAllProjects(edition: String, searchQuery: String = ""): Iterable<Project> =
-        repository.findByEdition(edition).filter { nameMatchesSearchQuery(it.name, searchQuery) }
+    fun getAllProjects(edition: String, searchQuery: String = ""): List<Project> =
+        repository.findByEdition(edition).filter { nameMatchesSearchQuery(it.name, searchQuery) }.toList()
 
     /**
      * Get a project by its [id]. If there is no project with the given [id] and [edition],

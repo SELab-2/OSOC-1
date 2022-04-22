@@ -8,6 +8,7 @@ import be.osoc.team1.backend.entities.filterByStatus
 import be.osoc.team1.backend.entities.filterBySuggested
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
+import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.page
@@ -56,7 +57,7 @@ class StudentController(
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         @PathVariable edition: String,
         principal: Principal
-    ): Iterable<Student> {
+    ): PagedCollection<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
