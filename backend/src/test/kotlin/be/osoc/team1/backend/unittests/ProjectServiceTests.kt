@@ -65,7 +65,7 @@ class ProjectServiceTests {
         val skills = mutableSetOf<Skill>()
         if (hasSkill) skills.add(testSkill)
         val student = Student("firstname", "lastname", "", skills)
-        every { service.getStudentById(any()) } returns student
+        every { service.getStudentById(any(), testEdition) } returns student
         return service
     }
 

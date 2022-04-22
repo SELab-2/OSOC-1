@@ -129,7 +129,7 @@ class ProjectService(
         if (project.assignments.find { it.student.id == assignmentForm.student && position == it.position } != null)
             throw ForbiddenOperationException("This student was already assigned this position on the project!")
 
-        val student = studentService.getStudentById(assignmentForm.student)
+        val student = studentService.getStudentById(assignmentForm.student, edition)
         val suggester = userService.getUserById(assignmentForm.suggester)
         val assignment = Assignment(student, position, suggester, assignmentForm.reason)
         project.assignments.add(assignment)
