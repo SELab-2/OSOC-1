@@ -135,17 +135,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(get("/students?status=Yes&sortBy=name&pageSize=2").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(
-                content().json(
-                    objectMapper.writeValueAsString(
-                        PagedCollection(
-                            listOf(
-                                testStudent2,
-                                testStudent3
-                            ),
-                            2
-                        )
-                    )
-                )
+                content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent2, testStudent3), 2)))
             )
     }
 
@@ -277,6 +267,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
                 .content(objectMapper.writeValueAsString(node))
         ).andExpect(status().isBadRequest)
     }
+
     @Test
     fun `addStudent should fail when firstname question is not given`() {
         val node = jsonNodeFromFile("student_test_form.json")
@@ -320,7 +311,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `addStudent should fail when an option is used as a value not present in the options list with MULTIPLE_CHOICE`() {
         val node = jsonNodeFromFile("student_test_form.json")
-        setFieldValueFromTallyForm(node, TallyDeserializer.TallyKeys.alumnQuestion, "689451da-305b-451a-8039-c748ff06ec83")
+        setFieldValueFromTallyForm(
+            node,
+            TallyDeserializer.TallyKeys.alumnQuestion,
+            "689451da-305b-451a-8039-c748ff06ec83"
+        )
 
         testInvalidTallyForm(node)
     }
