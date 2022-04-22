@@ -69,17 +69,15 @@ class StudentController(
         principal: Principal
     ): PagedCollection<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        var result = service.getAllStudents(Sort.by(sortBy))
+        return service.getAllStudents(Sort.by(sortBy))
             .filterByName(decodedName)
             .filterBySuggested(includeSuggested, userDetailService.getUserFromPrincipal(principal))
             .filterByStatus(status)
-
-        if (skills.isNotEmpty()) result = result.filterBySkills(skills)
-        if (alumnOnly) result = result.filterByAlumn()
-        if (possibleStudentCoach) result = result.filterByStudentCoach()
-        if (onlyNotAssigned) result = result.filterByNotYetAssigned(assignmentRepository)
-
-        return result.page(Pager(pageNumber, pageSize))
+            .apply { if(skills.isNotEmpty()) filterBySkills(skills) }
+            .apply { if(alumnOnly) filterByAlumn() }
+            .apply { if(possibleStudentCoach) filterByStudentCoach() }
+            .apply { if(onlyNotAssigned) filterByNotYetAssigned(assignmentRepository) }
+            .page(Pager(pageNumber, pageSize))
     }
 
     /**
