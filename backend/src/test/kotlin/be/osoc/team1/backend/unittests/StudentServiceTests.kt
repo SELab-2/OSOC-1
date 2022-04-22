@@ -261,9 +261,9 @@ class StudentServiceTests {
     }
     @Test
     fun `pager class returns a pagedcollection with the correct total amount`() {
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia", testEdition)
+        val student2 = Student("Testien", "Tamzia", testEdition)
+        val student3 = Student("Testaan", "Tamzia", testEdition)
         val collection = listOf(student1, student2, student3)
         assertEquals(PagedCollection(collection, 3), Pager(0, 5).paginate(collection))
         assertEquals(PagedCollection(listOf(student1), 3), Pager(0, 1).paginate(collection))

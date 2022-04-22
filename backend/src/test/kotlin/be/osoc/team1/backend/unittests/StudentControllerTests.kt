@@ -84,7 +84,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort, testEdition) } returns testList
         mockMvc.perform(get("$editionUrl?pageNumber=0&pageSize=1").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 3))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 1))))
     }
 
     @Test
