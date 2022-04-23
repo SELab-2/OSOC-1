@@ -47,7 +47,10 @@ const useAxiosAuth = () => {
       (response) => response,
       async (error) => {
         const prevRequest = error?.config;
-        if (UNAUTHORIZED_STATUSES.includes(error?.response?.status) && !prevRequest?.sent) {
+        if (
+          UNAUTHORIZED_STATUSES.includes(error?.response?.status) &&
+          !prevRequest?.sent
+        ) {
           try {
             prevRequest.sent = true;
             const newAccessToken = await refresh();
