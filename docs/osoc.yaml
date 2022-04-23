@@ -909,7 +909,17 @@ paths:
                 '404':
                     description: |
                         The response if there is no Answer in the database with the given id.
-
+  /skills:
+    get:
+      responses:
+        '200':
+          description: Get all Skill objects stored in the database.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Skill'
     /login:
         post:
             summary: login to the user with the correct email and password

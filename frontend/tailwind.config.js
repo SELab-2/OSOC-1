@@ -12,6 +12,16 @@ module.exports = {
         'osoc-red': '#F14A3B',
        'osoc-btn-primary': '#1DE1AE'
       },
+      animation: {
+        'spin-reverse': 'spin-reverse 1s linear infinite'
+      },
+      keyframes: {
+        'spin-reverse': {
+          from: {
+            transform: 'rotate(360deg)'
+          }
+        }
+      }
     },
     fontFamily: {
       sans: ['Montserrat', 'sans-serif']
