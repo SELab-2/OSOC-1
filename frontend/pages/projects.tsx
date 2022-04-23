@@ -18,6 +18,7 @@ import {number} from "prop-types";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
+const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
  * function that allows searching projects by name
@@ -58,13 +59,13 @@ const Projects: NextPage = () => {
   const [error, setError]: [string, (error: string) => void] = useState('');
 
   type positionForm = {
-    amount: number;
-    skill: Skill;
+    amount: string; // This is a string because input field always return a string
+    skill: { value: string; label: string }; // The weird react-select options type
   }
 
   const defaultPosition = {
-    amount:0,
-    skill:{skillName:''}
+    amount: '',
+    skill: {} as { value: string; label: string },
   }
 
   const defaultprojectForm = {
@@ -77,9 +78,27 @@ const Projects: NextPage = () => {
 
   const [projectForm, setProjectForm] = useState(defaultprojectForm);
 
+  const setPositionDropdownValue = (key: number, value: { value: string; label: string }) => {
+    const newProjectForm = { ...projectForm };
+    (newProjectForm['positions'] as positionForm[])[key].skill = value;
+    setProjectForm(newProjectForm);
+  }
+
+  const setPositionDropdownAmount = (key: number, amount: string) => {
+    const newProjectForm = { ...projectForm };
+    (newProjectForm['positions'] as positionForm[])[key].amount = amount;
+    setProjectForm(newProjectForm);
+  }
+
   const addPositionDropdown = () => {
     const newProjectForm = { ...projectForm };
     (newProjectForm['positions'] as positionForm[]).push(defaultPosition as positionForm);
+    setProjectForm(newProjectForm);
+  }
+
+  const removePositionDropdown = (key: number) => {
+    const newProjectForm = { ...projectForm };
+    (newProjectForm['positions'] as positionForm[]).splice(key, 1);
     setProjectForm(newProjectForm);
   }
 
@@ -190,7 +209,7 @@ const Projects: NextPage = () => {
           </section>
         </main>
       </DndProvider>
-      {/* TODO style this entire thing and add required fields */}
+      {/* TODO style this popup */}
       {/* This is the popup to create a new project */}
       <Popup
           open={showCreateProject}
@@ -218,10 +237,10 @@ const Projects: NextPage = () => {
               }}
           >
 
-            <label className="">
+            <label className="block">
               Project Name
               <input
-                  className="border-2"
+                  className="border-2 block"
                   name="projectName"
                   type="text"
                   value={projectForm.projectName as string}
@@ -229,10 +248,10 @@ const Projects: NextPage = () => {
               />
             </label>
 
-            <label className="">
+            <label className="block">
               Client Name
               <input
-                  className="border-2"
+                  className="border-2 block"
                   name="clientName"
                   type="text"
                   value={projectForm.clientName as string}
@@ -246,9 +265,11 @@ const Projects: NextPage = () => {
             >
               <Fragment>
 
-                {(projectForm.positions as positionForm[]).map((position, i) => {
+                {(projectForm.positions as positionForm[]).map((position, index) => {
                   return (
-                      <div className="" key={i}>
+                      <div className="flex flex-row" key={index}>
+                        <label className="block">
+                          Position
                         <Select
                             className="basic-single"
                             classNamePrefix="select"
@@ -257,33 +278,56 @@ const Projects: NextPage = () => {
                             isClearable={true}
                             isRtl={false}
                             isSearchable={true}
-                            name={`"Position-" +${i}`}
+                            name={`"Position-" +${index}`}
+                            value={position.skill}
                             options={[
                               { value: 'chocolate', label: 'Chocolate' },
                               { value: 'strawberry', label: 'Strawberry' },
                               { value: 'vanilla', label: 'Vanilla' },
                             ]} // TODO fix this once backend has getAllSKills endpoint implemented
-                            placeholder="Select position"
-                            // onChange={(e) => setPositionId(e ? e.value || '' : '')}
+                            placeholder="Position"
+                            onChange={(e) => setPositionDropdownValue(index, e ? e : {} as { value: string; label: string })}
                         />
-                        {/*TODO add amount input*/}
-                        {/*TODO add remove this dropdown button*/}
+                        </label>
+                        <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
+                          Amount
+                          <input
+                              className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
+                              name={`"Amount-" +${index}`}
+                              type="number"
+                              value={position.amount}
+                              onChange={(e) => setPositionDropdownAmount(index, e.target.value)}
+                          />
+                        </label>
+                        <div className="flex flex-col justify-center">
+                          <i
+                              onClick={() => {
+                                console.log(index);
+                                removePositionDropdown(index);
+                              }}
+                              className="icon-xcircle-red text-2xl"
+                          >
+                            {xmark_circle}
+                          </i>
+                        </div>
                       </div>
                   );
                 })}
               </Fragment>
+              {/* TODO make this button more obvious */}
               <button onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 addPositionDropdown();
               }} className="btn btn-primary">
-                + Add
+                + Add Position
               </button>
             </div>
 
             <textarea
                 placeholder="Project description"
                 className="mt-3 w-full resize-y border-2 border-check-gray"
+                value={projectForm.description as string}
                 onChange={(e) => handleProjectFormChange('description',e.target.value || '')}
             />
 

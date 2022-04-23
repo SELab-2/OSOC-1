@@ -8,6 +8,8 @@ import {
   UUID,
 } from '../../lib/types';
 import { Icon } from '@iconify/react';
+import Popup from 'reactjs-popup';
+import Select from 'react-select';
 import { useDrop } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
 import { Fragment, useEffect, useState } from 'react';
@@ -16,8 +18,7 @@ import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
-import Popup from 'reactjs-popup';
-import Select from 'react-select';
+const edit_icon = <Icon icon="akar-icons:edit" />;
 
 // Using projectInput and not just project to avoid confusion
 type ProjectProp = {
@@ -179,7 +180,10 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}
         <div className="flex min-w-[40%] flex-col xl:min-w-[50%]">
-          <p className="text-lg font-bold">{myProject.name}</p>
+          <div className="flex flex-row items-center">
+            <p className="text-lg font-bold">{myProject.name}</p>
+            <i className={`pl-2 text-xl opacity-20`} onClick={() => console.log("editclick")}>{edit_icon}</i>
+          </div>
           <p>{myProject.clientName}</p>
           <div className="flex flex-row">
             {myProject.coaches.map((user) => (
