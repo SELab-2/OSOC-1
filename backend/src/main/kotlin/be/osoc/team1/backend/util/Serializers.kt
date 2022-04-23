@@ -1,6 +1,5 @@
 package be.osoc.team1.backend.util
 
-import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import com.fasterxml.jackson.core.JsonGenerator
@@ -16,8 +15,6 @@ open class Serializer<T>(private val genFunc: (T) -> String) : BaseSerializer<T>
         gen!!.writeObject(baseUrl + genFunc(item!!))
 }
 
-class PositionSerializer : Serializer<Position>({ "/positions/" + it.id.toString() })
+class StudentSerializer : Serializer<Student>({ "/${it.edition}/students/${it.id}" })
 
-class StudentSerializer : Serializer<Student>({ "/students/" + it.id.toString() })
-
-class UserSerializer : Serializer<User>({ "/users/" + it.id.toString() })
+class UserSerializer : Serializer<User>({ "/users/${it.id}" })

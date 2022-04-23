@@ -6,6 +6,7 @@ import be.osoc.team1.backend.services.StudentService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -19,7 +20,12 @@ import java.util.UUID
 class CommunicationController(
     private val communicationService: CommunicationService,
     private val studentService: StudentService
-) : BaseController<Communication>(communicationService) {
+) {
+
+    @GetMapping("/{id}")
+    @Secured("ROLE_COACH")
+    fun getCommunicationById(@PathVariable edition: String, @PathVariable id: UUID) =
+        communicationService.getCommunicationById(id, edition)
 
     /**
      * Add a communication to the database. The communication should be passed in the request body

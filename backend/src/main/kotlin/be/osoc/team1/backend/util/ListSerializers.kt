@@ -1,10 +1,6 @@
 package be.osoc.team1.backend.util
 
-import be.osoc.team1.backend.entities.Answer
 import be.osoc.team1.backend.entities.Assignment
-import be.osoc.team1.backend.entities.Communication
-import be.osoc.team1.backend.entities.Position
-import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.User
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
@@ -24,14 +20,6 @@ open class ListSerializer<T>(private val genFunc: (T) -> String) : BaseSerialize
     }
 }
 
-class AssignmentListSerializer : ListSerializer<Assignment>({ "/assignments/" + it.id.toString() })
+class AssignmentListSerializer : ListSerializer<Assignment>({ "/${it.student.edition}/assignments/${it.id}" })
 
-class CommunicationListSerializer : ListSerializer<Communication>({ "/communications/" + it.id.toString() })
-
-class PositionListSerializer : ListSerializer<Position>({ "/positions/" + it.id.toString() })
-
-class StatusSuggestionListSerializer : ListSerializer<StatusSuggestion>({ "/statusSuggestions/" + it.id.toString() })
-
-class UserListSerializer : ListSerializer<User>({ "/users/" + it.id.toString() })
-
-class AnswerListSerializer : ListSerializer<Answer>({ "/answers/" + it.id.toString() })
+class UserListSerializer : ListSerializer<User>({ "/users/${it.id}" })

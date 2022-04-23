@@ -12,7 +12,7 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidAssignmentIdException
 import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
-import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.repositories.GenericEditionRepository
 import be.osoc.team1.backend.repositories.ProjectRepository
 import be.osoc.team1.backend.services.ProjectService
 import be.osoc.team1.backend.services.StudentService
@@ -306,7 +306,7 @@ class ProjectServiceTests {
 
     @Test
     fun `deleteAssignment does not fail if the assignment is part of the project`() {
-        val assignmentRepository: AssignmentRepository = mockk()
+        val assignmentRepository = mockk<GenericEditionRepository<Assignment>>()
         val service = ProjectService(
             getRepository(true),
             getStudentService(true),

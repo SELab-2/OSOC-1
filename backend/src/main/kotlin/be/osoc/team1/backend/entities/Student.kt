@@ -1,13 +1,9 @@
 package be.osoc.team1.backend.entities
 
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
-import be.osoc.team1.backend.util.AnswerListSerializer
-import be.osoc.team1.backend.util.CommunicationListSerializer
-import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
@@ -125,7 +121,6 @@ class Student(
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = AnswerListSerializer::class)
     val answers: List<Answer> = listOf()
 ) {
 
@@ -135,11 +130,9 @@ class Student(
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = StatusSuggestionListSerializer::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
 }
 
