@@ -190,8 +190,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents filtering by skills only returns students with one of those skills`() {
-        val backendStudent = Student("firstname", "lastname", skills=setOf(Skill("Backend")))
-        val frontendStudent = Student("firstname", "lastname", skills=setOf(Skill("Frontend")))
+        val backendStudent = Student("firstname", "lastname", skills = setOf(Skill("Backend")))
+        val frontendStudent = Student("firstname", "lastname", skills = setOf(Skill("Frontend")))
         val studentList = listOf(backendStudent, frontendStudent)
         every { studentService.getAllStudents(defaultSort) } returns studentList
         mockMvc.perform(get("/students?skills=otherSkill").principal(defaultPrincipal))
