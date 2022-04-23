@@ -17,6 +17,7 @@
     "@heroicons/react": "^1.0.6",
     "@iconify/react": "^3.2.1",
     "axios": "^0.26.1",
+    "flatlist-react": "^1.5.0",
     "font-awesome": "^4.7.0",
     "next": "latest",
     "react": "^17.0.2",

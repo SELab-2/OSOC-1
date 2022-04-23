@@ -6,7 +6,7 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import {Fragment, useEffect, useState} from 'react';
-import {Project, Skill, UserRole, UUID} from '../lib/types';
+import {Project, Skill, Student, UserRole, UUID} from '../lib/types';
 import axios, { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import useAxiosAuth from '../hooks/useAxiosAuth';
@@ -19,6 +19,8 @@ import ProjectTile from "../components/projects/ProjectTile";
 // import ProjectPopup, {defaultprojectForm, projectForm, setProjectForm} from "../components/projects/ProjectPopup"
 // import ProjectPopup, {defaultprojectForm, useProjectForm} from "../components/projects/ProjectPopup"
 import ProjectPopup, {defaultprojectForm} from "../components/projects/ProjectPopup"
+import StudentTile from "../components/students/StudentTile";
+import FlatList from "flatlist-react";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -82,6 +84,26 @@ const Projects: NextPage = () => {
         setLoading(false);
       });
   }, []);
+
+  const state = {
+    hasMoreItems: true,
+    offset: 0,
+    loading: false // important so the right blank message is shown from the start
+  }
+
+  const showBlank = () => {
+    if (projects.length === 0 && state.loading) {
+      return <div>Loading list...</div>
+    }
+    return <div>No students found.</div>
+  }
+
+
+  // TODO make actual request with pagination parameters via searchStudent but without overwriting list
+  const fetchData = () => {
+    // TODO set state to correct values
+    console.log("loadmore");
+  }
 
   return (
     <div className="min-w-screen flex min-h-screen flex-col items-center">
@@ -161,7 +183,17 @@ const Projects: NextPage = () => {
             </div>
 
             {/* This contains the project tiles */}
-            <ProjectTiles projects={projects} />
+            <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
+              <FlatList
+                  list={projects}
+                  renderItem={(project: Project) => <ProjectTile key={project.id} projectInput={project} />}
+                  renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
+                  hasMoreItems={state.hasMoreItems}
+                  loadMoreItems={fetchData}
+                  paginationLoadingIndicator={<div>Loading Students</div>} // TODO style this
+                  paginationLoadingIndicatorPosition="center"
+              />
+            </div>
           </section>
         </main>
       </DndProvider>
