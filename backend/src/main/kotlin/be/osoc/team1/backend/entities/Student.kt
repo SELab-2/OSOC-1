@@ -166,7 +166,8 @@ fun List<Student>.filterBySuggested(includeSuggested: Boolean, callee: User) =
  * This function will filter [Student]s based on a set of [Skill]s.
  * Only students that have at least one of these skills will be returned.
  */
-fun List<Student>.filterBySkills(skills: Set<Skill>) = filter { it.skills.intersect(skills).isNotEmpty() }
+fun List<Student>.filterBySkills(skillNames: Set<String>) =
+    filter { student -> student.skills.map { it.skillName }.intersect(skillNames).isNotEmpty() }
 
 /**
  * This function will filter a list of [Student]s to only return alumni.

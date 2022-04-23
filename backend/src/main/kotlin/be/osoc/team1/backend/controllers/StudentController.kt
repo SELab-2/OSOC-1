@@ -1,6 +1,5 @@
 package be.osoc.team1.backend.controllers
 
-import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
@@ -63,9 +62,9 @@ class StudentController(
         @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
-        @RequestParam(defaultValue = "") skills: Set<Skill>,
+        @RequestParam(defaultValue = "") skills: Set<String>,
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
-        @RequestParam(defaultValue = "false") possibleStudentCoach: Boolean,
+        @RequestParam(defaultValue = "false") onlyStudentCoach: Boolean,
         @RequestParam(defaultValue = "false") onlyNotAssigned: Boolean,
         principal: Principal
     ): PagedCollection<Student> {
@@ -76,7 +75,7 @@ class StudentController(
             .filterByStatus(status)
             .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
             .applyIf(alumnOnly) { filterByAlumn() }
-            .applyIf(possibleStudentCoach) { filterByStudentCoach() }
+            .applyIf(onlyStudentCoach) { filterByStudentCoach() }
             .applyIf(onlyNotAssigned) { filterByNotYetAssigned(assignmentRepository) }
             .page(Pager(pageNumber, pageSize))
     }
