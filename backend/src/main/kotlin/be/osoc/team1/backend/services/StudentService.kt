@@ -80,8 +80,6 @@ class StudentService(private val repository: StudentRepository, private val user
             throw ForbiddenOperationException("This coach has already made a suggestion for this student.")
         }
         student.statusSuggestions.add(statusSuggestion)
-        // See the comment at StatusSuggestion.student to understand why we have to do this.
-        statusSuggestion.student = student
         repository.save(student)
     }
 
@@ -101,8 +99,6 @@ class StudentService(private val repository: StudentRepository, private val user
             throw FailedOperationException("This coach hasn't made a suggestion for the given student.")
         }
         student.statusSuggestions.remove(suggestion)
-        // See the comment at StatusSuggestion.student to understand why we have to do this.
-        suggestion.student = null
         repository.save(student)
     }
 

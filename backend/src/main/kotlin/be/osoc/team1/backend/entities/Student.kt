@@ -12,11 +12,8 @@ import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
-import javax.persistence.FetchType
 import javax.persistence.Id
-import javax.persistence.JoinColumn
 import javax.persistence.ManyToMany
-import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 
 /**
@@ -56,7 +53,7 @@ enum class SuggestionEnum {
  * Every [StatusSuggestion] is made by a coach of type [User]. The [coachId] of the [User] who made the suggestion
  * is included in the object. A coach can make multiple suggestions about different [Student]s, but
  * it wouldn't make any sense for a coach to make multiple suggestions about the same [Student].
- * Therefore the combination of [coachId] and [student] must be unique.
+ * Therefore the combination of [coachId] and [Student] must be unique.
  * This constraint is checked when adding a new [StatusSuggestion] to a [Student].
  * A [StatusSuggestion] always belongs to one particular [Student] in the database.
  * This [Student] is included in the [StatusSuggestion] to verify the unique constraint,
@@ -70,16 +67,6 @@ class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motiva
 
     @Id
     val id: UUID = UUID.randomUUID()
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
-    @JsonIgnore
-    // Needs to be a nullable var for synchronization purposes. See
-    // https://vladmihalcea.com/the-best-way-to-map-a-onetomany-association-with-jpa-and-hibernate/
-    // (Bidirectional @OneToMany) for more information. I didn't implement the most efficient option
-    // in this article, because I couldn't get the code to work when the mappedBy attribute was added
-    // to the @OneToMany side of the relation.
-    var student: Student? = null
 }
 
 /**

@@ -127,7 +127,6 @@ class StudentServiceTests {
         val suggestionId = testSuggestion.id
         verify { student.statusSuggestions.add(testSuggestion) }
         assert(testSuggestion.id == suggestionId)
-        assert(testSuggestion.student == student)
     }
 
     @Test
