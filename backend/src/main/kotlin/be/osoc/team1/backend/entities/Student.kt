@@ -14,7 +14,9 @@ import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.ManyToMany
+import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.validation.constraints.NotBlank
 
 /**
  * Represents the possible values that a student's status can have.
@@ -63,7 +65,14 @@ enum class SuggestionEnum {
  * Apart from the suggested [status], a [motivation] for the suggestion should also be included.
  */
 @Entity
-class StatusSuggestion(val coachId: UUID, val status: SuggestionEnum, val motivation: String) {
+class StatusSuggestion(
+    val coachId: UUID,
+    val status: SuggestionEnum,
+    val motivation: String,
+    @JsonIgnore
+    @NotBlank
+    val edition: String = ""
+) {
 
     @Id
     val id: UUID = UUID.randomUUID()
@@ -87,6 +96,10 @@ class Answer(
 ) {
     @Id
     val id: UUID = UUID.randomUUID()
+
+    @JsonIgnore
+    @ManyToOne
+    lateinit var student: Student
 }
 
 /**
@@ -106,7 +119,8 @@ class Student(
     val lastName: String,
 
     @JsonIgnore
-    val edition: String,
+    @NotBlank
+    val edition: String = "",
 
     @ManyToMany(cascade = [CascadeType.ALL])
     val skills: Set<Skill> = sortedSetOf(),

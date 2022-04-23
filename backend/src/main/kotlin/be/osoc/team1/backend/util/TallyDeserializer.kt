@@ -31,7 +31,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         }
 
         try {
-            return Student(
+            val student = Student(
                 getAnswerForKey(answerMap, TallyKeys.firstnameQuestion, "firstname").answer.first(),
                 getAnswerForKey(answerMap, TallyKeys.lastnameQuestion, "lastname").answer.first(),
                 "",
@@ -39,6 +39,8 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
                 getAnswerForKey(answerMap, TallyKeys.alumnQuestion, "alumni").optionId == TallyKeys.alumnYesId,
                 answerMap.values.toList()
             )
+            answerMap.values.forEach { it.student = student }
+            return student
         } catch (_: NoSuchElementException) {
             throw FailedOperationException("The firstname ore lastname answer was found to be empty!")
         }

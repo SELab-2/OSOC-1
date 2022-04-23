@@ -17,10 +17,9 @@ import java.util.UUID
 open class BaseService<T>(open val repository: CrudRepository<T, UUID>) {
 
     /**
-     * Get a assignment by its [id], if this id doesn't exist throw an [InvalidIdException]
+     * Get a [T] by its [id], if this [id] doesn't exist throw an [InvalidIdException]
      */
-    fun getById(id: UUID): T = repository.findByIdOrNull(id)
-        ?: throw InvalidIdException()
+    fun getById(id: UUID): T = repository.findByIdOrNull(id) ?: throw InvalidIdException()
 }
 
 @Service

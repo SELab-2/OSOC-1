@@ -131,7 +131,7 @@ class ProjectService(
 
         val student = studentService.getStudentById(assignmentForm.student, edition)
         val suggester = userService.getUserById(assignmentForm.suggester)
-        val assignment = Assignment(student, position, suggester, assignmentForm.reason)
+        val assignment = Assignment(student, position, suggester, assignmentForm.reason, edition)
         project.assignments.add(assignment)
         repository.save(project)
     }
