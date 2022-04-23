@@ -3,7 +3,6 @@ package be.osoc.team1.backend.entities
 import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.Id
-import javax.persistence.ManyToOne
 
 enum class CommunicationTypeEnum {
     Email
@@ -20,7 +19,4 @@ class Communication(
 ) {
     @Id
     val id: UUID = UUID.randomUUID()
-
-    @ManyToOne
-    val student: Student? = null
 }
