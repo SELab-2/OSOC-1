@@ -3,9 +3,17 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.filterByName
+import be.osoc.team1.backend.entities.filterByStatus
+import be.osoc.team1.backend.entities.filterBySuggested
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
+import be.osoc.team1.backend.services.PagedCollection
+import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.page
+import be.osoc.team1.backend.util.TallyDeserializer
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -48,9 +56,13 @@ class StudentController(
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         principal: Principal
-    ): Iterable<Student> {
+    ): PagedCollection<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllStudents(pageNumber, pageSize, sortBy, status, decodedName, includeSuggested, userDetailService.getUserFromPrincipal(principal))
+        return service.getAllStudents(Sort.by(sortBy))
+            .filterByName(decodedName)
+            .filterBySuggested(includeSuggested, userDetailService.getUserFromPrincipal(principal))
+            .filterByStatus(status)
+            .page(Pager(pageNumber, pageSize))
     }
 
     /**
@@ -71,22 +83,15 @@ class StudentController(
     fun deleteStudentById(@PathVariable studentId: UUID) = service.deleteStudentById(studentId)
 
     /**
-     * Add a student to the database. The student should be passed in the request body as a JSON
-     * object and should have the following format:
-     *
-     * ```
-     * {
-     *     "firstName": "(INSERT FIRST NAME)",
-     *     "lastName": "(INSERT LAST NAME)"
-     * }
-     * ```
+     * Add a student to the database. The student should be passed in the request body as a JSON representation of a
+     * tally form submission. The form is expected to contain certain specific questions, these are specified in the
+     * [TallyDeserializer] class.
      *
      * The location of the newly created student is then returned to the API caller in the location
      * header. No checking is done to see if firstName or lastName qualify as valid 'names'. This
      * verification is the responsibility of the caller.
      */
     @PostMapping
-    @Secured("ROLE_COACH")
     fun addStudent(@RequestBody student: Student): ResponseEntity<Student> {
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
