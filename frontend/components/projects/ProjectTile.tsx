@@ -16,7 +16,7 @@ import { Fragment, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
-import ProjectPopup, {projectFormFromProject} from "./ProjectPopup";
+import ProjectPopup, { projectFormFromProject } from './ProjectPopup';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -136,7 +136,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   ] = useState<boolean>(false);
   const closeUnassignmentModal = () => setOpenUnassignment(false);
   const [assignmentId, setAssignmentId] = useState('' as UUID);
-  const [removeStudentName, setRemoveStudentName] = useState('' as string)
+  const [removeStudentName, setRemoveStudentName] = useState('' as string);
   const [student, setStudent] = useState({} as Student);
   const [positionId, setPositionId] = useState('' as UUID);
   const [reason, setReason] = useState('' as string);
@@ -144,7 +144,9 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [showEditProject, setShowEditProject] = useState(false);
   useAxiosAuth();
 
-  const [projectForm, setProjectForm] = useState(projectFormFromProject(myProject));
+  const [projectForm, setProjectForm] = useState(
+    projectFormFromProject(myProject)
+  );
 
   /**
    * This catches the dropped studentTile
@@ -187,7 +189,12 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         <div className="flex min-w-[40%] flex-col xl:min-w-[50%]">
           <div className="flex flex-row items-center">
             <p className="text-lg font-bold">{myProject.name}</p>
-            <i className={`pl-2 text-xl opacity-20`} onClick={() => setShowEditProject(true)}>{edit_icon}</i>
+            <i
+              className={`pl-2 text-xl opacity-20`}
+              onClick={() => setShowEditProject(true)}
+            >
+              {edit_icon}
+            </i>
           </div>
           <p>{myProject.clientName}</p>
           <div className="flex flex-row">
@@ -227,7 +234,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         closeOnDocumentClick={false}
         lockScroll={true}
       >
-        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[600px] flex-col p-5 max-h-[85vh] max-w-screen bg-osoc-neutral-bg">
+        <div className="modal chart-label max-w-screen absolute left-1/2 top-1/2 flex max-h-[85vh] min-w-[600px] flex-col bg-osoc-neutral-bg p-5">
           <a
             className="close"
             onClick={(e) => {
@@ -238,7 +245,13 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
             &times;
           </a>
 
-          <h3 className="mb-3 text-lg">Assign <i>{student.firstName} {student.lastName}</i> to <i>{myProject.name}</i></h3>
+          <h3 className="mb-3 text-lg">
+            Assign{' '}
+            <i>
+              {student.firstName} {student.lastName}
+            </i>{' '}
+            to <i>{myProject.name}</i>
+          </h3>
 
           <form
             onSubmit={(e) => {
@@ -263,40 +276,43 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
               <Fragment>
                 <label>
                   Position
-                <Select
-                  className="basic-single mt-1"
-                  classNamePrefix="select"
-                  isDisabled={false}
-                  isLoading={false}
-                  isClearable={true}
-                  isRtl={false}
-                  isSearchable={true}
-                  name="Position"
-                  options={myOptions}
-                  placeholder="Select position"
-                  onChange={(e) => setPositionId(e ? e.value || '' : '')}
-                />
+                  <Select
+                    className="basic-single mt-1"
+                    classNamePrefix="select"
+                    isDisabled={false}
+                    isLoading={false}
+                    isClearable={true}
+                    isRtl={false}
+                    isSearchable={true}
+                    name="Position"
+                    options={myOptions}
+                    placeholder="Select position"
+                    onChange={(e) => setPositionId(e ? e.value || '' : '')}
+                  />
                 </label>
               </Fragment>
             </div>
 
             <label>
               Reason for assignment
-            <textarea
+              <textarea
                 placeholder="Reason for assignment"
-                className="mt-1 px-1 w-full resize-y border-2"
+                className="mt-1 w-full resize-y border-2 px-1"
                 onChange={(e) => setReason(e.target.value || '')}
-            />
+              />
             </label>
-            <div className="flex flex-row justify-between mt-6">
+            <div className="mt-6 flex flex-row justify-between">
               <button
-                  onClick={() => closeAssignmentModal()}
-                  className={`border-2 min-w-[120px] bg-white`}
+                onClick={() => closeAssignmentModal()}
+                className={`min-w-[120px] border-2 bg-white`}
               >
                 Cancel
               </button>
 
-              <button className={`border-2 min-w-[120px] py-1 bg-check-green`} type={`submit`}>
+              <button
+                className={`min-w-[120px] border-2 bg-check-green py-1`}
+                type={`submit`}
+              >
                 Confirm
               </button>
             </div>
@@ -313,7 +329,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         closeOnDocumentClick={false}
         lockScroll={true}
       >
-        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col py-5 max-h-[85vh] max-w-screen bg-osoc-neutral-bg">
+        <div className="modal chart-label max-w-screen absolute left-1/2 top-1/2 flex max-h-[85vh] min-w-[450px] flex-col bg-osoc-neutral-bg py-5">
           <a
             className="close"
             onClick={(e) => {
@@ -323,24 +339,28 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           >
             &times;
           </a>
-          <h3 className="px-5 text-lg">Are you sure you wish to remove <i>{removeStudentName}</i> from <i>{myProject.name}</i>?</h3>
-          <div className="flex flex-row justify-between mt-3 px-5">
+          <h3 className="px-5 text-lg">
+            Are you sure you wish to remove <i>{removeStudentName}</i> from{' '}
+            <i>{myProject.name}</i>?
+          </h3>
+          <div className="mt-3 flex flex-row justify-between px-5">
             <button
-                onClick={() => closeUnassignmentModal()}
-                className={`border-2 min-w-[120px] bg-white`}
+              onClick={() => closeUnassignmentModal()}
+              className={`min-w-[120px] border-2 bg-white`}
             >
               Cancel
             </button>
 
-            <button className={`border-2 min-w-[120px] py-1 bg-check-green`}
-                    onClick={() => {
-                      closeUnassignmentModal();
-                      deleteStudentFromProject(
-                          myProject.id,
-                          assignmentId,
-                          setMyProject
-                      );
-                    }}
+            <button
+              className={`min-w-[120px] border-2 bg-check-green py-1`}
+              onClick={() => {
+                closeUnassignmentModal();
+                deleteStudentFromProject(
+                  myProject.id,
+                  assignmentId,
+                  setMyProject
+                );
+              }}
             >
               Confirm
             </button>
@@ -350,34 +370,33 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
 
       {/* This is the popup to create a new project */}
       <Popup
-          open={showEditProject}
-          onClose={() => setShowEditProject(false)}
-          // reset the form before opening so users do not accidentally change things
-          onOpen={() => setProjectForm(projectFormFromProject(myProject))}
-          data-backdrop="static"
-          data-keyboard="false"
-          closeOnDocumentClick={false}
-          lockScroll={true}
+        open={showEditProject}
+        onClose={() => setShowEditProject(false)}
+        // reset the form before opening so users do not accidentally change things
+        onOpen={() => setProjectForm(projectFormFromProject(myProject))}
+        data-backdrop="static"
+        data-keyboard="false"
+        closeOnDocumentClick={false}
+        lockScroll={true}
       >
-        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[600px] flex-col py-5 max-h-[85vh] max-w-screen bg-osoc-neutral-bg">
+        <div className="modal chart-label max-w-screen absolute left-1/2 top-1/2 flex max-h-[85vh] min-w-[600px] flex-col bg-osoc-neutral-bg py-5">
           <a
-              className="close"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowEditProject(false);
-              }}
+            className="close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowEditProject(false);
+            }}
           >
             &times;
           </a>
-          <h3 className="text-xl mb-3 px-5">Edit Project</h3>
-          <div className="flex flex-col overflow-y-auto mb-4">
-          <ProjectPopup
+          <h3 className="mb-3 px-5 text-xl">Edit Project</h3>
+          <div className="mb-4 flex flex-col overflow-y-auto">
+            <ProjectPopup
               projectForm={projectForm}
               setShowPopup={setShowEditProject}
               setProjectForm={setProjectForm}
-          />
+            />
           </div>
-
         </div>
       </Popup>
     </div>
@@ -404,7 +423,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
   assignment,
   setAssignmentId,
   setOpenUnassignment,
-    setRemoveStudentName,
+  setRemoveStudentName,
 }: AssignmentProp) => {
   return (
     <div className="flex flex-row justify-between pb-4">
@@ -432,7 +451,9 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
         <i
           onClick={() => {
             setAssignmentId(assignment.id);
-            setRemoveStudentName(assignment.student.firstName + ' ' + assignment.student.lastName)
+            setRemoveStudentName(
+              assignment.student.firstName + ' ' + assignment.student.lastName
+            );
             setOpenUnassignment(true);
           }}
           className="icon-xcircle-red text-2xl"

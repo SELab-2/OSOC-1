@@ -5,22 +5,24 @@ import ProjectTiles from '../components/projects/ProjectTiles';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import {Fragment, useEffect, useState} from 'react';
-import {Project, Skill, Student, UserRole, UUID} from '../lib/types';
+import { Fragment, useEffect, useState } from 'react';
+import { Project, Skill, Student, UserRole, UUID } from '../lib/types';
 import axios, { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import Popup from "reactjs-popup";
-import Select from "react-select";
-import {number} from "prop-types";
-import ProjectTile from "../components/projects/ProjectTile";
+import Popup from 'reactjs-popup';
+import Select from 'react-select';
+import { number } from 'prop-types';
+import ProjectTile from '../components/projects/ProjectTile';
 // import ProjectPopup, {defaultprojectForm, projectForm, setProjectForm} from "../components/projects/ProjectPopup"
 // import ProjectPopup, {defaultprojectForm, useProjectForm} from "../components/projects/ProjectPopup"
-import ProjectPopup, {defaultprojectForm} from "../components/projects/ProjectPopup"
-import StudentTile from "../components/students/StudentTile";
-import FlatList from "flatlist-react";
+import ProjectPopup, {
+  defaultprojectForm,
+} from '../components/projects/ProjectPopup';
+import StudentTile from '../components/students/StudentTile';
+import FlatList from 'flatlist-react';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -64,7 +66,7 @@ const Projects: NextPage = () => {
     useState<boolean>(true);
   const [error, setError]: [string, (error: string) => void] = useState('');
 
-  const [projectForm, setProjectForm] = useState({...defaultprojectForm});
+  const [projectForm, setProjectForm] = useState({ ...defaultprojectForm });
 
   useAxiosAuth();
   useEffect(() => {
@@ -88,22 +90,21 @@ const Projects: NextPage = () => {
   const state = {
     hasMoreItems: true,
     offset: 0,
-    loading: false // important so the right blank message is shown from the start
-  }
+    loading: false, // important so the right blank message is shown from the start
+  };
 
   const showBlank = () => {
     if (projects.length === 0 && state.loading) {
-      return <div>Loading projects...</div>
+      return <div>Loading projects...</div>;
     }
-    return <div>No projects found.</div>
-  }
-
+    return <div>No projects found.</div>;
+  };
 
   // TODO make actual request with pagination parameters via searchStudent but without overwriting list
   const fetchData = () => {
     // TODO set state to correct values
-    console.log("loadmore");
-  }
+    console.log('loadmore');
+  };
 
   return (
     <div className="min-w-screen flex min-h-screen flex-col items-center">
@@ -144,54 +145,54 @@ const Projects: NextPage = () => {
               </div>
 
               <div className={`flex flex-row`}>
-
-              {/* TODO add an easy reset/undo search button */}
-              {/* TODO either move search icon left and add xmark to the right or vice versa */}
-              {/* This is the projects searchbar */}
-              <div className="ml-6 flex w-full justify-center md:mx-6 md:mr-4">
-                <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
-                  <input
-                    type="text"
-                    className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
-                    id="ProjectsSearch"
-                    placeholder="Search projects by name"
-                    onChange={(e) => setProjectSearch(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key == 'Enter') {
-                        searchProject(projectSearch, setProjects);
-                      }
-                    }}
-                  />
-                  <i
-                    className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
-                    onClick={() => searchProject(projectSearch, setProjects)}
-                  >
-                    {magnifying_glass}
-                  </i>
+                {/* TODO add an easy reset/undo search button */}
+                {/* TODO either move search icon left and add xmark to the right or vice versa */}
+                {/* This is the projects searchbar */}
+                <div className="ml-6 flex w-full justify-center md:mx-6 md:mr-4">
+                  <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
+                    <input
+                      type="text"
+                      className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+                      id="ProjectsSearch"
+                      placeholder="Search projects by name"
+                      onChange={(e) => setProjectSearch(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key == 'Enter') {
+                          searchProject(projectSearch, setProjects);
+                        }
+                      }}
+                    />
+                    <i
+                      className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                      onClick={() => searchProject(projectSearch, setProjects)}
+                    >
+                      {magnifying_glass}
+                    </i>
+                  </div>
                 </div>
-              </div>
 
                 <button
-                    className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300"
-                    type="submit"
-                    onClick={() => setShowCreateProject(true)}
+                  className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300"
+                  type="submit"
+                  onClick={() => setShowCreateProject(true)}
                 >
                   Create new project
                 </button>
-
               </div>
             </div>
 
             {/* This contains the project tiles */}
             <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
               <FlatList
-                  list={projects}
-                  renderItem={(project: Project) => <ProjectTile key={project.id} projectInput={project} />}
-                  renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
-                  hasMoreItems={state.hasMoreItems}
-                  loadMoreItems={fetchData}
-                  paginationLoadingIndicator={<div>Loading Projects</div>} // TODO style this
-                  paginationLoadingIndicatorPosition="center"
+                list={projects}
+                renderItem={(project: Project) => (
+                  <ProjectTile key={project.id} projectInput={project} />
+                )}
+                renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
+                hasMoreItems={state.hasMoreItems}
+                loadMoreItems={fetchData}
+                paginationLoadingIndicator={<div>Loading Projects</div>} // TODO style this
+                paginationLoadingIndicatorPosition="center"
               />
             </div>
           </section>
@@ -200,33 +201,32 @@ const Projects: NextPage = () => {
 
       {/* This is the popup to create a new project */}
       <Popup
-          open={showCreateProject}
-          onClose={() => setShowCreateProject(false)}
-          data-backdrop="static"
-          data-keyboard="false"
-          closeOnDocumentClick={false}
-          lockScroll={true}
+        open={showCreateProject}
+        onClose={() => setShowCreateProject(false)}
+        data-backdrop="static"
+        data-keyboard="false"
+        closeOnDocumentClick={false}
+        lockScroll={true}
       >
-        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[600px] flex-col py-5 max-h-[85vh] max-w-screen bg-osoc-neutral-bg">
+        <div className="modal chart-label max-w-screen absolute left-1/2 top-1/2 flex max-h-[85vh] min-w-[600px] flex-col bg-osoc-neutral-bg py-5">
           <a
-              className="close"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowCreateProject(false);
-              }}
+            className="close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowCreateProject(false);
+            }}
           >
             &times;
           </a>
 
-          <h3 className="text-xl mb-3 px-5">Create New Project</h3>
-          <div className="flex flex-col overflow-y-auto mb-4">
-          <ProjectPopup
+          <h3 className="mb-3 px-5 text-xl">Create New Project</h3>
+          <div className="mb-4 flex flex-col overflow-y-auto">
+            <ProjectPopup
               projectForm={projectForm}
               setShowPopup={setShowCreateProject}
               setProjectForm={setProjectForm}
-          />
+            />
           </div>
-
         </div>
       </Popup>
     </div>

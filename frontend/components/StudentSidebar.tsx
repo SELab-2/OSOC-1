@@ -1,5 +1,4 @@
 import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
-import StudentTiles from './students/StudentTiles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { StatusSuggestionStatus, Student } from '../lib/types';
@@ -7,7 +6,7 @@ import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import Select from 'react-select';
-import FlatList from "flatlist-react";
+import FlatList from 'flatlist-react';
 import StudentTile from './students/StudentTile';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
@@ -142,22 +141,21 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const state = {
     hasMoreItems: true,
     offset: 0,
-    loading: false // important so the right blank message is shown from the start
-  }
+    loading: false, // important so the right blank message is shown from the start
+  };
 
   const showBlank = () => {
     if (students.length === 0 && state.loading) {
-      return <div>Loading students...</div>
+      return <div>Loading students...</div>;
     }
-    return <div>No students found.</div>
-  }
-
+    return <div>No students found.</div>;
+  };
 
   // TODO make actual request with pagination parameters via searchStudent but without overwriting list
   const fetchData = () => {
     // TODO set state to correct values
-    console.log("loadmore");
-  }
+    console.log('loadmore');
+  };
 
   return (
     // TODO test with a long list for autoscroll etc this should be separate from projects scroll but no longer
@@ -445,13 +443,15 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
             {students.length + '/' + students.length + ' shown'}
           </div>
           <FlatList
-              list={students}
-              renderItem={(student: Student) => <StudentTile key={student.id} student={student} />}
-              renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
-              hasMoreItems={state.hasMoreItems}
-              loadMoreItems={fetchData}
-              paginationLoadingIndicator={<div>Loading Students</div>} // TODO style this
-              paginationLoadingIndicatorPosition="center"
+            list={students_fake}
+            renderItem={(student: Student) => (
+              <StudentTile key={student.id} student={student} />
+            )}
+            renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
+            hasMoreItems={state.hasMoreItems}
+            loadMoreItems={fetchData}
+            paginationLoadingIndicator={<div>Loading Students</div>} // TODO style this
+            paginationLoadingIndicatorPosition="center"
           />
         </div>
       </div>

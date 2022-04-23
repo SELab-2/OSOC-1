@@ -8,15 +8,17 @@ import {
 import { Icon } from '@iconify/react';
 import {
   ItemTypes,
-  Project,
   StatusSuggestionStatus,
   Student,
-  UUID,
 } from '../../lib/types';
 import { useDrag } from 'react-dnd';
-const check_mark = <FontAwesomeIcon icon={faCheck} />;
-const question_mark = <FontAwesomeIcon icon={faQuestion} />;
-const x_mark = <FontAwesomeIcon icon={faXmark} />;
+// const check_mark = <Icon icon="bi:check-lg" width="16" height="16" />;
+// const question_mark = <Icon icon="bi:question-lg" width="16" height="16" />;
+// const x_mark = <Icon icon="bx:x" width="16" height="16" />;
+// const tilde_mark = <Icon icon="mdi:tilde" width="16" height="16"/>;
+const check_mark = <Icon icon="bi:check-lg" />;
+const question_mark = <Icon icon="bi:question-lg" />;
+const x_mark = <Icon icon="bx:x" />;
 const tilde_mark = <Icon icon="mdi:tilde" />;
 
 type StudentProp = {
@@ -72,69 +74,65 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
 
   return (
     // TODO add a chevron dropdown to show possible roles, student coach, ...
+    <div ref={drag} key={student.id}>
       <div
-          ref={drag}
-          key={student.id}
+        className={`my-4 mx-1 flex flex-row justify-between p-2 opacity-100 shadow-sm shadow-gray-500`}
       >
-        <div
-
-          className={`my-4 mx-1 flex flex-row justify-between p-2 shadow-sm shadow-gray-500 opacity-100`}
-        >
-          {/* basic student info */}
-          <div className="flex w-3/4 flex-col justify-center">
-            <div
-              className={`flex flex-row ${
-                student.alumn ? 'visible' : 'hidden h-0 w-0'
+        {/* basic student info */}
+        <div className="flex w-3/4 flex-col justify-center">
+          <div
+            className={`flex flex-row ${
+              student.alumn ? 'visible' : 'hidden h-0 w-0'
+            }`}
+          >
+            <p
+              className={`m-0 rounded-xl bg-osoc-bg text-xs ${
+                student.alumn ? 'visible px-1' : 'invisible h-0 px-0'
               }`}
             >
-              <p
-                className={`m-0 rounded-xl bg-osoc-bg text-xs ${
-                  student.alumn ? 'visible px-1' : 'invisible h-0 px-0'
-                }`}
-              >
-                Alumn
-              </p>
-            </div>
-            <p className="pl-2">{student.firstName + ' ' + student.lastName}</p>
+              Alumn
+            </p>
           </div>
+          <p className="pl-2">{student.firstName + ' ' + student.lastName}</p>
+        </div>
 
-          {/* TODO add some sort of counter to show total amount of suggestions for this student */}
-          {/* holds the suggestions circle image thing + checkmark */}
-          <div className="relative w-[10%]">
-            <PieChart
-              data={[
-                {
-                  title: 'Yes',
-                  value: suggestionCounts[StatusSuggestionStatus.Yes] || 0,
-                  color: '#22c55e', // I can't get tailwind config colors to work here
-                },
-                {
-                  title: 'No',
-                  value: suggestionCounts[StatusSuggestionStatus.No] || 0,
-                  color: '#ef4444',
-                },
-                {
-                  title: 'Maybe',
-                  value: suggestionCounts[StatusSuggestionStatus.Maybe] || 0,
-                  color: '#f97316',
-                },
-              ]}
-              lineWidth={25}
-            />
-            <i
-              className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[22px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${
-                chartHelper[student.status]
-                  ? chartHelper[student.status][1]
-                  : chartHelper['Default'][1]
-              }`}
-            >
-              {chartHelper[student.status]
-                ? chartHelper[student.status][0]
-                : chartHelper['Default'][0]}
-            </i>
-          </div>
+        {/* TODO add some sort of counter to show total amount of suggestions for this student */}
+        {/* holds the suggestions circle image thing + checkmark */}
+        <div className="relative w-[10%]">
+          <PieChart
+            data={[
+              {
+                title: 'Yes',
+                value: suggestionCounts[StatusSuggestionStatus.Yes] || 0,
+                color: '#22c55e', // I can't get tailwind config colors to work here
+              },
+              {
+                title: 'No',
+                value: suggestionCounts[StatusSuggestionStatus.No] || 0,
+                color: '#ef4444',
+              },
+              {
+                title: 'Maybe',
+                value: suggestionCounts[StatusSuggestionStatus.Maybe] || 0,
+                color: '#f97316',
+              },
+            ]}
+            lineWidth={25}
+          />
+          <i
+            className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[28px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${
+              chartHelper[student.status]
+                ? chartHelper[student.status][1]
+                : chartHelper['Default'][1]
+            }`}
+          >
+            {chartHelper[student.status]
+              ? chartHelper[student.status][0]
+              : chartHelper['Default'][0]}
+          </i>
         </div>
       </div>
+    </div>
   );
 };
 
