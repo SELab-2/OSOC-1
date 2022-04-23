@@ -72,10 +72,13 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
 
   return (
     // TODO add a chevron dropdown to show possible roles, student coach, ...
-        <div
+      <div
           ref={drag}
           key={student.id}
-          className="my-4 mx-1 flex flex-row justify-between p-2 shadow-sm shadow-gray-500"
+      >
+        <div
+
+          className={`my-4 mx-1 flex flex-row justify-between p-2 shadow-sm shadow-gray-500 opacity-100`}
         >
           {/* basic student info */}
           <div className="flex w-3/4 flex-col justify-center">
@@ -131,6 +134,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
             </i>
           </div>
         </div>
+      </div>
   );
 };
 
