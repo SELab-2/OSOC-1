@@ -6,9 +6,7 @@ import { UserRole } from '../lib/types';
 
 const Home: NextPage = () => {
   return (
-    <RouteProtection
-      allowedRoles={[UserRole.Admin, UserRole.Coach]}
-    >
+    <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
       <div className="flex min-h-screen flex-col items-center justify-center py-2">
         <Head>
           <title>Create Next App</title>
