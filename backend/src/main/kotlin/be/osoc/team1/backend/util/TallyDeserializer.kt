@@ -19,6 +19,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         const val alumnQuestion = "question_wz7eGE"
         const val alumnYesId = "689451da-305b-451a-8039-c748ff06ec82"
         const val skillQuestion = "question_3X4q1V"
+        const val otherSkillQuestion = "question_w8Ze6o"
     }
 
     override fun deserialize(parser: JsonParser, context: DeserializationContext): Student {
@@ -31,15 +32,22 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         }
 
         try {
+            val skillNames = getAnswerForKey(answerMap, TallyKeys.skillQuestion, "skill").answer.toMutableSet()
+            if (skillNames.remove("Other")) {
+                skillNames.add(getAnswerForKey(
+                    answerMap, TallyKeys.otherSkillQuestion, "otherSkill").answer.first()
+                )
+            }
+
             return Student(
                 getAnswerForKey(answerMap, TallyKeys.firstnameQuestion, "firstname").answer.first(),
                 getAnswerForKey(answerMap, TallyKeys.lastnameQuestion, "lastname").answer.first(),
-                getAnswerForKey(answerMap, TallyKeys.skillQuestion, "skill").answer.map { Skill(it) }.toSortedSet(),
+                skillNames.map { Skill(it) }.toSortedSet(),
                 getAnswerForKey(answerMap, TallyKeys.alumnQuestion, "alumni").optionId == TallyKeys.alumnYesId,
                 answerMap.values.toList()
             )
-        } catch (_: NoSuchElementException) {
-            throw FailedOperationException("The firstname ore lastname answer was found to be empty!")
+        } catch (nse: NoSuchElementException) {
+            throw FailedOperationException("The firstname, lastname or other skill answer was found to be empty!")
         }
     }
 

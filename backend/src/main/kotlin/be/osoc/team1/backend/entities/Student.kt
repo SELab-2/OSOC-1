@@ -8,6 +8,7 @@ import be.osoc.team1.backend.util.TallyDeserializer
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import java.util.SortedSet
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
@@ -18,6 +19,7 @@ import javax.persistence.JoinColumn
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OrderBy
 
 /**
  * Represents the possible values that a student's status can have.
@@ -117,6 +119,7 @@ class Student(
     val firstName: String,
     val lastName: String,
     @ManyToMany(cascade = [CascadeType.ALL])
+    @OrderBy
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
