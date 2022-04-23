@@ -440,7 +440,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
         {/* These are the student tiles */}
         <div className="max-h-[100%] grow overflow-y-auto">
-
+            {/*<StudentTiles students={students}/>*/}
+          {/* TODO show total number of results */}
           <FlatList
               list={students}
               renderItem={(student: Student) => <StudentTile key={student.id} student={student} />}

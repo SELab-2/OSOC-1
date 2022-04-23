@@ -77,7 +77,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
         <div
           ref={drag}
           key={student.id}
-          className="my-2 flex flex-row justify-between p-2 shadow-sm shadow-gray-500"
+          className="my-4 mx-1 flex flex-row justify-between p-2 shadow-sm shadow-gray-500"
         >
           {/* basic student info */}
           <div className="flex w-3/4 flex-col justify-center">
@@ -133,8 +133,8 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
             </i>
           </div>
         </div>
-    //   </td>
-    // </tr>
+     //   </td>
+     // </tr>*
   );
 };
 

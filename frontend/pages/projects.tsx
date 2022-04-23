@@ -190,7 +190,7 @@ const Projects: NextPage = () => {
                   renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
                   hasMoreItems={state.hasMoreItems}
                   loadMoreItems={fetchData}
-                  paginationLoadingIndicator={<div>Loading Students</div>} // TODO style this
+                  paginationLoadingIndicator={<div>Loading Projects</div>} // TODO style this
                   paginationLoadingIndicatorPosition="center"
               />
             </div>
