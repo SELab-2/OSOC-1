@@ -93,9 +93,9 @@ const Projects: NextPage = () => {
 
   const showBlank = () => {
     if (projects.length === 0 && state.loading) {
-      return <div>Loading list...</div>
+      return <div>Loading projects...</div>
     }
-    return <div>No students found.</div>
+    return <div>No projects found.</div>
   }
 
 
@@ -197,15 +197,17 @@ const Projects: NextPage = () => {
           </section>
         </main>
       </DndProvider>
-      {/* TODO style this popup */}
+
       {/* This is the popup to create a new project */}
       <Popup
           open={showCreateProject}
           onClose={() => setShowCreateProject(false)}
           data-backdrop="static"
           data-keyboard="false"
+          closeOnDocumentClick={false}
+          lockScroll={true}
       >
-        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col bg-white p-20">
+        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[600px] flex-col py-5 max-h-[85vh] max-w-screen bg-osoc-neutral-bg">
           <a
               className="close"
               onClick={(e) => {
@@ -215,13 +217,15 @@ const Projects: NextPage = () => {
           >
             &times;
           </a>
-          <h3>Create New Project</h3>
 
+          <h3 className="text-xl mb-3 px-5">Create New Project</h3>
+          <div className="flex flex-col overflow-y-auto mb-4">
           <ProjectPopup
               projectForm={projectForm}
               setShowPopup={setShowCreateProject}
               setProjectForm={setProjectForm}
           />
+          </div>
 
         </div>
       </Popup>

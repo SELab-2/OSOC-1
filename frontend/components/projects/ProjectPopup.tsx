@@ -100,10 +100,10 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({projectForm, setShowPopup, se
             }}
         >
 
-            <label className="block">
+            <label className="block px-5 mb-2">
                 Project Name
                 <input
-                    className="border-2 block"
+                    className="border-2 block w-[60%] py-1"
                     name="projectName"
                     type="text"
                     value={projectForm.projectName as string}
@@ -111,10 +111,10 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({projectForm, setShowPopup, se
                 />
             </label>
 
-            <label className="block">
+            <label className="block px-5">
                 Client Name
                 <input
-                    className="border-2 block"
+                    className="border-2 block w-[60%] py-1"
                     name="clientName"
                     type="text"
                     value={projectForm.clientName as string}
@@ -123,6 +123,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({projectForm, setShowPopup, se
             </label>
             {/* This is a fix to stop clicking on the clearable closing the entire modal */}
             <div
+                className="my-6"
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
             >
@@ -130,8 +131,8 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({projectForm, setShowPopup, se
 
                     {(projectForm.positions as positionForm[]).map((position, index) => {
                         return (
-                            <div className="flex flex-row" key={index}>
-                                <label className="block">
+                            <div className={`flex flex-row justify-between px-5 ${index % 2 == 0 ? 'bg-neutral-100' : 'bg-neutral-50'}`} key={index}>
+                                <label className="mb-4 grow mr-20">
                                     Position
                                     <Select
                                         className="basic-single"
@@ -152,26 +153,29 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({projectForm, setShowPopup, se
                                         onChange={(e) => setPositionDropdownValue(index, e ? e : {} as { value: string; label: string })}
                                     />
                                 </label>
-                                <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
+                                <div className="flex flex-row">
+                                <label className="mb-4">
                                     Amount
                                     <input
-                                        className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
+                                        className="mt-1 box-border block h-8 border-2 p-1 text-sm max-w-[120px]"
                                         name={`"Amount-" +${index}`}
                                         type="number"
+                                        min="1"
                                         value={position.amount}
                                         onChange={(e) => setPositionDropdownAmount(index, e.target.value)}
                                     />
                                 </label>
-                                <div className="flex flex-col justify-center">
+                                <div className="ml-4 flex flex-col justify-center">
                                     <i
                                         onClick={() => {
                                             console.log(index);
                                             removePositionDropdown(index);
                                         }}
-                                        className="icon-xcircle-red text-2xl"
+                                        className="icon-xcircle-red text-[36px]"
                                     >
                                         {xmark_circle}
                                     </i>
+                                </div>
                                 </div>
                             </div>
                         );
@@ -182,21 +186,33 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({projectForm, setShowPopup, se
                     e.preventDefault();
                     e.stopPropagation();
                     addPositionDropdown();
-                }} className="btn btn-primary">
+                }} className="btn btn-primary mx-5 p-2 border-2 bg-white mt-1">
                     + Add Position
                 </button>
             </div>
 
+            <label className="pl-5">
+                Description
             <textarea
                 placeholder="Project description"
-                className="mt-3 w-full resize-y border-2 border-check-gray"
+                className="px-1 mt-1 resize-y border-2 mx-5 w-[calc(100%-40px)]"
                 value={projectForm.description as string}
                 onChange={(e) => handleProjectFormChange('description',e.target.value || '')}
             />
+            </label>
 
-            <button className={`border-2`} type={`submit`}>
-                Create Project
+            <div className="flex flex-row justify-between mt-3 px-5">
+            <button
+                onClick={() => setShowPopup(false)}
+                className={`border-2 min-w-[120px] bg-white`}
+            >
+                Cancel
             </button>
+
+            <button className={`border-2 min-w-[120px] py-1 bg-check-green`} type={`submit`}>
+                Confirm
+            </button>
+            </div>
         </form>
     );
 };

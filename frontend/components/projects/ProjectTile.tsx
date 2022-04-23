@@ -38,6 +38,7 @@ type AssignmentProp = {
   assignment: Assignment;
   setOpenUnassignment: (openUnAssignment: boolean) => void;
   setAssignmentId: (assignmentId: UUID) => void;
+  setRemoveStudentName: (removeStudentName: string) => void;
 };
 
 /**
@@ -135,6 +136,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   ] = useState<boolean>(false);
   const closeUnassignmentModal = () => setOpenUnassignment(false);
   const [assignmentId, setAssignmentId] = useState('' as UUID);
+  const [removeStudentName, setRemoveStudentName] = useState('' as string)
   const [student, setStudent] = useState({} as Student);
   const [positionId, setPositionId] = useState('' as UUID);
   const [reason, setReason] = useState('' as string);
@@ -211,19 +213,21 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
             assignment={assignment}
             setOpenUnassignment={setOpenUnassignment}
             setAssignmentId={setAssignmentId}
+            setRemoveStudentName={setRemoveStudentName}
           />
         ))}
       </div>
 
-      {/* TODO style this entire thing & show what project / student is used */}
       {/* This is the popup to assign a student to a project */}
       <Popup
         open={openAssignment}
         onClose={closeAssignmentModal}
         data-backdrop="static"
         data-keyboard="false"
+        closeOnDocumentClick={false}
+        lockScroll={true}
       >
-        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col bg-white p-20">
+        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[600px] flex-col p-5 max-h-[85vh] max-w-screen bg-osoc-neutral-bg">
           <a
             className="close"
             onClick={(e) => {
@@ -233,6 +237,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           >
             &times;
           </a>
+
+          <h3 className="mb-3 text-lg">Assign <i>{student.firstName} {student.lastName}</i> to <i>{myProject.name}</i></h3>
 
           <form
             onSubmit={(e) => {
@@ -248,19 +254,17 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
               closeAssignmentModal();
             }}
           >
-            <textarea
-              placeholder="Reason for assignment"
-              className="mt-3 w-full resize-y border-2 border-check-gray"
-              onChange={(e) => setReason(e.target.value || '')}
-            />
             {/* This is a fix to stop clicking on the clearable closing the entire modal */}
             <div
               onClick={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
+              className="mb-6"
             >
               <Fragment>
+                <label>
+                  Position
                 <Select
-                  className="basic-single"
+                  className="basic-single mt-1"
                   classNamePrefix="select"
                   isDisabled={false}
                   isLoading={false}
@@ -272,24 +276,44 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
                   placeholder="Select position"
                   onChange={(e) => setPositionId(e ? e.value || '' : '')}
                 />
+                </label>
               </Fragment>
             </div>
-            <button className={`border-2`} type={`submit`}>
-              Assign student
-            </button>
+
+            <label>
+              Reason for assignment
+            <textarea
+                placeholder="Reason for assignment"
+                className="mt-1 px-1 w-full resize-y border-2"
+                onChange={(e) => setReason(e.target.value || '')}
+            />
+            </label>
+            <div className="flex flex-row justify-between mt-6">
+              <button
+                  onClick={() => closeAssignmentModal()}
+                  className={`border-2 min-w-[120px] bg-white`}
+              >
+                Cancel
+              </button>
+
+              <button className={`border-2 min-w-[120px] py-1 bg-check-green`} type={`submit`}>
+                Confirm
+              </button>
+            </div>
           </form>
         </div>
       </Popup>
 
-      {/* TODO style this entire thing & show what project / student is used */}
       {/* This is the popup to remove a student assignment */}
       <Popup
         open={openUnassignment}
         onClose={closeUnassignmentModal}
         data-backdrop="static"
         data-keyboard="false"
+        closeOnDocumentClick={false}
+        lockScroll={true}
       >
-        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col bg-white p-20">
+        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col py-5 max-h-[85vh] max-w-screen bg-osoc-neutral-bg">
           <a
             className="close"
             onClick={(e) => {
@@ -299,29 +323,31 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           >
             &times;
           </a>
-          <p>Are you sure you wish to remove this student from this project?</p>
-          <button
-            onClick={() => closeUnassignmentModal()}
-            className={`border-2`}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              closeUnassignmentModal();
-              deleteStudentFromProject(
-                myProject.id,
-                assignmentId,
-                setMyProject
-              );
-            }}
-            className={`border-2`}
-          >
-            Confirm
-          </button>
+          <h3 className="px-5 text-lg">Are you sure you wish to remove <i>{removeStudentName}</i> from <i>{myProject.name}</i>?</h3>
+          <div className="flex flex-row justify-between mt-3 px-5">
+            <button
+                onClick={() => closeUnassignmentModal()}
+                className={`border-2 min-w-[120px] bg-white`}
+            >
+              Cancel
+            </button>
+
+            <button className={`border-2 min-w-[120px] py-1 bg-check-green`}
+                    onClick={() => {
+                      closeUnassignmentModal();
+                      deleteStudentFromProject(
+                          myProject.id,
+                          assignmentId,
+                          setMyProject
+                      );
+                    }}
+            >
+              Confirm
+            </button>
+          </div>
         </div>
       </Popup>
-      {/* TODO style this popup */}
+
       {/* This is the popup to create a new project */}
       <Popup
           open={showEditProject}
@@ -330,8 +356,10 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           onOpen={() => setProjectForm(projectFormFromProject(myProject))}
           data-backdrop="static"
           data-keyboard="false"
+          closeOnDocumentClick={false}
+          lockScroll={true}
       >
-        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col bg-white p-20">
+        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[600px] flex-col py-5 max-h-[85vh] max-w-screen bg-osoc-neutral-bg">
           <a
               className="close"
               onClick={(e) => {
@@ -341,13 +369,14 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           >
             &times;
           </a>
-          <h3>Edit Project</h3>
-
+          <h3 className="text-xl mb-3 px-5">Edit Project</h3>
+          <div className="flex flex-col overflow-y-auto mb-4">
           <ProjectPopup
               projectForm={projectForm}
               setShowPopup={setShowEditProject}
               setProjectForm={setProjectForm}
           />
+          </div>
 
         </div>
       </Popup>
@@ -375,6 +404,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
   assignment,
   setAssignmentId,
   setOpenUnassignment,
+    setRemoveStudentName,
 }: AssignmentProp) => {
   return (
     <div className="flex flex-row justify-between pb-4">
@@ -402,6 +432,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
         <i
           onClick={() => {
             setAssignmentId(assignment.id);
+            setRemoveStudentName(assignment.student.firstName + ' ' + assignment.student.lastName)
             setOpenUnassignment(true);
           }}
           className="icon-xcircle-red text-2xl"

@@ -43,6 +43,12 @@
   visibility: visible;
 }
 
+/* This is the style for the background around the popup */
+.popup-overlay {
+  background: rgba(163, 163, 163, 0.6);
+}
+
+/* This styles the x-mark at the top right of a popup */
 .modal > .close {
   cursor: pointer;
   position: absolute;

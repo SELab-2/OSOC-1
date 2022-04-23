@@ -147,7 +147,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
   const showBlank = () => {
     if (students.length === 0 && state.loading) {
-      return <div>Loading list...</div>
+      return <div>Loading students...</div>
     }
     return <div>No students found.</div>
   }
