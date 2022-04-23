@@ -45,6 +45,28 @@ paths:
           schema:
             type: boolean
           description: Whether or not to include students you have already added a suggestion for (default value is true)
+        - in: query
+          name: skills
+          schema:
+            type: array
+            items:
+              type: string
+          description: Filter by skill, students that have atleast one of the skills listed are included
+        - in: query
+          name: alumnOnly
+          schema:
+            type: boolean
+          description: Only return alumni students
+        - in: query
+          name: onlyStudentCoach
+          schema:
+            type: boolean
+          description: Only returns student coach volunteers
+        - in: query
+          name: onlyNotAssigned
+          schema:
+            type: boolean
+          description: Only return unassigned students
       summary: Get a list containing all Student objects
       description: Get a list of all students in the database. This request cannot fail.
       responses:
