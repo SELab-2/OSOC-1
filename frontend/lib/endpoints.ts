@@ -1,6 +1,3 @@
-const envURL: string = process.env.NEXT_PUBLIC_API_ENDPOINT || '';
-const baseURL = envURL.replace(/\/$/, '');
-
 /**
  * A collection of all available endpoint URLs
  * {@label ENDPOINT_ENUM}
@@ -10,7 +7,7 @@ const baseURL = envURL.replace(/\/$/, '');
  */
 type Endpoints = typeof Endpoints[keyof typeof Endpoints];
 const Endpoints = {
-  USERS: baseURL + '/users',
+  USERS: '/users',
   LOGIN: '/login',
   REFRESH: '/token/refresh',
 } as const;
