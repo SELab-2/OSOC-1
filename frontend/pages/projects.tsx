@@ -217,7 +217,6 @@ const Projects: NextPage = () => {
           </a>
           <h3>Create New Project</h3>
 
-        {/* TODO readd form */}
           <ProjectPopup
               projectForm={projectForm}
               setShowPopup={setShowCreateProject}

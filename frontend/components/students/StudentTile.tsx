@@ -72,8 +72,6 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
 
   return (
     // TODO add a chevron dropdown to show possible roles, student coach, ...
-    // <tr key={student.id} className="">
-    //   <td className="">
         <div
           ref={drag}
           key={student.id}
@@ -133,8 +131,6 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
             </i>
           </div>
         </div>
-     //   </td>
-     // </tr>*
   );
 };
 
