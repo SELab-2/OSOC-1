@@ -16,6 +16,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
+import ProjectPopup, {defaultprojectForm} from "./ProjectPopup";
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -33,7 +34,6 @@ type PositionProp = {
   position: Position;
 };
 
-// TODO find out what types these are
 type AssignmentProp = {
   assignment: Assignment;
   setOpenUnassignment: (openUnAssignment: boolean) => void;
@@ -139,6 +139,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [positionId, setPositionId] = useState('' as UUID);
   const [reason, setReason] = useState('' as string);
   const [currentUser] = useUser();
+  const [projectForm, setProjectForm] = useState({...defaultprojectForm});
+  const [showEditProject, setShowEditProject] = useState(false);
   useAxiosAuth();
 
   /**
@@ -182,7 +184,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         <div className="flex min-w-[40%] flex-col xl:min-w-[50%]">
           <div className="flex flex-row items-center">
             <p className="text-lg font-bold">{myProject.name}</p>
-            <i className={`pl-2 text-xl opacity-20`} onClick={() => console.log("editclick")}>{edit_icon}</i>
+            <i className={`pl-2 text-xl opacity-20`} onClick={() => setShowEditProject(true)}>{edit_icon}</i>
           </div>
           <p>{myProject.clientName}</p>
           <div className="flex flex-row">
@@ -316,6 +318,35 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           >
             Confirm
           </button>
+        </div>
+      </Popup>
+      {/* TODO style this popup */}
+      {/* This is the popup to create a new project */}
+      <Popup
+          open={showEditProject}
+          onClose={() => setShowEditProject(false)}
+          data-backdrop="static"
+          data-keyboard="false"
+      >
+        <div className="modal chart-label absolute left-1/2 top-1/2 flex min-w-[450px] flex-col bg-white p-20">
+          <a
+              className="close"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowEditProject(false);
+              }}
+          >
+            &times;
+          </a>
+          <h3>Create New Project</h3>
+
+          {/* TODO readd form */}
+          <ProjectPopup
+              projectForm={projectForm}
+              setShowPopup={setShowEditProject}
+              setProjectForm={setProjectForm}
+          />
+
         </div>
       </Popup>
     </div>
