@@ -1,7 +1,7 @@
 import {Fragment} from "react";
 import Select from "react-select";
 import {Icon} from "@iconify/react";
-import {UUID} from "../../lib/types";
+import {Project, User, UUID} from "../../lib/types";
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 
@@ -13,14 +13,14 @@ type ProjectPopupProp = {
 
 type positionForm = {
     amount: string; // This is a string because input field always return a string
-    skill: { value: string; label: string }; // The weird react-select options type
+    skill: { value: UUID; label: string }; // The weird react-select options type
 }
 
 type ProjectForm = {
     projectName: string;
     clientName: string;
     description: string;
-    coachIds: UUID[];
+    coachIds: User[];
     positions: positionForm[];
 }
 
@@ -42,6 +42,20 @@ export const defaultprojectForm = {
     coachIds: [],
     positions: [{...defaultPosition}] as positionForm[],
 } as ProjectForm;
+
+export function projectFormFromProject(project: Project){
+    const newProjectForm = { ...defaultprojectForm };
+    newProjectForm.projectName = project.name || '';
+    newProjectForm.clientName = project.clientName || '';
+    newProjectForm.description = project.description || '';
+    newProjectForm.coachIds = project.coaches || [];
+    newProjectForm.positions = project.positions.map(value => (
+        {
+            amount: value.amount.toString(),
+            skill: { value: value.id, label: value.skill.skillName},
+        } as positionForm))
+    return newProjectForm;
+}
 
 const ProjectPopup: React.FC<ProjectPopupProp> = ({projectForm, setShowPopup, setProjectForm}) => {
 
@@ -69,9 +83,9 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({projectForm, setShowPopup, se
         setProjectForm(newProjectForm);
     }
 
-    const handleProjectFormChange = (parameter: keyof typeof projectForm, value: string|UUID[]|positionForm[]) => {
+    const handleProjectFormChange = (parameter: keyof typeof projectForm, value: string|User[]|positionForm[]) => {
         const newProjectForm = { ...projectForm };
-        newProjectForm[parameter] = value as string&UUID[]&positionForm[]; // not sure why this is needed but it errors without
+        newProjectForm[parameter] = value as string&User[]&positionForm[]; // not sure why this is needed but it errors without
         setProjectForm(newProjectForm);
     };
 

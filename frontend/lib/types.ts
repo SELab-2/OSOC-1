@@ -82,7 +82,6 @@ export type Project = {
   assignments: Assignment[];
 };
 
-// TODO fix Skill
 export type Position = {
   id: UUID;
   skill: Skill;

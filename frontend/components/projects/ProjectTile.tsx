@@ -16,7 +16,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
-import ProjectPopup, {defaultprojectForm} from "./ProjectPopup";
+import ProjectPopup, {defaultprojectForm, projectFormFromProject} from "./ProjectPopup";
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -139,9 +139,10 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [positionId, setPositionId] = useState('' as UUID);
   const [reason, setReason] = useState('' as string);
   const [currentUser] = useUser();
-  const [projectForm, setProjectForm] = useState({...defaultprojectForm});
   const [showEditProject, setShowEditProject] = useState(false);
   useAxiosAuth();
+
+  const [projectForm, setProjectForm] = useState(projectFormFromProject(myProject));
 
   /**
    * This catches the dropped studentTile
@@ -325,6 +326,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
       <Popup
           open={showEditProject}
           onClose={() => setShowEditProject(false)}
+          // reset the form before opening so users do not accidentally change things
+          onOpen={() => setProjectForm(projectFormFromProject(myProject))}
           data-backdrop="static"
           data-keyboard="false"
       >
@@ -338,9 +341,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           >
             &times;
           </a>
-          <h3>Create New Project</h3>
+          <h3>Edit Project</h3>
 
-          {/* TODO readd form */}
           <ProjectPopup
               projectForm={projectForm}
               setShowPopup={setShowEditProject}
