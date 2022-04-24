@@ -149,7 +149,7 @@ class Student(
  * This function will filter [Student]s based on given [statuses]
  * Only [Student]s who have 1 of the given [statuses] will be kept
  */
-fun List<Student>.filterByStatus(statuses: List<StatusEnum>) =
+fun List<Student>.filterByStatus(statuses: Set<StatusEnum>) =
     filter { student: Student -> statuses.contains(student.status) }
 
 /**

@@ -60,7 +60,7 @@ class StudentController(
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
         @RequestParam(defaultValue = "id") sortBy: String,
-        @RequestParam(defaultValue = "") status: List<StatusEnum>,
+        @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: Set<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         @RequestParam(defaultValue = "") skills: Set<String>,
@@ -74,12 +74,12 @@ class StudentController(
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
         return service.getAllStudents(Sort.by(sortBy), edition)
+            .applyIf(studentCoachOnly) { filterByStudentCoach() }
+            .applyIf(alumnOnly) { filterByAlumn() }
             .applyIf(name.isNotBlank()) { filterByName(decodedName) }
             .applyIf(!includeSuggested) { filterBySuggested(callee) }
-            .applyIf(status.isNotEmpty()) { filterByStatus(status) }
+            .applyIf(status.size != StatusEnum.values().size) { filterByStatus(status) }
             .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
-            .applyIf(alumnOnly) { filterByAlumn() }
-            .applyIf(studentCoachOnly) { filterByStudentCoach() }
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
     }
