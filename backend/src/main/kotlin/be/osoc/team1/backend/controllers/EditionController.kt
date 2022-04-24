@@ -49,6 +49,7 @@ class EditionController(val service: EditionService) {
 
     /**
      * Inactivate the given [edition]. If this [edition] does not exist yet, it will be automatically created.
+     * If it does exist, the role of all coach users will be changed to disabled.
      * Returns a 400 (BAD REQUEST) if it is already inactive.
      */
     @PostMapping("/{edition}/inactivate")
@@ -56,7 +57,8 @@ class EditionController(val service: EditionService) {
     fun makeEditionInactive(@PathVariable edition: String) = service.makeEditionInactive(edition)
 
     /**
-     * Removes the given [edition] from the database. Returns a 404 (NOT FOUND) if the [edition] does not exist.
+     * Removes the given [edition] from the database. All entities related to the given [edition] are also deleted.
+     * Returns a 404 (NOT FOUND) if the [edition] does not exist.
      */
     @DeleteMapping("/{edition}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
