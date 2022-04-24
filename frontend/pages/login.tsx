@@ -60,9 +60,6 @@ const Login = () => {
             refreshToken,
           });
 
-          resetEmail();
-          setPassword('');
-
           if (user.role === UserRole.Disabled) {
             router.push('/wait');
           } else {

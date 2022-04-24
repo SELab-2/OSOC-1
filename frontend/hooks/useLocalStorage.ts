@@ -16,7 +16,11 @@ const useLocalStorage = <T>(key: string, initValue: T) => {
     localStorage.setItem(key, JSON.stringify(value));
   }, [value]);
 
-  return [value, setValue] as const;
+  const clearValue = () => {
+    localStorage.removeItem(key);
+  }
+
+  return [value, setValue, clearValue] as const;
 };
 
 export default useLocalStorage;
