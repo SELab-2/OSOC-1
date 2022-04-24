@@ -56,11 +56,11 @@ class ProjectService(
      * Updates a project based on [project]. If there is no project with the same id as the given project
      * and the given [edition], throw an [InvalidProjectIdException].
      */
-    fun patchProject(project: Project, edition: String) {
+    fun patchProject(project: Project, edition: String): Project {
         if (!repository.existsByIdAndEdition(project.id, edition))
             throw InvalidProjectIdException()
 
-        repository.save(project)
+        return repository.save(project)
     }
 
     /**

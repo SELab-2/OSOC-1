@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.util.AssignmentListDeserializer
 import be.osoc.team1.backend.util.AssignmentListSerializer
 import be.osoc.team1.backend.util.PositionListSerializer
 import be.osoc.team1.backend.util.PositionSerializer
@@ -7,6 +8,7 @@ import be.osoc.team1.backend.util.StudentSerializer
 import be.osoc.team1.backend.util.UserListSerializer
 import be.osoc.team1.backend.util.UserSerializer
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 import javax.persistence.CascadeType
@@ -69,7 +71,7 @@ class Project(
     val description: String,
 
     @JsonIgnore
-    val edition: String,
+    val edition: String = "",
 
     @OneToMany(cascade = [CascadeType.ALL])
     @JsonSerialize(using = UserListSerializer::class)
@@ -79,6 +81,7 @@ class Project(
     val positions: Collection<Position> = listOf(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JsonSerialize(using = AssignmentListSerializer::class)
+    @JsonDeserialize(using = AssignmentListDeserializer::class)
     val assignments: MutableCollection<Assignment> = mutableListOf()
 ) {
     @Id
