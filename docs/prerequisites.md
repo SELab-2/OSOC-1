@@ -53,6 +53,16 @@ $ ktlint --reporter=plain --reporter=checkstyle,output=ktlint-report-in-checksty
 
 A .editorconfig file is also added to ensure everyone uses the same coding style, make sure to enable the editorconfig plugin in IntelliJ to use this!
 
+### Populate script
+To run the populate script the Faker library is needed on your root user, you can install it as follows:
+```sh
+sudo pip3 install Faker
+```
+Then you can run the script with (make sure your intellij isn't running the application!):
+```sh
+cd docker
+sudo ./populate
+```
 ## Setting up the first admin
 
 Please make sure a user had been created using the register page or using the POST method onto https://localhost:8080/api/users.

@@ -14,7 +14,7 @@ import java.util.UUID
 @Service
 class UserService(private val repository: UserRepository, private val passwordEncoder: PasswordEncoder) {
 
-    fun getAllUsers(organization: String): Iterable<User> = repository.findByOrganization(organization)
+    fun getAllUsers(): Iterable<User> = repository.findAll()
 
     /**
      * Get a user using their [id]. Throws an [InvalidUserIdException] if no such user exists.
@@ -37,14 +37,13 @@ class UserService(private val repository: UserRepository, private val passwordEn
      * there already exists another user with the specified email address. The newly created user will have the
      * [Role.Disabled] role by default.
      */
-    fun registerUser(plaintextPasswordUser: User, organization: String): User {
+    fun registerUser(plaintextPasswordUser: User): User {
         val encodedPassword = passwordEncoder.encode(plaintextPasswordUser.password)
         val encodedPasswordUser = User(
             plaintextPasswordUser.username,
             plaintextPasswordUser.email,
             Role.Disabled,
-            encodedPassword,
-            organization
+            encodedPassword
         )
         try {
             return repository.save(encodedPasswordUser)
@@ -55,14 +54,14 @@ class UserService(private val repository: UserRepository, private val passwordEn
 
     /**
      * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidUserIdException]
-     * will be thrown. If the role of the last remaining admin of his organization is changed to a role with
-     * fewer permissions a [ForbiddenOperationException] will be thrown. Currently, anyone can change the role of
+     * will be thrown. If the role of the last remaining admin is changed to a role with fewer permissions a
+     * [ForbiddenOperationException] will be thrown. Currently, anyone can change the role of
      * any other user, this will be changed when we have functional authentication in place.
      */
     fun changeRole(id: UUID, newRole: Role) {
         val user = getUserById(id)
         if (user.role == Role.Admin && !newRole.hasPermissionLevel(Role.Admin) &&
-            repository.findByOrganizationAndRole(user.organization, Role.Admin).size == 1
+            repository.findByRole(Role.Admin).size == 1
         ) {
             throw ForbiddenOperationException("Cannot demote last remaining admin")
         }
@@ -71,12 +70,15 @@ class UserService(private val repository: UserRepository, private val passwordEn
     }
 
     /**
-     * Update a user object with the data defined in [updatedUser]. If this user does not exist an
-     * [InvalidUserIdException] will be thrown.
+     * Update a user object with the data defined in [updatedUser].
+     * If this user does not exist an [InvalidUserIdException] will be thrown.
+     * If password gets changed a [ForbiddenOperationException] will be thrown.
      */
     fun patchUser(updatedUser: User): User {
-        if (!repository.existsById(updatedUser.id))
-            throw InvalidUserIdException()
+        val oldUser = getUserById(updatedUser.id)
+        if (oldUser.password != updatedUser.password) {
+            throw ForbiddenOperationException("Not allowed to update password field of users")
+        }
 
         return repository.save(updatedUser)
     }
