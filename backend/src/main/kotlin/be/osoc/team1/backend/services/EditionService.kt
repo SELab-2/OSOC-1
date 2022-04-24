@@ -6,11 +6,16 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidEditionIdException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.EditionRepository
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
-class EditionService(val repository: EditionRepository) {
+class EditionService(
+    private val repository: EditionRepository,
+    private val studentService: StudentService,
+    private val projectService: ProjectService
+) {
 
     fun getEdition(editionName: String): Edition = repository.findByIdOrNull(editionName)
         ?: throw InvalidEditionIdException()
@@ -57,8 +62,12 @@ class EditionService(val repository: EditionRepository) {
      */
     fun deleteEdition(editionName: String) {
         if (!repository.existsById(editionName)) {
-            throw InvalidIdException("The given edition does not exist.")
+            throw InvalidEditionIdException()
         }
+        studentService.getAllStudents(Sort.unsorted(), editionName)
+            .forEach { studentService.deleteStudentById(it.id) }
+        projectService.getAllProjects(editionName)
+            .forEach { projectService.deleteProjectById(it.id, editionName) }
         repository.deleteById(editionName)
     }
 }
