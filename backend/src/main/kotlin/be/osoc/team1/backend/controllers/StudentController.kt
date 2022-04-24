@@ -101,6 +101,7 @@ class StudentController(
         @RequestBody studentRegistration: Student,
         @PathVariable edition: String
     ): ResponseEntity<Student> {
+        studentRegistration.answers.forEach { it.edition = edition }
         val student = Student(
             studentRegistration.firstName, studentRegistration.lastName,
             edition,

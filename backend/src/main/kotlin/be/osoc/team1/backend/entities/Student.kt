@@ -14,7 +14,6 @@ import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.ManyToMany
-import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.validation.constraints.NotBlank
 
@@ -98,8 +97,8 @@ class Answer(
     val id: UUID = UUID.randomUUID()
 
     @JsonIgnore
-    @ManyToOne
-    lateinit var student: Student
+    @NotBlank
+    lateinit var edition: String
 }
 
 /**
