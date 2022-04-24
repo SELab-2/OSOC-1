@@ -69,7 +69,9 @@ class DeleteEditionTest {
         studentRepository.save(student)
         val skill = Skill("")
         val position = Position(skill, 1, editionName)
+        positionRepository.save(position)
         val assignment = Assignment(student, position, coach, "", editionName)
+        assignmentRepository.save(assignment)
         val project = Project(
             "", "", "", editionName,
             mutableListOf(coach), listOf(position), mutableListOf(assignment)
@@ -84,23 +86,25 @@ class DeleteEditionTest {
         differentEditionStudent.statusSuggestions.add(differentEditionSuggestion)
         studentRepository.save(differentEditionStudent)
         val differentEditionPosition = Position(skill, 1, differentEditionName)
+        positionRepository.save(differentEditionPosition)
         val differentEditionAssignment = Assignment(differentEditionStudent, differentEditionPosition, coach, "", differentEditionName)
+        assignmentRepository.save(differentEditionAssignment)
         val differentEditionProject = Project(
             "", "", "", differentEditionName,
             mutableListOf(coach), listOf(differentEditionPosition), mutableListOf(differentEditionAssignment)
         )
-        projectRepository.save(project)
+        projectRepository.save(differentEditionProject)
 
-        assertEquals(listOf(student, differentEditionStudent), studentRepository.findAll())
-        assertEquals(listOf(project, differentEditionProject), projectRepository.findAll())
-        assertEquals(listOf(assignment, differentEditionAssignment), assignmentRepository.findAll())
-        assertEquals(listOf(position, differentEditionPosition), positionRepository.findAll())
-        assertEquals(listOf(suggestion, differentEditionSuggestion), statusSuggestionRepository.findAll())
+        assertEquals(2, studentRepository.findAll().count())
+        assertEquals(2, projectRepository.findAll().count())
+        assertEquals(2, assignmentRepository.findAll().count())
+        assertEquals(2, positionRepository.findAll().count())
+        assertEquals(2, statusSuggestionRepository.findAll().count())
         restTemplate.exchange(URI("/editions/$editionName"), HttpMethod.DELETE, HttpEntity("", HttpHeaders()), String::class.java)
-        assertEquals(listOf(differentEditionStudent), studentRepository.findAll())
-        assertEquals(listOf(differentEditionProject), projectRepository.findAll())
-        assertEquals(listOf(differentEditionAssignment), assignmentRepository.findAll())
-        assertEquals(listOf(differentEditionPosition), positionRepository.findAll())
-        assertEquals(listOf(differentEditionSuggestion), statusSuggestionRepository.findAll())
+        assertEquals(1, studentRepository.findAll().count())
+        assertEquals(1, projectRepository.findAll().count())
+        assertEquals(1, assignmentRepository.findAll().count())
+        assertEquals(1, positionRepository.findAll().count())
+        assertEquals(1, statusSuggestionRepository.findAll().count())
     }
 }
