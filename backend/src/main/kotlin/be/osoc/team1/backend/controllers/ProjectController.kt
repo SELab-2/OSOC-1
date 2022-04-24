@@ -96,7 +96,6 @@ class ProjectController(private val service: ProjectService) {
         return getObjectCreatedResponse(updatedProject.id, updatedProject)
     }
 
-
     /**
      * Gets all students assigned to a project. If there is no project with the given [projectId] and [edition],
      * return a 404 (NOT FOUND).

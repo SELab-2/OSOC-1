@@ -31,6 +31,8 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var studentService: StudentService
 
     private val testId = UUID.randomUUID()
+    private val testEdition = "testEdition"
+    private val editionUrl = "/$testEdition/communications"
     private val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testCommunication)
@@ -38,7 +40,7 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getCommunicationById returns communication if communication with given id exists`() {
         every { communicationService.getById(testId) } returns testCommunication
-        mockMvc.perform(get("/communications/$testId")).andExpect(status().isOk)
+        mockMvc.perform(get("$editionUrl/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
 
@@ -46,16 +48,16 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getCommunicationById returns 404 Not Found if communication with given id does not exist`() {
         val differentId = UUID.randomUUID()
         every { communicationService.getById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(get("/communications/$differentId"))
+        mockMvc.perform(get("$editionUrl/$differentId"))
             .andExpect(status().isNotFound)
     }
 
     @Test
     fun `createCommunication succeeds if student with given id exists`() {
         every { communicationService.createCommunication(any()) } returns testCommunication
-        every { studentService.addCommunicationToStudent(testId, any()) } just Runs
+        every { studentService.addCommunicationToStudent(testId, any(), testEdition) } just Runs
         mockMvc.perform(
-            post("/communications/$testId")
+            post("$editionUrl/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isCreated).andExpect(content().string(jsonRepresentation))
@@ -65,9 +67,9 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `createCommunication returns 404 Not Found if student with given id does not exist`() {
         every { communicationService.createCommunication(any()) } returns testCommunication
         val differentId = UUID.randomUUID()
-        every { studentService.addCommunicationToStudent(differentId, any()) }.throws(InvalidIdException())
+        every { studentService.addCommunicationToStudent(differentId, any(), testEdition) }.throws(InvalidIdException())
         mockMvc.perform(
-            post("/communications/$differentId")
+            post("$editionUrl/$differentId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isNotFound)

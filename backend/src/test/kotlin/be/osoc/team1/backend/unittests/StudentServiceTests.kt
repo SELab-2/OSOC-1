@@ -27,50 +27,45 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.Sort
-import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
 
 class StudentServiceTests {
 
-    private val testStudent = Student("Tom", "Alard")
+    private val testEdition = "testEdition"
+    private val testStudent = Student("Tom", "Alard", testEdition)
     private val studentId = testStudent.id
     private val testCoach = User("", "", Role.Coach, "")
     private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
     private val userService = mockk<UserService>()
-    private val defaultStatusFilter = listOf(StatusEnum.Yes, StatusEnum.No, StatusEnum.Maybe, StatusEnum.Undecided)
     private val defaultSort = Sort.by("id")
 
     private fun getRepository(studentAlreadyExists: Boolean): StudentRepository {
         val repository: StudentRepository = mockk()
         every { repository.existsById(studentId) } returns studentAlreadyExists
-        every { repository.findByIdOrNull(studentId) } returns if (studentAlreadyExists) testStudent else null
+        every { repository.findByIdAndEdition(studentId, testEdition) } returns if (studentAlreadyExists) testStudent else null
         every { repository.deleteById(studentId) } just Runs
-        val differentIdTestStudent = Student("Tom", "Alard")
+        val differentIdTestStudent = Student("Tom", "Alard", testEdition)
         every { repository.save(testStudent) } returns differentIdTestStudent
-        every { repository.findAll() } returns listOf(testStudent)
-        every { repository.findAll(Sort.by("id")) } returns listOf(testStudent)
+        every { repository.findByEdition(testEdition, defaultSort) } returns listOf(testStudent)
         return repository
     }
 
     @Test
     fun `getAllStudents does not fail`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(
-            listOf(testStudent),
-            service.getAllStudents(defaultSort)
-        )
+        assertEquals(listOf(testStudent), service.getAllStudents(defaultSort, testEdition))
     }
 
     @Test
     fun `getStudentById succeeds when student with id exists`() {
         val service = StudentService(getRepository(true), userService)
-        assertEquals(testStudent, service.getStudentById(studentId))
+        assertEquals(testStudent, service.getStudentById(studentId, testEdition))
     }
 
     @Test
     fun `getStudentById fails when no student with that id exists`() {
         val service = StudentService(getRepository(false), userService)
-        assertThrows<InvalidStudentIdException> { service.getStudentById(studentId) }
+        assertThrows<InvalidStudentIdException> { service.getStudentById(studentId, testEdition) }
     }
 
     @Test
@@ -105,7 +100,7 @@ class StudentServiceTests {
     fun `setStudentStatus changes student status when student with id exists`() {
         val repository = getRepository(true)
         val service = StudentService(repository, userService)
-        service.setStudentStatus(studentId, StatusEnum.Yes)
+        service.setStudentStatus(studentId, StatusEnum.Yes, testEdition)
         testStudent.status = StatusEnum.Yes // Bit of a hack
         verify { repository.save(testStudent) }
         testStudent.status = StatusEnum.Undecided
@@ -114,7 +109,7 @@ class StudentServiceTests {
     @Test
     fun `setStudentStatus fails when no student with that id exists`() {
         val service = StudentService(getRepository(false), userService)
-        assertThrows<InvalidStudentIdException> { service.setStudentStatus(studentId, StatusEnum.Yes) }
+        assertThrows<InvalidStudentIdException> { service.setStudentStatus(studentId, StatusEnum.Yes, testEdition) }
     }
 
     @Test
@@ -123,16 +118,15 @@ class StudentServiceTests {
         val student: Student = mockk()
         every { student.statusSuggestions.add(testSuggestion) } returns true
         every { student.statusSuggestions.iterator() } returns mutableListOf<StatusSuggestion>().iterator()
-        every { repository.findByIdOrNull(studentId) } returns student
+        every { repository.findByIdAndEdition(studentId, testEdition) } returns student
         every { repository.save(student) } returns student
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
         val service = StudentService(repository, customUserService)
-        service.addStudentStatusSuggestion(studentId, testSuggestion)
+        service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition)
         val suggestionId = testSuggestion.id
         verify { student.statusSuggestions.add(testSuggestion) }
         assert(testSuggestion.id == suggestionId)
-        assert(testSuggestion.student == student)
     }
 
     @Test
@@ -140,7 +134,7 @@ class StudentServiceTests {
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
         val service = StudentService(getRepository(false), customUserService)
-        assertThrows<InvalidStudentIdException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
+        assertThrows<InvalidStudentIdException> { service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition) }
     }
 
     @Test
@@ -150,11 +144,11 @@ class StudentServiceTests {
         val coachId2 = UUID.randomUUID()
         val testSuggestion2 = StatusSuggestion(coachId2, SuggestionEnum.No, "test motivation2")
         every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion2, testSuggestion).iterator()
-        every { repository.findByIdOrNull(studentId) } returns student
+        every { repository.findByIdAndEdition(studentId, testEdition) } returns student
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
         val service = StudentService(repository, customUserService)
-        assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
+        assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition) }
     }
 
     @Test
@@ -162,7 +156,7 @@ class StudentServiceTests {
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) }.throws(InvalidUserIdException())
         val service = StudentService(getRepository(true), customUserService)
-        assertThrows<InvalidUserIdException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
+        assertThrows<InvalidUserIdException> { service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition) }
     }
 
     @Test
@@ -171,7 +165,7 @@ class StudentServiceTests {
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) } returns disabledUser
         val service = StudentService(getRepository(true), customUserService)
-        assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion) }
+        assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition) }
     }
 
     @Test
@@ -182,12 +176,12 @@ class StudentServiceTests {
         val testSuggestion2 = StatusSuggestion(coachId2, SuggestionEnum.No, "test motivation2")
         every { student.statusSuggestions.remove(testSuggestion) } returns true
         every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion2, testSuggestion).iterator()
-        every { repository.findByIdOrNull(studentId) } returns student
+        every { repository.findByIdAndEdition(studentId, testEdition) } returns student
         every { repository.save(student) } returns student
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
         val service = StudentService(repository, customUserService)
-        service.deleteStudentStatusSuggestion(studentId, testCoach.id)
+        service.deleteStudentStatusSuggestion(studentId, testCoach.id, testEdition)
         verify { student.statusSuggestions.remove(testSuggestion) }
     }
 
@@ -196,7 +190,7 @@ class StudentServiceTests {
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
         val service = StudentService(getRepository(false), customUserService)
-        assertThrows<InvalidStudentIdException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id) }
+        assertThrows<InvalidStudentIdException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id, testEdition) }
     }
 
     @Test
@@ -204,7 +198,7 @@ class StudentServiceTests {
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
         val service = StudentService(getRepository(true), customUserService)
-        assertThrows<FailedOperationException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id) }
+        assertThrows<FailedOperationException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id, testEdition) }
     }
 
     @Test
@@ -212,7 +206,7 @@ class StudentServiceTests {
         val customUserService: UserService = mockk()
         every { customUserService.getUserById(testSuggestion.coachId) }.throws(InvalidUserIdException())
         val service = StudentService(getRepository(true), customUserService)
-        assertThrows<InvalidUserIdException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id) }
+        assertThrows<InvalidUserIdException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id, testEdition) }
     }
 
     @Test
@@ -220,7 +214,7 @@ class StudentServiceTests {
         val repository = getRepository(true)
         val service = StudentService(repository, userService)
         val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
-        service.addCommunicationToStudent(studentId, testCommunication)
+        service.addCommunicationToStudent(studentId, testCommunication, testEdition)
         testStudent.communications.add(testCommunication) // Bit of a hack
         verify { repository.save(testStudent) }
         testStudent.communications.remove(testCommunication)
@@ -230,15 +224,15 @@ class StudentServiceTests {
     fun `addCommunicationToStudent fails when no student with that id exists`() {
         val service = StudentService(getRepository(false), userService)
         val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
-        assertThrows<InvalidStudentIdException> { service.addCommunicationToStudent(studentId, testCommunication) }
+        assertThrows<InvalidStudentIdException> { service.addCommunicationToStudent(studentId, testCommunication, testEdition) }
     }
 
     @Test
     fun `pager class paginates collections correctly`() {
         val pager = Pager(0, 1)
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia", testEdition)
+        val student2 = Student("Testien", "Tamzia", testEdition)
+        val student3 = Student("Testaan", "Tamzia", testEdition)
         val collection = listOf(student1, student2, student3)
         assertEquals(listOf(student1), pager.paginate(collection).collection)
     }
@@ -246,9 +240,9 @@ class StudentServiceTests {
     @Test
     fun `pager class returns less items than requested if the collection is smaller`() {
         val pager = Pager(0, 5)
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia", testEdition)
+        val student2 = Student("Testien", "Tamzia", testEdition)
+        val student3 = Student("Testaan", "Tamzia", testEdition)
         val collection = listOf(student1, student2, student3)
         assertEquals(collection, pager.paginate(collection).collection)
     }
@@ -256,17 +250,17 @@ class StudentServiceTests {
     @Test
     fun `pager class returns empty list when start of paging-request is out of bounds`() {
         val pager = Pager(1, 5)
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia", testEdition)
+        val student2 = Student("Testien", "Tamzia", testEdition)
+        val student3 = Student("Testaan", "Tamzia", testEdition)
         val collection = listOf(student1, student2, student3)
         assertEquals(listOf<Student>(), pager.paginate(collection).collection)
     }
     @Test
     fun `pager class returns a pagedcollection with the correct total amount`() {
-        val student1 = Student("Testoon", "Tamzia")
-        val student2 = Student("Testien", "Tamzia")
-        val student3 = Student("Testaan", "Tamzia")
+        val student1 = Student("Testoon", "Tamzia", testEdition)
+        val student2 = Student("Testien", "Tamzia", testEdition)
+        val student3 = Student("Testaan", "Tamzia", testEdition)
         val collection = listOf(student1, student2, student3)
         assertEquals(PagedCollection(collection, 3), Pager(0, 5).paginate(collection))
         assertEquals(PagedCollection(listOf(student1), 3), Pager(0, 1).paginate(collection))
