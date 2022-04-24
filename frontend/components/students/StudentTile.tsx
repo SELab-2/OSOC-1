@@ -1,34 +1,30 @@
 import { PieChart } from 'react-minimal-pie-chart';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCheck,
-  faQuestion,
-  faXmark,
-} from '@fortawesome/free-solid-svg-icons';
 import { Icon } from '@iconify/react';
-import {
-  ItemTypes,
-  StatusSuggestionStatus,
-  Student,
-} from '../../lib/types';
+import { ItemTypes, StatusSuggestionStatus, Student } from '../../lib/types';
 import { useDrag } from 'react-dnd';
-// const check_mark = <Icon icon="bi:check-lg" width="16" height="16" />;
-// const question_mark = <Icon icon="bi:question-lg" width="16" height="16" />;
-// const x_mark = <Icon icon="bx:x" width="16" height="16" />;
-// const tilde_mark = <Icon icon="mdi:tilde" width="16" height="16"/>;
 const check_mark = <Icon icon="bi:check-lg" />;
 const question_mark = <Icon icon="bi:question-lg" />;
 const x_mark = <Icon icon="bx:x" />;
 const tilde_mark = <Icon icon="mdi:tilde" />;
 
+/**
+ * This is what StudentTile expects as its argument
+ * @See StudentTile for more information
+ */
 type StudentProp = {
   student: Student;
 };
 
+/**
+ * Helper type to count the suggestions for the pie char
+ */
 type statusSuggestionStatusToNumberDict = {
   [key in StatusSuggestionStatus]: number;
 };
 
+/**
+ * Helper type to use the correct icon and color in the pie chart
+ */
 type stringToArrayDict = {
   [key: string]: [JSX.Element, string];
 };
@@ -45,6 +41,10 @@ const chartHelper = {
   Default: [tilde_mark, 'text-check-gray'],
 } as stringToArrayDict;
 
+/**
+ * This creates the tiles show in the StudentSidebar
+ * @param student - The student whose information should be shown
+ */
 const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
   /**
    * This counts the different status suggestions to create the pie chart

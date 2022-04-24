@@ -10,6 +10,9 @@ import FlatList from 'flatlist-react';
 import StudentTile from './students/StudentTile';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
+/**
+ * Empty Prop type for correct typing
+ */
 type StudentsSidebarProps = PropsWithChildren<unknown>;
 
 /**
@@ -63,7 +66,13 @@ function getStatusFilterList(
   return stringList;
 }
 
-// TODO add documentation
+// TODO allow disabling drag on studentView since I don't think it is needed there
+/**
+ * This returns the StudentSidebar
+ * Any page using this should add a DndProvider backend=\{HTML5Backend\} element
+ * because student tiles can be dragged and must be in a DndProvider element to avoid errors
+ * The DndProvider is needed even when the drag function is not needed or used on that page
+ */
 const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [showFilter, setShowFilter] = useState(true);
 
@@ -443,7 +452,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
             {students.length + '/' + students.length + ' shown'}
           </div>
           <FlatList
-            list={students_fake}
+            list={students}
             renderItem={(student: Student) => (
               <StudentTile key={student.id} student={student} />
             )}

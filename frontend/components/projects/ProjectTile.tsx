@@ -81,7 +81,7 @@ function postStudentToProject(
     });
 }
 
-// TODO when delete is finished, should update the project frontend view & also the student filter
+// TODO when delete is finished, should update the student filter
 // TODO should show success / error
 /**
  * This function sends an authenticated DELETE request to remove an assignment from a project
@@ -108,6 +108,13 @@ function deleteStudentFromProject(
     });
 }
 
+/**
+ * This function reloads this project
+ * Use whenever a post, patch or delete is done
+ *
+ * @param projectId - the UUID of the project to reload
+ * @param setMyProject - a hook to set the reloaded project information
+ */
 function reloadProject(
   projectId: UUID,
   setMyProject: (myProject: Project) => void
