@@ -57,7 +57,6 @@ class DeleteEditionTest {
     @Autowired
     private lateinit var statusSuggestionRepository: StatusSuggestionRepository
 
-
     @Test
     fun `deleteEdition removes all entities from the edition`() {
         val editionName = "testEdition"
