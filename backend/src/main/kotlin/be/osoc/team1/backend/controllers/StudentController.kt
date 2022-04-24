@@ -103,9 +103,13 @@ class StudentController(
     ): ResponseEntity<Student> {
         studentRegistration.answers.forEach { it.edition = edition }
         val student = Student(
-            studentRegistration.firstName, studentRegistration.lastName,
+            studentRegistration.firstName,
+            studentRegistration.lastName,
             edition,
-            studentRegistration.skills, studentRegistration.alumn, studentRegistration.answers
+            studentRegistration.skills,
+            studentRegistration.alumn,
+            studentRegistration.possibleStudentCoach,
+            studentRegistration.answers
         )
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)

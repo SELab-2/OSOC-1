@@ -19,6 +19,8 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         const val alumnQuestion = "question_wz7eGE"
         const val alumnYesId = "689451da-305b-451a-8039-c748ff06ec82"
         const val skillQuestion = "question_3X4q1V"
+        const val studentCoachQuestion = "question_w5Z2eb"
+        const val studentCoachYesId = "d2091172-9678-413a-bb3b-0d9cf6d5fa0b"
     }
 
     override fun deserialize(parser: JsonParser, context: DeserializationContext): Student {
@@ -37,7 +39,10 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
                 "",
                 getAnswerForKey(answerMap, TallyKeys.skillQuestion, "skill").answer.map { Skill(it) }.toSortedSet(),
                 getAnswerForKey(answerMap, TallyKeys.alumnQuestion, "alumni").optionId == TallyKeys.alumnYesId,
-                answerMap.values.toList()
+                getAnswerForKey(
+                    answerMap, TallyKeys.studentCoachQuestion, "studentCoach"
+                ).optionId == TallyKeys.studentCoachYesId,
+                answerMap.values.toList(),
             )
             return student
         } catch (_: NoSuchElementException) {

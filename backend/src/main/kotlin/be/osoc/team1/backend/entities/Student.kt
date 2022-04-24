@@ -124,6 +124,7 @@ class Student(
     @ManyToMany(cascade = [CascadeType.ALL])
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
+    val possibleStudentCoach: Boolean = false,
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JsonSerialize(using = AnswerListSerializer::class)
     val answers: List<Answer> = listOf()
