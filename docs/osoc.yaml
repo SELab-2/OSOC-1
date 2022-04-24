@@ -63,10 +63,12 @@ paths:
                     name: edition
                     schema:
                         type: string
-            summary: Inactivate the given edition
+            summary: Inactivate the given edition (DANGEROUS)
             description: |
                 Inactivate the given active edition.
                 If this edition does not exist yet, it will be automatically created.
+                Watch out! If the edition does exist, all existing coach users
+                will have their accounts disabled!
                 Only GET and DELETE endpoints can be used on active editions,
                 and only by users with Admin permissions.
             responses:
@@ -105,9 +107,11 @@ paths:
                     name: edition
                     schema:
                         type: string
-            summary: Delete the given edition
+            summary: Delete the given edition (DANGEROUS)
             description: |
                 Deletes the given edition from the database.
+                Watch out! All data related to this edition will also be deleted.
+                This includes students and projects.
                 If this edition does not exist, returns a 404 (NOT FOUND) instead.
             responses:
                 204:
