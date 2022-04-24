@@ -168,7 +168,7 @@ fun List<Student>.filterBySuggested(includeSuggested: Boolean, callee: User) =
     filter { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
 
 /**
- * This function will filter [Student]s based on a set of [Skill]s.
+ * This function will filter [Student]s based on a set of [skillNames].
  * Only students that have at least one of these skills will be returned.
  */
 fun List<Student>.filterBySkills(skillNames: Set<String>) =
