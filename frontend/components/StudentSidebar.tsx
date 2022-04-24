@@ -58,6 +58,10 @@ function searchStudent(
 function getStatusFilterList(
   studentSearchParameters: Record<string, boolean>
 ): string {
+  // TODO include this since the new filter checks on default empty to avoid doing needless filtering
+  // if (studentSearchParameters.StatusYes && studentSearchParameters.StatusNo && studentSearchParameters.StatusMaybe && studentSearchParameters.StatusUndecided){
+  //
+  // }
   let stringList = '';
   stringList += studentSearchParameters.StatusYes ? 'Yes,' : '';
   stringList += studentSearchParameters.StatusNo ? 'No,' : '';
