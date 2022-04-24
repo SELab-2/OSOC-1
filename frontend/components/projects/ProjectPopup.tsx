@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import Select from 'react-select';
 import { Icon } from '@iconify/react';
 import { Project, User, UUID } from '../../lib/types';
+import CreatableSelect from "react-select/creatable";
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 type ProjectPopupProp = {
@@ -153,7 +154,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
               >
                 <label className="mb-4 mr-20 grow">
                   Position
-                  <Select
+                  <CreatableSelect
                     className="basic-single"
                     classNamePrefix="select"
                     isDisabled={false}
@@ -168,13 +169,21 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                       { value: 'strawberry', label: 'Strawberry' },
                       { value: 'vanilla', label: 'Vanilla' },
                     ]} // TODO fix this once backend has getAllSKills endpoint implemented
+                    isOptionDisabled={(option) => (projectForm['positions'] as positionForm[]).map(v => v.skill.label).includes(option.label)}
                     placeholder="Position"
                     onChange={(e) =>
+                      //  TODO should also disable this value I guess?
                       setPositionDropdownValue(
                         index,
                         e ? e : ({} as { value: string; label: string })
                       )
                     }
+                    onCreateOption={(e) => {
+                      setPositionDropdownValue(
+                          index,
+                          e ? { value: '', label: e } : ({} as { value: string; label: string })
+                      );
+                    }}
                   />
                 </label>
                 <div className="flex flex-row">
