@@ -52,7 +52,7 @@ class StudentController(
      * The results can also be filtered by [name] (default value is empty so no student is excluded),
      * by [status] (default value allows all statuses), by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
-     * volunteers([onlyStudentCoach]) and by only unassigned students ([onlyNotAssigned]) students.
+     * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
      */
     @GetMapping
     @Secured("ROLE_COACH")
@@ -65,8 +65,8 @@ class StudentController(
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         @RequestParam(defaultValue = "") skills: Set<String>,
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
-        @RequestParam(defaultValue = "false") onlyStudentCoach: Boolean,
-        @RequestParam(defaultValue = "false") onlyNotAssigned: Boolean,
+        @RequestParam(defaultValue = "false") studentCoachOnly: Boolean,
+        @RequestParam(defaultValue = "false") unassignedOnly: Boolean,
         @PathVariable edition: String,
         principal: Principal
     ): PagedCollection<Student> {
@@ -79,8 +79,8 @@ class StudentController(
             .applyIf(status.isNotEmpty()) { filterByStatus(status) }
             .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
             .applyIf(alumnOnly) { filterByAlumn() }
-            .applyIf(onlyStudentCoach) { filterByStudentCoach() }
-            .applyIf(onlyNotAssigned) { filterByNotYetAssigned(assignmentRepository) }
+            .applyIf(studentCoachOnly) { filterByStudentCoach() }
+            .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
     }
 
