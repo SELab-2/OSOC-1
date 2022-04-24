@@ -12,6 +12,8 @@ import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.ManyToMany
+import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.validation.constraints.NotBlank
@@ -23,7 +25,7 @@ import javax.validation.constraints.NotBlank
  */
 @Entity
 class Position(
-    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @ManyToOne(cascade = [CascadeType.ALL])
     val skill: Skill,
     val amount: Int,
     @JsonIgnore
@@ -80,7 +82,7 @@ class Project(
     @NotBlank
     val edition: String = "",
 
-    @OneToMany(cascade = [CascadeType.ALL])
+    @ManyToMany(cascade = [CascadeType.ALL])
     @JsonSerialize(using = UserListSerializer::class)
     val coaches: MutableCollection<User> = mutableListOf(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
