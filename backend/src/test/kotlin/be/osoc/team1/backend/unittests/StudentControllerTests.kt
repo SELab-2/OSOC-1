@@ -80,11 +80,16 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllStudents paging returns the correct amount`() {
-        val testList = listOf(testStudent)
-        every { studentService.getAllStudents(defaultSort, testEdition) } returns testList
+        val allStudents = listOf(
+            testStudent,
+            Student("Foo", "Bar"),
+            Student("Fooo", "Baar")
+        )
+        val expected = listOf(testStudent)
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
         mockMvc.perform(get("$editionUrl?pageNumber=0&pageSize=1").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 1))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(expected, 3))))
     }
 
     @Test
