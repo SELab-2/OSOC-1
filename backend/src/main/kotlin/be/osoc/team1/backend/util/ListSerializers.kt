@@ -24,14 +24,14 @@ open class ListSerializer<T>(private val genFunc: (T) -> String) : BaseSerialize
     }
 }
 
-class AssignmentListSerializer : ListSerializer<Assignment>({ "/${it.edition}/assignments/${it.id}" })
+class AssignmentListSerializer : ListSerializer<Assignment>({ "/assignments/${it.id}" })
 
 class CommunicationListSerializer : ListSerializer<Communication>({ "/${it.edition}/communications/${it.id}" })
 
-class PositionListSerializer : ListSerializer<Position>({ "/${it.edition}/positions/${it.id}" })
+class PositionListSerializer : ListSerializer<Position>({ "/positions/${it.id}" })
 
-class StatusSuggestionListSerializer : ListSerializer<StatusSuggestion>({ "/${it.edition}/statusSuggestions/${it.id}" })
+class StatusSuggestionListSerializer : ListSerializer<StatusSuggestion>({ "/statusSuggestions/${it.id}" })
 
 class UserListSerializer : ListSerializer<User>({ "/users/${it.id}" })
 
-class AnswerListSerializer : ListSerializer<Answer>({ "/${it.student.edition}/answers/${it.id}" })
+class AnswerListSerializer : ListSerializer<Answer>({ "/answers/${it.id}" })

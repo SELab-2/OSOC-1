@@ -16,7 +16,7 @@ open class Serializer<T>(private val genFunc: (T) -> String) : BaseSerializer<T>
         gen!!.writeObject(baseUrl + genFunc(item!!))
 }
 
-class PositionSerializer : Serializer<Position>({ "/${it.edition}/positions/${it.id}" })
+class PositionSerializer : Serializer<Position>({ "/positions/${it.id}" })
 
 class StudentSerializer : Serializer<Student>({ "/${it.edition}/students/${it.id}" })
 

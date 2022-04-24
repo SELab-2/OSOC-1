@@ -64,9 +64,9 @@ class SerializationTests {
         assertThat(json).extractingJsonPathValue("$.coaches")
             .isEqualTo(mutableListOf("https://example.com/api/users/${testUser.id}"))
         assertThat(json).extractingJsonPathValue("$.positions")
-            .isEqualTo(mutableListOf("https://example.com/api/$testEdition/positions/${testPosition.id}"))
+            .isEqualTo(mutableListOf("https://example.com/api/positions/${testPosition.id}"))
         assertThat(json).extractingJsonPathValue("$.assignments")
-            .isEqualTo(mutableListOf("https://example.com/api/$testEdition/assignments/${testAssignment.id}"))
+            .isEqualTo(mutableListOf("https://example.com/api/assignments/${testAssignment.id}"))
     }
 
     @Test
@@ -89,7 +89,7 @@ class SerializationTests {
         val json: JsonContent<Student> = studentJacksonTester!!.write(testStudent)
 
         assertThat(json).extractingJsonPathValue("$.statusSuggestions")
-            .isEqualTo(mutableListOf("https://example.com/api/$testEdition/statusSuggestions/${testStatusSuggestion.id}"))
+            .isEqualTo(mutableListOf("https://example.com/api/statusSuggestions/${testStatusSuggestion.id}"))
         assertThat(json).extractingJsonPathValue("$.communications")
             .isEqualTo(mutableListOf("https://example.com/api/$testEdition/communications/${testCommunication.id}"))
     }
@@ -115,7 +115,7 @@ class SerializationTests {
         assertThat(json).extractingJsonPathValue("$.student")
             .isEqualTo("https://example.com/api/$testEdition/students/${testStudent.id}")
         assertThat(json).extractingJsonPathValue("$.position")
-            .isEqualTo("https://example.com/api/$testEdition/positions/${testPosition.id}")
+            .isEqualTo("https://example.com/api/positions/${testPosition.id}")
         assertThat(json).extractingJsonPathValue("$.suggester")
             .isEqualTo("https://example.com/api/users/${testSuggester.id}")
     }
