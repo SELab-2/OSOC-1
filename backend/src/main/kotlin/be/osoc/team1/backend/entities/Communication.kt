@@ -1,8 +1,10 @@
 package be.osoc.team1.backend.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.validation.constraints.NotBlank
 
 enum class CommunicationTypeEnum {
     Email
@@ -15,7 +17,10 @@ enum class CommunicationTypeEnum {
 @Entity
 class Communication(
     val message: String,
-    val type: CommunicationTypeEnum
+    val type: CommunicationTypeEnum,
+    @JsonIgnore
+    @NotBlank
+    val edition: String = ""
 ) {
     @Id
     var id: UUID = UUID.randomUUID()
