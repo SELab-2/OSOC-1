@@ -26,8 +26,8 @@ class ProjectService(
      * The projects can also be filtered by the optional [searchQuery] parameter.
      * See the documentation of the [nameMatchesSearchQuery] function to understand how the filtering is done.
      */
-    fun getAllProjects(edition: String, searchQuery: String = ""): Iterable<Project> =
-        repository.findByEdition(edition).filter { nameMatchesSearchQuery(it.name, searchQuery) }
+    fun getAllProjects(edition: String, searchQuery: String = ""): List<Project> =
+        repository.findByEdition(edition).filter { nameMatchesSearchQuery(it.name, searchQuery) }.toList()
 
     /**
      * Get a project by its [id]. If there is no project with the given [id] and [edition],
@@ -129,9 +129,9 @@ class ProjectService(
         if (project.assignments.find { it.student.id == assignmentForm.student && position == it.position } != null)
             throw ForbiddenOperationException("This student was already assigned this position on the project!")
 
-        val student = studentService.getStudentById(assignmentForm.student)
+        val student = studentService.getStudentById(assignmentForm.student, edition)
         val suggester = userService.getUserById(assignmentForm.suggester)
-        val assignment = Assignment(student, position, suggester, assignmentForm.reason)
+        val assignment = Assignment(student, position, suggester, assignmentForm.reason, edition)
         project.assignments.add(assignment)
         repository.save(project)
     }

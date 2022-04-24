@@ -1,11 +1,12 @@
 package be.osoc.team1.backend.controllers
 
-import be.osoc.team1.backend.entities.Assignment
-import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
+import be.osoc.team1.backend.services.PagedCollection
+import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.ProjectService
+import be.osoc.team1.backend.services.page
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -33,10 +34,12 @@ class ProjectController(private val service: ProjectService) {
     @Secured("ROLE_COACH")
     fun getAllProjects(
         @RequestParam(defaultValue = "") name: String,
-        @PathVariable edition: String
-    ): Iterable<Project> {
+        @PathVariable edition: String,
+        @RequestParam(defaultValue = "0") pageNumber: Int,
+        @RequestParam(defaultValue = "50") pageSize: Int
+    ): PagedCollection<Project> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllProjects(edition, decodedName)
+        return service.getAllProjects(edition, decodedName).page(Pager(pageNumber, pageSize))
     }
 
     /**
@@ -65,7 +68,7 @@ class ProjectController(private val service: ProjectService) {
     @PostMapping
     @Secured("ROLE_ADMIN")
     fun postProject(
-        @RequestBody projectRegistration: ProjectRegistration,
+        @RequestBody projectRegistration: Project,
         @PathVariable edition: String
     ): ResponseEntity<Project> {
         val project = Project(
@@ -76,16 +79,6 @@ class ProjectController(private val service: ProjectService) {
         val createdProject = service.postProject(project)
         return getObjectCreatedResponse(createdProject.id, createdProject)
     }
-
-    // Needed to avoid the caller having to pass the edition in both the URL and the request body.
-    data class ProjectRegistration(
-        val name: String,
-        val clientName: String,
-        val description: String,
-        val coaches: MutableCollection<User> = mutableListOf(),
-        val positions: Collection<Position> = listOf(),
-        val assignments: MutableCollection<Assignment> = mutableListOf()
-    )
 
     /**
      * Gets all students assigned to a project. If there is no project with the given [projectId] and [edition],

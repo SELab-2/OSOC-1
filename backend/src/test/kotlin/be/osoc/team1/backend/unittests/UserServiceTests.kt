@@ -159,4 +159,13 @@ class UserServiceTests {
         val service = UserService(getRepository(false), getPasswordEncoder())
         assertThrows<InvalidIdException> { service.patchUser(testUser) }
     }
+
+    @Test
+    fun `patchUser fails when password gets changed`() {
+        val repository: UserRepository = mockk()
+        val user = User(testUser.username, testUser.email, password = "azerty")
+        every { repository.findByIdOrNull(user.id) } returns testUser
+        val service = UserService(repository, getPasswordEncoder())
+        assertThrows<ForbiddenOperationException> { service.patchUser(user) }
+    }
 }

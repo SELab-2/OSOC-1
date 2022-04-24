@@ -8,6 +8,7 @@ import be.osoc.team1.backend.entities.filterByStatus
 import be.osoc.team1.backend.entities.filterBySuggested
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.OsocUserDetailService
+import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.page
@@ -56,7 +57,7 @@ class StudentController(
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         @PathVariable edition: String,
         principal: Principal
-    ): Iterable<Student> {
+    ): PagedCollection<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
@@ -74,7 +75,7 @@ class StudentController(
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
     fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
-        service.getStudentById(studentId)
+        service.getStudentById(studentId, edition)
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
@@ -129,7 +130,7 @@ class StudentController(
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
-        service.setStudentStatus(studentId, status)
+        service.setStudentStatus(studentId, status, edition)
 
     /**
      * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should
@@ -167,7 +168,7 @@ class StudentController(
                 "The 'coachId' did not equal authenticated user id!"
             )
 
-        service.addStudentStatusSuggestion(studentId, statusSuggestion)
+        service.addStudentStatusSuggestion(studentId, statusSuggestion, edition)
     }
 
     /**
@@ -193,6 +194,6 @@ class StudentController(
                 "The 'coachId' did not equal authenticated user id. You can't remove suggestions from other users!"
             )
 
-        service.deleteStudentStatusSuggestion(studentId, coachId)
+        service.deleteStudentStatusSuggestion(studentId, coachId, edition)
     }
 }
