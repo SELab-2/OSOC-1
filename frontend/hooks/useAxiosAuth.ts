@@ -49,10 +49,14 @@ const useAxiosAuth = () => {
       async (error) => {
         const prevRequest = error?.config;
         if (UNAUTHORIZED_STATUSES.includes(error?.response?.status) && !prevRequest?.sent) {
-          prevRequest.sent = true;
-          const newAccessToken = await refresh();
-          prevRequest.headers['Authorization'] = `Basic ${newAccessToken}`;
-          return axiosAuthenticated(prevRequest);
+          try {
+            prevRequest.sent = true;
+            const newAccessToken = await refresh();
+            prevRequest.headers['Authorization'] = `Basic ${newAccessToken}`;
+            return axiosAuthenticated(prevRequest);
+          } catch (err: unknown) {
+            return Promise.reject(err);
+          }
         }
         return Promise.reject(error);
       }
