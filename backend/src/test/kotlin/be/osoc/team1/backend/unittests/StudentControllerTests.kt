@@ -251,6 +251,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         assertEquals("Maarten", capturedStudent.firstName)
         assertEquals("Steevens", capturedStudent.lastName)
         assert(capturedStudent.skills.contains(Skill("Back-end developer")))
+        assert(capturedStudent.skills.contains(Skill("Some other role")))
         assertEquals(true, capturedStudent.alumn)
         assertEquals(false, capturedStudent.possibleStudentCoach)
 
