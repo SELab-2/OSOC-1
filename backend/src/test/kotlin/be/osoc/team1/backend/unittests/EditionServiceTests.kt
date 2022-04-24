@@ -2,7 +2,9 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Project
+import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
@@ -10,6 +12,7 @@ import be.osoc.team1.backend.repositories.EditionRepository
 import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.ProjectService
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.UserService
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -28,13 +31,20 @@ class EditionServiceTests {
     private val inactiveEdition = Edition(editionName, false)
 
     @Test
-    fun `makeEditionInactive inactivates edition if it is active`() {
+    fun `makeEditionInactive inactivates edition and disables coach accounts if it is active`() {
         val repository = mockk<EditionRepository>()
         every { repository.findByIdOrNull(activeEdition.name) } returns activeEdition
         every { repository.save(inactiveEdition) } returns inactiveEdition
-        val service = EditionService(repository, mockk(), mockk())
+        val coach = User("", "", Role.Coach, "")
+        val admin = User("", "", Role.Admin, "")
+        val userService = mockk<UserService>()
+        every { userService.getAllUsers() } returns listOf(coach, admin)
+        every { userService.changeRole(coach.id, Role.Disabled) } just Runs
+        val service = EditionService(repository, mockk(), mockk(), userService)
         service.makeEditionInactive(activeEdition.name)
         verify { repository.save(inactiveEdition) }
+        verify { userService.changeRole(coach.id, Role.Disabled) }
+        verify(exactly = 0) { userService.changeRole(admin.id, Role.Disabled) }
     }
 
     @Test
@@ -42,7 +52,7 @@ class EditionServiceTests {
         val repository = mockk<EditionRepository>()
         every { repository.findByIdOrNull(activeEdition.name) } returns null
         every { repository.save(inactiveEdition) } returns inactiveEdition
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         service.makeEditionInactive(activeEdition.name)
         verify { repository.save(inactiveEdition) }
     }
@@ -51,7 +61,7 @@ class EditionServiceTests {
     fun `makeEditionInactive fails if edition is already inactive`() {
         val repository = mockk<EditionRepository>()
         every { repository.findByIdOrNull(inactiveEdition.name) } returns inactiveEdition
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         assertThrows<FailedOperationException> { service.makeEditionInactive(inactiveEdition.name) }
     }
 
@@ -61,7 +71,7 @@ class EditionServiceTests {
         every { repository.findByIdOrNull(inactiveEdition.name) } returns inactiveEdition
         every { repository.findAll() } returns listOf(inactiveEdition)
         every { repository.save(activeEdition) } returns activeEdition
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         service.makeEditionActive(inactiveEdition.name)
         verify { repository.save(activeEdition) }
     }
@@ -72,7 +82,7 @@ class EditionServiceTests {
         every { repository.findByIdOrNull(editionName) } returns null
         every { repository.findAll() } returns emptyList()
         every { repository.save(activeEdition) } returns activeEdition
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         service.makeEditionActive(editionName)
         verify { repository.save(activeEdition) }
     }
@@ -81,7 +91,7 @@ class EditionServiceTests {
     fun `makeEditionActive fails if the edition is already active`() {
         val repository = mockk<EditionRepository>()
         every { repository.findByIdOrNull(activeEdition.name) } returns activeEdition
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         assertThrows<FailedOperationException> { service.makeEditionActive(activeEdition.name) }
     }
 
@@ -91,7 +101,7 @@ class EditionServiceTests {
         val repository = mockk<EditionRepository>()
         every { repository.findByIdOrNull(inactiveEdition.name) } returns inactiveEdition
         every { repository.findAll() } returns listOf(activeEditionWithDifferentName, inactiveEdition)
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         assertThrows<ForbiddenOperationException> { service.makeEditionActive(inactiveEdition.name) }
     }
 
@@ -99,7 +109,7 @@ class EditionServiceTests {
     fun `getActiveEdition returns the active edition if it exists`() {
         val repository = mockk<EditionRepository>()
         every { repository.findAll() } returns listOf(activeEdition)
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         assertEquals(activeEdition, service.getActiveEdition())
     }
 
@@ -107,7 +117,7 @@ class EditionServiceTests {
     fun `getActiveEdition returns null if there is no active edition`() {
         val repository = mockk<EditionRepository>()
         every { repository.findAll() } returns listOf(inactiveEdition)
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         assertEquals(null, service.getActiveEdition())
     }
 
@@ -115,7 +125,7 @@ class EditionServiceTests {
     fun `getInactiveEditions returns all inactive editions`() {
         val repository = mockk<EditionRepository>()
         every { repository.findAll() } returns listOf(activeEdition, inactiveEdition)
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         assertEquals(listOf(inactiveEdition), service.getInactiveEditions())
     }
 
@@ -132,7 +142,7 @@ class EditionServiceTests {
         val projectService = mockk<ProjectService>()
         every { projectService.getAllProjects(inactiveEdition.name) } returns listOf(testProject)
         every { projectService.deleteProjectById(testProject.id, inactiveEdition.name) } just Runs
-        val service = EditionService(repository, studentService, projectService)
+        val service = EditionService(repository, studentService, projectService, mockk())
         service.deleteEdition(inactiveEdition.name)
         verify { studentService.deleteStudentById(testStudent.id) }
         verify { projectService.deleteProjectById(testProject.id, inactiveEdition.name) }
@@ -143,7 +153,7 @@ class EditionServiceTests {
     fun `deleteEdition fails if edition does not exist`() {
         val repository = mockk<EditionRepository>()
         every { repository.existsById(inactiveEdition.name) } returns false
-        val service = EditionService(repository, mockk(), mockk())
+        val service = EditionService(repository, mockk(), mockk(), mockk())
         assertThrows<InvalidIdException> { service.deleteEdition(inactiveEdition.name) }
     }
 }

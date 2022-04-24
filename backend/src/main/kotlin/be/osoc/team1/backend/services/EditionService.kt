@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.Edition
+import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidEditionIdException
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Service
 class EditionService(
     private val repository: EditionRepository,
     private val studentService: StudentService,
-    private val projectService: ProjectService
+    private val projectService: ProjectService,
+    private val userService: UserService
 ) {
 
     fun getEdition(editionName: String): Edition = repository.findByIdOrNull(editionName)
@@ -45,19 +47,30 @@ class EditionService(
     /**
      * Given a currently active [Edition] identified by the given [editionName], make it inactive.
      * If there is no [Edition] with that [editionName], it will be created automatically.
+     * If the edition did exist, this deactivates all [Role.Coach] accounts, by making them [Role.Disabled].
      * Throws a [FailedOperationException] if the edition is already inactive.
      */
     fun makeEditionInactive(editionName: String) {
-        val edition = repository.findByIdOrNull(editionName) ?: Edition(editionName, true)
-        if (!edition.isActive) {
+        var edition = repository.findByIdOrNull(editionName)
+        val editionExists = edition != null
+        if (!editionExists) {
+            edition = Edition(editionName, true)
+        }
+        if (!edition!!.isActive) {
             throw FailedOperationException("The given edition is already inactive.")
         }
         edition.isActive = false
+        if (editionExists) {
+            userService.getAllUsers()
+                .filter { it.role == Role.Coach }
+                .forEach { userService.changeRole(it.id, Role.Disabled) }
+        }
         repository.save(edition)
     }
 
     /**
      * Deletes the [Edition] identified by the given [editionName] from the database.
+     * This function also deletes all of the data associated with this edition.
      * Throws an [InvalidIdException] if the edition does not exist.
      */
     fun deleteEdition(editionName: String) {
