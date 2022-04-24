@@ -1,7 +1,7 @@
 import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { StatusSuggestionStatus, Student } from '../lib/types';
+import {StatusSuggestionStatus, Student, StudentData} from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
@@ -22,6 +22,7 @@ type StudentsSidebarProps = PropsWithChildren<unknown>;
  * @param skills                  - list of skills to include, student has to have one of these
  * @param studentSearchParameters - record containing the possible filters boolean
  * @param setStudents             - callback to set the results
+ * @param setFilterAmount         - callback to set total amount of filtered results
  */
 // TODO show/handle errors
 // TODO add Skills, alumn & studentcoach filter when implemented in backend
@@ -30,11 +31,12 @@ function searchStudent(
   studentNameSearch: string,
   skills: Array<{ value: string; label: string }>,
   studentSearchParameters: Record<string, boolean>,
-  setStudents: (students: Student[]) => void
+  setStudents: (students: Student[]) => void,
+  setFilterAmount: (filterAmount: number) => void,
 ) {
   // console.log(skills);
   axiosAuthenticated
-    .get(Endpoints.STUDENTS, {
+    .get<StudentData>(Endpoints.STUDENTS, {
       params: {
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
@@ -42,7 +44,8 @@ function searchStudent(
       },
     })
     .then((response) => {
-      setStudents(response.data as Student[]);
+      setStudents(response.data.collection as Student[]);
+      setFilterAmount(response.data.totalLength as number);
       console.log(response);
     })
     .catch((ex) => {
@@ -58,10 +61,6 @@ function searchStudent(
 function getStatusFilterList(
   studentSearchParameters: Record<string, boolean>
 ): string {
-  // TODO include this since the new filter checks on default empty to avoid doing needless filtering
-  // if (studentSearchParameters.StatusYes && studentSearchParameters.StatusNo && studentSearchParameters.StatusMaybe && studentSearchParameters.StatusUndecided){
-  //
-  // }
   let stringList = '';
   stringList += studentSearchParameters.StatusYes ? 'Yes,' : '';
   stringList += studentSearchParameters.StatusNo ? 'No,' : '';
@@ -87,6 +86,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
   // Split this to avoid making new object every type action & control when to call filter
   const [studentNameSearch, setStudentNameSearch] = useState('' as string);
+
+  const [filterAmount, setFilterAmount]: [number, (filterAmount: number) => void] = useState(0);
 
   const [students, setStudents]: [Student[], (students: Student[]) => void] =
     useState([] as Student[]);
@@ -124,9 +125,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   // TODO this should just call searchStudent since this ignores current filters on reload
   useEffect(() => {
     axiosAuthenticated
-      .get<Student[]>(Endpoints.STUDENTS)
+      .get<StudentData>(Endpoints.STUDENTS)
       .then((response) => {
-        setStudents(response.data as Student[]);
+        setStudents(response.data.collection as Student[]);
+        setFilterAmount(response.data.totalLength as number);
         setLoading(false);
       })
       .catch((ex) => {
@@ -147,7 +149,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       studentNameSearch,
       skills,
       studentSearchParameters,
-      setStudents
+      setStudents,
+      setFilterAmount
     );
   }, [studentSearchParameters, skills]);
 
@@ -192,7 +195,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                       studentNameSearch,
                       skills,
                       studentSearchParameters,
-                      setStudents
+                      setStudents,
+                        setFilterAmount,
                     );
                   }
                 }}
@@ -204,7 +208,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                     studentNameSearch,
                     skills,
                     studentSearchParameters,
-                    setStudents
+                    setStudents,
+                    setFilterAmount
                   )
                 }
               >
@@ -452,8 +457,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
         {/* These are the student tiles */}
         <div className="max-h-[100%] grow overflow-y-auto">
           <div className="col-span-full border-b-2 border-gray-400 pb-1 pr-2 text-right text-xs font-normal">
-            {/* TODO this should be actual functionality */}
-            {students.length + '/' + students.length + ' shown'}
+            {filterAmount + ' total results'}
           </div>
           <FlatList
             list={students}

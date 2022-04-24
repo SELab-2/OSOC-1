@@ -6,7 +6,7 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Fragment, useEffect, useState } from 'react';
-import { Project, Skill, Student, UserRole, UUID } from '../lib/types';
+import {Project, ProjectBase, ProjectData, Skill, Student, UserRole, UUID} from '../lib/types';
 import axios, { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import useAxiosAuth from '../hooks/useAxiosAuth';
@@ -40,11 +40,11 @@ function searchProject(
   setProjects: (projects: Project[]) => void
 ) {
   axiosAuthenticated
-    .get(Endpoints.PROJECTS, {
+    .get<ProjectData>(Endpoints.PROJECTS, {
       params: { name: projectSearch },
     })
     .then((response) => {
-      setProjects(response.data as Project[]);
+      setProjects(response.data.collection as Project[]);
     })
     .catch((ex) => {
       console.log(ex);
@@ -71,10 +71,10 @@ const Projects: NextPage = () => {
   useAxiosAuth();
   useEffect(() => {
     axiosAuthenticated
-      .get<Project[]>(Endpoints.PROJECTS)
+      .get<ProjectData>(Endpoints.PROJECTS)
       .then((response) => {
         // console.log(response.data);
-        setProjects(response.data as Project[]);
+        setProjects(response.data.collection as Project[]);
         setLoading(false);
       })
       .catch((ex) => {
@@ -185,7 +185,7 @@ const Projects: NextPage = () => {
             <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
               <FlatList
                 list={projects}
-                renderItem={(project: Project) => (
+                renderItem={(project: ProjectBase) => (
                   <ProjectTile key={project.id} projectInput={project} />
                 )}
                 renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
@@ -221,6 +221,7 @@ const Projects: NextPage = () => {
 
           <h3 className="mb-3 px-5 text-xl">Create New Project</h3>
           <div className="mb-4 flex flex-col overflow-y-auto">
+            {/* TODO after this is uploaded, need to get new correct projects list */}
             <ProjectPopup
               projectForm={projectForm}
               setShowPopup={setShowCreateProject}

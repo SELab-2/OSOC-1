@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Icon } from '@iconify/react';
-import { Assignment, Project, User, UUID } from '../../lib/types';
+import {Assignment, Project, Url, User, UUID} from '../../lib/types';
 import CreatableSelect from 'react-select/creatable';
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
@@ -36,7 +36,7 @@ type ProjectForm = {
   description: string;
   coachIds: User[];
   positions: positionForm[];
-  assignments: Assignment[]; // TODO change this to url on refactor
+  assignments: Url[]; // TODO change this to url on refactor
 };
 
 /**
@@ -56,7 +56,7 @@ export const defaultprojectForm = {
   description: '',
   coachIds: [] as User[],
   positions: [{ ...defaultPosition }] as positionForm[],
-  assignments: [] as Assignment[],
+  assignments: [] as Url[],
 } as ProjectForm;
 
 /**
@@ -65,9 +65,11 @@ export const defaultprojectForm = {
  * as the value, since this is a react-select options object
  *
  * @param project - the project to use as a base
+ * @param assignmentUrls - a list of the assignment urls that are part of the given project
  */
 // TODO find best way to get assignment urls, will probably use overloads
-export function projectFormFromProject(project: Project): ProjectForm {
+export function projectFormFromProject(project: Project, assignmentUrls: Url[]): ProjectForm {
+  console.log(JSON.stringify(project));
   const newProjectForm = { ...defaultprojectForm };
   newProjectForm.projectName = project.name || '';
   newProjectForm.clientName = project.clientName || '';
@@ -80,7 +82,7 @@ export function projectFormFromProject(project: Project): ProjectForm {
         skill: { value: value.id, label: value.skill.skillName },
       } as positionForm) || ([{ ...defaultPosition }] as positionForm[]))
   );
-  newProjectForm.assignments = project.assignments || ([] as Assignment[]);
+  newProjectForm.assignments = assignmentUrls || ([] as Url[]);
   return newProjectForm;
 }
 
@@ -154,7 +156,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
    */
   const handleProjectFormChange = (
     parameter: keyof typeof projectForm,
-    value: string | User[] | positionForm[] | Assignment[]
+    value: string | User[] | positionForm[] | Url[]
   ) => {
     if (typeof value !== 'string') {
       return;
@@ -163,7 +165,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     newProjectForm[parameter] = value as string &
       User[] &
       positionForm[] &
-      Assignment[]; // not sure why this is needed but it errors without
+        Url[]; // not sure why this is needed but it errors without
     setProjectForm(newProjectForm);
   };
 

@@ -2,10 +2,11 @@ import {
   Assignment,
   ItemTypes,
   Position,
-  Project,
+  Project, ProjectBase,
   Student,
   User,
   UUID,
+    Url,
 } from '../../lib/types';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
@@ -16,14 +17,14 @@ import { Fragment, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
-import ProjectPopup, { projectFormFromProject } from './ProjectPopup';
+import ProjectPopup, {defaultprojectForm, projectFormFromProject} from './ProjectPopup';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
 
 // Using projectInput and not just project to avoid confusion
 type ProjectProp = {
-  projectInput: Project;
+  projectInput: ProjectBase;
 };
 
 type UserProp = {
@@ -129,6 +130,27 @@ function reloadProject(
     });
 }
 
+function getUrlList(urls: Url[]){
+  axiosAuthenticated
+      .get<Project>(Endpoints.PROJECTS + '/' + projectId)
+      .then((response) => {
+        setMyProject(response.data as Project);
+      })
+      .catch((ex) => {
+        console.log(ex);
+      });
+}
+
+function getEntireProject(projectBase: ProjectBase, setMyProject: (myProject: Project) => void) {
+  const newProject = {} as Project;
+  newProject.name = projectBase.name;
+  newProject.id = projectBase.id;
+  newProject.description = projectBase.description;
+  newProject.clientName = projectBase.clientName;
+  newProject.coaches = [] as User[];
+  projectBase.coaches.forEach()
+}
+
 const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
     useState(projectInput as Project); // using different names to avoid confusion
@@ -150,6 +172,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [currentUser] = useUser();
   const [showEditProject, setShowEditProject] = useState(false);
   useAxiosAuth();
+
+  console.log("project:", projectInput);
 
   const [projectForm, setProjectForm] = useState(
     projectFormFromProject(myProject)

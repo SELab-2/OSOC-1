@@ -17,6 +17,17 @@ export default axios.create({
 /**
  * axios instance to be used for authenticated (JSON) requests
  */
+export const axiosAuthenticatedBase = axios.create({
+  baseURL: '',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+/**
+ * axios instance to be used for authenticated (JSON) requests
+ */
+// TODO fix this to inherit from axiosAuthenticatedBase so I can put the interceptors there
 export const axiosAuthenticated = axios.create({
   baseURL: BASEURL,
   headers: {

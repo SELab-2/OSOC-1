@@ -10,8 +10,8 @@ const Endpoints = {
   USERS: '/users',
   LOGIN: '/login',
   REFRESH: '/token/refresh',
-  PROJECTS: '/projects',
-  STUDENTS: '/students',
+  PROJECTS: '/ed/projects',
+  STUDENTS: '/ed/students',
 } as const;
 
 export default Endpoints;

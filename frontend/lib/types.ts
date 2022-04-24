@@ -1,5 +1,6 @@
 export type UUID = string;
 export type AuthToken = string;
+export type Url = string;
 
 export type AuthTokens = {
   /**
@@ -54,6 +55,16 @@ export enum StatusSuggestionStatus {
   Maybe = 'Maybe',
 }
 
+export type StudentData = {
+  collection: Student[];
+  totalLength: number;
+}
+
+export type ProjectData = {
+  collection: Project[];
+  totalLength: number;
+}
+
 // TODO fix this once tally form is done
 export type Student = {
   id: UUID;
@@ -62,14 +73,26 @@ export type Student = {
   status: string;
   statusSuggestions: StatusSuggestion[];
   alumn: boolean;
+  possibleStudentCoach: boolean;
   skills: Skill[];
-  // communications: [];
+  communications: Url[];
+  answers: Url[];
 };
 
 export type StatusSuggestion = {
   coachId: UUID;
   status: StatusSuggestionStatus;
   motivation: string;
+};
+
+export type ProjectBase = {
+  id: UUID;
+  name: string;
+  clientName: string;
+  description: string;
+  coaches: Url[];
+  positions: Url[];
+  assignments: Url[];
 };
 
 export type Project = {
