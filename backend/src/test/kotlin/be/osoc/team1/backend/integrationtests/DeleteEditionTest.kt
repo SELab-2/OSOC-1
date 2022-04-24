@@ -1,8 +1,7 @@
 package be.osoc.team1.backend.integrationtests
 
 import be.osoc.team1.backend.entities.Assignment
-import be.osoc.team1.backend.entities.Communication
-import be.osoc.team1.backend.entities.CommunicationTypeEnum
+import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Role
@@ -12,35 +11,35 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.repositories.EditionRepository
 import be.osoc.team1.backend.repositories.PositionRepository
 import be.osoc.team1.backend.repositories.ProjectRepository
 import be.osoc.team1.backend.repositories.StatusSuggestionRepository
 import be.osoc.team1.backend.repositories.StudentRepository
-import be.osoc.team1.backend.services.EditionService
-import be.osoc.team1.backend.services.ProjectService
-import be.osoc.team1.backend.services.StudentService
-import be.osoc.team1.backend.services.UserService
+import be.osoc.team1.backend.repositories.UserRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.net.URI
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DeleteEditionTest {
 
     @Autowired
-    private lateinit var editionService: EditionService
+    private lateinit var restTemplate: TestRestTemplate
 
     @Autowired
-    private lateinit var studentService: StudentService
+    private lateinit var editionRepository: EditionRepository
 
     @Autowired
-    private lateinit var userService: UserService
-
-    @Autowired
-    private lateinit var projectService: ProjectService
+    private lateinit var userRepository: UserRepository
 
     @Autowired
     private lateinit var studentRepository: StudentRepository
@@ -60,16 +59,14 @@ class DeleteEditionTest {
     @Test
     fun `deleteEdition removes all entities from the edition`() {
         val editionName = "testEdition"
-        editionService.makeEditionActive(editionName)
-        val coach = User("", "", Role.Disabled, "")
-        userService.registerUser(coach)
-        userService.changeRole(coach.id, Role.Coach)
+        val edition = Edition(editionName, true)
+        editionRepository.save(edition)
+        val coach = User("", "", Role.Coach, "")
+        userRepository.save(coach)
         val student = Student("", "", editionName)
-        studentService.addStudent(student)
         val suggestion = StatusSuggestion(coach.id, SuggestionEnum.Yes, "", editionName)
-        studentService.addStudentStatusSuggestion(student.id, suggestion, editionName)
-        val communication = Communication("", CommunicationTypeEnum.Email, editionName)
-        studentService.addCommunicationToStudent(student.id, communication, editionName)
+        student.statusSuggestions.add(suggestion)
+        studentRepository.save(student)
         val skill = Skill("")
         val position = Position(skill, 1, editionName)
         val assignment = Assignment(student, position, coach, "", editionName)
@@ -77,28 +74,29 @@ class DeleteEditionTest {
             "", "", "", editionName,
             mutableListOf(coach), listOf(position), mutableListOf(assignment)
         )
-        projectService.postProject(project)
+        projectRepository.save(project)
 
         val differentEditionName = "differentEdition"
-        editionService.makeEditionInactive(differentEditionName)
+        val differentEdition = Edition(differentEditionName, false)
+        editionRepository.save(differentEdition)
         val differentEditionStudent = Student("", "", differentEditionName)
-        studentService.addStudent(differentEditionStudent)
         val differentEditionSuggestion = StatusSuggestion(coach.id, SuggestionEnum.Yes, "", differentEditionName)
-        studentService.addStudentStatusSuggestion(differentEditionStudent.id, differentEditionSuggestion, differentEditionName)
+        differentEditionStudent.statusSuggestions.add(differentEditionSuggestion)
+        studentRepository.save(differentEditionStudent)
         val differentEditionPosition = Position(skill, 1, differentEditionName)
         val differentEditionAssignment = Assignment(differentEditionStudent, differentEditionPosition, coach, "", differentEditionName)
         val differentEditionProject = Project(
             "", "", "", differentEditionName,
             mutableListOf(coach), listOf(differentEditionPosition), mutableListOf(differentEditionAssignment)
         )
-        projectService.postProject(differentEditionProject)
+        projectRepository.save(project)
 
         assertEquals(listOf(student, differentEditionStudent), studentRepository.findAll())
         assertEquals(listOf(project, differentEditionProject), projectRepository.findAll())
         assertEquals(listOf(assignment, differentEditionAssignment), assignmentRepository.findAll())
         assertEquals(listOf(position, differentEditionPosition), positionRepository.findAll())
         assertEquals(listOf(suggestion, differentEditionSuggestion), statusSuggestionRepository.findAll())
-        editionService.deleteEdition(editionName)
+        restTemplate.exchange(URI("/editions/$editionName"), HttpMethod.DELETE, HttpEntity("", HttpHeaders()), String::class.java)
         assertEquals(listOf(differentEditionStudent), studentRepository.findAll())
         assertEquals(listOf(differentEditionProject), projectRepository.findAll())
         assertEquals(listOf(differentEditionAssignment), assignmentRepository.findAll())
