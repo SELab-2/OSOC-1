@@ -60,7 +60,7 @@ class StudentController(
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
         @RequestParam(defaultValue = "id") sortBy: String,
-        @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
+        @RequestParam(defaultValue = "") status: List<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
         @RequestParam(defaultValue = "") skills: Set<String>,
@@ -74,9 +74,9 @@ class StudentController(
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
         return service.getAllStudents(Sort.by(sortBy), edition)
-            .filterByName(decodedName)
-            .filterBySuggested(includeSuggested, callee)
-            .filterByStatus(status)
+            .applyIf(name.isNotBlank()) { filterByName(decodedName) }
+            .applyIf(!includeSuggested) { filterBySuggested(callee) }
+            .applyIf(status.isNotEmpty()) { filterByStatus(status) }
             .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
             .applyIf(alumnOnly) { filterByAlumn() }
             .applyIf(onlyStudentCoach) { filterByStudentCoach() }

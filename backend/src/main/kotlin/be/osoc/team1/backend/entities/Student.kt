@@ -160,12 +160,11 @@ fun List<Student>.filterByName(nameQuery: String) =
     filter { student: Student -> nameMatchesSearchQuery("${student.firstName} ${student.lastName}", nameQuery) }
 
 /**
- * This function will filter [Student]s based on given [includeSuggested] boolean
- * if [includeSuggested] is false only [Student] for which the [callee] hasn't made a suggestion yet will be returned
- * else return all of the [Student]s
+ * This function will filter [Student]s so that only [Student]s for which the [callee] hasn't made a suggestion yet will
+ * be returned.
  */
-fun List<Student>.filterBySuggested(includeSuggested: Boolean, callee: User) =
-    filter { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
+fun List<Student>.filterBySuggested(callee: User) =
+    filter { student: Student -> student.statusSuggestions.none { it.coachId == callee.id } }
 
 /**
  * This function will filter [Student]s based on a set of [skillNames].
