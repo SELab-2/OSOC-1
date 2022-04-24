@@ -37,7 +37,7 @@ import java.security.Principal
 import java.util.UUID
 
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/{edition}/students")
 class StudentController(
     private val service: StudentService,
     private val userDetailService: OsocUserDetailService,
@@ -45,9 +45,9 @@ class StudentController(
 ) {
 
     /**
-     * Get a list of all students in the database. This request cannot fail. There are default
-     * values applied for paging ([pageNumber], [pageSize] and [sortBy]), these can be modified by
-     * adding request parameters to the url.
+     * Get a list of all students in the database who are a part of the given OSOC [edition].
+     * This request cannot fail. There are default values applied for paging ([pageNumber], [pageSize] and [sortBy]).
+     * These can be modified by adding request parameters to the url.
      *
      * The results can also be filtered by [name] (default value is empty so no student is excluded),
      * by [status] (default value allows all statuses), by [includeSuggested] (default value is true, so
@@ -67,18 +67,21 @@ class StudentController(
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
         @RequestParam(defaultValue = "false") onlyStudentCoach: Boolean,
         @RequestParam(defaultValue = "false") onlyNotAssigned: Boolean,
+        @PathVariable edition: String,
         principal: Principal
     ): PagedCollection<Student> {
         val decodedName = URLDecoder.decode(name, "UTF-8")
-        return service.getAllStudents(Sort.by(sortBy))
+        val callee = userDetailService.getUserFromPrincipal(principal)
+        val pager = Pager(pageNumber, pageSize)
+        return service.getAllStudents(Sort.by(sortBy), edition)
             .filterByName(decodedName)
-            .filterBySuggested(includeSuggested, userDetailService.getUserFromPrincipal(principal))
+            .filterBySuggested(includeSuggested, callee)
             .filterByStatus(status)
             .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
             .applyIf(alumnOnly) { filterByAlumn() }
             .applyIf(onlyStudentCoach) { filterByStudentCoach() }
             .applyIf(onlyNotAssigned) { filterByNotYetAssigned(assignmentRepository) }
-            .page(Pager(pageNumber, pageSize))
+            .page(pager)
     }
 
     /**
@@ -87,7 +90,8 @@ class StudentController(
      */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
-    fun getStudentById(@PathVariable studentId: UUID): Student = service.getStudentById(studentId)
+    fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
+        service.getStudentById(studentId, edition)
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
@@ -96,7 +100,8 @@ class StudentController(
     @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun deleteStudentById(@PathVariable studentId: UUID) = service.deleteStudentById(studentId)
+    fun deleteStudentById(@PathVariable studentId: UUID, @PathVariable edition: String) =
+        service.deleteStudentById(studentId)
 
     /**
      * Add a student to the database. The student should be passed in the request body as a JSON representation of a
@@ -108,7 +113,20 @@ class StudentController(
      * verification is the responsibility of the caller.
      */
     @PostMapping
-    fun addStudent(@RequestBody student: Student): ResponseEntity<Student> {
+    fun addStudent(
+        @RequestBody studentRegistration: Student,
+        @PathVariable edition: String
+    ): ResponseEntity<Student> {
+        studentRegistration.answers.forEach { it.edition = edition }
+        val student = Student(
+            studentRegistration.firstName,
+            studentRegistration.lastName,
+            edition,
+            studentRegistration.skills,
+            studentRegistration.alumn,
+            studentRegistration.possibleStudentCoach,
+            studentRegistration.answers
+        )
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
@@ -132,8 +150,8 @@ class StudentController(
     @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum) =
-        service.setStudentStatus(studentId, status)
+    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
+        service.setStudentStatus(studentId, status, edition)
 
     /**
      * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should
@@ -162,7 +180,8 @@ class StudentController(
     fun addStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @RequestBody statusSuggestion: StatusSuggestion,
-        principal: Principal
+        @PathVariable edition: String,
+        principal: Principal,
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
         if (statusSuggestion.coachId != user.id)
@@ -170,7 +189,7 @@ class StudentController(
                 "The 'coachId' did not equal authenticated user id!"
             )
 
-        service.addStudentStatusSuggestion(studentId, statusSuggestion)
+        service.addStudentStatusSuggestion(studentId, statusSuggestion, edition)
     }
 
     /**
@@ -187,6 +206,7 @@ class StudentController(
     fun deleteStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @PathVariable coachId: UUID,
+        @PathVariable edition: String,
         principal: Principal
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
@@ -195,6 +215,6 @@ class StudentController(
                 "The 'coachId' did not equal authenticated user id. You can't remove suggestions from other users!"
             )
 
-        service.deleteStudentStatusSuggestion(studentId, coachId)
+        service.deleteStudentStatusSuggestion(studentId, coachId, edition)
     }
 }

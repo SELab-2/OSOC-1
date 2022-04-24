@@ -21,7 +21,7 @@ import java.util.UUID
 abstract class BaseController<T, K>(open val service: BaseService<T, K>) {
 
     /**
-     * Returns the T with the corresponding [id]. If no such T exists, returns a
+     * Returns the [T] with the corresponding [id]. If no such [T] exists, returns a
      * "404: Not Found" message instead.
      */
     @GetMapping("/{id}")
