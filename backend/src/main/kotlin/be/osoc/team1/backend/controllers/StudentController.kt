@@ -3,14 +3,20 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.filterByAlumn
 import be.osoc.team1.backend.entities.filterByName
+import be.osoc.team1.backend.entities.filterByNotYetAssigned
+import be.osoc.team1.backend.entities.filterBySkills
 import be.osoc.team1.backend.entities.filterByStatus
+import be.osoc.team1.backend.entities.filterByStudentCoach
 import be.osoc.team1.backend.entities.filterBySuggested
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.applyIf
 import be.osoc.team1.backend.services.page
 import be.osoc.team1.backend.util.TallyDeserializer
 import org.springframework.data.domain.Sort
@@ -34,7 +40,8 @@ import java.util.UUID
 @RequestMapping("/{edition}/students")
 class StudentController(
     private val service: StudentService,
-    private val userDetailService: OsocUserDetailService
+    private val userDetailService: OsocUserDetailService,
+    private val assignmentRepository: AssignmentRepository
 ) {
 
     /**
@@ -43,8 +50,9 @@ class StudentController(
      * These can be modified by adding request parameters to the url.
      *
      * The results can also be filtered by [name] (default value is empty so no student is excluded),
-     * by [status] (default value allows all statuses) by [includeSuggested] (default value is true, so
-     * you will also see students you already suggested for)
+     * by [status] (default value allows all statuses), by [includeSuggested] (default value is true, so
+     * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
+     * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
      */
     @GetMapping
     @Secured("ROLE_COACH")
@@ -52,9 +60,13 @@ class StudentController(
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
         @RequestParam(defaultValue = "id") sortBy: String,
-        @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: List<StatusEnum>,
+        @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: Set<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
+        @RequestParam(defaultValue = "") skills: Set<String>,
+        @RequestParam(defaultValue = "false") alumnOnly: Boolean,
+        @RequestParam(defaultValue = "false") studentCoachOnly: Boolean,
+        @RequestParam(defaultValue = "false") unassignedOnly: Boolean,
         @PathVariable edition: String,
         principal: Principal
     ): PagedCollection<Student> {
@@ -62,9 +74,13 @@ class StudentController(
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
         return service.getAllStudents(Sort.by(sortBy), edition)
-            .filterByName(decodedName)
-            .filterBySuggested(includeSuggested, callee)
-            .filterByStatus(status)
+            .applyIf(studentCoachOnly) { filterByStudentCoach() }
+            .applyIf(alumnOnly) { filterByAlumn() }
+            .applyIf(name.isNotBlank()) { filterByName(decodedName) }
+            .applyIf(!includeSuggested) { filterBySuggested(callee) }
+            .applyIf(status.size != StatusEnum.values().size) { filterByStatus(status) }
+            .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
+            .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
     }
 

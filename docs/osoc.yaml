@@ -294,6 +294,28 @@ paths:
                     schema:
                         type: integer
                     description: The page size for pagination. For example, if you pass 50 as value, there will be 50 projects on one page
+                -   in: query
+                    name: skills
+                    schema:
+                        type: array
+                        items:
+                            type: string
+                    description: Filter by skill, students that have atleast one of the skills listed are included
+                -   in: query
+                    name: alumnOnly
+                    schema:
+                        type: boolean
+                    description: Only return alumni students
+                -   in: query
+                    name: onlyStudentCoach
+                    schema:
+                        type: boolean
+                    description: Only returns student coach volunteers
+                -   in: query
+                    name: onlyNotAssigned
+                    schema:
+                        type: boolean
+                    description: Only return unassigned students
             responses:
                 '200':
                     description: successful operation
