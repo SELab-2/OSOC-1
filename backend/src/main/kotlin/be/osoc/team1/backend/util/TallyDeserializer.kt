@@ -36,8 +36,8 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         try {
             val skillNames = getAnswerForKey(answerMap, TallyKeys.skillQuestion, "skill").answer.toMutableSet()
             if (skillNames.remove("Other")) {
-                skillNames.add(getAnswerForKey(
-                    answerMap, TallyKeys.otherSkillQuestion, "otherSkill").answer.first()
+                skillNames.add(
+                    getAnswerForKey(answerMap, TallyKeys.otherSkillQuestion, "otherSkill").answer.first()
                 )
             }
 
