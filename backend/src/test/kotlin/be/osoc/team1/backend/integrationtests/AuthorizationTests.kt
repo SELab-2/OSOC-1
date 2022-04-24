@@ -51,6 +51,9 @@ class AuthorizationTests {
     @Autowired
     private lateinit var userRepository: UserRepository
 
+    private val testEditionName = "testEditionName"
+    private val studentBaseUrl = "/$testEditionName/students"
+
     private val adminPassword = "adminPassword"
     private val adminEmail = "admin@admin.com"
     private val encodedAdminPassword = BCryptPasswordEncoder().encode(adminPassword)
@@ -66,7 +69,7 @@ class AuthorizationTests {
     private val encodedDisabledPassword = BCryptPasswordEncoder().encode(disabledPassword)
     private val disabledUser = User("disabled", disabledEmail, Role.Disabled, encodedDisabledPassword)
 
-    private val testStudent = Student("Test", "Student")
+    private val testStudent = Student("Test", "Student", testEditionName)
 
     /**
      * Log in with given email and password via post request to /login
@@ -194,7 +197,7 @@ class AuthorizationTests {
         val authHeaders = HttpHeaders()
         authHeaders.add("Authorization", "Invalid $accessToken")
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 403)
         logoutResponse(loginResponse)
     }
@@ -203,14 +206,14 @@ class AuthorizationTests {
     fun `access token can be used after login`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 200)
         logoutHeader(authHeaders)
     }
 
     @Test
     fun `GET students returns 403 when not logged in`() {
-        val response: ResponseEntity<String> = restTemplate.getForEntity("/students")
+        val response: ResponseEntity<String> = restTemplate.getForEntity(studentBaseUrl)
         assert(response.statusCodeValue == 403)
     }
 
@@ -218,7 +221,7 @@ class AuthorizationTests {
     fun `GET students works when logged in as admin`() {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
 
         assert(response.statusCodeValue == 200)
         assert(JSONObject(response.body).getJSONArray("collection").getJSONObject(0).get("firstName") == testStudent.firstName)
@@ -230,7 +233,7 @@ class AuthorizationTests {
     fun `GET students works when logged in as coach`() {
         val authHeaders = getAuthenticatedHeader(coachEmail, coachPassword)
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
 
         assert(response.statusCodeValue == 200)
         assert(JSONObject(response.body).getJSONArray("collection").getJSONObject(0).get("firstName") == testStudent.firstName)
@@ -242,7 +245,7 @@ class AuthorizationTests {
     fun `GET students returns 403 when logged in as disabled`() {
         val authHeaders = getAuthenticatedHeader(disabledEmail, disabledPassword)
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
 
         assert(response.statusCodeValue == 403)
         logoutHeader(authHeaders)
@@ -253,7 +256,7 @@ class AuthorizationTests {
         val accessToken = "in.val.id"
         val request = HttpEntity(null, createAuthHeaders(accessToken))
 
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 401)
     }
 
@@ -263,7 +266,7 @@ class AuthorizationTests {
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
         val request = HttpEntity(null, createAuthHeaders(refreshToken))
 
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 401)
     }
 
@@ -376,7 +379,7 @@ class AuthorizationTests {
 
         val authHeaders = createAuthHeaders(newAccessToken)
         val request = HttpEntity(null, authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 200)
         logoutHeader(authHeaders)
     }
@@ -414,7 +417,7 @@ class AuthorizationTests {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         authHeaders.add(HttpHeaders.ORIGIN, "https://notallowed.com")
         val request = HttpEntity("", authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 403)
         assert(response.body == "Invalid CORS request")
     }
@@ -425,7 +428,7 @@ class AuthorizationTests {
         val authHeaders = getAuthenticatedHeader(adminEmail, adminPassword)
         authHeaders.add(HttpHeaders.ORIGIN, ConfigUtil.allowedCorsOrigins[0])
         val request = HttpEntity("", authHeaders)
-        val response: ResponseEntity<String> = restTemplate.exchange(URI("/students"), HttpMethod.GET, request, String::class.java)
+        val response: ResponseEntity<String> = restTemplate.exchange(URI(studentBaseUrl), HttpMethod.GET, request, String::class.java)
         assert(response.statusCodeValue == 200)
     }
 }

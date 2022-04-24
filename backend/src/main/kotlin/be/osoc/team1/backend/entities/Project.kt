@@ -12,8 +12,11 @@ import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.ManyToMany
+import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
+import javax.validation.constraints.NotBlank
 
 /**
  * Represents the requirement of specific positions for a [Project].
@@ -22,9 +25,12 @@ import javax.persistence.OneToOne
  */
 @Entity
 class Position(
-    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @ManyToOne(cascade = [CascadeType.ALL])
     val skill: Skill,
-    val amount: Int
+    val amount: Int,
+    @JsonIgnore
+    @NotBlank
+    val edition: String = ""
 ) {
     @Id
     val id: UUID = UUID.randomUUID()
@@ -48,7 +54,11 @@ class Assignment(
     @JsonSerialize(using = UserSerializer::class)
     val suggester: User,
 
-    val reason: String
+    val reason: String,
+
+    @JsonIgnore
+    @NotBlank
+    val edition: String = ""
 ) {
     @Id
     val id: UUID = UUID.randomUUID()
@@ -69,9 +79,10 @@ class Project(
     val description: String,
 
     @JsonIgnore
-    val edition: String,
+    @NotBlank
+    val edition: String = "",
 
-    @OneToMany(cascade = [CascadeType.ALL])
+    @ManyToMany(cascade = [CascadeType.ALL])
     @JsonSerialize(using = UserListSerializer::class)
     val coaches: MutableCollection<User> = mutableListOf(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
