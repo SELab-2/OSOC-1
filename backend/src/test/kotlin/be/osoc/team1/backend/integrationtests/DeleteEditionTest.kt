@@ -61,8 +61,9 @@ class DeleteEditionTest {
     fun `deleteEdition removes all entities from the edition`() {
         val editionName = "testEdition"
         editionService.makeEditionActive(editionName)
-        val coach = User("", "", Role.Coach, "")
+        val coach = User("", "", Role.Disabled, "")
         userService.registerUser(coach)
+        userService.changeRole(coach.id, Role.Coach)
         val student = Student("", "", editionName)
         studentService.addStudent(student)
         val suggestion = StatusSuggestion(coach.id, SuggestionEnum.Yes, "", editionName)
