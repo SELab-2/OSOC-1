@@ -57,8 +57,9 @@ class ProjectService(
      * and the given [edition], throw an [InvalidProjectIdException].
      */
     fun patchProject(project: Project, edition: String): Project {
-        if (!repository.existsByIdAndEdition(project.id, edition))
-            throw InvalidProjectIdException()
+        val oldProject = getProjectById(project.id, edition)
+        if(oldProject.edition != project.edition)
+            throw ForbiddenOperationException("The edition field cannot be changed!")
 
         return repository.save(project)
     }
