@@ -224,7 +224,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   };
 
   return (
-    // TODO test with a long list for autoscroll etc this should be separate from projects scroll but no longer
     // holds searchbar + hide filter button
     <div className="sidebar mt-[50px] max-h-screen py-4 sm:mt-0">
       <div className="flex max-h-[calc(100vh-32px)] flex-col">

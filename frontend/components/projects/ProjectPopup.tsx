@@ -38,7 +38,7 @@ type ProjectForm = {
   description: string;
   coaches: User[];
   positions: positionForm[];
-  assignments: Url[]; // TODO change this to url on refactor
+  assignments: Url[];
 };
 
 /**
@@ -190,7 +190,6 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     getCoaches(setCoachOptions);
   }, []);
 
-  // TODO add select coaches field
   return (
     <form
       onSubmit={(e) => {

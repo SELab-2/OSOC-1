@@ -55,7 +55,7 @@ type AssignmentProp = {
  * @param reason      - the reason for assigning this student to this project
  * @param setMyProjectBase  - callback for reloadProject that is called after this POST completes
  */
-// TODO when post is finished, should update the project frontend view & also the student filter
+// TODO when post is finished, should update the student filter
 // TODO should show success / error
 function postStudentToProject(
   projectId: UUID,
@@ -229,7 +229,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
       accept: ItemTypes.STUDENTTILE,
       canDrop: () => true, // TODO add check to see if student is already part of project & if any positions are left
       drop: (item) => {
-        setStudent(item as Student); // TODO find a way to pass item not as type DragObject but as type Student
+        setStudent(item as Student);
         setOpenAssignment(true); // This opens the popup window to select position & type reason
       },
       collect: (monitor) => ({

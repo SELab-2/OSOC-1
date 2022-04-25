@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
-import { Project, ProjectBase, ProjectData, UserRole } from '../lib/types';
+import { ProjectBase, ProjectData, UserRole } from '../lib/types';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import useAxiosAuth from '../hooks/useAxiosAuth';
@@ -118,7 +118,6 @@ const Projects: NextPage = () => {
     return <div>No projects found.</div>;
   };
 
-  // TODO make actual request with pagination parameters via searchStudent but without overwriting list
   const fetchData = () => {
     searchProject(projectSearch, updateProjects, state, setState);
   };
