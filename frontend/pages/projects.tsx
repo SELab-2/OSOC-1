@@ -78,8 +78,10 @@ const Projects: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState('' as string);
-  const [projects, setProjects]: [ProjectBase[], (projects: ProjectBase[]) => void] =
-    useState([] as ProjectBase[]);
+  const [projects, setProjects]: [
+    ProjectBase[],
+    (projects: ProjectBase[]) => void
+  ] = useState([] as ProjectBase[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true);
   const [error, setError]: [string, (error: string) => void] = useState('');

@@ -1,11 +1,7 @@
 import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import {
-  StatusSuggestionStatus,
-  StudentBase,
-  StudentData,
-} from '../lib/types';
+import { StatusSuggestionStatus, StudentBase, StudentData } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
@@ -124,8 +120,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     (filterAmount: number) => void
   ] = useState(0);
 
-  const [students, setStudents]: [StudentBase[], (students: StudentBase[]) => void] =
-    useState([] as StudentBase[]);
+  const [students, setStudents]: [
+    StudentBase[],
+    (students: StudentBase[]) => void
+  ] = useState([] as StudentBase[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true); // TODO use this for styling
   const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
@@ -219,7 +217,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       skills,
       studentSearchParameters,
       updateStudents,
-      // setStudents,
       setFilterAmount,
       state,
       setState
@@ -315,7 +312,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                   isMulti={true}
                   name="Skills"
                   value={skills}
-                  options={skillOptions} // TODO fix this once backend has getAllSKills endpoint implemented
+                  options={skillOptions}
                   placeholder="Select skills"
                   onChange={(e) =>
                     setSkills(

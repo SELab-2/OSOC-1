@@ -1,18 +1,15 @@
 import { PieChart } from 'react-minimal-pie-chart';
 import { Icon } from '@iconify/react';
 import {
-    Assignment,
-    ItemTypes, Position,
-    Project, ProjectBase, Skill,
-    StatusSuggestion,
-    StatusSuggestionStatus,
-    Student,
-    StudentBase, Url,
-    User, UUID
+  ItemTypes,
+  StatusSuggestion,
+  StatusSuggestionStatus,
+  Student,
+  StudentBase,
 } from '../../lib/types';
 import { useDrag } from 'react-dnd';
-import {getUrlList} from "../../lib/requestUtils";
-import {useEffect, useState} from "react";
+import { getUrlList } from '../../lib/requestUtils';
+import { useEffect, useState } from 'react';
 const check_mark = <Icon icon="bi:check-lg" />;
 const question_mark = <Icon icon="bi:question-lg" />;
 const x_mark = <Icon icon="bx:x" />;
@@ -53,24 +50,27 @@ const chartHelper = {
 } as stringToArrayDict;
 
 async function getEntireStudent(studentBase: StudentBase): Promise<Student> {
-    const newStudent = convertStudentBase(studentBase);
-    await getUrlList<StatusSuggestion>(studentBase.statusSuggestions, newStudent.statusSuggestions);
-    return newStudent;
+  const newStudent = convertStudentBase(studentBase);
+  await getUrlList<StatusSuggestion>(
+    studentBase.statusSuggestions,
+    newStudent.statusSuggestions
+  );
+  return newStudent;
 }
 
 function convertStudentBase(studentBase: StudentBase): Student {
-    const newStudent = {} as Student;
-    newStudent.id = studentBase.id;
-    newStudent.firstName = studentBase.firstName;
-    newStudent.lastName = studentBase.lastName;
-    newStudent.status = studentBase.status;
-    newStudent.statusSuggestions = [] as StatusSuggestion[];
-    newStudent.alumn = studentBase.alumn;
-    newStudent.possibleStudentCoach = studentBase.possibleStudentCoach;
-    newStudent.skills = studentBase.skills;
-    newStudent.communications = studentBase.communications;
-    newStudent.answers = studentBase.answers;
-    return newStudent as Student;
+  const newStudent = {} as Student;
+  newStudent.id = studentBase.id;
+  newStudent.firstName = studentBase.firstName;
+  newStudent.lastName = studentBase.lastName;
+  newStudent.status = studentBase.status;
+  newStudent.statusSuggestions = [] as StatusSuggestion[];
+  newStudent.alumn = studentBase.alumn;
+  newStudent.possibleStudentCoach = studentBase.possibleStudentCoach;
+  newStudent.skills = studentBase.skills;
+  newStudent.communications = studentBase.communications;
+  newStudent.answers = studentBase.answers;
+  return newStudent as Student;
 }
 
 /**
@@ -78,21 +78,20 @@ function convertStudentBase(studentBase: StudentBase): Student {
  * @param student - The student whose information should be shown
  */
 const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
-    // Need to set a project with all keys present to avoid the render code throwing undefined errors
-    const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
-        useState(convertStudentBase(student) as Student); // using different names to avoid confusion
+  // Need to set a project with all keys present to avoid the render code throwing undefined errors
+  const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
+    useState(convertStudentBase(student) as Student); // using different names to avoid confusion
 
-    const [myStudentBase, setMyStudentBase]: [
-        StudentBase,
-        (myStudentBase: StudentBase) => void
-    ] = useState(student as StudentBase);
+  const [myStudentBase, setMyStudentBase]: [
+    StudentBase,
+    (myStudentBase: StudentBase) => void
+  ] = useState(student as StudentBase);
 
-
-    useEffect(() => {
-        getEntireStudent(myStudentBase).then((response) => {
-            setMyStudent(response);
-        });
-    }, [myStudentBase]);
+  useEffect(() => {
+    getEntireStudent(myStudentBase).then((response) => {
+      setMyStudent(response);
+    });
+  }, [myStudentBase]);
 
   /**
    * This counts the different status suggestions to create the pie chart
@@ -100,7 +99,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
    * you should add '|| 0' to avoid getting an undefined error
    */
   const suggestionCounts = {} as statusSuggestionStatusToNumberDict;
-    myStudent.statusSuggestions.forEach((suggestion) => {
+  myStudent.statusSuggestions.forEach((suggestion) => {
     suggestionCounts[suggestion.status] =
       suggestionCounts[suggestion.status] + 1 || 1;
   });

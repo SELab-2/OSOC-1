@@ -2,7 +2,8 @@ import { Fragment, useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Project, Url, User, UUID } from '../../lib/types';
 import CreatableSelect from 'react-select/creatable';
-import { getSkills } from '../../lib/requestUtils';
+import { getCoaches, getSkills } from '../../lib/requestUtils';
+import Select from 'react-select';
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -35,7 +36,7 @@ type ProjectForm = {
   projectName: string;
   clientName: string;
   description: string;
-  coachIds: User[];
+  coaches: User[];
   positions: positionForm[];
   assignments: Url[]; // TODO change this to url on refactor
 };
@@ -55,7 +56,7 @@ export const defaultprojectForm = {
   projectName: '',
   clientName: '',
   description: '',
-  coachIds: [] as User[],
+  coaches: [] as User[],
   positions: [{ ...defaultPosition }] as positionForm[],
   assignments: [] as Url[],
 } as ProjectForm;
@@ -76,7 +77,7 @@ export function projectFormFromProject(
   newProjectForm.projectName = project.name || '';
   newProjectForm.clientName = project.clientName || '';
   newProjectForm.description = project.description || '';
-  newProjectForm.coachIds = project.coaches || [];
+  newProjectForm.coaches = project.coaches || [];
   newProjectForm.positions = project.positions.map(
     (value) =>
       (({
@@ -153,7 +154,6 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
 
   /**
    * Updates the value in projectForm referenced by given parameter
-   * IMPORTANT This function is only designed to be used with value being a string!
    * If value is an array type, please use one of the function for that use case
    *
    * @param parameter - what projectForm[parameter] to update
@@ -163,9 +163,6 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     parameter: keyof typeof projectForm,
     value: string | User[] | positionForm[] | Url[]
   ) => {
-    if (typeof value !== 'string') {
-      return;
-    }
     const newProjectForm = { ...projectForm };
     newProjectForm[parameter] = value as string &
       User[] &
@@ -178,6 +175,10 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     [] as Array<{ value: string; label: string }>
   );
 
+  const [coachOptions, setCoachOptions] = useState(
+    [] as Array<{ value: User; label: string }>
+  );
+
   const addSkillOption = (option: string) => {
     const newSkillOptions = [...skillOptions];
     newSkillOptions.push({ value: '', label: option });
@@ -186,6 +187,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
 
   useEffect(() => {
     getSkills(setSkillOptions);
+    getCoaches(setCoachOptions);
   }, []);
 
   // TODO add select coaches field
@@ -223,6 +225,36 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
           }
         />
       </label>
+
+      <label className="block px-5">
+        Coaches
+        <Select
+          className="basic-single"
+          classNamePrefix="select"
+          isDisabled={false}
+          isLoading={false}
+          isClearable={true}
+          isRtl={false}
+          isSearchable={true}
+          isMulti={true}
+          name="Coaches"
+          value={projectForm.coaches.map((coach) => {
+            return {
+              value: coach,
+              label: coach.username,
+            };
+          })}
+          options={coachOptions}
+          placeholder="Select coaches"
+          onChange={(e) =>
+            handleProjectFormChange(
+              'coaches',
+              e.map((x) => x.value)
+            )
+          }
+        />
+      </label>
+
       {/* This is a fix to stop clicking on the clearable closing the entire modal */}
       <div
         className="my-6"

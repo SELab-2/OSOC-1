@@ -18,10 +18,8 @@ import { Fragment, useEffect, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
-import ProjectPopup, {
-  projectFormFromProject,
-} from './ProjectPopup';
-import {getUrlDict, getUrlList} from "../../lib/requestUtils";
+import ProjectPopup, { projectFormFromProject } from './ProjectPopup';
+import { getUrlDict, getUrlList } from '../../lib/requestUtils';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
