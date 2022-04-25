@@ -16,7 +16,7 @@ import { Edition } from '../lib/types';
  * Editions page where we list editions, show a form to create new editions and
  * make it possible to view data from previous editions
  * {@label EDITIONS_PAGE}
- * 
+ *
  * @returns Editions Page
  */
 const Editions: NextPage = () => {
@@ -46,7 +46,6 @@ const Editions: NextPage = () => {
         }
 
         setAllEditions(allEditionsList);
-
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
           const status = err.response?.status;
@@ -59,7 +58,6 @@ const Editions: NextPage = () => {
     };
 
     getAllEditions();
-
   }, []);
 
   const createEdition = async (_edition: string) => {

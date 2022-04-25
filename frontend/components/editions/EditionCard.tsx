@@ -18,11 +18,10 @@ type EditionCardProps = {
   deleteEdition: (edition: string) => void;
 };
 
-
 /**
  * A card displaying information about an edition (currently only the name and whether it's active or not).
  * This card also adds interactions to set this edition as the currently viewed edition and to delete this edition.
- * 
+ *
  * @param EditionCardProps - {@link EditionCardProps}
  * @returns Edition Card representing the given edition
  */

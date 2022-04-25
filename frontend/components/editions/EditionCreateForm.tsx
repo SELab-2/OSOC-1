@@ -9,7 +9,7 @@ type ECFProps = {
 
   /**
    * Function that takes an edition name and creates a new edition with that name.
-   * 
+   *
    * @see {@link EDITIONS_PAGE}
    */
   createEdition: (name: string) => void;
@@ -17,7 +17,7 @@ type ECFProps = {
 
 /**
  * Edition create form in the shape of an edition card
- * 
+ *
  * @param ECFProps - @see {@link ECFProps}
  * @returns Edition Create Form Component
  */
