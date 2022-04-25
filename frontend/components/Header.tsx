@@ -43,6 +43,13 @@ const Header: React.FC<HeaderProps> = () => {
           >
             <Link href="/users">Manage Users</Link>
           </li>
+          <li
+            className={`ml-3 hover:underline sm:inline ${
+              current_path === '/editions' ? 'underline' : ''
+            }`}
+          >
+            <Link href="/editions">Manage Editions</Link>
+          </li>
           <li className={`ml-3 hover:underline sm:inline`}>
             <Link href="/logout">Log Out</Link>
           </li>
