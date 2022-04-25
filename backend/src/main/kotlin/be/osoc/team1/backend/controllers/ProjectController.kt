@@ -82,6 +82,13 @@ class ProjectController(private val service: ProjectService) {
         return getObjectCreatedResponse(createdProject.id, createdProject)
     }
 
+    /**
+     * Patches a project by updating the project with [projectId] to match [project].
+     * Throws an exception if the path [projectId] does not match the id of [project]. If the project we attempt to
+     * patch a non-existent project a 404 not found is returned. If we attempt to change the edition of a project then a
+     * 403 forbidden is returned.
+     * Returns the patched project in the response body, with a link pointing to the resource in the Location header.
+     */
     @PatchMapping("/{projectId}")
     @Secured("ROLE_ADMIN")
     fun patchProject(

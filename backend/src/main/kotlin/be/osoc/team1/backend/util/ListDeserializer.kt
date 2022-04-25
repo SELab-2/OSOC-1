@@ -11,6 +11,10 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
 
+/**
+ * This class takes a list of urls and turns it into a list of objects of type [T]. It does by extracting the uuids from
+ * the urls and then looking up these ids in the [repository] for type [T].
+ */
 open class ListDeserializer<T>(private val repository: CrudRepository<T, UUID>) :
     JsonDeserializer<List<T>>() {
 
