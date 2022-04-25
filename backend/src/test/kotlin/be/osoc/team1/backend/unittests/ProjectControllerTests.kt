@@ -36,7 +36,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import java.util.*
+import java.util.UUID
 
 @UnsecuredWebMvcTest(ProjectController::class)
 class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
