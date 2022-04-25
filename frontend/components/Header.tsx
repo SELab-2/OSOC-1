@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { PropsWithChildren } from "react";
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { PropsWithChildren } from 'react';
 
 type HeaderProps = PropsWithChildren<unknown>;
 
@@ -9,14 +9,14 @@ const Header: React.FC<HeaderProps> = () => {
   const current_path = router.pathname;
 
   return (
-    <header className="h-fit flex flex-col sm:flex-row shadow-lg sm:h-12 px-4 items-center w-full justify-between">
+    <header className="flex h-fit w-full flex-col items-center justify-between px-4 shadow-lg sm:h-12 sm:flex-row">
       <div className="flex flex-row items-center">
         <img
           src="https://osoc.be/img/logo/logo-osoc-color.svg"
           className="hidden sm:inline-block sm:h-12 sm:w-12"
           alt="The OSOC logo"
         />
-        <h2 className="inline ml-2 text-xl font-semibold text-osoc-blue">
+        <h2 className="ml-2 inline text-xl font-semibold text-osoc-blue">
           Selections
         </h2>
       </div>

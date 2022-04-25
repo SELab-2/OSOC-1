@@ -41,12 +41,12 @@ type AuthContextProps = {
    * name of currently opened edition
    */
   edition: string;
-  
+
   /**
    * React setState function to set current edition
    */
   setEdition: Dispatch<SetStateAction<string>>;
-}
+};
 
 const AuthContext: Context<AuthContextProps> = createContext(
   {} as AuthContextProps
@@ -66,8 +66,10 @@ export const AuthProvider = ({
   const [edition, setEdition] = useState('');
 
   return (
-    <AuthContext.Provider value={{ user, setUser, tokens, setTokens, edition, setEdition }}>
-      { children }
+    <AuthContext.Provider
+      value={{ user, setUser, tokens, setTokens, edition, setEdition }}
+    >
+      {children}
     </AuthContext.Provider>
   );
 };
