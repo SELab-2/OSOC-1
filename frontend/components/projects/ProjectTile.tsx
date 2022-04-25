@@ -13,11 +13,12 @@ import Popup from 'reactjs-popup';
 import Select from 'react-select';
 import { useDrop } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
-import { Fragment, useState } from 'react';
+import {Fragment, useEffect, useState} from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import ProjectPopup, {defaultprojectForm, projectFormFromProject} from './ProjectPopup';
+import axios from "axios";
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -130,30 +131,53 @@ function reloadProject(
     });
 }
 
-function getUrlList(urls: Url[]){
-  axiosAuthenticated
-      .get<Project>(Endpoints.PROJECTS + '/' + projectId)
-      .then((response) => {
-        setMyProject(response.data as Project);
-      })
+async function getUrlList<Type>(urls: Url[], resultList: Type[]) {
+  await axios.all(urls.map(url => axiosAuthenticated.get<Type>(url))).then((response) => {
+    response.forEach(resp => resultList.push(resp.data))
+  })
       .catch((ex) => {
         console.log(ex);
       });
 }
 
-function getEntireProject(projectBase: ProjectBase, setMyProject: (myProject: Project) => void) {
+async function getUrl<Type>(url: Url){
+  return axiosAuthenticated.get<Type>(url)
+}
+
+
+async function getEntireProject(projectBase: ProjectBase): Promise<Project>{
+  const newProject = convertProjectBase(projectBase)
+
+  await Promise.all([
+    getUrlList(projectBase.coaches, newProject.coaches),
+    getUrlList(projectBase.positions, newProject.positions),
+    getUrlList(projectBase.assignments, newProject.assignments),
+  ])
+
+    await newProject.assignments.forEach(assignment =>
+        axiosAuthenticated
+            .get<Position>(assignment.position as unknown as string)
+            .then(response => assignment.position = response.data)
+    )
+
+  return newProject;
+}
+
+function convertProjectBase(projectBase: ProjectBase): Project{
   const newProject = {} as Project;
   newProject.name = projectBase.name;
   newProject.id = projectBase.id;
   newProject.description = projectBase.description;
   newProject.clientName = projectBase.clientName;
   newProject.coaches = [] as User[];
-  projectBase.coaches.forEach()
+  newProject.positions = [] as Position[];
+  newProject.assignments = [] as Assignment[];
+  return newProject as Project;
 }
 
 const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
-    useState(projectInput as Project); // using different names to avoid confusion
+    useState(convertProjectBase(projectInput) as Project); // using different names to avoid confusion
   const [openAssignment, setOpenAssignment]: [
     boolean,
     (openAssignment: boolean) => void
@@ -172,11 +196,22 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [currentUser] = useUser();
   const [showEditProject, setShowEditProject] = useState(false);
   useAxiosAuth();
+  // console.log("doing function?");
+  // getEntireProject(projectInput, setMyProject);
 
-  console.log("project:", projectInput);
+  useEffect(() => {
+    console.log("doing effect");
+    getEntireProject(projectInput).then(response => {
+      console.log('resp:', response);
+      setMyProject(response);
+    });
+  },[projectInput]);
+
+  // console.log("projectInput:", projectInput);
+  // console.log("myProject:", myProject);
 
   const [projectForm, setProjectForm] = useState(
-    projectFormFromProject(myProject)
+    projectFormFromProject(myProject, projectInput.assignments)
   );
 
   /**
@@ -208,6 +243,14 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   myProject.positions.forEach((position) => {
     myOptions.push({ value: position.id, label: position.skill.skillName });
   });
+
+  // useEffect(() => {
+  //   if (myProject && myProject.positions){
+  //     myProject.positions.forEach((position) => {
+  //       myOptions.push({ value: position.id, label: position.skill.skillName });
+  //     });
+  //   }
+  // },[myProject]);
 
   return (
     <div
@@ -404,7 +447,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         open={showEditProject}
         onClose={() => setShowEditProject(false)}
         // reset the form before opening so users do not accidentally change things
-        onOpen={() => setProjectForm(projectFormFromProject(myProject))}
+        onOpen={() => setProjectForm(projectFormFromProject(myProject, projectInput.assignments))}
         data-backdrop="static"
         data-keyboard="false"
         closeOnDocumentClick={false}
