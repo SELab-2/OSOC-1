@@ -7,6 +7,7 @@ import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import Select from 'react-select';
 import FlatList from 'flatlist-react';
+import { getSkills } from '../lib/requestUtils'
 import StudentTile from './students/StudentTile';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
@@ -85,12 +86,6 @@ function getStatusFilterList(
   studentSearchParameters.StatusMaybe ? stringList.push('Maybe') : null;
   studentSearchParameters.StatusUndecided ? stringList.push('Undecided') : null;
   return stringList.join(',') || ' ';
-}
-
-async function getSkills(setSkillOptions: (skillOptions: Array<{ value: string; label: string }>) => void) {
-  await axiosAuthenticated.get<Skill[]>(Endpoints.SKILLS)
-      .then(response => setSkillOptions(response.data.map(skill => {return { value: skill.skillName, label: skill.skillName }})))
-      .catch(err => console.log(err))
 }
 
 // TODO allow disabling drag on studentView since I don't think it is needed there

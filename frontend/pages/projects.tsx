@@ -23,6 +23,7 @@ import ProjectPopup, {
 } from '../components/projects/ProjectPopup';
 import StudentTile from '../components/students/StudentTile';
 import FlatList from 'flatlist-react';
+import {strictEqual} from "assert";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -33,22 +34,42 @@ const xmark_circle = <Icon icon="akar-icons:circle-x" />;
  *
  * @param projectSearch - (part of) the name of a project
  * @param setProjects   - callback to set the results
+ * @param state - holds page, loading, hasMoreItems, pageSize
+ * @param setState - set the state variable
  */
 // TODO show/handle errors
 function searchProject(
   projectSearch: string,
-  setProjects: (projects: Project[]) => void
+  setProjects: (projects: Project[]) => void,
+state: {hasMoreItems: boolean,
+    page: number,
+    pageSize: number,
+    loading: boolean},
+setState: (state: {hasMoreItems: boolean,
+  page: number,
+  pageSize: number,
+  loading: boolean}) => void,
 ) {
+  state.loading = true;
   axiosAuthenticated
     .get<ProjectData>(Endpoints.PROJECTS, {
-      params: { name: projectSearch },
+      params: {
+        name: projectSearch,
+        pageNumber: state.page,
+        pageSize: state.pageSize,
+      },
     })
     .then((response) => {
       setProjects(response.data.collection as Project[]);
+      const newState = {...state};
+      newState.page = state.page + 1;
+      newState.hasMoreItems = response.data.totalLength > (state.page * state.pageSize);
+      setState(newState);
     })
     .catch((ex) => {
       console.log(ex);
     });
+  state.loading = false;
 }
 
 /**
@@ -68,30 +89,39 @@ const Projects: NextPage = () => {
 
   const [projectForm, setProjectForm] = useState({ ...defaultprojectForm });
 
+  const updateProjects: (param: Project[]) => void = (projectsList: Project[]) => {
+    const newProjects = projects ? [...projects] : ([] as Project[]) as Project[];
+    newProjects.push(...projectsList);
+    setProjects(newProjects);
+  }
+
   useAxiosAuth();
   useEffect(() => {
-    axiosAuthenticated
-      .get<ProjectData>(Endpoints.PROJECTS)
-      .then((response) => {
-        // console.log(response.data);
-        setProjects(response.data.collection as Project[]);
-        setLoading(false);
-      })
-      .catch((ex) => {
-        const error =
-          ex.response.status === 404
-            ? 'Resource Not found'
-            : 'An unexpected error has occurred';
-        setError(error);
-        setLoading(false);
-      });
+    state.page = 0;
+    searchProject(projectSearch, setProjects, state, setState);
+    // axiosAuthenticated
+    //   .get<ProjectData>(Endpoints.PROJECTS)
+    //   .then((response) => {
+    //     // console.log(response.data);
+    //     setProjects(response.data.collection as Project[]);
+    //     setLoading(false);
+    //   })
+    //   .catch((ex) => {
+    //     const error =
+    //       ex.response.status === 404
+    //         ? 'Resource Not found'
+    //         : 'An unexpected error has occurred';
+    //     setError(error);
+    //     setLoading(false);
+    //   });
   }, []);
 
-  const state = {
+  const [state, setState] = useState({
     hasMoreItems: true,
-    offset: 0,
-    loading: false, // important so the right blank message is shown from the start
-  };
+    page: 0,
+    pageSize: 50,
+    loading: false,
+  });
 
   const showBlank = () => {
     if (projects.length === 0 && state.loading) {
@@ -102,8 +132,7 @@ const Projects: NextPage = () => {
 
   // TODO make actual request with pagination parameters via searchStudent but without overwriting list
   const fetchData = () => {
-    // TODO set state to correct values
-    console.log('loadmore');
+    searchProject(projectSearch, updateProjects, state, setState);
   };
 
   return (
@@ -158,13 +187,17 @@ const Projects: NextPage = () => {
                       onChange={(e) => setProjectSearch(e.target.value)}
                       onKeyPress={(e) => {
                         if (e.key == 'Enter') {
-                          searchProject(projectSearch, setProjects);
+                          state.page = 0;
+                          searchProject(projectSearch, setProjects, state, setState);
                         }
                       }}
                     />
                     <i
                       className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
-                      onClick={() => searchProject(projectSearch, setProjects)}
+                      onClick={() => {
+                        state.page = 0;
+                        searchProject(projectSearch, setProjects, state, setState);
+                      }}
                     >
                       {magnifying_glass}
                     </i>

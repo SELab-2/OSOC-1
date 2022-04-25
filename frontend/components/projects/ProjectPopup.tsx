@@ -1,7 +1,8 @@
-import { Fragment } from 'react';
+import {Fragment, useEffect, useState} from 'react';
 import { Icon } from '@iconify/react';
 import {Assignment, Project, Url, User, UUID} from '../../lib/types';
 import CreatableSelect from 'react-select/creatable';
+import { getSkills } from '../../lib/requestUtils'
 import {axiosAuthenticated} from "../../lib/axios";
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
@@ -173,6 +174,20 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     setProjectForm(newProjectForm);
   };
 
+  const [skillOptions, setSkillOptions] = useState(
+      [] as Array<{ value: string; label: string }>
+  );
+
+  const addSkillOption = (option: string) => {
+    const newSkillOptions = [...skillOptions];
+    newSkillOptions.push({value: '', label: option});
+    setSkillOptions(newSkillOptions);
+  }
+
+  useEffect(() => {
+    getSkills(setSkillOptions);
+  }, []);
+
   // TODO add select coaches field
   return (
     <form
@@ -235,11 +250,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                     isSearchable={true}
                     name={`"Position-" +${index}`}
                     value={position.skill}
-                    options={[
-                      { value: 'chocolate', label: 'Chocolate' },
-                      { value: 'strawberry', label: 'Strawberry' },
-                      { value: 'vanilla', label: 'Vanilla' },
-                    ]} // TODO fix this once backend has getAllSKills endpoint implemented
+                    options={skillOptions}
                     isOptionDisabled={(option) =>
                       (projectForm['positions'] as positionForm[])
                         .map((v) => v.skill.label)
@@ -253,6 +264,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                       )
                     }
                     onCreateOption={(e) => {
+                      addSkillOption(e);
                       setPositionDropdownValue(
                         index,
                         e
