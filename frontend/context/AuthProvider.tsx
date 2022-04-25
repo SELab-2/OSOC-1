@@ -1,12 +1,19 @@
-import { Context, createContext, Dispatch, PropsWithChildren, SetStateAction, useState } from "react";
-import { AuthTokens, User } from "../lib/types";
+import {
+  Context,
+  createContext,
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
+  useState,
+} from 'react';
+import { AuthTokens, User } from '../lib/types';
 
 type ProviderProps = Record<string, unknown>;
 
 type AuthContextProps = {
   /**
    * User object of the logged in user
-   * 
+   *
    * @remarks
    * @see {@link User} for all fields
    */
@@ -19,7 +26,7 @@ type AuthContextProps = {
 
   /**
    * Tokens object representing the access token and refresh token container
-   * 
+   *
    * @remarks
    * @see {@link AuthTokens} for more information
    */
@@ -29,26 +36,29 @@ type AuthContextProps = {
    * React setState function to set tokens
    */
   setTokens: Dispatch<SetStateAction<AuthTokens>>;
-}
+};
 
-const AuthContext: Context<AuthContextProps> = createContext({} as AuthContextProps);
+const AuthContext: Context<AuthContextProps> = createContext(
+  {} as AuthContextProps
+);
 
 /**
  * Provider object to expose authentication data to all components
  * @param children - the child components
- * 
+ *
  * @returns Provider component of the AuthContext
  */
-export const AuthProvider = ({ children }: PropsWithChildren<ProviderProps>) => {
+export const AuthProvider = ({
+  children,
+}: PropsWithChildren<ProviderProps>) => {
   const [user, setUser] = useState({} as User);
   const [tokens, setTokens] = useState({} as AuthTokens);
 
   return (
     <AuthContext.Provider value={{ user, setUser, tokens, setTokens }}>
-      { children }
+      {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
 export default AuthContext;
-
