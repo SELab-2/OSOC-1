@@ -17,6 +17,7 @@ import ProjectPopup, {
   defaultprojectForm,
 } from '../components/projects/ProjectPopup';
 import FlatList from 'flatlist-react';
+import useUser from "../hooks/useUser";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -74,6 +75,7 @@ function searchProject(
  * @returns Projects page
  */
 const Projects: NextPage = () => {
+  const [user,] = useUser();
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
@@ -201,8 +203,9 @@ const Projects: NextPage = () => {
                   </div>
                 </div>
 
+                {/* Button to create new project */}
                 <button
-                  className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300"
+                  className={`${user.role == UserRole.Admin ? 'visible' : 'hidden'} justify - right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
                   type="submit"
                   onClick={() => setShowCreateProject(true)}
                 >

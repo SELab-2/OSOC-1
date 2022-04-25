@@ -7,7 +7,7 @@ import {
   Student,
   User,
   UUID,
-  Url,
+  Url, UserRole,
 } from '../../lib/types';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
@@ -184,7 +184,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
     useState(convertProjectBase(projectInput) as Project); // using different names to avoid confusion
-
+  const [user,] = useUser();
   const [myProjectBase, setMyProjectBase]: [
     ProjectBase,
     (myProjectBase: ProjectBase) => void
@@ -261,7 +261,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           <div className="flex flex-row items-center">
             <p className="text-lg font-bold">{myProject.name}</p>
             <i
-              className={`pl-2 text-xl opacity-20`}
+              className={`${user.role == UserRole.Admin ? 'visible' : 'hidden'} pl-2 text-xl opacity-20`}
               onClick={() => setShowEditProject(true)}
             >
               {edit_icon}
