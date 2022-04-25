@@ -70,12 +70,15 @@ class UserService(private val repository: UserRepository, private val passwordEn
     }
 
     /**
-     * Update a user object with the data defined in [updatedUser]. If this user does not exist an
-     * [InvalidUserIdException] will be thrown.
+     * Update a user object with the data defined in [updatedUser].
+     * If this user does not exist an [InvalidUserIdException] will be thrown.
+     * If password gets changed a [ForbiddenOperationException] will be thrown.
      */
     fun patchUser(updatedUser: User): User {
-        if (!repository.existsById(updatedUser.id))
-            throw InvalidUserIdException()
+        val oldUser = getUserById(updatedUser.id)
+        if (oldUser.password != updatedUser.password) {
+            throw ForbiddenOperationException("Not allowed to update password field of users")
+        }
 
         return repository.save(updatedUser)
     }
