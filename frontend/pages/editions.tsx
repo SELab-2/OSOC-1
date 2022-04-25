@@ -10,7 +10,8 @@ import Endpoints from '../lib/endpoints';
 import { useEffect, useState } from 'react';
 import EditionCreateForm from '../components/editions/EditionCreateForm';
 import Error from '../components/Error';
-import { Edition } from '../lib/types';
+import { Edition, UserRole } from '../lib/types';
+import RouteProtection from '../components/RouteProtection';
 
 /**
  * Editions page where we list editions, show a form to create new editions and
@@ -97,6 +98,9 @@ const Editions: NextPage = () => {
   };
 
   return (
+    <RouteProtection
+      allowedRoles={[UserRole.Admin]}
+    >
     <div className="h-screen">
       <Header />
 
@@ -129,6 +133,7 @@ const Editions: NextPage = () => {
           ))}
       </div>
     </div>
+    </RouteProtection>
   );
 };
 
