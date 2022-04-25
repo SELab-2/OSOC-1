@@ -100,7 +100,7 @@ class ProjectController(private val service: ProjectService) {
             throw FailedOperationException("Request url id=\"$projectId\" did not match request body id=\"${project.id}\"")
 
         val updatedProject = service.patchProject(project, edition)
-        return getObjectCreatedResponse(updatedProject.id, updatedProject)
+        return getObjectCreatedResponse(updatedProject.id, updatedProject, HttpStatus.OK)
     }
 
     /**

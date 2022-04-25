@@ -1,16 +1,22 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.ProjectController
+import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.ProjectService
+import be.osoc.team1.backend.util.Serializer
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -18,23 +24,28 @@ import io.mockk.just
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import java.util.UUID
+import java.util.*
 
 @UnsecuredWebMvcTest(ProjectController::class)
 class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @MockkBean
     private lateinit var projectService: ProjectService
+
+    @MockkBean
+    private lateinit var assignmentRepository: AssignmentRepository
 
     private val testId = UUID.randomUUID()
     private val testEdition = "testEdition"
@@ -120,6 +131,32 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isCreated).andExpect(content().string(jsonRepresentation))
+    }
+
+    @Test
+    fun `patchProject should update project`() {
+        val module = SimpleModule()
+        module.addSerializer(Assignment::class.java, Serializer<Assignment> { "/assignments/${it.id}" })
+        val objectMapper = ObjectMapper()
+        objectMapper.registerModule(module)
+
+        val testStudent = Student("firstname", "lastname")
+        val testUser = User("username", "email", Role.Coach, "password")
+        val testPosition = Position(Skill("backend"), 2)
+        val testAssignment = Assignment(testStudent, testPosition, testUser, "reason")
+        testProject.assignments.add(testAssignment)
+
+        every { assignmentRepository.findByIdOrNull(testAssignment.id) } returns testAssignment
+
+        val jsonRepresentation = objectMapper.writeValueAsString(testProject)
+        every { projectService.patchProject(any(), testEdition) } returns testProject
+        mockMvc.perform(
+            patch("$editionUrl/" + testProject.id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isOk).andExpect(content().string(jsonRepresentation))
+
+        testProject.assignments.remove(testAssignment)
     }
 
     @Test
