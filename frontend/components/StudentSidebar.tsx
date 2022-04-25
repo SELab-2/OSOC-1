@@ -17,7 +17,8 @@ const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 type StudentsSidebarProps = PropsWithChildren<unknown>;
 
 /**
- * function that allows searching students by name
+ * Function that allows searching students by name
+ * Depending on what function you pass for setStudents, the list will get replaced or appended to
  *
  * @param studentNameSearch       - (part of) the name of a student
  * @param skills                  - list of skills to include, student has to have one of these
@@ -124,8 +125,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     StudentBase[],
     (students: StudentBase[]) => void
   ] = useState([] as StudentBase[]);
+
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true); // TODO use this for styling
+
   const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
 
   const defaultStudentSearchParameters = {

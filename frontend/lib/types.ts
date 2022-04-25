@@ -44,27 +44,34 @@ export type User = {
 };
 
 /**
- * All types below should conform to the osoc.yaml file!
+ * All possible values for the Student -> StatusSuggestion -> status type
+ * Not to be confused with Student -> status
  */
-
-// TODO add documentation once these types are used with actual backend data and thus correct
-
 export enum StatusSuggestionStatus {
   Yes = 'Yes',
   No = 'No',
   Maybe = 'Maybe',
 }
 
+/**
+ * This is the full object returned by a get to the Student endpoint
+ */
 export type StudentData = {
   collection: StudentBase[];
   totalLength: number;
 };
 
+/**
+ * This is the full object returned by a get to the Project endpoint
+ */
 export type ProjectData = {
   collection: ProjectBase[];
   totalLength: number;
 };
 
+/**
+ * This is the Student type as defined in osoc.yaml
+ */
 // TODO fix this once tally form & communications is done
 export type Student = {
   id: UUID;
@@ -79,6 +86,9 @@ export type Student = {
   answers: Url[];
 };
 
+/**
+ * This is the exact collection type returned by a get to the Student endpoint
+ */
 export type StudentBase = {
   id: UUID;
   firstName: string;
@@ -92,12 +102,18 @@ export type StudentBase = {
   answers: Url[];
 };
 
+/**
+ * This is the StatusSuggestion type as defined in osoc.yaml
+ */
 export type StatusSuggestion = {
   coachId: UUID;
   status: StatusSuggestionStatus;
   motivation: string;
 };
 
+/**
+ * This is the exact collection type returned by a get to the Project endpoint
+ */
 export type ProjectBase = {
   id: UUID;
   name: string;
@@ -108,6 +124,9 @@ export type ProjectBase = {
   assignments: Url[];
 };
 
+/**
+ * This is the Project type as defined in osoc.yaml
+ */
 export type Project = {
   id: UUID;
   name: string;
@@ -118,12 +137,18 @@ export type Project = {
   assignments: Assignment[];
 };
 
+/**
+ * This is the Position type as defined in osoc.yaml
+ */
 export type Position = {
   id: UUID;
   skill: Skill;
   amount: number;
 };
 
+/**
+ * This is the Assignment type as defined in osoc.yaml
+ */
 export type Assignment = {
   id: UUID;
   student: Student;
@@ -132,6 +157,9 @@ export type Assignment = {
   reason: string;
 };
 
+/**
+ * This is the Skill type as defined in osoc.yaml
+ */
 export type Skill = {
   skillName: string;
 };
