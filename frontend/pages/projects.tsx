@@ -32,7 +32,7 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 // TODO show/handle errors
 function searchProject(
   projectSearch: string,
-  setProjects: (projects: Project[]) => void,
+  setProjects: (projects: ProjectBase[]) => void,
   state: {
     hasMoreItems: boolean;
     page: number;
@@ -56,7 +56,7 @@ function searchProject(
       },
     })
     .then((response) => {
-      setProjects(response.data.collection as Project[]);
+      setProjects(response.data.collection as ProjectBase[]);
       const newState = { ...state };
       newState.page = state.page + 1;
       newState.hasMoreItems =
@@ -78,20 +78,20 @@ const Projects: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState('' as string);
-  const [projects, setProjects]: [Project[], (projects: Project[]) => void] =
-    useState([] as Project[]);
+  const [projects, setProjects]: [ProjectBase[], (projects: ProjectBase[]) => void] =
+    useState([] as ProjectBase[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true);
   const [error, setError]: [string, (error: string) => void] = useState('');
 
   const [projectForm, setProjectForm] = useState({ ...defaultprojectForm });
 
-  const updateProjects: (param: Project[]) => void = (
-    projectsList: Project[]
+  const updateProjects: (param: ProjectBase[]) => void = (
+    projectsList: ProjectBase[]
   ) => {
     const newProjects = projects
       ? [...projects]
-      : ([] as Project[] as Project[]);
+      : ([] as ProjectBase[] as ProjectBase[]);
     newProjects.push(...projectsList);
     setProjects(newProjects);
   };

@@ -21,7 +21,7 @@ import useUser from '../../hooks/useUser';
 import ProjectPopup, {
   projectFormFromProject,
 } from './ProjectPopup';
-import axios from 'axios';
+import {getUrlDict, getUrlList} from "../../lib/requestUtils";
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -131,30 +131,6 @@ function reloadProject(
     })
     .catch((ex) => {
       console.log(ex);
-    });
-}
-
-async function getUrlList<Type>(urls: Url[], resultList: Type[]) {
-  await axios
-    .all(urls.map((url) => axiosAuthenticated.get<Type>(url)))
-    .then((response) => {
-      response.forEach((resp) => resultList.push(resp.data));
-    })
-    .catch((ex) => {
-      console.log(ex);
-    });
-}
-
-async function getUrlDict<Type>(urls: Url[], resultMap: Map<Url, Type>) {
-  await axios
-    .all(urls.map((url) => axiosAuthenticated.get<Type>(url)))
-    .then((response) => {
-      response.forEach((resp) =>
-        resultMap.set(resp.config.url as string, resp.data)
-      );
-    })
-    .catch((ex) => {
-      console.log('getUrlDict', ex);
     });
 }
 

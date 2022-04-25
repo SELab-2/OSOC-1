@@ -56,22 +56,35 @@ export enum StatusSuggestionStatus {
 }
 
 export type StudentData = {
-  collection: Student[];
+  collection: StudentBase[];
   totalLength: number;
 };
 
 export type ProjectData = {
-  collection: Project[];
+  collection: ProjectBase[];
   totalLength: number;
 };
 
-// TODO fix this once tally form is done
+// TODO fix this once tally form & communications is done
 export type Student = {
   id: UUID;
   firstName: string;
   lastName: string;
   status: string;
   statusSuggestions: StatusSuggestion[];
+  alumn: boolean;
+  possibleStudentCoach: boolean;
+  skills: Skill[];
+  communications: Url[];
+  answers: Url[];
+};
+
+export type StudentBase = {
+  id: UUID;
+  firstName: string;
+  lastName: string;
+  status: string;
+  statusSuggestions: Url[];
   alumn: boolean;
   possibleStudentCoach: boolean;
   skills: Skill[];

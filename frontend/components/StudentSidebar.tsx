@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import {
   StatusSuggestionStatus,
-  Student,
+  StudentBase,
   StudentData,
 } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
@@ -36,7 +36,7 @@ function searchStudent(
   studentNameSearch: string,
   skills: Array<{ value: string; label: string }>,
   studentSearchParameters: Record<string, boolean>,
-  setStudents: (students: Student[]) => void,
+  setStudents: (students: StudentBase[]) => void,
   setFilterAmount: (filterAmount: number) => void,
   state: {
     hasMoreItems: boolean;
@@ -67,7 +67,7 @@ function searchStudent(
       },
     })
     .then((response) => {
-      setStudents(response.data.collection as Student[]);
+      setStudents(response.data.collection as StudentBase[]);
       setFilterAmount(response.data.totalLength as number);
       const newState = { ...state };
       newState.page = state.page + 1;
@@ -124,8 +124,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     (filterAmount: number) => void
   ] = useState(0);
 
-  const [students, setStudents]: [Student[], (students: Student[]) => void] =
-    useState([] as Student[]);
+  const [students, setStudents]: [StudentBase[], (students: StudentBase[]) => void] =
+    useState([] as StudentBase[]);
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true); // TODO use this for styling
   const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
@@ -156,12 +156,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     setSkills([] as Array<{ value: string; label: string }>);
   };
 
-  const updateStudents: (param: Student[]) => void = (
-    studentsList: Student[]
+  const updateStudents: (param: StudentBase[]) => void = (
+    studentsList: StudentBase[]
   ) => {
     const newStudents = students
       ? [...students]
-      : ([] as Student[] as Student[]);
+      : ([] as StudentBase[] as StudentBase[]);
     newStudents.push(...studentsList);
     setStudents(newStudents);
   };
@@ -516,7 +516,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
           </div>
           <FlatList
             list={students}
-            renderItem={(student: Student) => (
+            renderItem={(student: StudentBase) => (
               <StudentTile key={student.id} student={student} />
             )}
             renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
