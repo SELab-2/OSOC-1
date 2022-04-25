@@ -23,8 +23,8 @@ type StudentsSidebarProps = PropsWithChildren<unknown>;
  * @param studentSearchParameters - record containing the possible filters boolean
  * @param setStudents             - callback to set the results
  * @param setFilterAmount         - callback to set total amount of filtered results
- * @param state                   - holds page, loading, hasMoreItems
- * @param setState
+ * @param state                   - holds page, loading, hasMoreItems, pageSize
+ * @param setState                - set the state variable
  */
 // TODO show/handle errors
 function searchStudent(
@@ -79,12 +79,12 @@ function searchStudent(
 function getStatusFilterList(
   studentSearchParameters: Record<string, boolean>
 ): string {
-  let stringList = '';
-  stringList += studentSearchParameters.StatusYes ? 'Yes,' : '';
-  stringList += studentSearchParameters.StatusNo ? 'No,' : '';
-  stringList += studentSearchParameters.StatusMaybe ? 'Maybe,' : '';
-  stringList += studentSearchParameters.StatusUndecided ? 'Undecided,' : '';
-  return stringList;
+  const stringList = [];
+  studentSearchParameters.StatusYes ? stringList.push('Yes') : null;
+  studentSearchParameters.StatusNo ? stringList.push('No') : null;
+  studentSearchParameters.StatusMaybe ? stringList.push('Maybe') : null;
+  studentSearchParameters.StatusUndecided ? stringList.push('Undecided') : null;
+  return stringList.join(',') || ' ';
 }
 
 async function getSkills(setSkillOptions: (skillOptions: Array<{ value: string; label: string }>) => void) {
@@ -149,7 +149,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     setSkills([] as Array<{ value: string; label: string }>);
   };
 
-  const updateStudents: (students: Student[]) => void = (studentsList: Student[]) => {
+  const updateStudents: (param: Student[]) => void = (studentsList: Student[]) => {
     const newStudents = students ? [...students] : ([] as Student[]) as Student[];
     newStudents.push(...studentsList);
     setStudents(newStudents);
@@ -160,6 +160,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   useEffect(() => {
     // TODO this should probably update when a new skill is created but that seems difficult
     getSkills(setSkillOptions);
+    state.page = 0;
     searchStudent(
         studentNameSearch,
         skills,
@@ -175,6 +176,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
    * when a search parameter changes, call the function to reload results
    */
   useEffect(() => {
+    state.page = 0;
     searchStudent(
       studentNameSearch,
       skills,
@@ -190,7 +192,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     hasMoreItems: true,
     page: 0,
     pageSize: 50,
-    loading: false, // important so the right blank message is shown from the start
+    loading: false,
   });
 
   const showBlank = () => {
@@ -206,6 +208,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
         skills,
         studentSearchParameters,
         updateStudents,
+        // setStudents,
         setFilterAmount,
         state,
         setState
@@ -230,6 +233,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 onChange={(e) => setStudentNameSearch(e.target.value)}
                 onKeyPress={(e) => {
                   if (e.key == 'Enter') {
+                    state.page = 0;
                     searchStudent(
                       studentNameSearch,
                       skills,
@@ -244,16 +248,18 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
               />
               <i
                 className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
-                onClick={() =>
+                onClick={() => {
+                  state.page = 0;
                   searchStudent(
-                    studentNameSearch,
-                    skills,
-                    studentSearchParameters,
-                    setStudents,
-                    setFilterAmount,
+                      studentNameSearch,
+                      skills,
+                      studentSearchParameters,
+                      setStudents,
+                      setFilterAmount,
                       state,
                       setState
-                  )
+                  );
+                }
                 }
               >
                 {magnifying_glass}
