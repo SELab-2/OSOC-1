@@ -11,6 +11,12 @@ paths:
         post:
             summary: Create a new inactive edition
             description: Creates a new inactive edition with the given name
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: string
+                            example: OSOC 2022
             responses:
                 201:
                     description: Successful operation
