@@ -53,6 +53,7 @@ paths:
         post:
             parameters:
                 -   in: path
+                    required: true
                     name: edition
                     schema:
                         type: string
@@ -74,6 +75,7 @@ paths:
         post:
             parameters:
                 -   in: path
+                    required: true
                     name: edition
                     schema:
                         type: string
@@ -94,6 +96,7 @@ paths:
         get:
             parameters:
                 -   in: path
+                    required: true
                     name: edition
                     schema:
                         type: string
@@ -113,6 +116,7 @@ paths:
         delete:
             parameters:
                 -   in: path
+                    required: true
                     name: edition
                     schema:
                         type: string
