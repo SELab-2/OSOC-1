@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { Icon } from '@iconify/react';
 import {Assignment, Project, Url, User, UUID} from '../../lib/types';
 import CreatableSelect from 'react-select/creatable';
+import {axiosAuthenticated} from "../../lib/axios";
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -67,9 +68,7 @@ export const defaultprojectForm = {
  * @param project - the project to use as a base
  * @param assignmentUrls - a list of the assignment urls that are part of the given project
  */
-// TODO find best way to get assignment urls, will probably use overloads
 export function projectFormFromProject(project: Project, assignmentUrls: Url[]): ProjectForm {
-  // console.log(JSON.stringify(project));
   const newProjectForm = { ...defaultprojectForm };
   newProjectForm.projectName = project.name || '';
   newProjectForm.clientName = project.clientName || '';
@@ -82,9 +81,13 @@ export function projectFormFromProject(project: Project, assignmentUrls: Url[]):
         skill: { value: value.id, label: value.skill.skillName },
       } as positionForm) || ([{ ...defaultPosition }] as positionForm[]))
   );
-  // TODO fix this
   newProjectForm.assignments = assignmentUrls || ([] as Url[]);
   return newProjectForm;
+}
+
+// TODO once patch endpoint is actually finished
+function patchProject(projectForm: ProjectForm){
+
 }
 
 /**

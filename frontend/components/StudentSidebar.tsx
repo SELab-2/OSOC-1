@@ -23,17 +23,26 @@ type StudentsSidebarProps = PropsWithChildren<unknown>;
  * @param studentSearchParameters - record containing the possible filters boolean
  * @param setStudents             - callback to set the results
  * @param setFilterAmount         - callback to set total amount of filtered results
+ * @param state                   - holds page, loading, hasMoreItems
+ * @param setState
  */
 // TODO show/handle errors
-// TODO add alumn & studentcoach & assigned filter when implemented in backend
-// TODO add pagination once fully implemented in backed
 function searchStudent(
   studentNameSearch: string,
   skills: Array<{ value: string; label: string }>,
   studentSearchParameters: Record<string, boolean>,
   setStudents: (students: Student[]) => void,
   setFilterAmount: (filterAmount: number) => void,
+  state: {hasMoreItems: boolean,
+    page: number,
+    pageSize: number,
+    loading: boolean},
+  setState: (state: {hasMoreItems: boolean,
+    page: number,
+    pageSize: number,
+    loading: boolean}) => void,
 ) {
+  state.loading = true;
   axiosAuthenticated
     .get<StudentData>(Endpoints.STUDENTS, {
       params: {
@@ -43,16 +52,23 @@ function searchStudent(
         skills: skills.map(skill => skill.value).join(','),
         alumnOnly: studentSearchParameters.OnlyAlumni,
         studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
-        unassignedOnly: studentSearchParameters.ExcludeAssigned
+        unassignedOnly: studentSearchParameters.ExcludeAssigned,
+        pageNumber: state.page,
+        pageSize: state.pageSize,
       },
     })
     .then((response) => {
       setStudents(response.data.collection as Student[]);
       setFilterAmount(response.data.totalLength as number);
+      const newState = {...state};
+      newState.page = state.page + 1;
+      newState.hasMoreItems = response.data.totalLength > (state.page * state.pageSize);
+      setState(newState);
     })
     .catch((ex) => {
       console.log(ex);
     });
+  state.loading = false;
 }
 
 /**
@@ -133,6 +149,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     setSkills([] as Array<{ value: string; label: string }>);
   };
 
+  const updateStudents: (students: Student[]) => void = (studentsList: Student[]) => {
+    const newStudents = students ? [...students] : ([] as Student[]) as Student[];
+    newStudents.push(...studentsList);
+    setStudents(newStudents);
+  }
+
   useAxiosAuth();
 
   useEffect(() => {
@@ -143,7 +165,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
         skills,
         studentSearchParameters,
         setStudents,
-        setFilterAmount
+        setFilterAmount,
+        state,
+        setState
     );
   }, []);
 
@@ -156,15 +180,18 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       skills,
       studentSearchParameters,
       setStudents,
-      setFilterAmount
+      setFilterAmount,
+        state,
+        setState
     );
   }, [studentSearchParameters, skills]);
 
-  const state = {
+  const [state, setState] = useState({
     hasMoreItems: true,
-    offset: 0,
+    page: 0,
+    pageSize: 50,
     loading: false, // important so the right blank message is shown from the start
-  };
+  });
 
   const showBlank = () => {
     if (students.length === 0 && state.loading) {
@@ -173,10 +200,16 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     return <div>No students found.</div>;
   };
 
-  // TODO make actual request with pagination parameters via searchStudent but without overwriting list
   const fetchData = () => {
-    // TODO set state to correct values
-    console.log('loadmore');
+    searchStudent(
+        studentNameSearch,
+        skills,
+        studentSearchParameters,
+        updateStudents,
+        setFilterAmount,
+        state,
+        setState
+    );
   };
 
   return (
@@ -203,6 +236,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                       studentSearchParameters,
                       setStudents,
                         setFilterAmount,
+                        state,
+                        setState
                     );
                   }
                 }}
@@ -215,7 +250,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                     skills,
                     studentSearchParameters,
                     setStudents,
-                    setFilterAmount
+                    setFilterAmount,
+                      state,
+                      setState
                   )
                 }
               >

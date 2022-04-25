@@ -225,7 +225,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   },[myProjectBase]);
 
   const [projectForm, setProjectForm] = useState(
-    projectFormFromProject(myProject, projectInput.assignments)
+    projectFormFromProject(myProject, myProjectBase.assignments)
   );
 
   /**
@@ -453,7 +453,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         open={showEditProject}
         onClose={() => setShowEditProject(false)}
         // reset the form before opening so users do not accidentally change things
-        onOpen={() => setProjectForm(projectFormFromProject(myProject, projectInput.assignments))}
+        onOpen={() => setProjectForm(projectFormFromProject(myProject, myProjectBase.assignments))}
         data-backdrop="static"
         data-keyboard="false"
         closeOnDocumentClick={false}
