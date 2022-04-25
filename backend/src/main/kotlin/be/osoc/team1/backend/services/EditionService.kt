@@ -19,6 +19,17 @@ class EditionService(
     private val userService: UserService
 ) {
 
+    /**
+     * Creates an inactive [Edition] with the given [editionName].
+     * Throws a [FailedOperationException] if there is already an edition with that [editionName].
+     */
+    fun createInactiveEdition(editionName: String): Edition {
+        if (repository.existsById(editionName)) {
+            throw FailedOperationException("The given edition already exists.")
+        }
+        return repository.save(Edition(editionName, false))
+    }
+
     fun getEdition(editionName: String): Edition = repository.findByIdOrNull(editionName)
         ?: throw InvalidEditionIdException()
 
@@ -28,16 +39,16 @@ class EditionService(
 
     /**
      * Given a currently inactive [Edition] identified by the given [editionName], make it active.
-     * If there is no [Edition] with that [editionName], it will be created automatically.
-     * Throws a [FailedOperationException] if the edition is already active, or a
+     * Throws an [InvalidIdException] if the edition doesn't exist,
+     * a [FailedOperationException] if the edition is already active, or a
      * [ForbiddenOperationException] if there is already another active edition.
      */
     fun makeEditionActive(editionName: String) {
-        val edition = repository.findByIdOrNull(editionName) ?: Edition(editionName, false)
+        val edition = repository.findByIdOrNull(editionName) ?: throw InvalidEditionIdException()
         if (edition.isActive) {
             throw FailedOperationException("The given edition is already active.")
         }
-        if (repository.findAll().count(Edition::isActive) == 1) {
+        if (getActiveEdition() != null) {
             throw ForbiddenOperationException("There can only be one active edition at a time.")
         }
         edition.isActive = true
@@ -46,25 +57,19 @@ class EditionService(
 
     /**
      * Given a currently active [Edition] identified by the given [editionName], make it inactive.
-     * If there is no [Edition] with that [editionName], it will be created automatically.
-     * If the edition did exist, this deactivates all [Role.Coach] accounts, by making them [Role.Disabled].
-     * Throws a [FailedOperationException] if the edition is already inactive.
+     * This deactivates all [Role.Coach] accounts, by making them [Role.Disabled].
+     * Throws an [InvalidIdException] if the edition does not exist,
+     * or a [FailedOperationException] if the edition is already inactive.
      */
     fun makeEditionInactive(editionName: String) {
-        var edition = repository.findByIdOrNull(editionName)
-        val editionExists = edition != null
-        if (!editionExists) {
-            edition = Edition(editionName, true)
-        }
-        if (!edition!!.isActive) {
+        val edition = repository.findByIdOrNull(editionName) ?: throw InvalidEditionIdException()
+        if (!edition.isActive) {
             throw FailedOperationException("The given edition is already inactive.")
         }
         edition.isActive = false
-        if (editionExists) {
-            userService.getAllUsers()
-                .filter { it.role == Role.Coach }
-                .forEach { userService.changeRole(it.id, Role.Disabled) }
-        }
+        userService.getAllUsers()
+            .filter { it.role == Role.Coach }
+            .forEach { userService.changeRole(it.id, Role.Disabled) }
         repository.save(edition)
     }
 

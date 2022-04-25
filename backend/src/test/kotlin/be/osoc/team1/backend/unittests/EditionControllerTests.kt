@@ -12,6 +12,7 @@ import io.mockk.every
 import io.mockk.just
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -29,10 +30,28 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val editionUrl = "/editions/$editionName"
 
     @Test
-    fun `getEdition returns the edition if it exists`() {
-        val edition = Edition(editionName, true)
+    fun `createInactiveEdition returns created edition when it succeeds`() {
+        val edition = Edition(editionName, false)
         // We can't use Jackson here, as it will rename the 'isActive' field to 'active' for some reason.
         // See: https://stackoverflow.com/questions/32270422/jackson-renames-primitive-boolean-field-by-removing-is
+        val expected = "{\"name\":\"$editionName\",\"isActive\":false}"
+        every { editionService.createInactiveEdition(editionName) } returns edition
+        mockMvc.perform(
+            post("/editions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(editionName)
+        ).andExpect(status().isCreated).andExpect(content().string(expected))
+    }
+
+    @Test
+    fun `createInactiveEdition returns 400 (BAD REQUEST) if the edition already exists`() {
+        every { editionService.createInactiveEdition(editionName) }.throws(FailedOperationException())
+        mockMvc.perform(post("/editions")).andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `getEdition returns the edition if it exists`() {
+        val edition = Edition(editionName, true)
         val expected = "{\"name\":\"$editionName\",\"isActive\":true}"
         every { editionService.getEdition(editionName) } returns edition
         mockMvc.perform(get(editionUrl))
@@ -84,6 +103,12 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `makeEditionInactive returns 404 (NOT FOUND) if the edition does not exist`() {
+        every { editionService.makeEditionInactive(editionName) }.throws(InvalidIdException())
+        mockMvc.perform(post("$editionUrl/inactivate")).andExpect(status().isNotFound)
+    }
+
+    @Test
     fun `makeEditionInactive returns 400 (BAD REQUEST) if the edition is already inactive`() {
         every { editionService.makeEditionInactive(editionName) }.throws(FailedOperationException())
         mockMvc.perform(post("$editionUrl/inactivate")).andExpect(status().isBadRequest)
@@ -95,6 +120,12 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(post("$editionUrl/activate"))
             .andExpect(status().isOk)
             .andExpect(content().string(""))
+    }
+
+    @Test
+    fun `makeEditionActive returns 404 (NOT FOUND) if the edition does not exist`() {
+        every { editionService.makeEditionActive(editionName) }.throws(InvalidIdException())
+        mockMvc.perform(post("$editionUrl/activate")).andExpect(status().isNotFound)
     }
 
     @Test

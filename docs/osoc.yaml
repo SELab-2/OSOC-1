@@ -7,6 +7,19 @@ info:
 servers:
     -   url: 'http://localhost:8080/api'
 paths:
+    /editions:
+        post:
+            summary: Create a new inactive edition
+            description: Creates a new inactive edition with the given name
+            responses:
+                201:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Edition"
+                400:
+                    description: The edition already exists
     /editions/active:
         get:
             summary: Get the active edition or null
@@ -46,7 +59,6 @@ paths:
             summary: Activate the given edition
             description: |
                 Activate the given edition, making it the active edition.
-                If this edition does not exist yet, it will be automatically created.
                 There can only be one active edition at a time.
                 All endpoints can be used on active editions.
             responses:
@@ -56,6 +68,8 @@ paths:
                     description: The edition is already active
                 403:
                     description: There is another active edition
+                404:
+                    description: The edition does not exist
     /editions/{edition}/inactivate:
         post:
             parameters:
@@ -66,9 +80,7 @@ paths:
             summary: Inactivate the given edition (DANGEROUS)
             description: |
                 Inactivate the given active edition.
-                If this edition does not exist yet, it will be automatically created.
-                Watch out! If the edition does exist, all existing coach users
-                will have their accounts disabled!
+                Watch out! All existing coach users will have their accounts disabled!
                 Only GET and DELETE endpoints can be used on active editions,
                 and only by users with Admin permissions.
             responses:
@@ -76,6 +88,8 @@ paths:
                     description: Successful operation
                 400:
                     description: The edition is already inactive
+                404:
+                    description: The edition does not exist
     /editions/{edition}:
         get:
             parameters:
@@ -93,12 +107,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: object
-                                properties:
-                                    name:
-                                        type: string
-                                    isActive:
-                                        type: boolean
+                                $ref: "#/components/schemas/Edition"
                 404:
                     description: The edition does not exist
         delete:
@@ -1430,6 +1439,17 @@ components:
                 totalLength:
                     type: integer
                     example: 1
+        Edition:
+            type: object
+            required:
+                - name
+                - isActive
+            properties:
+                name:
+                    type: string
+                    example: OSOC 2022
+                isActive:
+                    type: boolean
     securitySchemes:
         BasicAuth:
             type: http
