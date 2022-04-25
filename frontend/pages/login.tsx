@@ -22,6 +22,7 @@ import usePersistentInput from '../hooks/usePersistentInput';
 const Login = () => {
   const emailRef = useRef<HTMLInputElement>(null);
 
+  /* eslint-disable */
   const [email, resetEmail, emailProps] = usePersistentInput('email', '');
   const [password, setPassword] = useState('');
 
