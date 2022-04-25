@@ -25,7 +25,12 @@ class EditionController(val service: EditionService) {
     @PostMapping
     @Secured("ROLE_ADMIN")
     fun createInactiveEdition(@RequestBody edition: String): ResponseEntity<Edition> {
-        val createdEdition = service.createInactiveEdition(edition)
+        // For some reason the edition string is sometimes deserialized as the literal "string" instead of string.
+        // This happens when testing in postman, but not in the unit tests.
+        val editionWithoutQuotes =
+            if (edition.first() == '"' && edition.last() == '"') edition.substring(1, edition.length - 1)
+            else edition
+        val createdEdition = service.createInactiveEdition(editionWithoutQuotes)
         return getObjectCreatedResponse(createdEdition.name, createdEdition)
     }
 
