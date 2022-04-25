@@ -7,6 +7,136 @@ info:
 servers:
     -   url: 'http://localhost:8080/api'
 paths:
+    /editions:
+        post:
+            summary: Create a new inactive edition
+            description: Creates a new inactive edition with the given name
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: string
+                            example: OSOC 2022
+            responses:
+                201:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Edition"
+                400:
+                    description: The edition already exists
+    /editions/active:
+        get:
+            summary: Get the active edition or null
+            description: |
+                Returns the currently active edition,
+                or null if there is no active edition.
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                nullable: true
+                                default: edition name
+    /editions/inactive:
+        get:
+            summary: Get all inactive editions
+            description: Returns all editions that are currently inactive
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    default: edition name
+    /editions/{edition}/activate:
+        post:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            summary: Activate the given edition
+            description: |
+                Activate the given edition, making it the active edition.
+                There can only be one active edition at a time.
+                All endpoints can be used on active editions.
+            responses:
+                200:
+                    description: Successful operation
+                400:
+                    description: The edition is already active
+                403:
+                    description: There is another active edition
+                404:
+                    description: The edition does not exist
+    /editions/{edition}/inactivate:
+        post:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            summary: Inactivate the given edition (DANGEROUS)
+            description: |
+                Inactivate the given active edition.
+                Watch out! All existing coach users will have their accounts disabled!
+                Only GET and DELETE endpoints can be used on active editions,
+                and only by users with Admin permissions.
+            responses:
+                200:
+                    description: Successful operation
+                400:
+                    description: The edition is already inactive
+                404:
+                    description: The edition does not exist
+    /editions/{edition}:
+        get:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            summary: Get the given edition
+            description: |
+                Returns the Edition object with the given edition name, 
+                or a 404 (NOT FOUND) if there is no such Edition.
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Edition"
+                404:
+                    description: The edition does not exist
+        delete:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            summary: Delete the given edition (DANGEROUS)
+            description: |
+                Deletes the given edition from the database.
+                Watch out! All data related to this edition will also be deleted.
+                This includes students and projects.
+                If this edition does not exist, returns a 404 (NOT FOUND) instead.
+            responses:
+                204:
+                    description: Successful operation
+                404:
+                    description: The edition does not exist
     /{edition}/students:
         get:
             parameters:
@@ -294,6 +424,28 @@ paths:
                     schema:
                         type: integer
                     description: The page size for pagination. For example, if you pass 50 as value, there will be 50 projects on one page
+                -   in: query
+                    name: skills
+                    schema:
+                        type: array
+                        items:
+                            type: string
+                    description: Filter by skill, students that have atleast one of the skills listed are included
+                -   in: query
+                    name: alumnOnly
+                    schema:
+                        type: boolean
+                    description: Only return alumni students
+                -   in: query
+                    name: onlyStudentCoach
+                    schema:
+                        type: boolean
+                    description: Only returns student coach volunteers
+                -   in: query
+                    name: onlyNotAssigned
+                    schema:
+                        type: boolean
+                    description: Only return unassigned students
             responses:
                 '200':
                     description: successful operation
@@ -909,17 +1061,17 @@ paths:
                 '404':
                     description: |
                         The response if there is no Answer in the database with the given id.
-  /skills:
-    get:
-      responses:
-        '200':
-          description: Get all Skill objects stored in the database.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Skill'
+    /skills:
+        get:
+            responses:
+                '200':
+                    description: Get all Skill objects stored in the database.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Skill'
     /login:
         post:
             summary: login to the user with the correct email and password
@@ -953,6 +1105,15 @@ paths:
                 '401':
                     description: |
                         The response if authorization has failed.
+    /logout:
+      post:
+        summary: log user out. invalidate http session, refresh token and redirect to /login?logout
+        responses:
+          '302':
+            description: logout successful, redirect to /login?logout
+          '400':
+            description:
+              Bad Request.
     /token/refresh:
         post:
             summary: renew access token using refresh token
@@ -978,6 +1139,8 @@ paths:
                                         type: string
                                     refreshToken:
                                         type: string
+                                    accessTokenTTL:
+                                        type: integer
                 '400':
                     description: Bad Request.
 components:
@@ -1319,6 +1482,17 @@ components:
                 totalLength:
                     type: integer
                     example: 1
+        Edition:
+            type: object
+            required:
+                - name
+                - isActive
+            properties:
+                name:
+                    type: string
+                    example: OSOC 2022
+                isActive:
+                    type: boolean
     securitySchemes:
         BasicAuth:
             type: http

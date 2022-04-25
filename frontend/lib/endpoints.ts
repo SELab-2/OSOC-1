@@ -1,17 +1,13 @@
 /**
  * A collection of all available endpoint URLs
  * {@label ENDPOINT_ENUM}
- *
- * @remarks
- * Typescript doesn't allow computed enums, this is a little work-around to get the required functionality
  */
-type Endpoints = typeof Endpoints[keyof typeof Endpoints];
-const Endpoints = {
-  USERS: '/users',
-  LOGIN: '/login',
-  REFRESH: '/token/refresh',
-  PROJECTS: '/ed/projects',
-  STUDENTS: '/ed/students',
-} as const;
+enum Endpoints {
+  USERS = '/users',
+  LOGIN = '/login',
+  REFRESH = '/token/refresh',
+  PROJECTS = '/ed/projects',
+  STUDENTS = '/ed/students',
+}
 
 export default Endpoints;

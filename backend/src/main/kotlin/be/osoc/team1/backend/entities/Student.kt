@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
@@ -148,7 +149,7 @@ class Student(
  * This function will filter [Student]s based on given [statuses]
  * Only [Student]s who have 1 of the given [statuses] will be kept
  */
-fun List<Student>.filterByStatus(statuses: List<StatusEnum>) =
+fun List<Student>.filterByStatus(statuses: Set<StatusEnum>) =
     filter { student: Student -> statuses.contains(student.status) }
 
 /**
@@ -159,9 +160,31 @@ fun List<Student>.filterByName(nameQuery: String) =
     filter { student: Student -> nameMatchesSearchQuery("${student.firstName} ${student.lastName}", nameQuery) }
 
 /**
- * This function will filter [Student]s based on given [includeSuggested] boolean
- * if [includeSuggested] is false only [Student] for which the [callee] hasn't made a suggestion yet will be returned
- * else return all of the [Student]s
+ * This function will filter [Student]s so that only [Student]s for which the [callee] hasn't made a suggestion yet will
+ * be returned.
  */
-fun List<Student>.filterBySuggested(includeSuggested: Boolean, callee: User) =
-    filter { student: Student -> includeSuggested || student.statusSuggestions.none { it.coachId == callee.id } }
+fun List<Student>.filterBySuggested(callee: User) =
+    filter { student: Student -> student.statusSuggestions.none { it.coachId == callee.id } }
+
+/**
+ * This function will filter [Student]s based on a set of [skillNames].
+ * Only students that have at least one of these skills will be returned.
+ */
+fun List<Student>.filterBySkills(skillNames: Set<String>) =
+    filter { student -> student.skills.map { it.skillName }.intersect(skillNames).isNotEmpty() }
+
+/**
+ * This function will filter a list of [Student]s to only return alumni.
+ */
+fun List<Student>.filterByAlumn() = filter { it.alumn }
+
+/**
+ * This function will filter a list of [Student]s to only return students that would like to be a student coach.
+ */
+fun List<Student>.filterByStudentCoach() = filter { it.possibleStudentCoach }
+
+/**
+ * This function will filter a list of [Student]s to only return students who have not yet been assigned to a [Project].
+ */
+fun List<Student>.filterByNotYetAssigned(assignmentRepository: AssignmentRepository) =
+    filter { assignmentRepository.findByStudent(it).isEmpty() }

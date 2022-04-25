@@ -19,6 +19,8 @@ import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import ProjectPopup, {defaultprojectForm, projectFormFromProject} from './ProjectPopup';
 import axios from "axios";
+import {list} from "postcss";
+import {toArray} from "uri-js/dist/esnext/util";
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -140,26 +142,40 @@ async function getUrlList<Type>(urls: Url[], resultList: Type[]) {
       });
 }
 
+async function getUrlDict<Type>(urls: Url[], resultMap: Map<Url, Type>) {
+  await axios.all(urls.map(url => axiosAuthenticated.get<Type>(url))).then((response) => {
+    response.forEach(resp => resultMap.set(resp.config.url as string, resp.data))
+  })
+      .catch((ex) => {
+        console.log('getUrlDict', ex);
+      });
+}
+
 async function getUrl<Type>(url: Url){
-  return axiosAuthenticated.get<Type>(url)
+  const resp = await axiosAuthenticated.get<Type>(url)
+  return resp;
 }
 
 
 async function getEntireProject(projectBase: ProjectBase): Promise<Project>{
-  const newProject = convertProjectBase(projectBase)
+  const newProject: Project = convertProjectBase(projectBase)
 
+  const positionMap = new Map<Url, Position>();
   await Promise.all([
-    getUrlList(projectBase.coaches, newProject.coaches),
-    getUrlList(projectBase.positions, newProject.positions),
-    getUrlList(projectBase.assignments, newProject.assignments),
+    getUrlList<User>(projectBase.coaches, newProject.coaches),
+    getUrlList<Assignment>(projectBase.assignments, newProject.assignments),
+    getUrlDict<Position>(projectBase.positions, positionMap),
   ])
 
-    await newProject.assignments.forEach(assignment =>
-        axiosAuthenticated
-            .get<Position>(assignment.position as unknown as string)
-            .then(response => assignment.position = response.data)
-    )
+  newProject.positions = Array.from(positionMap.values());
 
+  const studentMap = new Map<Url, Student>();
+  await getUrlDict<Student>(newProject.assignments.map(assignment => assignment.student) as unknown as string[], studentMap);
+
+  for (const assignment of newProject.assignments) {
+    assignment.position = positionMap.get(assignment.position as unknown as string) as Position;
+    assignment.student = studentMap.get(assignment.student as unknown as string) as Student;
+  }
   return newProject;
 }
 

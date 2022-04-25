@@ -150,8 +150,15 @@ object TokenUtil {
             val newTokenResponse = createAccessAndRefreshToken(email, authorities, expirationDate)
             newTokenResponse.addDataToHttpResponse(response)
         } else {
-            validRefreshTokens.remove(email)
-            response.status = 400
+            invalidateRefreshToken(email)
+            response.status = HttpServletResponse.SC_BAD_REQUEST
         }
+    }
+
+    /**
+     * Invalidate the refresh token associated with [email].
+     */
+    fun invalidateRefreshToken(email: String) {
+        validRefreshTokens.remove(email)
     }
 }

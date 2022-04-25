@@ -1,6 +1,8 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StudentController
+import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusEnum
@@ -8,14 +10,17 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.entities.User
+import be.osoc.team1.backend.entities.filterByName
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
+import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.StudentService
+import be.osoc.team1.backend.services.applyIf
 import be.osoc.team1.backend.util.TallyDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -54,6 +59,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @MockkBean
     private lateinit var userDetailService: OsocUserDetailService
+
+    @MockkBean
+    private lateinit var assignmentRepository: AssignmentRepository
 
     private val studentId = UUID.randomUUID()
     private val testCoach = User("coach", "email", Role.Coach, "password")
@@ -119,6 +127,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(get("$editionUrl?status=Yes,No,Maybe,Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
+        mockMvc.perform(get("$editionUrl?status=NonExistentStatus").principal(defaultPrincipal))
+            .andExpect(status().isBadRequest)
     }
 
     @Test
@@ -178,6 +188,77 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(get("$editionUrl?includeSuggested=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent), 1))))
+    }
+
+    @Test
+    fun `getAllStudents filtering by skills only returns students with one of those skills`() {
+        val backendStudent = Student("firstname", "lastname", skills = setOf(Skill("Backend")))
+        val frontendStudent = Student("firstname", "lastname", skills = setOf(Skill("Frontend")))
+        val studentList = listOf(backendStudent, frontendStudent)
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
+        mockMvc.perform(get("$editionUrl?skills=otherSkill").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf<Student>(), 0))))
+        mockMvc.perform(get("$editionUrl?skills=Backend").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(backendStudent), 1))))
+        mockMvc.perform(get("$editionUrl?skills=Backend,Frontend").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+    }
+
+    @Test
+    fun `getAllStudents filtering by alumni only returns alumni`() {
+        val student1 = Student("firstname", "lastname", alumn = false)
+        val student2 = Student("firstname", "lastname", alumn = true)
+        val studentList = listOf(student1, student2)
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
+        mockMvc.perform(get("$editionUrl?alumnOnly=false").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+        mockMvc.perform(get("$editionUrl?alumnOnly=true").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student2), 1))))
+    }
+
+    @Test
+    fun `getAllStudents filtering by possibleStudentCoach only returns possible student coaches`() {
+        val student1 = Student("firstname", "lastname", possibleStudentCoach = false)
+        val student2 = Student("firstname", "lastname", possibleStudentCoach = true)
+        val studentList = listOf(student1, student2)
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
+        mockMvc.perform(get("$editionUrl?studentCoachOnly=false").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+        mockMvc.perform(get("$editionUrl?studentCoachOnly=true").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student2), 1))))
+    }
+
+    @Test
+    fun `getAllStudents filtering by not yet assigned only returns unassigned students`() {
+        val student1 = Student("firstname", "lastname")
+        val student2 = Student("firstname", "lastname")
+        val studentList = listOf(student1, student2)
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
+        every { assignmentRepository.findByStudent(student1) } returns setOf(Assignment(student1, Position(Skill("Backend"), 1), User("username", "email", Role.Coach, "password"), "reason"))
+        every { assignmentRepository.findByStudent(student2) } returns setOf()
+        mockMvc.perform(get("$editionUrl?unassignedOnly=false").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+        mockMvc.perform(get("$editionUrl?unassignedOnly=true").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student2), 1))))
+    }
+
+    @Test
+    fun `applyIf should only filter when the condition is true`() {
+        val list = listOf(Student("firstname", "lastname"))
+        var result = list.applyIf(true) { filterByName("test") }
+        assertEquals(listOf<Student>(), result)
+
+        result = list.applyIf(false) { filterByName("test") }
+        assertEquals(list, result)
     }
 
     @Test

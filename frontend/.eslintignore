@@ -20,6 +20,9 @@ frontend/*
 !frontend/styles/
 !frontend/lib/
 !frontend/atoms/
+!frontend/components/
+!frontend/context/
+!frontend/hooks/
 
 # Ignores for manual runs
 /*
@@ -30,3 +33,5 @@ frontend/*
 !lib/
 !atoms/
 !components/
+!context/
+!hooks/
