@@ -54,7 +54,7 @@ type AssignmentProp = {
  *                      this position is already part of the needed project positions
  * @param suggesterId - the UUID of the currently authenticated User
  * @param reason      - the reason for assigning this student to this project
- * @param setMyProject  - callback for reloadProject that is called after this POST completes
+ * @param setMyProjectBase  - callback for reloadProject that is called after this POST completes
  */
 // TODO when post is finished, should update the project frontend view & also the student filter
 // TODO should show success / error
@@ -64,7 +64,7 @@ function postStudentToProject(
   positionId: UUID,
   suggesterId: UUID,
   reason: string,
-  setMyProject: (myProject: Project) => void
+  setMyProjectBase: (myProjectBase: ProjectBase) => void
 ) {
   axiosAuthenticated
     .post(
@@ -78,7 +78,7 @@ function postStudentToProject(
     )
     .then((response) => {
       console.log(response);
-      reloadProject(projectId, setMyProject);
+      reloadProject(projectId, setMyProjectBase);
     })
     .catch((ex) => {
       console.log(ex);
@@ -92,12 +92,12 @@ function postStudentToProject(
  *
  * @param projectId     - the UUID of the project to remove the assignment from
  * @param assignmentId  - the UUID of the assignment to remove
- * @param setMyProject    - callback for reloadProject that is called after this DELETE completes
+ * @param setMyProjectBase    - callback for reloadProject that is called after this DELETE completes
  */
 function deleteStudentFromProject(
   projectId: UUID,
   assignmentId: UUID,
-  setMyProject: (myProject: Project) => void
+  setMyProjectBase: (myProjectBase: ProjectBase) => void
 ) {
   axiosAuthenticated
     .delete(
@@ -105,7 +105,7 @@ function deleteStudentFromProject(
     )
     .then((response) => {
       console.log(response);
-      reloadProject(projectId, setMyProject);
+      reloadProject(projectId, setMyProjectBase);
     })
     .catch((ex) => {
       console.log(ex);
@@ -117,16 +117,16 @@ function deleteStudentFromProject(
  * Use whenever a post, patch or delete is done
  *
  * @param projectId - the UUID of the project to reload
- * @param setMyProject - a hook to set the reloaded project information
+ * @param setMyProjectBase - a hook to set the reloaded project information
  */
 function reloadProject(
   projectId: UUID,
-  setMyProject: (myProject: Project) => void
+  setMyProjectBase: (myProjectBase: ProjectBase) => void
 ) {
   axiosAuthenticated
-    .get<Project>(Endpoints.PROJECTS + '/' + projectId)
+    .get<ProjectBase>(Endpoints.PROJECTS + '/' + projectId)
     .then((response) => {
-      setMyProject(response.data as Project);
+      setMyProjectBase(response.data as ProjectBase);
     })
     .catch((ex) => {
       console.log(ex);
@@ -192,8 +192,13 @@ function convertProjectBase(projectBase: ProjectBase): Project{
 }
 
 const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
+  // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
     useState(convertProjectBase(projectInput) as Project); // using different names to avoid confusion
+
+  const [myProjectBase, setMyProjectBase]: [ProjectBase, (myProjectBase: ProjectBase) => void] =
+      useState(projectInput as ProjectBase);
+
   const [openAssignment, setOpenAssignment]: [
     boolean,
     (openAssignment: boolean) => void
@@ -212,19 +217,12 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [currentUser] = useUser();
   const [showEditProject, setShowEditProject] = useState(false);
   useAxiosAuth();
-  // console.log("doing function?");
-  // getEntireProject(projectInput, setMyProject);
 
   useEffect(() => {
-    console.log("doing effect");
-    getEntireProject(projectInput).then(response => {
-      console.log('resp:', response);
+    getEntireProject(myProjectBase).then(response => {
       setMyProject(response);
     });
-  },[projectInput]);
-
-  // console.log("projectInput:", projectInput);
-  // console.log("myProject:", myProject);
+  },[myProjectBase]);
 
   const [projectForm, setProjectForm] = useState(
     projectFormFromProject(myProject, projectInput.assignments)
@@ -259,14 +257,6 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   myProject.positions.forEach((position) => {
     myOptions.push({ value: position.id, label: position.skill.skillName });
   });
-
-  // useEffect(() => {
-  //   if (myProject && myProject.positions){
-  //     myProject.positions.forEach((position) => {
-  //       myOptions.push({ value: position.id, label: position.skill.skillName });
-  //     });
-  //   }
-  // },[myProject]);
 
   return (
     <div
@@ -352,7 +342,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
                 positionId,
                 currentUser.id,
                 reason,
-                setMyProject
+                setMyProjectBase
               );
               closeAssignmentModal();
             }}
@@ -448,7 +438,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
                 deleteStudentFromProject(
                   myProject.id,
                   assignmentId,
-                  setMyProject
+                  setMyProjectBase
                 );
               }}
             >
