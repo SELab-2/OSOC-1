@@ -53,6 +53,8 @@ class SecurityConfig(val userDetailsService: OsocUserDetailService) : WebSecurit
         http.authorizeRequests().antMatchers(HttpMethod.POST, *ConfigUtil.urlsOpenToAllToPostTo).permitAll()
         http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_COACH")
 
+        http.logout { it.addLogoutHandler(TokenLogoutHandler()) }
+
         val authenticationFilter = AuthenticationFilter(authenticationManagerBean(), userDetailsService)
         http.addFilterBefore(AuthorizationFilter(), AuthenticationFilter::class.java)
         http.addFilter(authenticationFilter)

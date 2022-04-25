@@ -411,6 +411,37 @@ class AuthorizationTests {
         assert(thirdRefreshResponse.statusCodeValue == 400)
     }
 
+    @Test
+    fun `logout works when not logged in`() {
+        val logoutRequest = HttpEntity(null, HttpHeaders())
+        val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
+        assert(logoutResponse.statusCodeValue == 302)
+    }
+
+    @Test
+    fun `logout works when logged in`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val accessToken = JSONObject(logInResponse.body).get("accessToken") as String
+
+        val logoutRequest = HttpEntity(null, createAuthHeaders(accessToken))
+        val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
+        assert(logoutResponse.statusCodeValue == 302)
+    }
+
+    @Test
+    fun `using refresh token after logout returns 400`() {
+        val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
+        val accessToken = JSONObject(logInResponse.body).get("accessToken") as String
+        val refreshToken = JSONObject(logInResponse.body).get("refreshToken") as String
+
+        val logoutRequest = HttpEntity(null, createAuthHeaders(accessToken))
+        val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
+        assert(logoutResponse.statusCodeValue == 302)
+
+        val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
+        assert(refreshResponse.statusCodeValue == 400)
+    }
+
     // Login first to test GET with protected endpoint
     @Test
     fun `CORS using not allowed origin gives error`() {
