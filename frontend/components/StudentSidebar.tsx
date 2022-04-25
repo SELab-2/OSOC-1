@@ -1,7 +1,7 @@
 import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import {StatusSuggestionStatus, Student, StudentData} from '../lib/types';
+import {Skill, StatusSuggestionStatus, Student, StudentData} from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
@@ -25,7 +25,7 @@ type StudentsSidebarProps = PropsWithChildren<unknown>;
  * @param setFilterAmount         - callback to set total amount of filtered results
  */
 // TODO show/handle errors
-// TODO add Skills, alumn & studentcoach filter when implemented in backend
+// TODO add alumn & studentcoach & assigned filter when implemented in backend
 // TODO add pagination once fully implemented in backed
 function searchStudent(
   studentNameSearch: string,
@@ -34,19 +34,21 @@ function searchStudent(
   setStudents: (students: Student[]) => void,
   setFilterAmount: (filterAmount: number) => void,
 ) {
-  // console.log(skills);
   axiosAuthenticated
     .get<StudentData>(Endpoints.STUDENTS, {
       params: {
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
         status: getStatusFilterList(studentSearchParameters),
+        skills: skills.map(skill => skill.value).join(','),
+        alumnOnly: studentSearchParameters.OnlyAlumni,
+        studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
+        unassignedOnly: studentSearchParameters.ExcludeAssigned
       },
     })
     .then((response) => {
       setStudents(response.data.collection as Student[]);
       setFilterAmount(response.data.totalLength as number);
-      console.log(response);
     })
     .catch((ex) => {
       console.log(ex);
@@ -69,6 +71,12 @@ function getStatusFilterList(
   return stringList;
 }
 
+async function getSkills(setSkillOptions: (skillOptions: Array<{ value: string; label: string }>) => void) {
+  await axiosAuthenticated.get<Skill[]>(Endpoints.SKILLS)
+      .then(response => setSkillOptions(response.data.map(skill => {return { value: skill.skillName, label: skill.skillName }})))
+      .catch(err => console.log(err))
+}
+
 // TODO allow disabling drag on studentView since I don't think it is needed there
 /**
  * This returns the StudentSidebar
@@ -82,6 +90,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   // Split this from studentSearchParameters to avoid typing hacks
   const [skills, setSkills] = useState(
     [] as Array<{ value: string; label: string }>
+  );
+
+  const [skillOptions, setSkillOptions] = useState(
+      [] as Array<{ value: string; label: string }>
   );
 
   // Split this to avoid making new object every type action & control when to call filter
@@ -122,23 +134,17 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   };
 
   useAxiosAuth();
-  // TODO this should just call searchStudent since this ignores current filters on reload
+
   useEffect(() => {
-    axiosAuthenticated
-      .get<StudentData>(Endpoints.STUDENTS)
-      .then((response) => {
-        setStudents(response.data.collection as Student[]);
-        setFilterAmount(response.data.totalLength as number);
-        setLoading(false);
-      })
-      .catch((ex) => {
-        const error =
-          ex.response.status === 404
-            ? 'Resource Not found'
-            : 'An unexpected error has occurred';
-        setError(error);
-        setLoading(false);
-      });
+    // TODO this should probably update when a new skill is created but that seems difficult
+    getSkills(setSkillOptions);
+    searchStudent(
+        studentNameSearch,
+        skills,
+        studentSearchParameters,
+        setStudents,
+        setFilterAmount
+    );
   }, []);
 
   /**
@@ -256,11 +262,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                   isMulti={true}
                   name="Skills"
                   value={skills}
-                  options={[
-                    { value: 'chocolate', label: 'Chocolate' },
-                    { value: 'strawberry', label: 'Strawberry' },
-                    { value: 'vanilla', label: 'Vanilla' },
-                  ]} // TODO fix this once backend has getAllSKills endpoint implemented
+                  options={skillOptions} // TODO fix this once backend has getAllSKills endpoint implemented
                   placeholder="Select skills"
                   onChange={(e) =>
                     setSkills(

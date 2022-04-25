@@ -69,21 +69,21 @@ export const defaultprojectForm = {
  */
 // TODO find best way to get assignment urls, will probably use overloads
 export function projectFormFromProject(project: Project, assignmentUrls: Url[]): ProjectForm {
-  console.log(JSON.stringify(project));
+  // console.log(JSON.stringify(project));
   const newProjectForm = { ...defaultprojectForm };
-  // newProjectForm.projectName = project.name || '';
-  // newProjectForm.clientName = project.clientName || '';
-  // newProjectForm.description = project.description || '';
-  // newProjectForm.coachIds = project.coaches || [];
-  // newProjectForm.positions = project.positions.map(
-  //   (value) =>
-  //     (({
-  //       amount: value.amount.toString(),
-  //       skill: { value: value.id, label: value.skill.skillName },
-  //     } as positionForm) || ([{ ...defaultPosition }] as positionForm[]))
-  // );
+  newProjectForm.projectName = project.name || '';
+  newProjectForm.clientName = project.clientName || '';
+  newProjectForm.description = project.description || '';
+  newProjectForm.coachIds = project.coaches || [];
+  newProjectForm.positions = project.positions.map(
+    (value) =>
+      (({
+        amount: value.amount.toString(),
+        skill: { value: value.id, label: value.skill.skillName },
+      } as positionForm) || ([{ ...defaultPosition }] as positionForm[]))
+  );
   // TODO fix this
-  // newProjectForm.assignments = assignmentUrls || ([] as Url[]);
+  newProjectForm.assignments = assignmentUrls || ([] as Url[]);
   return newProjectForm;
 }
 
