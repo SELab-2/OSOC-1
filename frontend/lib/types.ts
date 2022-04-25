@@ -58,12 +58,12 @@ export enum StatusSuggestionStatus {
 export type StudentData = {
   collection: Student[];
   totalLength: number;
-}
+};
 
 export type ProjectData = {
   collection: Project[];
   totalLength: number;
-}
+};
 
 // TODO fix this once tally form is done
 export type Student = {

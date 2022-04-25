@@ -2,25 +2,26 @@ import {
   Assignment,
   ItemTypes,
   Position,
-  Project, ProjectBase,
+  Project,
+  ProjectBase,
   Student,
   User,
   UUID,
-    Url,
+  Url,
 } from '../../lib/types';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
 import Select from 'react-select';
 import { useDrop } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
-import {Fragment, useEffect, useState} from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
-import ProjectPopup, {defaultprojectForm, projectFormFromProject} from './ProjectPopup';
-import axios from "axios";
-import {list} from "postcss";
-import {toArray} from "uri-js/dist/esnext/util";
+import ProjectPopup, {
+  projectFormFromProject,
+} from './ProjectPopup';
+import axios from 'axios';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -134,52 +135,66 @@ function reloadProject(
 }
 
 async function getUrlList<Type>(urls: Url[], resultList: Type[]) {
-  await axios.all(urls.map(url => axiosAuthenticated.get<Type>(url))).then((response) => {
-    response.forEach(resp => resultList.push(resp.data))
-  })
-      .catch((ex) => {
-        console.log(ex);
-      });
+  await axios
+    .all(urls.map((url) => axiosAuthenticated.get<Type>(url)))
+    .then((response) => {
+      response.forEach((resp) => resultList.push(resp.data));
+    })
+    .catch((ex) => {
+      console.log(ex);
+    });
 }
 
 async function getUrlDict<Type>(urls: Url[], resultMap: Map<Url, Type>) {
-  await axios.all(urls.map(url => axiosAuthenticated.get<Type>(url))).then((response) => {
-    response.forEach(resp => resultMap.set(resp.config.url as string, resp.data))
-  })
-      .catch((ex) => {
-        console.log('getUrlDict', ex);
-      });
+  await axios
+    .all(urls.map((url) => axiosAuthenticated.get<Type>(url)))
+    .then((response) => {
+      response.forEach((resp) =>
+        resultMap.set(resp.config.url as string, resp.data)
+      );
+    })
+    .catch((ex) => {
+      console.log('getUrlDict', ex);
+    });
 }
 
-async function getUrl<Type>(url: Url){
-  const resp = await axiosAuthenticated.get<Type>(url)
+async function getUrl<Type>(url: Url) {
+  const resp = await axiosAuthenticated.get<Type>(url);
   return resp;
 }
 
-
-async function getEntireProject(projectBase: ProjectBase): Promise<Project>{
-  const newProject: Project = convertProjectBase(projectBase)
+async function getEntireProject(projectBase: ProjectBase): Promise<Project> {
+  const newProject: Project = convertProjectBase(projectBase);
 
   const positionMap = new Map<Url, Position>();
   await Promise.all([
     getUrlList<User>(projectBase.coaches, newProject.coaches),
     getUrlList<Assignment>(projectBase.assignments, newProject.assignments),
     getUrlDict<Position>(projectBase.positions, positionMap),
-  ])
+  ]);
 
   newProject.positions = Array.from(positionMap.values());
 
   const studentMap = new Map<Url, Student>();
-  await getUrlDict<Student>(newProject.assignments.map(assignment => assignment.student) as unknown as string[], studentMap);
+  await getUrlDict<Student>(
+    newProject.assignments.map(
+      (assignment) => assignment.student
+    ) as unknown as string[],
+    studentMap
+  );
 
   for (const assignment of newProject.assignments) {
-    assignment.position = positionMap.get(assignment.position as unknown as string) as Position;
-    assignment.student = studentMap.get(assignment.student as unknown as string) as Student;
+    assignment.position = positionMap.get(
+      assignment.position as unknown as string
+    ) as Position;
+    assignment.student = studentMap.get(
+      assignment.student as unknown as string
+    ) as Student;
   }
   return newProject;
 }
 
-function convertProjectBase(projectBase: ProjectBase): Project{
+function convertProjectBase(projectBase: ProjectBase): Project {
   const newProject = {} as Project;
   newProject.name = projectBase.name;
   newProject.id = projectBase.id;
@@ -196,8 +211,10 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
     useState(convertProjectBase(projectInput) as Project); // using different names to avoid confusion
 
-  const [myProjectBase, setMyProjectBase]: [ProjectBase, (myProjectBase: ProjectBase) => void] =
-      useState(projectInput as ProjectBase);
+  const [myProjectBase, setMyProjectBase]: [
+    ProjectBase,
+    (myProjectBase: ProjectBase) => void
+  ] = useState(projectInput as ProjectBase);
 
   const [openAssignment, setOpenAssignment]: [
     boolean,
@@ -219,10 +236,10 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   useAxiosAuth();
 
   useEffect(() => {
-    getEntireProject(myProjectBase).then(response => {
+    getEntireProject(myProjectBase).then((response) => {
       setMyProject(response);
     });
-  },[myProjectBase]);
+  }, [myProjectBase]);
 
   const [projectForm, setProjectForm] = useState(
     projectFormFromProject(myProject, myProjectBase.assignments)
@@ -453,7 +470,11 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         open={showEditProject}
         onClose={() => setShowEditProject(false)}
         // reset the form before opening so users do not accidentally change things
-        onOpen={() => setProjectForm(projectFormFromProject(myProject, myProjectBase.assignments))}
+        onOpen={() =>
+          setProjectForm(
+            projectFormFromProject(myProject, myProjectBase.assignments)
+          )
+        }
         data-backdrop="static"
         data-keyboard="false"
         closeOnDocumentClick={false}

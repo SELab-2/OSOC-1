@@ -1,13 +1,17 @@
 import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import {Skill, StatusSuggestionStatus, Student, StudentData} from '../lib/types';
+import {
+  StatusSuggestionStatus,
+  Student,
+  StudentData,
+} from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import Select from 'react-select';
 import FlatList from 'flatlist-react';
-import { getSkills } from '../lib/requestUtils'
+import { getSkills } from '../lib/requestUtils';
 import StudentTile from './students/StudentTile';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
@@ -34,14 +38,18 @@ function searchStudent(
   studentSearchParameters: Record<string, boolean>,
   setStudents: (students: Student[]) => void,
   setFilterAmount: (filterAmount: number) => void,
-  state: {hasMoreItems: boolean,
-    page: number,
-    pageSize: number,
-    loading: boolean},
-  setState: (state: {hasMoreItems: boolean,
-    page: number,
-    pageSize: number,
-    loading: boolean}) => void,
+  state: {
+    hasMoreItems: boolean;
+    page: number;
+    pageSize: number;
+    loading: boolean;
+  },
+  setState: (state: {
+    hasMoreItems: boolean;
+    page: number;
+    pageSize: number;
+    loading: boolean;
+  }) => void
 ) {
   state.loading = true;
   axiosAuthenticated
@@ -50,7 +58,7 @@ function searchStudent(
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
         status: getStatusFilterList(studentSearchParameters),
-        skills: skills.map(skill => skill.value).join(','),
+        skills: skills.map((skill) => skill.value).join(','),
         alumnOnly: studentSearchParameters.OnlyAlumni,
         studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
         unassignedOnly: studentSearchParameters.ExcludeAssigned,
@@ -61,9 +69,10 @@ function searchStudent(
     .then((response) => {
       setStudents(response.data.collection as Student[]);
       setFilterAmount(response.data.totalLength as number);
-      const newState = {...state};
+      const newState = { ...state };
       newState.page = state.page + 1;
-      newState.hasMoreItems = response.data.totalLength > (state.page * state.pageSize);
+      newState.hasMoreItems =
+        response.data.totalLength > state.page * state.pageSize;
       setState(newState);
     })
     .catch((ex) => {
@@ -104,13 +113,16 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   );
 
   const [skillOptions, setSkillOptions] = useState(
-      [] as Array<{ value: string; label: string }>
+    [] as Array<{ value: string; label: string }>
   );
 
   // Split this to avoid making new object every type action & control when to call filter
   const [studentNameSearch, setStudentNameSearch] = useState('' as string);
 
-  const [filterAmount, setFilterAmount]: [number, (filterAmount: number) => void] = useState(0);
+  const [filterAmount, setFilterAmount]: [
+    number,
+    (filterAmount: number) => void
+  ] = useState(0);
 
   const [students, setStudents]: [Student[], (students: Student[]) => void] =
     useState([] as Student[]);
@@ -144,11 +156,15 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     setSkills([] as Array<{ value: string; label: string }>);
   };
 
-  const updateStudents: (param: Student[]) => void = (studentsList: Student[]) => {
-    const newStudents = students ? [...students] : ([] as Student[]) as Student[];
+  const updateStudents: (param: Student[]) => void = (
+    studentsList: Student[]
+  ) => {
+    const newStudents = students
+      ? [...students]
+      : ([] as Student[] as Student[]);
     newStudents.push(...studentsList);
     setStudents(newStudents);
-  }
+  };
 
   useAxiosAuth();
 
@@ -157,13 +173,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     getSkills(setSkillOptions);
     state.page = 0;
     searchStudent(
-        studentNameSearch,
-        skills,
-        studentSearchParameters,
-        setStudents,
-        setFilterAmount,
-        state,
-        setState
+      studentNameSearch,
+      skills,
+      studentSearchParameters,
+      setStudents,
+      setFilterAmount,
+      state,
+      setState
     );
   }, []);
 
@@ -178,8 +194,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       studentSearchParameters,
       setStudents,
       setFilterAmount,
-        state,
-        setState
+      state,
+      setState
     );
   }, [studentSearchParameters, skills]);
 
@@ -199,14 +215,14 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 
   const fetchData = () => {
     searchStudent(
-        studentNameSearch,
-        skills,
-        studentSearchParameters,
-        updateStudents,
-        // setStudents,
-        setFilterAmount,
-        state,
-        setState
+      studentNameSearch,
+      skills,
+      studentSearchParameters,
+      updateStudents,
+      // setStudents,
+      setFilterAmount,
+      state,
+      setState
     );
   };
 
@@ -234,9 +250,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                       skills,
                       studentSearchParameters,
                       setStudents,
-                        setFilterAmount,
-                        state,
-                        setState
+                      setFilterAmount,
+                      state,
+                      setState
                     );
                   }
                 }}
@@ -246,16 +262,15 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 onClick={() => {
                   state.page = 0;
                   searchStudent(
-                      studentNameSearch,
-                      skills,
-                      studentSearchParameters,
-                      setStudents,
-                      setFilterAmount,
-                      state,
-                      setState
+                    studentNameSearch,
+                    skills,
+                    studentSearchParameters,
+                    setStudents,
+                    setFilterAmount,
+                    state,
+                    setState
                   );
-                }
-                }
+                }}
               >
                 {magnifying_glass}
               </i>

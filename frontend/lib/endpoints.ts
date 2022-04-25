@@ -8,7 +8,7 @@ enum Endpoints {
   REFRESH = '/token/refresh',
   PROJECTS = '/ed/projects',
   STUDENTS = '/ed/students',
-  SKILLS = '/skills'
+  SKILLS = '/skills',
 }
 
 export default Endpoints;

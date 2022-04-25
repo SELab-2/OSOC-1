@@ -1,33 +1,25 @@
 import type { NextPage } from 'next';
 import Header from '../components/Header';
 import StudentSidebar from '../components/StudentSidebar';
-import ProjectTiles from '../components/projects/ProjectTiles';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { Fragment, useEffect, useState } from 'react';
-import {Project, ProjectBase, ProjectData, Skill, Student, UserRole, UUID} from '../lib/types';
-import axios, { axiosAuthenticated } from '../lib/axios';
+import { useEffect, useState } from 'react';
+import { Project, ProjectBase, ProjectData, UserRole } from '../lib/types';
+import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Popup from 'reactjs-popup';
-import Select from 'react-select';
-import { number } from 'prop-types';
 import ProjectTile from '../components/projects/ProjectTile';
-// import ProjectPopup, {defaultprojectForm, projectForm, setProjectForm} from "../components/projects/ProjectPopup"
-// import ProjectPopup, {defaultprojectForm, useProjectForm} from "../components/projects/ProjectPopup"
 import ProjectPopup, {
   defaultprojectForm,
 } from '../components/projects/ProjectPopup';
-import StudentTile from '../components/students/StudentTile';
 import FlatList from 'flatlist-react';
-import {strictEqual} from "assert";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
-const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
  * function that allows searching projects by name
@@ -41,14 +33,18 @@ const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 function searchProject(
   projectSearch: string,
   setProjects: (projects: Project[]) => void,
-state: {hasMoreItems: boolean,
-    page: number,
-    pageSize: number,
-    loading: boolean},
-setState: (state: {hasMoreItems: boolean,
-  page: number,
-  pageSize: number,
-  loading: boolean}) => void,
+  state: {
+    hasMoreItems: boolean;
+    page: number;
+    pageSize: number;
+    loading: boolean;
+  },
+  setState: (state: {
+    hasMoreItems: boolean;
+    page: number;
+    pageSize: number;
+    loading: boolean;
+  }) => void
 ) {
   state.loading = true;
   axiosAuthenticated
@@ -61,9 +57,10 @@ setState: (state: {hasMoreItems: boolean,
     })
     .then((response) => {
       setProjects(response.data.collection as Project[]);
-      const newState = {...state};
+      const newState = { ...state };
       newState.page = state.page + 1;
-      newState.hasMoreItems = response.data.totalLength > (state.page * state.pageSize);
+      newState.hasMoreItems =
+        response.data.totalLength > state.page * state.pageSize;
       setState(newState);
     })
     .catch((ex) => {
@@ -89,31 +86,20 @@ const Projects: NextPage = () => {
 
   const [projectForm, setProjectForm] = useState({ ...defaultprojectForm });
 
-  const updateProjects: (param: Project[]) => void = (projectsList: Project[]) => {
-    const newProjects = projects ? [...projects] : ([] as Project[]) as Project[];
+  const updateProjects: (param: Project[]) => void = (
+    projectsList: Project[]
+  ) => {
+    const newProjects = projects
+      ? [...projects]
+      : ([] as Project[] as Project[]);
     newProjects.push(...projectsList);
     setProjects(newProjects);
-  }
+  };
 
   useAxiosAuth();
   useEffect(() => {
     state.page = 0;
     searchProject(projectSearch, setProjects, state, setState);
-    // axiosAuthenticated
-    //   .get<ProjectData>(Endpoints.PROJECTS)
-    //   .then((response) => {
-    //     // console.log(response.data);
-    //     setProjects(response.data.collection as Project[]);
-    //     setLoading(false);
-    //   })
-    //   .catch((ex) => {
-    //     const error =
-    //       ex.response.status === 404
-    //         ? 'Resource Not found'
-    //         : 'An unexpected error has occurred';
-    //     setError(error);
-    //     setLoading(false);
-    //   });
   }, []);
 
   const [state, setState] = useState({
@@ -188,7 +174,12 @@ const Projects: NextPage = () => {
                       onKeyPress={(e) => {
                         if (e.key == 'Enter') {
                           state.page = 0;
-                          searchProject(projectSearch, setProjects, state, setState);
+                          searchProject(
+                            projectSearch,
+                            setProjects,
+                            state,
+                            setState
+                          );
                         }
                       }}
                     />
@@ -196,7 +187,12 @@ const Projects: NextPage = () => {
                       className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
                       onClick={() => {
                         state.page = 0;
-                        searchProject(projectSearch, setProjects, state, setState);
+                        searchProject(
+                          projectSearch,
+                          setProjects,
+                          state,
+                          setState
+                        );
                       }}
                     >
                       {magnifying_glass}

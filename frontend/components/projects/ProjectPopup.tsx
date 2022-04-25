@@ -1,9 +1,8 @@
-import {Fragment, useEffect, useState} from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
-import {Assignment, Project, Url, User, UUID} from '../../lib/types';
+import { Project, Url, User, UUID } from '../../lib/types';
 import CreatableSelect from 'react-select/creatable';
-import { getSkills } from '../../lib/requestUtils'
-import {axiosAuthenticated} from "../../lib/axios";
+import { getSkills } from '../../lib/requestUtils';
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -69,7 +68,10 @@ export const defaultprojectForm = {
  * @param project - the project to use as a base
  * @param assignmentUrls - a list of the assignment urls that are part of the given project
  */
-export function projectFormFromProject(project: Project, assignmentUrls: Url[]): ProjectForm {
+export function projectFormFromProject(
+  project: Project,
+  assignmentUrls: Url[]
+): ProjectForm {
   const newProjectForm = { ...defaultprojectForm };
   newProjectForm.projectName = project.name || '';
   newProjectForm.clientName = project.clientName || '';
@@ -87,9 +89,7 @@ export function projectFormFromProject(project: Project, assignmentUrls: Url[]):
 }
 
 // TODO once patch endpoint is actually finished
-function patchProject(projectForm: ProjectForm){
-
-}
+// function patchProject(projectForm: ProjectForm) {}
 
 /**
  * This will return a form element to be placed inside a Popup element
@@ -170,19 +170,19 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     newProjectForm[parameter] = value as string &
       User[] &
       positionForm[] &
-        Url[]; // not sure why this is needed but it errors without
+      Url[]; // not sure why this is needed but it errors without
     setProjectForm(newProjectForm);
   };
 
   const [skillOptions, setSkillOptions] = useState(
-      [] as Array<{ value: string; label: string }>
+    [] as Array<{ value: string; label: string }>
   );
 
   const addSkillOption = (option: string) => {
     const newSkillOptions = [...skillOptions];
-    newSkillOptions.push({value: '', label: option});
+    newSkillOptions.push({ value: '', label: option });
     setSkillOptions(newSkillOptions);
-  }
+  };
 
   useEffect(() => {
     getSkills(setSkillOptions);
