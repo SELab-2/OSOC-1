@@ -19,6 +19,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         const val alumnQuestion = "question_wz7eGE"
         const val alumnYesId = "689451da-305b-451a-8039-c748ff06ec82"
         const val skillQuestion = "question_3X4q1V"
+        const val otherSkillQuestion = "question_w8Ze6o"
         const val studentCoachQuestion = "question_w5Z2eb"
         const val studentCoachYesId = "d2091172-9678-413a-bb3b-0d9cf6d5fa0b"
     }
@@ -33,20 +34,26 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         }
 
         try {
-            val student = Student(
+            val skillNames = getAnswerForKey(answerMap, TallyKeys.skillQuestion, "skill").answer.toMutableSet()
+            if (skillNames.remove("Other")) {
+                skillNames.add(
+                    getAnswerForKey(answerMap, TallyKeys.otherSkillQuestion, "otherSkill").answer.first()
+                )
+            }
+
+            return Student(
                 getAnswerForKey(answerMap, TallyKeys.firstnameQuestion, "firstname").answer.first(),
                 getAnswerForKey(answerMap, TallyKeys.lastnameQuestion, "lastname").answer.first(),
                 "",
-                getAnswerForKey(answerMap, TallyKeys.skillQuestion, "skill").answer.map { Skill(it) }.toSortedSet(),
+                skillNames.map { Skill(it) }.toSortedSet(),
                 getAnswerForKey(answerMap, TallyKeys.alumnQuestion, "alumni").optionId == TallyKeys.alumnYesId,
                 getAnswerForKey(
                     answerMap, TallyKeys.studentCoachQuestion, "studentCoach"
                 ).optionId == TallyKeys.studentCoachYesId,
                 answerMap.values.toList(),
             )
-            return student
-        } catch (_: NoSuchElementException) {
-            throw FailedOperationException("The firstname ore lastname answer was found to be empty!")
+        } catch (nse: NoSuchElementException) {
+            throw FailedOperationException("The firstname, lastname or other skill answer was found to be empty!")
         }
     }
 
