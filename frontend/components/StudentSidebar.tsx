@@ -303,6 +303,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                         setLoading,
                         signal
                     );
+                    return () => {controller.abort();};
                   }
                 }}
               />
@@ -324,6 +325,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                       setLoading,
                       signal
                   );
+                  return () => {controller.abort();};
                 }}
               >
                 {magnifying_glass}
@@ -577,8 +579,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
             hasMoreItems={state.hasMoreItems}
             loadMoreItems={fetchData}
             state={state}
-            // Use an empty div here to avoid showing the default since it has a bug
-            paginationLoadingIndicator={<div/>}
+            paginationLoadingIndicator={<div/>} // Use an empty div here to avoid showing the default since it has a bug
             paginationLoadingIndicatorPosition="center"
           />
           <div className={`${state.loading && state.page > 0 ? 'visible block' : 'hidden'} text-center`}>
