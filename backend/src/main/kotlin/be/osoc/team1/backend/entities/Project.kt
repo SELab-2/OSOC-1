@@ -1,6 +1,6 @@
 package be.osoc.team1.backend.entities
 
-import be.osoc.team1.backend.util.AssignmentListDeserializer
+import be.osoc.team1.backend.util.AssignmentDeserializer
 import be.osoc.team1.backend.util.AssignmentListSerializer
 import be.osoc.team1.backend.util.PositionListSerializer
 import be.osoc.team1.backend.util.PositionSerializer
@@ -91,7 +91,7 @@ class Project(
     val positions: Collection<Position> = listOf(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JsonSerialize(using = AssignmentListSerializer::class)
-    @JsonDeserialize(using = AssignmentListDeserializer::class)
+    @JsonDeserialize(contentUsing = AssignmentDeserializer::class)
     val assignments: MutableCollection<Assignment> = mutableListOf()
 ) {
     @Id
