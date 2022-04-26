@@ -1,4 +1,4 @@
-import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { StudentBase, StudentData } from '../lib/types';
@@ -7,16 +7,16 @@ import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import Select from 'react-select';
 import FlatList from 'flatlist-react';
-import {getSkills, parseError} from '../lib/requestUtils';
+import { getSkills, parseError } from '../lib/requestUtils';
 import StudentTile from './students/StudentTile';
-import {SpinnerCircular} from "spinners-react";
+import { SpinnerCircular } from 'spinners-react';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 /**
  * This is what StudentsSidebar expects as its argument
  */
 type StudentsSidebarProps = {
-  setError: (error: string) => void
+  setError: (error: string) => void;
 };
 
 /**
@@ -30,69 +30,68 @@ type StudentsSidebarProps = {
  * @param setFilterAmount         - callback to set total amount of filtered results
  * @param state                   - holds page, loading, hasMoreItems, pageSize
  * @param setState                - set the state variable
- * @param setLoading
- * @param signal
- * @param setError
+ * @param setLoading              - set loading or not, this is not the same as the state loading due to styling bug otherwise
+ * @param signal                  - AbortSignal for the axios request
+ * @param setError                - callback to set error message
  */
 async function searchStudent(
-    studentNameSearch: string,
-    skills: Array<{ value: string; label: string }>,
-    studentSearchParameters: Record<string, boolean>,
-    setStudents: (students: StudentBase[]) => void,
-    setFilterAmount: (filterAmount: number) => void,
-    state: {
-      hasMoreItems: boolean;
-      loading: boolean;
-      page: number;
-      pageSize: number;
-    },
-    setState: (state: {
-      hasMoreItems: boolean;
-      loading: boolean;
-      page: number;
-      pageSize: number;
-    }) => void,
-    setLoading: (loading: boolean) => void,
-    signal: AbortSignal,
-    setError: (error: string) => void
+  studentNameSearch: string,
+  skills: Array<{ value: string; label: string }>,
+  studentSearchParameters: Record<string, boolean>,
+  setStudents: (students: StudentBase[]) => void,
+  setFilterAmount: (filterAmount: number) => void,
+  state: {
+    hasMoreItems: boolean;
+    loading: boolean;
+    page: number;
+    pageSize: number;
+  },
+  setState: (state: {
+    hasMoreItems: boolean;
+    loading: boolean;
+    page: number;
+    pageSize: number;
+  }) => void,
+  setLoading: (loading: boolean) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void
 ) {
   setLoading(true);
   axiosAuthenticated
-      .get<StudentData>(Endpoints.STUDENTS, {
-        params: {
-          name: studentNameSearch,
-          includeSuggested: !studentSearchParameters.ExcludeSuggested,
-          status: getStatusFilterList(studentSearchParameters),
-          skills: skills.map((skill) => skill.value).join(','),
-          alumnOnly: studentSearchParameters.OnlyAlumni,
-          studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
-          unassignedOnly: studentSearchParameters.ExcludeAssigned,
-          pageNumber: state.page,
-          pageSize: state.pageSize,
-        },
-        signal: signal
-      })
-      .then((response) => {
-        console.log('changing state');
-        setStudents(response.data.collection as StudentBase[]);
-        setFilterAmount(response.data.totalLength as number);
-        const newState = {...state};
-        newState.page = state.page + 1;
-        newState.hasMoreItems =
-            response.data.totalLength > state.page * state.pageSize;
-        newState.loading = false;
-        setState(newState);
+    .get<StudentData>(Endpoints.STUDENTS, {
+      params: {
+        name: studentNameSearch,
+        includeSuggested: !studentSearchParameters.ExcludeSuggested,
+        status: getStatusFilterList(studentSearchParameters),
+        skills: skills.map((skill) => skill.value).join(','),
+        alumnOnly: studentSearchParameters.OnlyAlumni,
+        studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
+        unassignedOnly: studentSearchParameters.ExcludeAssigned,
+        pageNumber: state.page,
+        pageSize: state.pageSize,
+      },
+      signal: signal,
+    })
+    .then((response) => {
+      setStudents(response.data.collection as StudentBase[]);
+      setFilterAmount(response.data.totalLength as number);
+      const newState = { ...state };
+      newState.page = state.page + 1;
+      newState.hasMoreItems =
+        response.data.totalLength > state.page * state.pageSize;
+      newState.loading = false;
+      setState(newState);
+      setLoading(false);
+    })
+    .catch((err) => {
+      const newState = { ...state };
+      newState.loading = false;
+      setState(newState);
+      parseError(err, setError, signal);
+      if (!signal.aborted) {
         setLoading(false);
-      })
-      .catch((err) => {
-        const newState = { ...state };
-        newState.loading = false;
-        setState(newState);
-        parseError(err, setError, signal);
-        if (!signal.aborted){
-          setLoading(false);
-        }
-      });
+      }
+    });
 }
 
 /**
@@ -118,7 +117,9 @@ function getStatusFilterList(
  * because student tiles can be dragged and must be in a DndProvider element to avoid errors
  * The DndProvider is needed even when the drag function is not needed or used on that page
  */
-const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSidebarProps) => {
+const StudentSidebar: React.FC<StudentsSidebarProps> = ({
+  setError,
+}: StudentsSidebarProps) => {
   const [showFilter, setShowFilter] = useState(true);
 
   let controller = new AbortController();
@@ -203,11 +204,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSide
       setFilterAmount,
       state,
       setState,
-        setLoading,
-        signal,
-        setError
+      setLoading,
+      signal,
+      setError
     );
-    return () => {controller.abort();};
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   /**
@@ -226,11 +229,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSide
       setFilterAmount,
       state,
       setState,
-        setLoading,
-        signal,
-        setError
+      setLoading,
+      signal,
+      setError
     );
-    return () => {controller.abort();};
+    return () => {
+      controller.abort();
+    };
   }, [studentSearchParameters, skills]);
 
   const [state, setState] = useState({
@@ -241,25 +246,26 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSide
   });
 
   const showBlank = () => {
-    console.log("blank:", JSON.stringify(loading), JSON.stringify(state));
     if (loading) {
-      return <div className="text-center">
-        <p>Loading Students</p>
-        <SpinnerCircular
+      return (
+        <div className="text-center">
+          <p>Loading Students</p>
+          <SpinnerCircular
             size={30}
             thickness={100}
             color="#FCB70F"
             secondaryColor="rgba(252, 183, 15, 0.4)"
             className="mx-auto"
-        />
-      </div>;
+          />
+        </div>
+      );
     }
     return <div className="text-center">No students found.</div>;
   };
 
   const fetchData = () => {
     // console.log('fetching');
-    if (state.loading){
+    if (state.loading) {
       return;
     }
     controller.abort();
@@ -274,11 +280,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSide
       setFilterAmount,
       state,
       setState,
-        setLoading,
-        signal,
-        setError
+      setLoading,
+      signal,
+      setError
     );
-    return () => {controller.abort();};
+    return () => {
+      controller.abort();
+    };
   };
 
   return (
@@ -310,11 +318,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSide
                       setFilterAmount,
                       state,
                       setState,
-                        setLoading,
-                        signal,
-                        setError
+                      setLoading,
+                      signal,
+                      setError
                     );
-                    return () => {controller.abort();};
+                    return () => {
+                      controller.abort();
+                    };
                   }
                 }}
               />
@@ -333,11 +343,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSide
                     setFilterAmount,
                     state,
                     setState,
-                      setLoading,
-                      signal,
-                      setError
+                    setLoading,
+                    signal,
+                    setError
                   );
-                  return () => {controller.abort();};
+                  return () => {
+                    controller.abort();
+                  };
                 }}
               >
                 {magnifying_glass}
@@ -591,17 +603,21 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSide
             hasMoreItems={state.hasMoreItems}
             loadMoreItems={fetchData}
             state={state}
-            paginationLoadingIndicator={<div/>} // Use an empty div here to avoid showing the default since it has a bug
+            paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
             paginationLoadingIndicatorPosition="center"
           />
-          <div className={`${state.loading && state.page > 0 ? 'visible block' : 'hidden'} text-center`}>
+          <div
+            className={`${
+              state.loading && state.page > 0 ? 'visible block' : 'hidden'
+            } text-center`}
+          >
             <p>Loading Students</p>
             <SpinnerCircular
-                size={30}
-                thickness={100}
-                color="#FCB70F"
-                secondaryColor="rgba(252, 183, 15, 0.4)"
-                className="mx-auto"
+              size={30}
+              thickness={100}
+              color="#FCB70F"
+              secondaryColor="rgba(252, 183, 15, 0.4)"
+              className="mx-auto"
             />
           </div>
         </div>

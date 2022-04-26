@@ -14,6 +14,7 @@ type ProjectPopupProp = {
   projectForm: ProjectForm;
   setShowPopup: (showPopup: boolean) => void;
   setProjectForm: (projectForm: ProjectForm) => void;
+  setError: (error: string) => void;
 };
 
 /**
@@ -105,6 +106,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
   projectForm,
   setShowPopup,
   setProjectForm,
+  setError,
 }: ProjectPopupProp) => {
   /**
    * Update the position dropdown value for the position at index key in projectForm
@@ -191,9 +193,11 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getSkills(setSkillOptions, signal);
-    getCoaches(setCoachOptions, signal);
-    return () => {controller.abort();};
+    getSkills(setSkillOptions, signal, setError);
+    getCoaches(setCoachOptions, signal, setError);
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return (

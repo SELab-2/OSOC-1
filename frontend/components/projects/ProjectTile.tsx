@@ -7,7 +7,8 @@ import {
   Student,
   User,
   UUID,
-  Url, UserRole,
+  Url,
+  UserRole,
 } from '../../lib/types';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
@@ -20,8 +21,8 @@ import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import ProjectPopup, { projectFormFromProject } from './ProjectPopup';
 import { getUrlDict, getUrlList } from '../../lib/requestUtils';
-import Error from "../Error";
-import {SpinnerCircular} from "spinners-react";
+import Error from '../Error';
+import { SpinnerCircular } from 'spinners-react';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -134,17 +135,27 @@ function reloadProject(
     });
 }
 
-async function getEntireProject(projectBase: ProjectBase, setLoading: (loading: boolean) => void, signal: AbortSignal, setError: (error: string) => void): Promise<Project> {
+async function getEntireProject(
+  projectBase: ProjectBase,
+  setLoading: (loading: boolean) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void
+): Promise<Project> {
   const newProject: Project = convertProjectBase(projectBase);
 
   const positionMap = new Map<Url, Position>();
   await Promise.all([
     getUrlList<User>(projectBase.coaches, newProject.coaches, signal, setError),
-    getUrlList<Assignment>(projectBase.assignments, newProject.assignments, signal, setError),
+    getUrlList<Assignment>(
+      projectBase.assignments,
+      newProject.assignments,
+      signal,
+      setError
+    ),
     getUrlDict<Position>(projectBase.positions, positionMap, signal, setError),
   ]);
 
-  if (signal.aborted){
+  if (signal.aborted) {
     return newProject;
   }
 
@@ -155,18 +166,22 @@ async function getEntireProject(projectBase: ProjectBase, setLoading: (loading: 
     newProject.assignments.map(
       (assignment) => assignment.student
     ) as unknown as string[],
-    studentMap, signal, setError
+    studentMap,
+    signal,
+    setError
   );
 
   const suggesterMap = new Map<Url, User>();
   await getUrlDict<User>(
-      newProject.assignments.map(
-          (assignment) => assignment.suggester
-      ) as unknown as string[],
-      suggesterMap, signal, setError
+    newProject.assignments.map(
+      (assignment) => assignment.suggester
+    ) as unknown as string[],
+    suggesterMap,
+    signal,
+    setError
   );
 
-  if (signal.aborted){
+  if (signal.aborted) {
     return newProject;
   }
 
@@ -178,7 +193,7 @@ async function getEntireProject(projectBase: ProjectBase, setLoading: (loading: 
       assignment.student as unknown as string
     ) as Student;
     assignment.suggester = suggesterMap.get(
-        assignment.suggester as unknown as string
+      assignment.suggester as unknown as string
     ) as User;
   }
   setLoading(false);
@@ -201,13 +216,14 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
     useState(convertProjectBase(projectInput) as Project); // using different names to avoid confusion
-  const [user,] = useUser();
+  const [user] = useUser();
   const [myProjectBase, setMyProjectBase]: [
     ProjectBase,
     (myProjectBase: ProjectBase) => void
   ] = useState(projectInput as ProjectBase);
   const [error, setError]: [string, (error: string) => void] = useState('');
-  const [loading, setLoading]: [boolean, (loading: boolean) => void] = useState<boolean>(true);
+  const [loading, setLoading]: [boolean, (loading: boolean) => void] =
+    useState<boolean>(true);
   let controller = new AbortController();
 
   const [openAssignment, setOpenAssignment]: [
@@ -234,10 +250,14 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireProject(myProjectBase, setLoading, signal, setError).then((response) => {
-      setMyProject(response);
-    });
-    return () => {controller.abort();};
+    getEntireProject(myProjectBase, setLoading, signal, setError).then(
+      (response) => {
+        setMyProject(response);
+      }
+    );
+    return () => {
+      controller.abort();
+    };
   }, [myProjectBase]);
 
   const [projectForm, setProjectForm] = useState(
@@ -287,7 +307,9 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           <div className="flex flex-row items-center">
             <p className="text-lg font-bold">{myProject.name}</p>
             <i
-              className={`${user.role == UserRole.Admin ? 'visible' : 'hidden'} pl-2 text-xl opacity-20`}
+              className={`${
+                user.role == UserRole.Admin ? 'visible' : 'hidden'
+              } pl-2 text-xl opacity-20`}
               onClick={() => setShowEditProject(true)}
             >
               {edit_icon}
@@ -322,16 +344,18 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         ))}
       </div>
 
-      {loading && <div className="text-center w-full">
-        <p>Loading</p>
-        <SpinnerCircular
+      {loading && (
+        <div className="w-full text-center">
+          <p>Loading</p>
+          <SpinnerCircular
             size={60}
             thickness={80}
             color="#FCB70F"
             secondaryColor="rgba(252, 183, 15, 0.4)"
             className="mx-auto"
-        />
-      </div>}
+          />
+        </div>
+      )}
 
       {/* This is the popup to assign a student to a project */}
       <Popup
@@ -507,6 +531,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
               projectForm={projectForm}
               setShowPopup={setShowEditProject}
               setProjectForm={setProjectForm}
+              setError={setError}
             />
           </div>
         </div>

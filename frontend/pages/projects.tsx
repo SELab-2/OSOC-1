@@ -17,12 +17,10 @@ import ProjectPopup, {
   defaultprojectForm,
 } from '../components/projects/ProjectPopup';
 import FlatList from 'flatlist-react';
-import useUser from "../hooks/useUser";
-import {SpinnerCircular} from "spinners-react";
-import axios, {AxiosError} from "axios";
-import {router} from "next/client";
-import Error from "../components/Error";
-import {parseError} from "../lib/requestUtils";
+import useUser from '../hooks/useUser';
+import { SpinnerCircular } from 'spinners-react';
+import Error from '../components/Error';
+import { parseError } from '../lib/requestUtils';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -34,9 +32,9 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
  * @param setProjects   - callback to set the results
  * @param state - holds page, loading, hasMoreItems, pageSize
  * @param setState - set the state variable
- * @param setLoading
- * @param signal
- * @param setError
+ * @param setLoading - set loading or not, this is not the same as the state loading due to styling bug otherwise
+ * @param signal - AbortSignal for the axios request
+ * @param setError - callback to set error message
  */
 // TODO show/handle errors
 function searchProject(
@@ -66,7 +64,7 @@ function searchProject(
         pageNumber: state.page,
         pageSize: state.pageSize,
       },
-        signal: signal
+      signal: signal,
     })
     .then((response) => {
       setProjects(response.data.collection as ProjectBase[]);
@@ -83,7 +81,7 @@ function searchProject(
       newState.loading = false;
       setState(newState);
       parseError(err, setError, signal);
-      if (!signal.aborted){
+      if (!signal.aborted) {
         setLoading(false);
       }
     });
@@ -94,7 +92,7 @@ function searchProject(
  * @returns Projects page
  */
 const Projects: NextPage = () => {
-  const [user,] = useUser();
+  const [user] = useUser();
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
@@ -127,8 +125,18 @@ const Projects: NextPage = () => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    searchProject(projectSearch, setProjects, state, setState, setLoading, signal, setError);
-    return () => {controller.abort();};
+    searchProject(
+      projectSearch,
+      setProjects,
+      state,
+      setState,
+      setLoading,
+      signal,
+      setError
+    );
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const [state, setState] = useState({
@@ -140,16 +148,18 @@ const Projects: NextPage = () => {
 
   const showBlank = () => {
     if (loading) {
-      return <div className="text-center w-full">
-        <p>Loading Projects</p>
-        <SpinnerCircular
+      return (
+        <div className="w-full text-center">
+          <p>Loading Projects</p>
+          <SpinnerCircular
             size={100}
             thickness={100}
             color="#FCB70F"
             secondaryColor="rgba(252, 183, 15, 0.4)"
             className="mx-auto"
-        />
-      </div>;
+          />
+        </div>
+      );
     }
     return <div>No projects found.</div>;
   };
@@ -158,8 +168,18 @@ const Projects: NextPage = () => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    searchProject(projectSearch, updateProjects, state, setState, setLoading, signal, setError);
-    return () => {controller.abort();};
+    searchProject(
+      projectSearch,
+      updateProjects,
+      state,
+      setState,
+      setLoading,
+      signal,
+      setError
+    );
+    return () => {
+      controller.abort();
+    };
   };
 
   return (
@@ -181,7 +201,7 @@ const Projects: NextPage = () => {
             >
               <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
             </div>
-            <StudentSidebar setError={setError}/>
+            <StudentSidebar setError={setError} />
           </section>
 
           {/* Holds the projects searchbar + project tiles */}
@@ -223,10 +243,13 @@ const Projects: NextPage = () => {
                             setProjects,
                             state,
                             setState,
-                              setLoading,
-                              signal, setError
+                            setLoading,
+                            signal,
+                            setError
                           );
-                          return () => {controller.abort();};
+                          return () => {
+                            controller.abort();
+                          };
                         }
                       }}
                     />
@@ -242,10 +265,13 @@ const Projects: NextPage = () => {
                           setProjects,
                           state,
                           setState,
-                            setLoading,
-                            signal, setError
+                          setLoading,
+                          signal,
+                          setError
                         );
-                        return () => {controller.abort();};
+                        return () => {
+                          controller.abort();
+                        };
                       }}
                     >
                       {magnifying_glass}
@@ -255,7 +281,9 @@ const Projects: NextPage = () => {
 
                 {/* Button to create new project */}
                 <button
-                  className={`${user.role == UserRole.Admin ? 'visible' : 'hidden'} justify - right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                  className={`${
+                    user.role == UserRole.Admin ? 'visible' : 'hidden'
+                  } justify - right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
                   type="submit"
                   onClick={() => setShowCreateProject(true)}
                 >
@@ -276,17 +304,21 @@ const Projects: NextPage = () => {
                 renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
                 hasMoreItems={state.hasMoreItems}
                 loadMoreItems={fetchData}
-                paginationLoadingIndicator={<div/>} // Use an empty div here to avoid showing the default since it has a bug
+                paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
                 paginationLoadingIndicatorPosition="center"
               />
-              <div className={`${state.loading && state.page > 0 ? 'visible block' : 'hidden'} text-center`}>
+              <div
+                className={`${
+                  state.loading && state.page > 0 ? 'visible block' : 'hidden'
+                } text-center`}
+              >
                 <p>Loading Projects</p>
                 <SpinnerCircular
-                    size={100}
-                    thickness={100}
-                    color="#FCB70F"
-                    secondaryColor="rgba(252, 183, 15, 0.4)"
-                    className="mx-auto"
+                  size={100}
+                  thickness={100}
+                  color="#FCB70F"
+                  secondaryColor="rgba(252, 183, 15, 0.4)"
+                  className="mx-auto"
                 />
               </div>
             </div>
@@ -321,6 +353,7 @@ const Projects: NextPage = () => {
               projectForm={projectForm}
               setShowPopup={setShowCreateProject}
               setProjectForm={setProjectForm}
+              setError={setError}
             />
           </div>
         </div>

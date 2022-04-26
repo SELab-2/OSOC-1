@@ -44,8 +44,8 @@ export type User = {
 };
 
 /**
- * All possible values for the Student -> StatusSuggestion -> status type
- * Not to be confused with Student -> status
+ * All possible values for the Student - StatusSuggestion - status type
+ * Not to be confused with Student - status
  */
 export enum StatusSuggestionStatus {
   Yes = 'Yes',

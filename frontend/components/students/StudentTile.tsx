@@ -49,12 +49,17 @@ const chartHelper = {
   Default: [tilde_mark, 'text-check-gray'],
 } as stringToArrayDict;
 
-async function getEntireStudent(studentBase: StudentBase, signal: AbortSignal, setError: (error: string) => void): Promise<Student> {
+async function getEntireStudent(
+  studentBase: StudentBase,
+  signal: AbortSignal,
+  setError: (error: string) => void
+): Promise<Student> {
   const newStudent = convertStudentBase(studentBase);
   await getUrlList<StatusSuggestion>(
     studentBase.statusSuggestions,
     newStudent.statusSuggestions,
-      signal, setError
+    signal,
+    setError
   );
   return newStudent;
 }
@@ -99,7 +104,9 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
     getEntireStudent(myStudentBase, signal, setError).then((response) => {
       setMyStudent(response);
     });
-    return () => {controller.abort();};
+    return () => {
+      controller.abort();
+    };
   }, [myStudentBase]);
 
   /**

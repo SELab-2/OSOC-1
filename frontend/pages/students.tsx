@@ -4,7 +4,7 @@ import StudentSidebar from '../components/StudentSidebar';
 import StudentView from '../components/student/StudentView';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import {StatusSuggestionStatus, Student} from '../lib/types';
+import { StatusSuggestionStatus } from '../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
@@ -39,7 +39,7 @@ const Students: NextPage = () => {
             >
               <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
             </div>
-            <StudentSidebar setError={setError}/>
+            <StudentSidebar setError={setError} />
           </section>
 
           {/* Holds main student content */}
