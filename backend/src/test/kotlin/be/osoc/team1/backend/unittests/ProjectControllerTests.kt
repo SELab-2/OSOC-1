@@ -160,6 +160,16 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `patchProject should fail when path id does match request body id`() {
+        val jsonRepresentation = objectMapper.writeValueAsString(testProject)
+        mockMvc.perform(
+            patch("$editionUrl/" + UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isBadRequest)
+    }
+
+    @Test
     fun `getStudentsOfProject succeeds if project with given id exists`() {
         every { projectService.getStudents(testId, testEdition) } returns emptyList()
         mockMvc.perform(get("$editionUrl/$testId/students"))
