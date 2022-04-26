@@ -361,6 +361,39 @@ paths:
                                 $ref: '#/components/schemas/Project'
                 '404':
                     description: Not Found. No such projectId.
+        patch:
+            summary: Patch project
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Project'
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Project'
+                '400':
+                    description: the projectId in the path did not match the request body projectId
+                '403':
+                    description: an attempt was made to change the edition of the project this is forbidden
+                '404':
+                    description: Not Found. No such projectId.
+
         delete:
             summary: Remove project by id
             parameters:
@@ -909,17 +942,17 @@ paths:
                 '404':
                     description: |
                         The response if there is no Answer in the database with the given id.
-  /skills:
-    get:
-      responses:
-        '200':
-          description: Get all Skill objects stored in the database.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Skill'
+    /skills:
+        get:
+            responses:
+                '200':
+                    description: Get all Skill objects stored in the database.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Skill'
     /login:
         post:
             summary: login to the user with the correct email and password
