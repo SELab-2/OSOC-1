@@ -2,8 +2,10 @@ import { Fragment, useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Project, Url, User, UUID } from '../../lib/types';
 import CreatableSelect from 'react-select/creatable';
-import { getCoaches, getSkills } from '../../lib/requestUtils';
+import {getCoaches, getSkills, parseError} from '../../lib/requestUtils';
 import Select from 'react-select';
+import {axiosAuthenticated} from "../../lib/axios";
+import Endpoints from "../../lib/endpoints";
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -34,6 +36,7 @@ type positionForm = {
  * assignments is not a value that is ever changed via this form, we simply need it for patch requests
  */
 type ProjectForm = {
+  id: Url;
   projectName: string;
   clientName: string;
   description: string;
@@ -54,6 +57,7 @@ const defaultPosition = {
  * Always unpack this value when assigning to avoid strange behaviour
  */
 export const defaultprojectForm = {
+  id: '',
   projectName: '',
   clientName: '',
   description: '',
@@ -75,6 +79,7 @@ export function projectFormFromProject(
   assignmentUrls: Url[]
 ): ProjectForm {
   const newProjectForm = { ...defaultprojectForm };
+  newProjectForm.id = project.id || '';
   newProjectForm.projectName = project.name || '';
   newProjectForm.clientName = project.clientName || '';
   newProjectForm.description = project.description || '';
@@ -91,7 +96,38 @@ export function projectFormFromProject(
 }
 
 // TODO once patch endpoint is actually finished
-// function patchProject(projectForm: ProjectForm) {}
+function postOrPatchProject(projectForm: ProjectForm) {
+  (projectForm.id ? axiosAuthenticated.patch : axiosAuthenticated.post)(
+          Endpoints.PROJECTS + (projectForm.id ? '' : '/' + projectForm.id),
+          {
+            name: projectForm.projectName,
+            clientName: projectForm.clientName,
+            description: projectForm.description,
+            coaches: projectForm.coaches,
+            positions: projectForm.positions.map(position => {
+              return {
+                skill: {
+                  skillName: position.skill.label
+                },
+                amount: position.amount
+                // edition
+                // id only needed for patch
+              }}),
+            // edition: {name: 'ed', isActive: true}, only needed for patch
+            // assignments only needed for patch
+            // id only needed for patch
+          }
+      )
+      .then((response) => {
+        // console.log(response);
+        // reloadProject(projectId, setMyProjectBase, signal, setError);
+        console.log("response:", response);
+      })
+      .catch((err) => {
+        // parseError(err, setError, signal);
+        console.log("error:", err);
+      });
+}
 
 /**
  * This will return a form element to be placed inside a Popup element
@@ -101,6 +137,7 @@ export function projectFormFromProject(
  * @param projectForm - use either \{...defaultprojectForm\} or projectFormFromProject(Project)
  * @param setShowPopup - const to set to false when popup should close (on from submission or cancel)
  * @param setProjectForm - const to use to change the passed projectForm, needed to save user changes
+ * @param setError
  */
 const ProjectPopup: React.FC<ProjectPopupProp> = ({
   projectForm,
@@ -204,6 +241,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        postOrPatchProject(projectForm);
         // TODO add submit function
         // TODO don't forget to reset projectForm to default afterwards
         setShowPopup(false);

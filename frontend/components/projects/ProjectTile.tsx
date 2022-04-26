@@ -20,7 +20,7 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import ProjectPopup, { projectFormFromProject } from './ProjectPopup';
-import { getUrlDict, getUrlList } from '../../lib/requestUtils';
+import {getUrlDict, getUrlList, parseError} from '../../lib/requestUtils';
 import Error from '../Error';
 import { SpinnerCircular } from 'spinners-react';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
@@ -57,6 +57,8 @@ type AssignmentProp = {
  * @param suggesterId - the UUID of the currently authenticated User
  * @param reason      - the reason for assigning this student to this project
  * @param setMyProjectBase  - callback for reloadProject that is called after this POST completes
+ * @param signal - IMPORTANT signal only works on following get request to reload
+ * @param setError - Callback to set error message
  */
 // TODO when post is finished, should update the student filter
 // TODO should show success / error
@@ -66,7 +68,9 @@ function postStudentToProject(
   positionId: UUID,
   suggesterId: UUID,
   reason: string,
-  setMyProjectBase: (myProjectBase: ProjectBase) => void
+  setMyProjectBase: (myProjectBase: ProjectBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void
 ) {
   axiosAuthenticated
     .post(
@@ -80,10 +84,10 @@ function postStudentToProject(
     )
     .then((response) => {
       console.log(response);
-      reloadProject(projectId, setMyProjectBase);
+      reloadProject(projectId, setMyProjectBase, signal, setError);
     })
-    .catch((ex) => {
-      console.log(ex);
+    .catch((err) => {
+      parseError(err, setError, signal);
     });
 }
 
@@ -95,22 +99,26 @@ function postStudentToProject(
  * @param projectId     - the UUID of the project to remove the assignment from
  * @param assignmentId  - the UUID of the assignment to remove
  * @param setMyProjectBase    - callback for reloadProject that is called after this DELETE completes
+ * @param signal - IMPORTANT signal only works on following get request to reload
+ * @param setError - Callback to set error message
  */
 function deleteStudentFromProject(
   projectId: UUID,
   assignmentId: UUID,
-  setMyProjectBase: (myProjectBase: ProjectBase) => void
+  setMyProjectBase: (myProjectBase: ProjectBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void
 ) {
   axiosAuthenticated
     .delete(
-      Endpoints.PROJECTS + '/' + projectId + '/assignments/' + assignmentId // TODO import this url somehow
+      Endpoints.PROJECTS + '/' + projectId + '/assignments/' + assignmentId,  // TODO import this url somehow
     )
     .then((response) => {
       console.log(response);
-      reloadProject(projectId, setMyProjectBase);
+      reloadProject(projectId, setMyProjectBase, signal, setError);
     })
-    .catch((ex) => {
-      console.log(ex);
+    .catch((err) => {
+      parseError(err, setError, signal);
     });
 }
 
@@ -120,18 +128,22 @@ function deleteStudentFromProject(
  *
  * @param projectId - the UUID of the project to reload
  * @param setMyProjectBase - a hook to set the reloaded project information
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
  */
 function reloadProject(
   projectId: UUID,
-  setMyProjectBase: (myProjectBase: ProjectBase) => void
+  setMyProjectBase: (myProjectBase: ProjectBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void
 ) {
   axiosAuthenticated
     .get<ProjectBase>(Endpoints.PROJECTS + '/' + projectId)
     .then((response) => {
       setMyProjectBase(response.data as ProjectBase);
     })
-    .catch((ex) => {
-      console.log(ex);
+    .catch((err) => {
+      parseError(err, setError, signal);
     });
 }
 
@@ -213,6 +225,7 @@ function convertProjectBase(projectBase: ProjectBase): Project {
 }
 
 const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
+  console.log('input:', JSON.stringify(projectInput.positions), JSON.stringify(projectInput.assignments));
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
     useState(convertProjectBase(projectInput) as Project); // using different names to avoid confusion
@@ -388,15 +401,23 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
+              controller.abort();
+              controller = new AbortController();
+              const signal = controller.signal;
               postStudentToProject(
                 myProject.id,
                 student.id,
                 positionId,
                 currentUser.id,
                 reason,
-                setMyProjectBase
+                setMyProjectBase,
+                  signal,
+                  setError
               );
               closeAssignmentModal();
+              return () => {
+                controller.abort();
+              };
             }}
           >
             {/* This is a fix to stop clicking on the clearable closing the entire modal */}
@@ -487,11 +508,19 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
               className={`min-w-[120px] border-2 bg-check-green py-1`}
               onClick={() => {
                 closeUnassignmentModal();
+                controller.abort();
+                controller = new AbortController();
+                const signal = controller.signal;
                 deleteStudentFromProject(
                   myProject.id,
                   assignmentId,
-                  setMyProjectBase
+                  setMyProjectBase,
+                    signal,
+                    setError
                 );
+                return () => {
+                  controller.abort();
+                };
               }}
             >
               Confirm
@@ -550,7 +579,7 @@ const ProjectPositionsList: React.FC<PositionProp> = ({
   return (
     <div className="text-right">
       <p className="my-1 inline bg-gray-300 px-1">
-        {position.amount + 'x ' + position.skill}
+        {position.amount + 'x ' + position.skill.skillName}
       </p>
     </div>
   );
