@@ -264,7 +264,7 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
             )
         )
         every { projectService.getConflicts(testEdition) } returns result
-        mockMvc.perform(get("/$editionUrl/conflicts"))
+        mockMvc.perform(get("$editionUrl/conflicts")).andExpect(status().isOk)
     }
 
     @Test
