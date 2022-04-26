@@ -88,13 +88,11 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
     useState(convertStudentBase(student) as Student); // using different names to avoid confusion
 
-  const [myStudentBase, setMyStudentBase]: [
-    StudentBase,
-    (myStudentBase: StudentBase) => void
-  ] = useState(student as StudentBase);
+  const [myStudentBase]: [StudentBase, (myStudentBase: StudentBase) => void] =
+    useState(student as StudentBase);
 
   // TODO find a place to actually show this error
-  const [error, setError]: [string, (error: string) => void] = useState('');
+  const [, setError]: [string, (error: string) => void] = useState('');
   let controller = new AbortController();
 
   useEffect(() => {

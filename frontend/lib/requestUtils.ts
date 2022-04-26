@@ -11,7 +11,7 @@ import { router } from 'next/client';
  * @param signal - AbortSignal for the original request
  */
 export function parseError(
-  error: any,
+  error: unknown,
   setError: (error: string) => void,
   signal: AbortSignal
 ) {

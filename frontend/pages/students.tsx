@@ -18,7 +18,7 @@ const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const [error, setError]: [string, (error: string) => void] = useState('');
+  const [, setError]: [string, (error: string) => void] = useState('');
 
   return (
     <div className="min-w-screen flex min-h-screen flex-col items-center">
