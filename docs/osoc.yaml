@@ -321,6 +321,22 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/Project'
+                        example:
+                            {
+                                "name": "Project name",
+                                "clientName": "Client name",
+                                "description": "Description",
+                                "positions": [
+                                    {
+                                        "skill": { "skillName": "Backend" },
+                                        "amount": "2"
+                                    },
+                                    {
+                                        "skill": { "skillName": "Frontend" },
+                                        "amount": "1"
+                                    }
+                                ]
+                            }
             responses:
                 '201':
                     description: |
@@ -380,6 +396,29 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/Project'
+                        example:
+                              {
+                                  "name": "Project name",
+                                  "clientName": "Client name",
+                                  "description": "Description",
+                                  "edition": "testEdition",
+                                  "positions": [
+                                      {
+                                          "skill": { "skillName": "Backend" },
+                                          "amount": "2",
+                                          "id": "6adf6cb3-6638-4771-a281-403c0bf3427a"
+                                      },
+                                      {
+                                          "skill": { "skillName": "Frontend" },
+                                          "amount": "1",
+                                          "id": "41e25173-f7cb-4c4b-b4e7-d12f30e5fbe3"
+                                      }
+                                  ],
+                                  "assignments": [
+                                      "http://localhost:8080/api/assignments/f9fefa13-80a3-439a-bf59-3cdacd60e2fc"
+                                  ],
+                                  "id": "68afaeef-48f4-4bf1-9ac7-a6a2c1bcf6d7"
+                              }
             responses:
                 '200':
                     description: successful operation
