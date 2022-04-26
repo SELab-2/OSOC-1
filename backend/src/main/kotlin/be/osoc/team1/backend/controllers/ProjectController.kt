@@ -1,8 +1,10 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
+import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.ProjectService
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -78,6 +81,39 @@ class ProjectController(private val service: ProjectService) {
         )
         val createdProject = service.postProject(project)
         return getObjectCreatedResponse(createdProject.id, createdProject)
+    }
+
+    /**
+     * Patches a project by updating the project with [projectId] to match [project].
+     * Throws an exception if the path [projectId] does not match the id of [project]. If the project we attempt to
+     * patch a non-existent project a 404 not found is returned. If we attempt to change the edition of a project then a
+     * 403 forbidden is returned.
+     *
+     * Returns the patched project in the response body, with a link pointing to the resource in the Location header.
+     *
+     * The endpoint expects every field in full except for the assignments field. The assignments field should be
+     * provided as a list of urls that if fetched return associated the [Assignment] object.
+     *
+     * Example of the assignments field:
+     * ```json
+     * "assignments": [
+     *     "http://localhost:8080/api/assignments/f9fefa13-80a3-439a-bf59-3cdacd60e2fc",
+     *     "http://localhost:8080/api/assignments/6adf6cb3-6638-4771-a281-403c0bf3427a"
+     * ],
+     * ```
+     */
+    @PatchMapping("/{projectId}")
+    @Secured("ROLE_ADMIN")
+    fun patchProject(
+        @PathVariable projectId: UUID,
+        @PathVariable edition: String,
+        @RequestBody project: Project
+    ): ResponseEntity<Project> {
+        if (projectId != project.id)
+            throw FailedOperationException("Request url id=\"$projectId\" did not match request body id=\"${project.id}\"")
+
+        val updatedProject = service.patchProject(project, edition)
+        return getObjectCreatedResponse(updatedProject.id, updatedProject, HttpStatus.OK)
     }
 
     /**

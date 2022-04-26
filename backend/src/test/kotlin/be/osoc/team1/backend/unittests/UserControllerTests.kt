@@ -69,7 +69,7 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
             patch("/users/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testUserJsonRepresentation)
-        ).andExpect(status().isCreated).andExpect(content().string(testUserJsonRepresentation))
+        ).andExpect(status().isOk).andExpect(content().string(testUserJsonRepresentation))
     }
 
     @Test

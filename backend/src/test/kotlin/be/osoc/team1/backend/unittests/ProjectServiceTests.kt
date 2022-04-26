@@ -144,6 +144,17 @@ class ProjectServiceTests {
     }
 
     @Test
+    fun `patchProject fails when attempting to change editions`() {
+        val repository = getRepository(true)
+        val service = ProjectService(repository, mockk(), getUserService())
+        assertThrows<ForbiddenOperationException> {
+            service.patchProject(
+                Project("name", "client", "desc", "someEdition"), testEdition
+            )
+        }
+    }
+
+    @Test
     fun `addCoachToProject runs`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), getUserService())

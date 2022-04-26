@@ -46,7 +46,7 @@ class UserController(private val service: UserService) {
             throw FailedOperationException("Request url id=\"$id\" did not match request body id=\"${user.id}\"")
 
         val updatedUser = service.patchUser(user)
-        return getObjectCreatedResponse(updatedUser.id, updatedUser)
+        return getObjectCreatedResponse(updatedUser.id, updatedUser, HttpStatus.OK)
     }
 
     /**
