@@ -12,11 +12,10 @@ import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
 
 /**
- * This class deserializes a url into an object of type [T]. It does by extracting the uuid from
+ * This class deserializes a url into an object of type [T]. It does so by extracting the uuid from
  * the url and then looking up this id in the [repository] for type [T].
  */
-open class UrlDeserializer<T>(private val repository: CrudRepository<T, UUID>) :
-    JsonDeserializer<T>() {
+open class UrlDeserializer<T>(private val repository: CrudRepository<T, UUID>) : JsonDeserializer<T>() {
 
     override fun deserialize(parser: JsonParser, context: DeserializationContext): T {
         val rootNode: JsonNode = parser.codec.readTree(parser)
