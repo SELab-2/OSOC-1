@@ -171,6 +171,8 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     setProjectForm(newProjectForm);
   };
 
+  let controller = new AbortController();
+
   const [skillOptions, setSkillOptions] = useState(
     [] as Array<{ value: string; label: string }>
   );
@@ -186,8 +188,12 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
   };
 
   useEffect(() => {
-    getSkills(setSkillOptions);
-    getCoaches(setCoachOptions);
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    getSkills(setSkillOptions, signal);
+    getCoaches(setCoachOptions, signal);
+    return () => {controller.abort();};
   }, []);
 
   return (

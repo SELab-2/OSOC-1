@@ -19,6 +19,9 @@ import ProjectPopup, {
 import FlatList from 'flatlist-react';
 import useUser from "../hooks/useUser";
 import {SpinnerCircular} from "spinners-react";
+import axios, {AxiosError} from "axios";
+import {router} from "next/client";
+import Error from "../components/Error";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -30,6 +33,9 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
  * @param setProjects   - callback to set the results
  * @param state - holds page, loading, hasMoreItems, pageSize
  * @param setState - set the state variable
+ * @param setLoading
+ * @param signal
+ * @param setError
  */
 // TODO show/handle errors
 function searchProject(
@@ -48,9 +54,11 @@ function searchProject(
     loading: boolean;
   }) => void,
   setLoading: (loading: boolean) => void,
-  signal: AbortSignal
+  signal: AbortSignal,
+  setError: (error: string) => void
 ) {
   setLoading(true);
+  setError('');
   axiosAuthenticated
     .get<ProjectData>(Endpoints.PROJECTS, {
       params: {
@@ -70,12 +78,18 @@ function searchProject(
       setState(newState);
       setLoading(false);
     })
-    .catch((ex) => {
+    .catch((err) => {
       setLoading(false);
-      console.log(ex);
       const newState = { ...state };
-      newState.loading = true;
+      newState.loading = false;
       setState(newState);
+      if (axios.isAxiosError(err)) {
+        const _err = err as AxiosError;
+        if (_err.response?.status === 400) router.push('/login'); // error when trying to refresh refreshtoken
+        if (!signal.aborted) {
+          setError(_err.response?.statusText || 'An unknown error occurred');
+        }
+      }
     });
 }
 
@@ -117,7 +131,7 @@ const Projects: NextPage = () => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    searchProject(projectSearch, setProjects, state, setState, setLoading, signal);
+    searchProject(projectSearch, setProjects, state, setState, setLoading, signal, setError);
     return () => {controller.abort();};
   }, []);
 
@@ -148,7 +162,7 @@ const Projects: NextPage = () => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    searchProject(projectSearch, updateProjects, state, setState, setLoading, signal);
+    searchProject(projectSearch, updateProjects, state, setState, setLoading, signal, setError);
     return () => {controller.abort();};
   };
 
@@ -214,7 +228,7 @@ const Projects: NextPage = () => {
                             state,
                             setState,
                               setLoading,
-                              signal
+                              signal, setError
                           );
                           return () => {controller.abort();};
                         }
@@ -233,7 +247,7 @@ const Projects: NextPage = () => {
                           state,
                           setState,
                             setLoading,
-                            signal
+                            signal, setError
                         );
                         return () => {controller.abort();};
                       }}
@@ -253,6 +267,8 @@ const Projects: NextPage = () => {
                 </button>
               </div>
             </div>
+
+            {error && <Error error={error} className="mb-4" />}
 
             {/* This contains the project tiles */}
             <div className="ml-0 flex flex-row flex-wrap lg:ml-6">

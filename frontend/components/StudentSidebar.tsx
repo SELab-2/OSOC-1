@@ -1,7 +1,7 @@
 import { Fragment, PropsWithChildren, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { StatusSuggestionStatus, StudentBase, StudentData } from '../lib/types';
+import { StudentBase, StudentData } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
@@ -84,7 +84,7 @@ async function searchStudent(
         setLoading(false);
         console.log(ex);
         const newState = { ...state };
-        newState.loading = true;
+        newState.loading = false;
         setState(newState);
       });
 }
@@ -183,12 +183,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   useAxiosAuth();
 
   useEffect(() => {
-    // TODO this should probably update when a new skill is created but that seems difficult
-    getSkills(setSkillOptions);
-    state.page = 0;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
+    // TODO this should probably update when a new skill is created but that seems difficult
+    getSkills(setSkillOptions, signal);
+    state.page = 0;
     searchStudent(
       studentNameSearch,
       skills,

@@ -132,20 +132,19 @@ function reloadProject(
     });
 }
 
-async function getUrl<Type>(url: Url) {
-  const resp = await axiosAuthenticated.get<Type>(url);
-  return resp;
-}
-
-async function getEntireProject(projectBase: ProjectBase): Promise<Project> {
+async function getEntireProject(projectBase: ProjectBase, signal: AbortSignal): Promise<Project> {
   const newProject: Project = convertProjectBase(projectBase);
 
   const positionMap = new Map<Url, Position>();
   await Promise.all([
-    getUrlList<User>(projectBase.coaches, newProject.coaches),
-    getUrlList<Assignment>(projectBase.assignments, newProject.assignments),
-    getUrlDict<Position>(projectBase.positions, positionMap),
+    getUrlList<User>(projectBase.coaches, newProject.coaches, signal),
+    getUrlList<Assignment>(projectBase.assignments, newProject.assignments, signal),
+    getUrlDict<Position>(projectBase.positions, positionMap, signal),
   ]);
+
+  if (signal.aborted){
+    return newProject;
+  }
 
   newProject.positions = Array.from(positionMap.values());
 
@@ -154,8 +153,20 @@ async function getEntireProject(projectBase: ProjectBase): Promise<Project> {
     newProject.assignments.map(
       (assignment) => assignment.student
     ) as unknown as string[],
-    studentMap
+    studentMap, signal
   );
+
+  const suggesterMap = new Map<Url, User>();
+  await getUrlDict<User>(
+      newProject.assignments.map(
+          (assignment) => assignment.suggester
+      ) as unknown as string[],
+      suggesterMap, signal
+  );
+
+  if (signal.aborted){
+    return newProject;
+  }
 
   for (const assignment of newProject.assignments) {
     assignment.position = positionMap.get(
@@ -164,6 +175,9 @@ async function getEntireProject(projectBase: ProjectBase): Promise<Project> {
     assignment.student = studentMap.get(
       assignment.student as unknown as string
     ) as Student;
+    assignment.suggester = suggesterMap.get(
+        assignment.suggester as unknown as string
+    ) as User;
   }
   return newProject;
 }
@@ -190,6 +204,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
     (myProjectBase: ProjectBase) => void
   ] = useState(projectInput as ProjectBase);
 
+  let controller = new AbortController();
+
   const [openAssignment, setOpenAssignment]: [
     boolean,
     (openAssignment: boolean) => void
@@ -210,9 +226,13 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   useAxiosAuth();
 
   useEffect(() => {
-    getEntireProject(myProjectBase).then((response) => {
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    getEntireProject(myProjectBase, signal).then((response) => {
       setMyProject(response);
     });
+    return () => {controller.abort();};
   }, [myProjectBase]);
 
   const [projectForm, setProjectForm] = useState(

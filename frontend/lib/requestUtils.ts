@@ -8,14 +8,15 @@ import axios from 'axios';
  * this function will wait to return until the request is done
  *
  * @param setSkillOptions - setter for the resulting options list
+ * @param signal
  */
 export async function getSkills(
   setSkillOptions: (
     skillOptions: Array<{ value: string; label: string }>
-  ) => void
+  ) => void, signal: AbortSignal
 ) {
   await axiosAuthenticated
-    .get<Skill[]>(Endpoints.SKILLS)
+    .get<Skill[]>(Endpoints.SKILLS, {signal: signal})
     .then((response) =>
       setSkillOptions(
         response.data.map((skill) => {
@@ -31,12 +32,13 @@ export async function getSkills(
  * This function will wait to return until the request is done
  *
  * @param setCoachOptions - setter for the resulting options list
+ * @param signal
  */
 export async function getCoaches(
-  setCoachOptions: (CoachOptions: Array<{ value: User; label: string }>) => void
+  setCoachOptions: (CoachOptions: Array<{ value: User; label: string }>) => void, signal: AbortSignal
 ) {
   await axiosAuthenticated
-    .get<User[]>(Endpoints.USERS)
+    .get<User[]>(Endpoints.USERS, {signal: signal})
     .then((response) =>
       setCoachOptions(
         response.data.filter(user => user.role != UserRole.Disabled).map((coach) => {
@@ -52,11 +54,15 @@ export async function getCoaches(
  *
  * @param urls - list of urls to get
  * @param resultList - list to push results unto
+ * @param signal
  */
-export async function getUrlList<Type>(urls: Url[], resultList: Type[]) {
+export async function getUrlList<Type>(urls: Url[], resultList: Type[], signal: AbortSignal) {
   await axios
-    .all(urls.map((url) => axiosAuthenticated.get<Type>(url)))
+    .all(urls.map((url) => axiosAuthenticated.get<Type>(url, {signal: signal})))
     .then((response) => {
+        if (signal.aborted){
+            return;
+        }
       response.forEach((resp) => resultList.push(resp.data));
     })
     .catch((ex) => {
@@ -71,10 +77,13 @@ export async function getUrlList<Type>(urls: Url[], resultList: Type[]) {
  * @param urls - list of urls to get
  * @param resultMap - map to set the results in
  */
-export async function getUrlDict<Type>(urls: Url[], resultMap: Map<Url, Type>) {
+export async function getUrlDict<Type>(urls: Url[], resultMap: Map<Url, Type>, signal: AbortSignal) {
   await axios
-    .all(urls.map((url) => axiosAuthenticated.get<Type>(url)))
+    .all(urls.map((url) => axiosAuthenticated.get<Type>(url, {signal: signal})))
     .then((response) => {
+        if (signal.aborted){
+            return;
+        }
       response.forEach((resp) =>
         resultMap.set(resp.config.url as string, resp.data)
       );
