@@ -7,15 +7,17 @@ import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import Select from 'react-select';
 import FlatList from 'flatlist-react';
-import { getSkills } from '../lib/requestUtils';
+import {getSkills, parseError} from '../lib/requestUtils';
 import StudentTile from './students/StudentTile';
 import {SpinnerCircular} from "spinners-react";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 /**
- * Empty Prop type for correct typing
+ * This is what StudentsSidebar expects as its argument
  */
-type StudentsSidebarProps = PropsWithChildren<unknown>;
+type StudentsSidebarProps = {
+  setError: (error: string) => void
+};
 
 /**
  * Function that allows searching students by name
@@ -30,8 +32,8 @@ type StudentsSidebarProps = PropsWithChildren<unknown>;
  * @param setState                - set the state variable
  * @param setLoading
  * @param signal
+ * @param setError
  */
-// TODO show/handle errors
 async function searchStudent(
     studentNameSearch: string,
     skills: Array<{ value: string; label: string }>,
@@ -51,7 +53,8 @@ async function searchStudent(
       pageSize: number;
     }) => void,
     setLoading: (loading: boolean) => void,
-    signal: AbortSignal
+    signal: AbortSignal,
+    setError: (error: string) => void
 ) {
   setLoading(true);
   axiosAuthenticated
@@ -70,6 +73,7 @@ async function searchStudent(
         signal: signal
       })
       .then((response) => {
+        console.log('changing state');
         setStudents(response.data.collection as StudentBase[]);
         setFilterAmount(response.data.totalLength as number);
         const newState = {...state};
@@ -80,12 +84,14 @@ async function searchStudent(
         setState(newState);
         setLoading(false);
       })
-      .catch((ex) => {
-        setLoading(false);
-        console.log(ex);
+      .catch((err) => {
         const newState = { ...state };
         newState.loading = false;
         setState(newState);
+        parseError(err, setError, signal);
+        if (!signal.aborted){
+          setLoading(false);
+        }
       });
 }
 
@@ -112,7 +118,7 @@ function getStatusFilterList(
  * because student tiles can be dragged and must be in a DndProvider element to avoid errors
  * The DndProvider is needed even when the drag function is not needed or used on that page
  */
-const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
+const StudentSidebar: React.FC<StudentsSidebarProps> = ({setError}: StudentsSidebarProps) => {
   const [showFilter, setShowFilter] = useState(true);
 
   let controller = new AbortController();
@@ -142,7 +148,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true);
 
-  const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
+  // const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
 
   const defaultStudentSearchParameters = {
     StatusYes: true,
@@ -187,7 +193,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     controller = new AbortController();
     const signal = controller.signal;
     // TODO this should probably update when a new skill is created but that seems difficult
-    getSkills(setSkillOptions, signal);
+    getSkills(setSkillOptions, signal, setError);
     state.page = 0;
     searchStudent(
       studentNameSearch,
@@ -198,7 +204,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       state,
       setState,
         setLoading,
-        signal
+        signal,
+        setError
     );
     return () => {controller.abort();};
   }, []);
@@ -220,7 +227,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       state,
       setState,
         setLoading,
-        signal
+        signal,
+        setError
     );
     return () => {controller.abort();};
   }, [studentSearchParameters, skills]);
@@ -233,6 +241,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   });
 
   const showBlank = () => {
+    console.log("blank:", JSON.stringify(loading), JSON.stringify(state));
     if (loading) {
       return <div className="text-center">
         <p>Loading Students</p>
@@ -266,7 +275,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       state,
       setState,
         setLoading,
-        signal
+        signal,
+        setError
     );
     return () => {controller.abort();};
   };
@@ -301,7 +311,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                       state,
                       setState,
                         setLoading,
-                        signal
+                        signal,
+                        setError
                     );
                     return () => {controller.abort();};
                   }
@@ -323,7 +334,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                     state,
                     setState,
                       setLoading,
-                      signal
+                      signal,
+                      setError
                   );
                   return () => {controller.abort();};
                 }}

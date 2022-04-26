@@ -4,7 +4,7 @@ import StudentSidebar from '../components/StudentSidebar';
 import StudentView from '../components/student/StudentView';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import { StatusSuggestionStatus } from '../lib/types';
+import {StatusSuggestionStatus, Student} from '../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
@@ -17,6 +17,8 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
+
+  const [error, setError]: [string, (error: string) => void] = useState('');
 
   return (
     <div className="min-w-screen flex min-h-screen flex-col items-center">
@@ -37,7 +39,7 @@ const Students: NextPage = () => {
             >
               <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
             </div>
-            <StudentSidebar />
+            <StudentSidebar setError={setError}/>
           </section>
 
           {/* Holds main student content */}

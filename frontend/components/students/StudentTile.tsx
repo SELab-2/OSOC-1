@@ -49,12 +49,12 @@ const chartHelper = {
   Default: [tilde_mark, 'text-check-gray'],
 } as stringToArrayDict;
 
-async function getEntireStudent(studentBase: StudentBase, signal: AbortSignal): Promise<Student> {
+async function getEntireStudent(studentBase: StudentBase, signal: AbortSignal, setError: (error: string) => void): Promise<Student> {
   const newStudent = convertStudentBase(studentBase);
   await getUrlList<StatusSuggestion>(
     studentBase.statusSuggestions,
     newStudent.statusSuggestions,
-      signal
+      signal, setError
   );
   return newStudent;
 }
@@ -88,13 +88,15 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
     (myStudentBase: StudentBase) => void
   ] = useState(student as StudentBase);
 
+  // TODO find a place to actually show this error
+  const [error, setError]: [string, (error: string) => void] = useState('');
   let controller = new AbortController();
 
   useEffect(() => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireStudent(myStudentBase, signal).then((response) => {
+    getEntireStudent(myStudentBase, signal, setError).then((response) => {
       setMyStudent(response);
     });
     return () => {controller.abort();};

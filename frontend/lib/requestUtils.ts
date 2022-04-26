@@ -1,19 +1,43 @@
 import {axiosAuthenticated} from './axios';
 import {Skill, Url, User, UserRole} from './types';
 import Endpoints from './endpoints';
-import axios from 'axios';
+import axios, {AxiosError} from 'axios';
+import {router} from "next/client";
+
+/**
+ * Function to parse axios request errors
+ * @param error - the error thrown
+ * @param setError - callback to set error message
+ * @param signal - AbortSignal for the original request
+ */
+export function parseError(error: any, setError: (error: string) => void, signal: AbortSignal){
+    if (signal.aborted){
+        return;
+    }
+    if (axios.isAxiosError(error)) {
+        const _error = error as AxiosError;
+        if (_error.response?.status === 400) {
+            router.push('/login');
+            return;
+        }
+        setError(_error.response?.statusText || 'An unknown error occurred');
+    } else {
+        setError('An unknown error occurred');
+    }
+}
 
 /**
  * Function to get all skills in dropdown options format
  * this function will wait to return until the request is done
  *
  * @param setSkillOptions - setter for the resulting options list
- * @param signal
+ * @param signal - AbortSignal for the axios request
+ * @param setError
  */
 export async function getSkills(
   setSkillOptions: (
     skillOptions: Array<{ value: string; label: string }>
-  ) => void, signal: AbortSignal
+  ) => void, signal: AbortSignal, setError: (error: string) => void
 ) {
   await axiosAuthenticated
     .get<Skill[]>(Endpoints.SKILLS, {signal: signal})
@@ -24,7 +48,10 @@ export async function getSkills(
         })
       )
     )
-    .catch((err) => console.log(err));
+    .catch((err) => {
+        parseError(err, setError, signal);
+        }
+    );
 }
 
 /**
@@ -32,10 +59,11 @@ export async function getSkills(
  * This function will wait to return until the request is done
  *
  * @param setCoachOptions - setter for the resulting options list
- * @param signal
+ * @param signal - AbortSignal for the axios request
+ * @param setError
  */
 export async function getCoaches(
-  setCoachOptions: (CoachOptions: Array<{ value: User; label: string }>) => void, signal: AbortSignal
+  setCoachOptions: (CoachOptions: Array<{ value: User; label: string }>) => void, signal: AbortSignal, setError: (error: string) => void
 ) {
   await axiosAuthenticated
     .get<User[]>(Endpoints.USERS, {signal: signal})
@@ -46,7 +74,9 @@ export async function getCoaches(
         })
       )
     )
-    .catch((err) => console.log(err));
+    .catch((err) => {
+        parseError(err, setError, signal);
+    });
 }
 
 /**
@@ -54,9 +84,10 @@ export async function getCoaches(
  *
  * @param urls - list of urls to get
  * @param resultList - list to push results unto
- * @param signal
+ * @param signal - AbortSignal for the axios request
+ * @param setError
  */
-export async function getUrlList<Type>(urls: Url[], resultList: Type[], signal: AbortSignal) {
+export async function getUrlList<Type>(urls: Url[], resultList: Type[], signal: AbortSignal, setError: (error: string) => void) {
   await axios
     .all(urls.map((url) => axiosAuthenticated.get<Type>(url, {signal: signal})))
     .then((response) => {
@@ -65,8 +96,8 @@ export async function getUrlList<Type>(urls: Url[], resultList: Type[], signal: 
         }
       response.forEach((resp) => resultList.push(resp.data));
     })
-    .catch((ex) => {
-      console.log(ex);
+    .catch((err) => {
+        parseError(err, setError, signal);
     });
 }
 
@@ -76,8 +107,10 @@ export async function getUrlList<Type>(urls: Url[], resultList: Type[], signal: 
  *
  * @param urls - list of urls to get
  * @param resultMap - map to set the results in
+ * @param signal - AbortSignal for the axios request
+ * @param setError
  */
-export async function getUrlDict<Type>(urls: Url[], resultMap: Map<Url, Type>, signal: AbortSignal) {
+export async function getUrlDict<Type>(urls: Url[], resultMap: Map<Url, Type>, signal: AbortSignal, setError: (error: string) => void) {
   await axios
     .all(urls.map((url) => axiosAuthenticated.get<Type>(url, {signal: signal})))
     .then((response) => {
@@ -88,7 +121,7 @@ export async function getUrlDict<Type>(urls: Url[], resultMap: Map<Url, Type>, s
         resultMap.set(resp.config.url as string, resp.data)
       );
     })
-    .catch((ex) => {
-      console.log('getUrlDict', ex);
+    .catch((err) => {
+        parseError(err, setError, signal);
     });
 }

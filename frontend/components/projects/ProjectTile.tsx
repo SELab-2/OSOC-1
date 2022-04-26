@@ -20,6 +20,8 @@ import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import ProjectPopup, { projectFormFromProject } from './ProjectPopup';
 import { getUrlDict, getUrlList } from '../../lib/requestUtils';
+import Error from "../Error";
+import {SpinnerCircular} from "spinners-react";
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -132,14 +134,14 @@ function reloadProject(
     });
 }
 
-async function getEntireProject(projectBase: ProjectBase, signal: AbortSignal): Promise<Project> {
+async function getEntireProject(projectBase: ProjectBase, setLoading: (loading: boolean) => void, signal: AbortSignal, setError: (error: string) => void): Promise<Project> {
   const newProject: Project = convertProjectBase(projectBase);
 
   const positionMap = new Map<Url, Position>();
   await Promise.all([
-    getUrlList<User>(projectBase.coaches, newProject.coaches, signal),
-    getUrlList<Assignment>(projectBase.assignments, newProject.assignments, signal),
-    getUrlDict<Position>(projectBase.positions, positionMap, signal),
+    getUrlList<User>(projectBase.coaches, newProject.coaches, signal, setError),
+    getUrlList<Assignment>(projectBase.assignments, newProject.assignments, signal, setError),
+    getUrlDict<Position>(projectBase.positions, positionMap, signal, setError),
   ]);
 
   if (signal.aborted){
@@ -153,7 +155,7 @@ async function getEntireProject(projectBase: ProjectBase, signal: AbortSignal): 
     newProject.assignments.map(
       (assignment) => assignment.student
     ) as unknown as string[],
-    studentMap, signal
+    studentMap, signal, setError
   );
 
   const suggesterMap = new Map<Url, User>();
@@ -161,7 +163,7 @@ async function getEntireProject(projectBase: ProjectBase, signal: AbortSignal): 
       newProject.assignments.map(
           (assignment) => assignment.suggester
       ) as unknown as string[],
-      suggesterMap, signal
+      suggesterMap, signal, setError
   );
 
   if (signal.aborted){
@@ -179,6 +181,7 @@ async function getEntireProject(projectBase: ProjectBase, signal: AbortSignal): 
         assignment.suggester as unknown as string
     ) as User;
   }
+  setLoading(false);
   return newProject;
 }
 
@@ -203,7 +206,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
     ProjectBase,
     (myProjectBase: ProjectBase) => void
   ] = useState(projectInput as ProjectBase);
-
+  const [error, setError]: [string, (error: string) => void] = useState('');
+  const [loading, setLoading]: [boolean, (loading: boolean) => void] = useState<boolean>(true);
   let controller = new AbortController();
 
   const [openAssignment, setOpenAssignment]: [
@@ -226,10 +230,11 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   useAxiosAuth();
 
   useEffect(() => {
+    setLoading(true);
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireProject(myProjectBase, signal).then((response) => {
+    getEntireProject(myProjectBase, setLoading, signal, setError).then((response) => {
       setMyProject(response);
     });
     return () => {controller.abort();};
@@ -274,6 +279,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
       ref={drop}
       className="m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]"
     >
+      {error && <Error error={error} className="mb-4" />}
       {/* project info top */}
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}
@@ -315,6 +321,17 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           />
         ))}
       </div>
+
+      {loading && <div className="text-center w-full">
+        <p>Loading</p>
+        <SpinnerCircular
+            size={60}
+            thickness={80}
+            color="#FCB70F"
+            secondaryColor="rgba(252, 183, 15, 0.4)"
+            className="mx-auto"
+        />
+      </div>}
 
       {/* This is the popup to assign a student to a project */}
       <Popup

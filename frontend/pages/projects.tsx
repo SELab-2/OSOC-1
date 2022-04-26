@@ -22,6 +22,7 @@ import {SpinnerCircular} from "spinners-react";
 import axios, {AxiosError} from "axios";
 import {router} from "next/client";
 import Error from "../components/Error";
+import {parseError} from "../lib/requestUtils";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -58,7 +59,6 @@ function searchProject(
   setError: (error: string) => void
 ) {
   setLoading(true);
-  setError('');
   axiosAuthenticated
     .get<ProjectData>(Endpoints.PROJECTS, {
       params: {
@@ -79,16 +79,12 @@ function searchProject(
       setLoading(false);
     })
     .catch((err) => {
-      setLoading(false);
       const newState = { ...state };
       newState.loading = false;
       setState(newState);
-      if (axios.isAxiosError(err)) {
-        const _err = err as AxiosError;
-        if (_err.response?.status === 400) router.push('/login'); // error when trying to refresh refreshtoken
-        if (!signal.aborted) {
-          setError(_err.response?.statusText || 'An unknown error occurred');
-        }
+      parseError(err, setError, signal);
+      if (!signal.aborted){
+        setLoading(false);
       }
     });
 }
@@ -144,10 +140,10 @@ const Projects: NextPage = () => {
 
   const showBlank = () => {
     if (loading) {
-      return <div className="text-center">
+      return <div className="text-center w-full">
         <p>Loading Projects</p>
         <SpinnerCircular
-            size={30}
+            size={100}
             thickness={100}
             color="#FCB70F"
             secondaryColor="rgba(252, 183, 15, 0.4)"
@@ -185,7 +181,7 @@ const Projects: NextPage = () => {
             >
               <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
             </div>
-            <StudentSidebar />
+            <StudentSidebar setError={setError}/>
           </section>
 
           {/* Holds the projects searchbar + project tiles */}
@@ -286,7 +282,7 @@ const Projects: NextPage = () => {
               <div className={`${state.loading && state.page > 0 ? 'visible block' : 'hidden'} text-center`}>
                 <p>Loading Projects</p>
                 <SpinnerCircular
-                    size={30}
+                    size={100}
                     thickness={100}
                     color="#FCB70F"
                     secondaryColor="rgba(252, 183, 15, 0.4)"
