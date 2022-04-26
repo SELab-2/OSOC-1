@@ -129,6 +129,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
         mockMvc.perform(get("$editionUrl?status=NonExistentStatus").principal(defaultPrincipal))
             .andExpect(status().isBadRequest)
+        mockMvc.perform(get("$editionUrl?status=Yes,No,Undecided,").principal(defaultPrincipal))
+            .andExpect(status().isBadRequest)
     }
 
     @Test
