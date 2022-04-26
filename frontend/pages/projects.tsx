@@ -18,6 +18,7 @@ import ProjectPopup, {
 } from '../components/projects/ProjectPopup';
 import FlatList from 'flatlist-react';
 import useUser from "../hooks/useUser";
+import {SpinnerCircular} from "spinners-react";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -84,8 +85,8 @@ const Projects: NextPage = () => {
     ProjectBase[],
     (projects: ProjectBase[]) => void
   ] = useState([] as ProjectBase[]);
-  const [loading, setLoading]: [boolean, (loading: boolean) => void] =
-    useState<boolean>(true);
+  // const [loading, setLoading]: [boolean, (loading: boolean) => void] =
+  //   useState<boolean>(true);
   const [error, setError]: [string, (error: string) => void] = useState('');
 
   const [projectForm, setProjectForm] = useState({ ...defaultprojectForm });
@@ -110,7 +111,7 @@ const Projects: NextPage = () => {
     hasMoreItems: true,
     page: 0,
     pageSize: 50,
-    loading: false,
+    loading: true,
   });
 
   const showBlank = () => {
@@ -127,7 +128,7 @@ const Projects: NextPage = () => {
   return (
     <div className="min-w-screen flex min-h-screen flex-col items-center">
       <Header />
-      <DndProvider backend={HTML5Backend}>
+      <DndProvider backend={HTML5Backend} key={1}>
         <main className="flex w-full flex-row">
           {/* Holds the sidebar with search, filter and student results */}
           <section
@@ -224,7 +225,16 @@ const Projects: NextPage = () => {
                 renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
                 hasMoreItems={state.hasMoreItems}
                 loadMoreItems={fetchData}
-                paginationLoadingIndicator={<div>Loading Projects</div>} // TODO style this
+                paginationLoadingIndicator={<div>
+                  <p>Loading Projects</p>
+                  <SpinnerCircular
+                      size={100}
+                      thickness={80}
+                      color="#FCB70F"
+                      secondaryColor="rgba(252, 183, 15, 0.4)"
+                      className="mx-auto"
+                  />
+                </div>} // TODO style this
                 paginationLoadingIndicatorPosition="center"
               />
             </div>

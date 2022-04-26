@@ -9,6 +9,7 @@ import Select from 'react-select';
 import FlatList from 'flatlist-react';
 import { getSkills } from '../lib/requestUtils';
 import StudentTile from './students/StudentTile';
+import {SpinnerCircular} from "spinners-react";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 /**
@@ -27,55 +28,65 @@ type StudentsSidebarProps = PropsWithChildren<unknown>;
  * @param setFilterAmount         - callback to set total amount of filtered results
  * @param state                   - holds page, loading, hasMoreItems, pageSize
  * @param setState                - set the state variable
+ * @param setLoading
+ * @param signal
  */
 // TODO show/handle errors
-function searchStudent(
-  studentNameSearch: string,
-  skills: Array<{ value: string; label: string }>,
-  studentSearchParameters: Record<string, boolean>,
-  setStudents: (students: StudentBase[]) => void,
-  setFilterAmount: (filterAmount: number) => void,
-  state: {
-    hasMoreItems: boolean;
-    page: number;
-    pageSize: number;
-    loading: boolean;
-  },
-  setState: (state: {
-    hasMoreItems: boolean;
-    page: number;
-    pageSize: number;
-    loading: boolean;
-  }) => void
+async function searchStudent(
+    studentNameSearch: string,
+    skills: Array<{ value: string; label: string }>,
+    studentSearchParameters: Record<string, boolean>,
+    setStudents: (students: StudentBase[]) => void,
+    setFilterAmount: (filterAmount: number) => void,
+    state: {
+      hasMoreItems: boolean;
+      loading: boolean;
+      page: number;
+      pageSize: number;
+    },
+    setState: (state: {
+      hasMoreItems: boolean;
+      loading: boolean;
+      page: number;
+      pageSize: number;
+    }) => void,
+    setLoading: (loading: boolean) => void,
+    signal: AbortSignal
 ) {
-  state.loading = true;
+  setLoading(true);
   axiosAuthenticated
-    .get<StudentData>(Endpoints.STUDENTS, {
-      params: {
-        name: studentNameSearch,
-        includeSuggested: !studentSearchParameters.ExcludeSuggested,
-        status: getStatusFilterList(studentSearchParameters),
-        skills: skills.map((skill) => skill.value).join(','),
-        alumnOnly: studentSearchParameters.OnlyAlumni,
-        studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
-        unassignedOnly: studentSearchParameters.ExcludeAssigned,
-        pageNumber: state.page,
-        pageSize: state.pageSize,
-      },
-    })
-    .then((response) => {
-      setStudents(response.data.collection as StudentBase[]);
-      setFilterAmount(response.data.totalLength as number);
-      const newState = { ...state };
-      newState.page = state.page + 1;
-      newState.hasMoreItems =
-        response.data.totalLength > state.page * state.pageSize;
-      setState(newState);
-    })
-    .catch((ex) => {
-      console.log(ex);
-    });
-  state.loading = false;
+      .get<StudentData>(Endpoints.STUDENTS, {
+        params: {
+          name: studentNameSearch,
+          includeSuggested: !studentSearchParameters.ExcludeSuggested,
+          status: getStatusFilterList(studentSearchParameters),
+          skills: skills.map((skill) => skill.value).join(','),
+          alumnOnly: studentSearchParameters.OnlyAlumni,
+          studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
+          unassignedOnly: studentSearchParameters.ExcludeAssigned,
+          pageNumber: state.page,
+          pageSize: state.pageSize,
+        },
+        signal: signal
+      })
+      .then((response) => {
+        setStudents(response.data.collection as StudentBase[]);
+        setFilterAmount(response.data.totalLength as number);
+        const newState = {...state};
+        newState.page = state.page + 1;
+        newState.hasMoreItems =
+            response.data.totalLength > state.page * state.pageSize;
+        newState.loading = false;
+        setState(newState);
+        setLoading(false);
+      })
+      .catch((ex) => {
+        setLoading(false);
+        console.log(ex);
+        const newState = { ...state };
+        newState.loading = true;
+        setState(newState);
+      });
 }
 
 /**
@@ -104,6 +115,8 @@ function getStatusFilterList(
 const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   const [showFilter, setShowFilter] = useState(true);
 
+  let controller = new AbortController();
+
   // Split this from studentSearchParameters to avoid typing hacks
   const [skills, setSkills] = useState(
     [] as Array<{ value: string; label: string }>
@@ -127,7 +140,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
   ] = useState([] as StudentBase[]);
 
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
-    useState<boolean>(true); // TODO use this for styling
+    useState<boolean>(true);
 
   const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
 
@@ -173,6 +186,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
     // TODO this should probably update when a new skill is created but that seems difficult
     getSkills(setSkillOptions);
     state.page = 0;
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
     searchStudent(
       studentNameSearch,
       skills,
@@ -180,8 +196,11 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       setStudents,
       setFilterAmount,
       state,
-      setState
+      setState,
+        setLoading,
+        signal
     );
+    return () => {controller.abort();};
   }, []);
 
   /**
@@ -189,6 +208,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
    */
   useEffect(() => {
     state.page = 0;
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
     searchStudent(
       studentNameSearch,
       skills,
@@ -196,25 +218,45 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       setStudents,
       setFilterAmount,
       state,
-      setState
+      setState,
+        setLoading,
+        signal
     );
+    return () => {controller.abort();};
   }, [studentSearchParameters, skills]);
 
   const [state, setState] = useState({
     hasMoreItems: true,
+    loading: true,
     page: 0,
     pageSize: 50,
-    loading: false,
   });
 
   const showBlank = () => {
-    if (students.length === 0 && state.loading) {
-      return <div>Loading students...</div>;
+    if (loading) {
+      return <div className="text-center">
+        <p>Loading Students</p>
+        <SpinnerCircular
+            size={30}
+            thickness={100}
+            color="#FCB70F"
+            secondaryColor="rgba(252, 183, 15, 0.4)"
+            className="mx-auto"
+        />
+      </div>;
     }
-    return <div>No students found.</div>;
+    return <div className="text-center">No students found.</div>;
   };
 
   const fetchData = () => {
+    // console.log('fetching');
+    if (state.loading){
+      return;
+    }
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    state.loading = true;
     searchStudent(
       studentNameSearch,
       skills,
@@ -222,8 +264,11 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
       updateStudents,
       setFilterAmount,
       state,
-      setState
+      setState,
+        setLoading,
+        signal
     );
+    return () => {controller.abort();};
   };
 
   return (
@@ -244,6 +289,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 onKeyPress={(e) => {
                   if (e.key == 'Enter') {
                     state.page = 0;
+                    controller.abort();
+                    controller = new AbortController();
+                    const signal = controller.signal;
                     searchStudent(
                       studentNameSearch,
                       skills,
@@ -251,7 +299,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                       setStudents,
                       setFilterAmount,
                       state,
-                      setState
+                      setState,
+                        setLoading,
+                        signal
                     );
                   }
                 }}
@@ -260,6 +310,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                 className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
                 onClick={() => {
                   state.page = 0;
+                  controller.abort();
+                  controller = new AbortController();
+                  const signal = controller.signal;
                   searchStudent(
                     studentNameSearch,
                     skills,
@@ -267,7 +320,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
                     setStudents,
                     setFilterAmount,
                     state,
-                    setState
+                    setState,
+                      setLoading,
+                      signal
                   );
                 }}
               >
@@ -521,9 +576,21 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
             renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
             hasMoreItems={state.hasMoreItems}
             loadMoreItems={fetchData}
-            paginationLoadingIndicator={<div>Loading Students</div>} // TODO style this
+            state={state}
+            // Use an empty div here to avoid showing the default since it has a bug
+            paginationLoadingIndicator={<div/>}
             paginationLoadingIndicatorPosition="center"
           />
+          <div className={`${state.loading && state.page > 0 ? 'visible block' : 'hidden'} text-center`}>
+            <p>Loading Students</p>
+            <SpinnerCircular
+                size={30}
+                thickness={100}
+                color="#FCB70F"
+                secondaryColor="rgba(252, 183, 15, 0.4)"
+                className="mx-auto"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -531,127 +598,3 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = () => {
 };
 
 export default StudentSidebar;
-
-// Temporary fake data to test with
-const students_fake = [
-  {
-    id: '1',
-    firstName: 'FNaam1',
-    lastName: 'LNaam1',
-    status: 'Undecided',
-    statusSuggestions: [
-      {
-        coachId: '100',
-        status: StatusSuggestionStatus.Yes,
-        motivation: 'Dit is een motivatie voor yes',
-      },
-      {
-        coachId: '101',
-        status: StatusSuggestionStatus.Yes,
-        motivation: 'Dit is een motivatie voor yes',
-      },
-      {
-        coachId: '102',
-        status: StatusSuggestionStatus.No,
-        motivation: 'Dit is een motivatie voor no',
-      },
-    ],
-    alumn: true,
-  },
-  {
-    id: '2',
-    firstName: 'FNaam2',
-    lastName: 'LNaam2',
-    status: 'Undecided',
-    statusSuggestions: [
-      {
-        coachId: '100',
-        status: StatusSuggestionStatus.Maybe,
-        motivation: 'Dit is een motivatie voor maybe',
-      },
-      {
-        coachId: '101',
-        status: StatusSuggestionStatus.Yes,
-        motivation: 'Dit is een motivatie voor yes',
-      },
-      {
-        coachId: '102',
-        status: StatusSuggestionStatus.No,
-        motivation: 'Dit is een motivatie voor no',
-      },
-    ],
-    alumn: false,
-  },
-  {
-    id: '3',
-    firstName: 'FNaam2',
-    lastName: 'LNaam2',
-    status: StatusSuggestionStatus.Yes,
-    statusSuggestions: [
-      {
-        coachId: '100',
-        status: StatusSuggestionStatus.Maybe,
-        motivation: 'Dit is een motivatie voor maybe',
-      },
-      {
-        coachId: '101',
-        status: StatusSuggestionStatus.Yes,
-        motivation: 'Dit is een motivatie voor yes',
-      },
-      {
-        coachId: '102',
-        status: StatusSuggestionStatus.No,
-        motivation: 'Dit is een motivatie voor no',
-      },
-    ],
-    alumn: false,
-  },
-  {
-    id: '4',
-    firstName: 'FNaam2',
-    lastName: 'LNaam2',
-    status: StatusSuggestionStatus.No,
-    statusSuggestions: [
-      {
-        coachId: '100',
-        status: StatusSuggestionStatus.Maybe,
-        motivation: 'Dit is een motivatie voor maybe',
-      },
-      {
-        coachId: '101',
-        status: StatusSuggestionStatus.No,
-        motivation: 'Dit is een motivatie voor no',
-      },
-      {
-        coachId: '102',
-        status: StatusSuggestionStatus.No,
-        motivation: 'Dit is een motivatie voor no',
-      },
-    ],
-    alumn: false,
-  },
-  {
-    id: '5',
-    firstName: 'FNaam2',
-    lastName: 'LNaam2',
-    status: StatusSuggestionStatus.Maybe,
-    statusSuggestions: [
-      {
-        coachId: '100',
-        status: StatusSuggestionStatus.Maybe,
-        motivation: 'Dit is een motivatie voor maybe',
-      },
-      {
-        coachId: '101',
-        status: StatusSuggestionStatus.Yes,
-        motivation: 'Dit is een motivatie voor yes',
-      },
-      {
-        coachId: '102',
-        status: StatusSuggestionStatus.No,
-        motivation: 'Dit is een motivatie voor no',
-      },
-    ],
-    alumn: false,
-  },
-];
