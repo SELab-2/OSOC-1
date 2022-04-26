@@ -91,10 +91,10 @@ class ProjectController(private val service: ProjectService) {
      *
      * Returns the patched project in the response body, with a link pointing to the resource in the Location header.
      *
-     * The endpoint expects every field in full except for the assignment list, the assignment list should be provided
-     * as a list of urls that if fetched return associated the [Assignment] object.
+     * The endpoint expects every field in full except for the assignments field. The assignments field should be
+     * provided as a list of urls that if fetched return associated the [Assignment] object.
      *
-     * Example of the assignment field:
+     * Example of the assignments field:
      * ```json
      * "assignments": [
      *     "http://localhost:8080/api/assignments/f9fefa13-80a3-439a-bf59-3cdacd60e2fc",
