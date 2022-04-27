@@ -133,7 +133,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
    * This hook allows dragging the StudentTile
    * It can be dropped onto a ProjectTile and will then open assignment functionality
    */
-  const [{ isDragging }, drag] = useDrag(
+  const [, drag] = useDrag(
     () => ({
       type: ItemTypes.STUDENTTILE,
       item: student, // This is what will be 'given' to the project this is dropped on

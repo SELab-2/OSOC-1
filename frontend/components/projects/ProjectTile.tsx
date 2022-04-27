@@ -274,7 +274,6 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         setMyProject(response);
       }
     );
-    // setProjectForm(projectFormFromProject(myProject, myProjectBase.assignments));
     return () => {
       controller.abort();
     };
@@ -288,7 +287,11 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: ItemTypes.STUDENTTILE,
-      canDrop: () => true, // TODO add check to see if student is already part of project & if any positions are left
+      canDrop: (item) => {
+        return !myProject.assignments
+          .map((assignment) => assignment.student.id)
+          .includes((item as Student).id);
+      },
       drop: (item) => {
         setStudent(item as Student);
         setOpenAssignment(true); // This opens the popup window to select position & type reason
@@ -296,9 +299,9 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
-      }), // TODO isOver & canDrop styling
+      }),
     }),
-    []
+    [myProject]
   );
 
   /**
@@ -313,7 +316,11 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   return (
     <div
       ref={drop}
-      className="m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]"
+      className={`${
+        isOver && !canDrop ? 'bg-check-red' : 'bg-osoc-neutral-bg'
+      } ${
+        isOver && canDrop ? 'bg-check-green' : 'bg-osoc-neutral-bg'
+      } m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]`}
     >
       {error && <Error error={error} className="mb-4" />}
       {/* project info top */}
