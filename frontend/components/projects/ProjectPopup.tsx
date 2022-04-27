@@ -7,6 +7,7 @@ import Select from 'react-select';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import Error from '../Error';
+import {useRouter} from "next/router";
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -109,12 +110,14 @@ export function projectFormFromProject(
  * @param setMyProjectBase - callback function to set result (can be used for reloading)
  * @param signal - AbortSignal for the axios request
  * @param setError - callback to set error message
+ * @param edition - the active edition
  */
 function postOrPatchProject(
   projectForm: ProjectForm,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  edition: string
 ) {
   const data = {
     name: projectForm.projectName,
@@ -134,8 +137,7 @@ function postOrPatchProject(
   if (projectForm.id) {
     data.id = projectForm.id;
     data.assignments = projectForm.assignments;
-    // TODO fix this
-    data.edition = 'ed';
+    data.edition = edition;
     data.positions = projectForm.positions.map((position) => {
       const newPos = {
         skill: {
@@ -151,7 +153,7 @@ function postOrPatchProject(
   (projectForm.id
     ? axiosAuthenticated.patch
     : axiosAuthenticated.post)<ProjectBase>(
-    Endpoints.PROJECTS + (projectForm.id ? '/' + projectForm.id : ''),
+      '/' + edition + Endpoints.PROJECTS + (projectForm.id ? '/' + projectForm.id : ''),
     data
   )
     .then((response) => {
@@ -210,6 +212,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
   setMyProjectBase,
   setDeletePopup,
 }: ProjectPopupProp) => {
+  const edition = useRouter().query.editionName as string;
   /**
    * Update the position dropdown value for the position at index key in projectForm
    * @param key - the index in projectForm['positions']
@@ -316,7 +319,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
           controller.abort();
           controller = new AbortController();
           const signal = controller.signal;
-          postOrPatchProject(projectForm, setMyProjectBase, signal, setError);
+          postOrPatchProject(projectForm, setMyProjectBase, signal, setError, edition);
           setShowPopup(false);
           return () => {
             controller.abort();
