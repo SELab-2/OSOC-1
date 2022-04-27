@@ -36,7 +36,6 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
  * @param signal - AbortSignal for the axios request
  * @param setError - callback to set error message
  */
-// TODO show/handle errors
 function searchProject(
   projectSearch: string,
   setProjects: (projects: ProjectBase[]) => void,
@@ -67,12 +66,13 @@ function searchProject(
       signal: signal,
     })
     .then((response) => {
-      setProjects(response.data.collection as ProjectBase[]);
       const newState = { ...state };
       newState.page = state.page + 1;
       newState.hasMoreItems =
         response.data.totalLength > state.page * state.pageSize;
       newState.loading = false;
+      // VERY IMPORTANT TO CHANGE STATE FIRST!!!!
+      setProjects(response.data.collection as ProjectBase[]);
       setState(newState);
       setLoading(false);
     })
@@ -107,7 +107,9 @@ const Projects: NextPage = () => {
 
   let controller = new AbortController();
 
-  const [projectForm, setProjectForm] = useState({ ...defaultprojectForm });
+  const [projectForm, setProjectForm] = useState(
+    JSON.parse(JSON.stringify({ ...defaultprojectForm }))
+  );
 
   const updateProjects: (param: ProjectBase[]) => void = (
     projectsList: ProjectBase[]
@@ -138,6 +140,26 @@ const Projects: NextPage = () => {
       controller.abort();
     };
   }, []);
+
+  const refreshProjects = () => {
+    setProjectForm(JSON.parse(JSON.stringify({ ...defaultprojectForm })));
+    state.page = 0;
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    searchProject(
+      projectSearch,
+      setProjects,
+      state,
+      setState,
+      setLoading,
+      signal,
+      setError
+    );
+    return () => {
+      controller.abort();
+    };
+  };
 
   const [state, setState] = useState({
     hasMoreItems: true,
@@ -354,6 +376,7 @@ const Projects: NextPage = () => {
               setShowPopup={setShowCreateProject}
               setProjectForm={setProjectForm}
               setError={setError}
+              setMyProjectBase={refreshProjects}
             />
           </div>
         </div>

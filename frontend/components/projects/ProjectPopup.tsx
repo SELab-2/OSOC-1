@@ -1,11 +1,11 @@
 import { Fragment, useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
-import { Project, Url, User, UUID } from '../../lib/types';
+import { Project, ProjectBase, Url, User, UUID } from '../../lib/types';
 import CreatableSelect from 'react-select/creatable';
-import {getCoaches, getSkills, parseError} from '../../lib/requestUtils';
+import { getCoaches, getSkills, parseError } from '../../lib/requestUtils';
 import Select from 'react-select';
-import {axiosAuthenticated} from "../../lib/axios";
-import Endpoints from "../../lib/endpoints";
+import { axiosAuthenticated } from '../../lib/axios';
+import Endpoints from '../../lib/endpoints';
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -17,6 +17,7 @@ type ProjectPopupProp = {
   setShowPopup: (showPopup: boolean) => void;
   setProjectForm: (projectForm: ProjectForm) => void;
   setError: (error: string) => void;
+  setMyProjectBase: (myProjectBase: ProjectBase) => void;
 };
 
 /**
@@ -46,7 +47,7 @@ type ProjectForm = {
 };
 
 /**
- * Always unpack this value when assigning to avoid strange behaviour
+ * Always unpack this value and use JSON.parse JSON.stringify when assigning to avoid strange behaviour
  */
 const defaultPosition = {
   amount: '',
@@ -54,7 +55,7 @@ const defaultPosition = {
 };
 
 /**
- * Always unpack this value when assigning to avoid strange behaviour
+ * Always unpack this value and use JSON.parse JSON.stringify when assigning to avoid strange behaviour
  */
 export const defaultprojectForm = {
   id: '',
@@ -62,7 +63,9 @@ export const defaultprojectForm = {
   clientName: '',
   description: '',
   coaches: [] as User[],
-  positions: [{ ...defaultPosition }] as positionForm[],
+  positions: [
+    JSON.parse(JSON.stringify({ ...defaultPosition })),
+  ] as positionForm[],
   assignments: [] as Url[],
 } as ProjectForm;
 
@@ -89,44 +92,63 @@ export function projectFormFromProject(
       (({
         amount: value.amount.toString(),
         skill: { value: value.id, label: value.skill.skillName },
-      } as positionForm) || ([{ ...defaultPosition }] as positionForm[]))
+      } as positionForm) ||
+      ([JSON.parse(JSON.stringify({ ...defaultPosition }))] as positionForm[]))
   );
   newProjectForm.assignments = assignmentUrls || ([] as Url[]);
   return newProjectForm;
 }
 
-// TODO once patch endpoint is actually finished
-function postOrPatchProject(projectForm: ProjectForm) {
-  (projectForm.id ? axiosAuthenticated.patch : axiosAuthenticated.post)(
-          Endpoints.PROJECTS + (projectForm.id ? '' : '/' + projectForm.id),
-          {
-            name: projectForm.projectName,
-            clientName: projectForm.clientName,
-            description: projectForm.description,
-            coaches: projectForm.coaches,
-            positions: projectForm.positions.map(position => {
-              return {
-                skill: {
-                  skillName: position.skill.label
-                },
-                amount: position.amount
-                // edition
-                // id only needed for patch
-              }}),
-            // edition: {name: 'ed', isActive: true}, only needed for patch
-            // assignments only needed for patch
-            // id only needed for patch
-          }
-      )
-      .then((response) => {
-        // console.log(response);
-        // reloadProject(projectId, setMyProjectBase, signal, setError);
-        console.log("response:", response);
-      })
-      .catch((err) => {
-        // parseError(err, setError, signal);
-        console.log("error:", err);
-      });
+function postOrPatchProject(
+  projectForm: ProjectForm,
+  setMyProjectBase: (myProjectBase: ProjectBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void
+) {
+  const data = {
+    name: projectForm.projectName,
+    clientName: projectForm.clientName,
+    description: projectForm.description,
+    coaches: projectForm.coaches,
+    positions: projectForm.positions.map((position) => {
+      return {
+        skill: {
+          skillName: position.skill.label,
+        },
+        amount: position.amount,
+      };
+    }),
+  } as { [key: string]: unknown };
+
+  if (projectForm.id) {
+    data.id = projectForm.id;
+    data.assignments = projectForm.assignments;
+    // TODO fix this
+    data.edition = 'ed';
+    data.positions = projectForm.positions.map((position) => {
+      const newPos = {
+        skill: {
+          skillName: position.skill.label,
+        },
+        amount: position.amount,
+      } as { [key: string]: unknown };
+      position.skill.value ? (newPos.id = position.skill.value) : null;
+      return newPos;
+    });
+  }
+
+  (projectForm.id
+    ? axiosAuthenticated.patch
+    : axiosAuthenticated.post)<ProjectBase>(
+    Endpoints.PROJECTS + (projectForm.id ? '/' + projectForm.id : ''),
+    data
+  )
+    .then((response) => {
+      setMyProjectBase(response.data as ProjectBase);
+    })
+    .catch((err) => {
+      parseError(err, setError, new AbortSignal());
+    });
 }
 
 /**
@@ -134,16 +156,18 @@ function postOrPatchProject(projectForm: ProjectForm) {
  * This form does not include a title and should be placed inside an element with
  * overflow-y-auto and either the element or a parent should have a max height set
  *
- * @param projectForm - use either \{...defaultprojectForm\} or projectFormFromProject(Project)
- * @param setShowPopup - const to set to false when popup should close (on from submission or cancel)
- * @param setProjectForm - const to use to change the passed projectForm, needed to save user changes
- * @param setError
+ * @param projectForm - use either defaultprojectForm or projectFormFromProject(Project)
+ * @param setShowPopup - callback to set to false when popup should close (on from submission or cancel)
+ * @param setProjectForm - callback to use to change the passed projectForm, needed to save user changes
+ * @param setError - callback to set error message
+ * @param setMyProjectBase - callback for the updated ProjectBase object
  */
 const ProjectPopup: React.FC<ProjectPopupProp> = ({
   projectForm,
   setShowPopup,
   setProjectForm,
   setError,
+  setMyProjectBase,
 }: ProjectPopupProp) => {
   /**
    * Update the position dropdown value for the position at index key in projectForm
@@ -175,9 +199,9 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
    */
   const addPositionDropdown = () => {
     const newProjectForm = { ...projectForm };
-    (newProjectForm['positions'] as positionForm[]).push({
-      ...defaultPosition,
-    } as positionForm);
+    (newProjectForm['positions'] as positionForm[]).push(
+      JSON.parse(JSON.stringify({ ...defaultPosition })) as positionForm
+    );
     setProjectForm(newProjectForm);
   };
 
@@ -241,10 +265,14 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        postOrPatchProject(projectForm);
-        // TODO add submit function
-        // TODO don't forget to reset projectForm to default afterwards
+        controller.abort();
+        controller = new AbortController();
+        const signal = controller.signal;
+        postOrPatchProject(projectForm, setMyProjectBase, signal, setError);
         setShowPopup(false);
+        return () => {
+          controller.abort();
+        };
       }}
     >
       <label className="mb-2 block px-5">

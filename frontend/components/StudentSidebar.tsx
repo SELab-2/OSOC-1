@@ -63,7 +63,7 @@ async function searchStudent(
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
         status: getStatusFilterList(studentSearchParameters),
-        skills: skills.map((skill) => skill.value).join(','),
+        skills: skills.map((skill) => skill.label).join(','),
         alumnOnly: studentSearchParameters.OnlyAlumni,
         studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
         unassignedOnly: studentSearchParameters.ExcludeAssigned,
@@ -73,14 +73,15 @@ async function searchStudent(
       signal: signal,
     })
     .then((response) => {
-      setStudents(response.data.collection as StudentBase[]);
-      setFilterAmount(response.data.totalLength as number);
       const newState = { ...state };
       newState.page = state.page + 1;
       newState.hasMoreItems =
         response.data.totalLength > state.page * state.pageSize;
       newState.loading = false;
       setState(newState);
+      // VERY IMPORTANT TO CHANGE STATE FIRST!!!!
+      setStudents(response.data.collection as StudentBase[]);
+      setFilterAmount(response.data.totalLength as number);
       setLoading(false);
     })
     .catch((err) => {
@@ -193,7 +194,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    // TODO this should probably update when a new skill is created but that seems difficult
     getSkills(setSkillOptions, signal, setError);
     state.page = 0;
     searchStudent(
@@ -221,6 +221,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
+    getSkills(setSkillOptions, signal, setError);
     searchStudent(
       studentNameSearch,
       skills,
@@ -264,7 +265,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   };
 
   const fetchData = () => {
-    // console.log('fetching');
     if (state.loading) {
       return;
     }

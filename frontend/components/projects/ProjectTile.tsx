@@ -20,7 +20,7 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import ProjectPopup, { projectFormFromProject } from './ProjectPopup';
-import {getUrlDict, getUrlList, parseError} from '../../lib/requestUtils';
+import { getUrlDict, getUrlList, parseError } from '../../lib/requestUtils';
 import Error from '../Error';
 import { SpinnerCircular } from 'spinners-react';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
@@ -82,8 +82,7 @@ function postStudentToProject(
         reason: reason,
       }
     )
-    .then((response) => {
-      console.log(response);
+    .then(() => {
       reloadProject(projectId, setMyProjectBase, signal, setError);
     })
     .catch((err) => {
@@ -111,10 +110,9 @@ function deleteStudentFromProject(
 ) {
   axiosAuthenticated
     .delete(
-      Endpoints.PROJECTS + '/' + projectId + '/assignments/' + assignmentId,  // TODO import this url somehow
+      Endpoints.PROJECTS + '/' + projectId + '/assignments/' + assignmentId // TODO import this url somehow
     )
-    .then((response) => {
-      console.log(response);
+    .then(() => {
       reloadProject(projectId, setMyProjectBase, signal, setError);
     })
     .catch((err) => {
@@ -225,7 +223,6 @@ function convertProjectBase(projectBase: ProjectBase): Project {
 }
 
 const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
-  console.log('input:', JSON.stringify(projectInput.positions), JSON.stringify(projectInput.assignments));
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
     useState(convertProjectBase(projectInput) as Project); // using different names to avoid confusion
@@ -411,8 +408,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
                 currentUser.id,
                 reason,
                 setMyProjectBase,
-                  signal,
-                  setError
+                signal,
+                setError
               );
               closeAssignmentModal();
               return () => {
@@ -515,8 +512,8 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
                   myProject.id,
                   assignmentId,
                   setMyProjectBase,
-                    signal,
-                    setError
+                  signal,
+                  setError
                 );
                 return () => {
                   controller.abort();
@@ -561,6 +558,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
               setShowPopup={setShowEditProject}
               setProjectForm={setProjectForm}
               setError={setError}
+              setMyProjectBase={setMyProjectBase}
             />
           </div>
         </div>
