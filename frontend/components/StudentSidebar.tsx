@@ -17,6 +17,8 @@ const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
  */
 type StudentsSidebarProps = {
   setError: (error: string) => void;
+  refresh: boolean;
+  setRefresh: (refresh: boolean) => void;
 };
 
 /**
@@ -121,10 +123,10 @@ function getStatusFilterList(
  */
 const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   setError,
+  refresh,
+  setRefresh
 }: StudentsSidebarProps) => {
   const [showFilter, setShowFilter] = useState(true);
-
-  let controller = new AbortController();
 
   const [skills, setSkills] = useState(
     [] as Array<{ value: string; label: string }>
@@ -192,55 +194,59 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   };
 
   useAxiosAuth();
+  let controller = new AbortController();
 
-  useEffect(() => {
-    controller.abort();
-    controller = new AbortController();
-    const signal = controller.signal;
-    getSkills(setSkillOptions, signal, setError);
-    state.page = 0;
-    searchStudent(
-      studentNameSearch,
-      skills,
-      studentSearchParameters,
-      setStudents,
-      setFilterAmount,
-      state,
-      setState,
-      setLoading,
-      signal,
-      setError
-    );
-    return () => {
-      controller.abort();
-    };
-  }, []);
 
   /**
    * when a search parameter changes, call the function to reload results
+   * This will also get called on first render
    */
   useEffect(() => {
+    return search(true);
+  }, [studentSearchParameters, skills]);
+
+  /**
+   * This call refreshes the students without changing the current scroll position
+   * The downside here is that if the students length is 500 elements, all 500 elements
+   * need to be reloaded. This can be quite slow and does a lot of useless work.
+   */
+  useEffect(() => {
+    if (refresh && studentSearchParameters.ExcludeAssigned){
+      let prevPageSize = state.pageSize;
+      let prevPage = state.page
+      state.pageSize = state.page * state.pageSize;
+      search();
+      state.page = prevPage;
+      state.pageSize = prevPageSize;
+    }
+    setRefresh(false);
+  },[refresh]);
+
+  /**
+   * Call to refresh students list from page 0 with current filters applied
+   */
+  const search = (refreshSkills: boolean = false) => {
     state.page = 0;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getSkills(setSkillOptions, signal, setError);
+    refreshSkills ? getSkills(setSkillOptions, signal, setError) : null;
     searchStudent(
-      studentNameSearch,
-      skills,
-      studentSearchParameters,
-      setStudents,
-      setFilterAmount,
-      state,
-      setState,
-      setLoading,
-      signal,
-      setError
+        studentNameSearch,
+        skills,
+        studentSearchParameters,
+        setStudents,
+        setFilterAmount,
+        state,
+        setState,
+        setLoading,
+        signal,
+        setError
     );
     return () => {
       controller.abort();
     };
-  }, [studentSearchParameters, skills]);
+  }
 
   /**
    * State for the infinite scroll FlatList
@@ -320,50 +326,14 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 onChange={(e) => setStudentNameSearch(e.target.value)}
                 onKeyPress={(e) => {
                   if (e.key == 'Enter') {
-                    state.page = 0;
-                    controller.abort();
-                    controller = new AbortController();
-                    const signal = controller.signal;
-                    searchStudent(
-                      studentNameSearch,
-                      skills,
-                      studentSearchParameters,
-                      setStudents,
-                      setFilterAmount,
-                      state,
-                      setState,
-                      setLoading,
-                      signal,
-                      setError
-                    );
-                    return () => {
-                      controller.abort();
-                    };
+                    return search();
                   }
                 }}
               />
               <i
                 className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
                 onClick={() => {
-                  state.page = 0;
-                  controller.abort();
-                  controller = new AbortController();
-                  const signal = controller.signal;
-                  searchStudent(
-                    studentNameSearch,
-                    skills,
-                    studentSearchParameters,
-                    setStudents,
-                    setFilterAmount,
-                    state,
-                    setState,
-                    setLoading,
-                    signal,
-                    setError
-                  );
-                  return () => {
-                    controller.abort();
-                  };
+                  return search();
                 }}
               >
                 {magnifying_glass}

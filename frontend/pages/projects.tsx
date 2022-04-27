@@ -96,6 +96,7 @@ const Projects: NextPage = () => {
   const [user] = useUser();
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
+  const [refreshStudents, setRefreshStudents] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState('' as string);
   const [loading, setLoading] = useState(true);
@@ -113,21 +114,7 @@ const Projects: NextPage = () => {
 
   useEffect(() => {
     state.page = 0;
-    controller.abort();
-    controller = new AbortController();
-    const signal = controller.signal;
-    searchProject(
-      projectSearch,
-      setProjects,
-      state,
-      setState,
-      setLoading,
-      signal,
-      setError
-    );
-    return () => {
-      controller.abort();
-    };
+    return search();
   }, []);
 
   /**
@@ -150,18 +137,26 @@ const Projects: NextPage = () => {
    */
   const refreshProjects = () => {
     setProjectForm(JSON.parse(JSON.stringify({ ...defaultprojectForm })));
+    return search();
+  };
+
+  /**
+   * Call to refresh projects list from page 0 with current filters applied
+   */
+  const search = () => {
+    setRefreshStudents(true);
     state.page = 0;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
     searchProject(
-      projectSearch,
-      setProjects,
-      state,
-      setState,
-      setLoading,
-      signal,
-      setError
+        projectSearch,
+        setProjects,
+        state,
+        setState,
+        setLoading,
+        signal,
+        setError
     );
     return () => {
       controller.abort();
@@ -241,7 +236,7 @@ const Projects: NextPage = () => {
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>
-              <StudentSidebar setError={setError} />
+              <StudentSidebar setError={setError} refresh={refreshStudents} setRefresh={setRefreshStudents} />
             </section>
 
             {/* Holds the projects searchbar + project tiles */}
@@ -276,44 +271,14 @@ const Projects: NextPage = () => {
                         onChange={(e) => setProjectSearch(e.target.value)}
                         onKeyPress={(e) => {
                           if (e.key == 'Enter') {
-                            state.page = 0;
-                            controller.abort();
-                            controller = new AbortController();
-                            const signal = controller.signal;
-                            searchProject(
-                              projectSearch,
-                              setProjects,
-                              state,
-                              setState,
-                              setLoading,
-                              signal,
-                              setError
-                            );
-                            return () => {
-                              controller.abort();
-                            };
+                            return search();
                           }
                         }}
                       />
                       <i
                         className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
                         onClick={() => {
-                          state.page = 0;
-                          controller.abort();
-                          controller = new AbortController();
-                          const signal = controller.signal;
-                          searchProject(
-                            projectSearch,
-                            setProjects,
-                            state,
-                            setState,
-                            setLoading,
-                            signal,
-                            setError
-                          );
-                          return () => {
-                            controller.abort();
-                          };
+                          return search();
                         }}
                       >
                         {magnifying_glass}
@@ -345,6 +310,7 @@ const Projects: NextPage = () => {
                       key={project.id}
                       projectInput={project}
                       refreshProjects={refreshProjects}
+                      setRefreshStudents={setRefreshStudents}
                     />
                   )}
                   renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show

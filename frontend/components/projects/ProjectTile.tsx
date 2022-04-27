@@ -33,6 +33,7 @@ const edit_icon = <Icon icon="akar-icons:edit" />;
 type ProjectProp = {
   projectInput: ProjectBase;
   refreshProjects: () => void;
+  setRefreshStudents: (refreshStudents: boolean) => void;
 };
 
 type UserProp = {
@@ -72,7 +73,8 @@ function postStudentToProject(
   reason: string,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  setRefreshStudents: (refreshStudents: boolean) => void
 ) {
   axiosAuthenticated
     .post(
@@ -86,6 +88,7 @@ function postStudentToProject(
     )
     .then(() => {
       reloadProject(projectId, setMyProjectBase, signal, setError);
+      setRefreshStudents(true);
     })
     .catch((err) => {
       parseError(err, setError, signal);
@@ -107,7 +110,8 @@ function deleteStudentFromProject(
   assignmentId: UUID,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  setRefreshStudents: (refreshStudents: boolean) => void
 ) {
   axiosAuthenticated
     .delete(
@@ -115,6 +119,7 @@ function deleteStudentFromProject(
     )
     .then(() => {
       reloadProject(projectId, setMyProjectBase, signal, setError);
+      setRefreshStudents(true);
     })
     .catch((err) => {
       parseError(err, setError, signal);
@@ -131,12 +136,14 @@ function deleteStudentFromProject(
 function deleteProject(
   projectId: UUID,
   refreshProjects: () => void,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  setRefreshStudents: (refreshStudents: boolean) => void
 ) {
   axiosAuthenticated
     .delete(Endpoints.PROJECTS + '/' + projectId)
     .then(() => {
       refreshProjects();
+      setRefreshStudents(true);
     })
     .catch((err) => {
       parseError(err, setError, new AbortController().signal);
@@ -260,6 +267,7 @@ function convertProjectBase(projectBase: ProjectBase): Project {
 const ProjectTile: React.FC<ProjectProp> = ({
   projectInput,
   refreshProjects,
+  setRefreshStudents,
 }: ProjectProp) => {
   const [user] = useUser();
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
@@ -451,7 +459,8 @@ const ProjectTile: React.FC<ProjectProp> = ({
                 reason,
                 setMyProjectBase,
                 signal,
-                setError
+                setError,
+                  setRefreshStudents
               );
               setOpenAssignment(false);
               return () => {
@@ -555,7 +564,8 @@ const ProjectTile: React.FC<ProjectProp> = ({
                   assignmentId,
                   setMyProjectBase,
                   signal,
-                  setError
+                  setError,
+                    setRefreshStudents
                 );
                 return () => {
                   controller.abort();
@@ -642,7 +652,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               onClick={() => {
                 setDeletePopup(false);
                 setShowEditProject(false);
-                deleteProject(myProject.id, refreshProjects, setError);
+                deleteProject(myProject.id, refreshProjects, setError, setRefreshStudents);
               }}
             >
               Delete
