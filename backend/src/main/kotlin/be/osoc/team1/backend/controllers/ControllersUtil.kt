@@ -19,11 +19,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
  *
  * `/api/students/(INSERT ID)`
  */
-fun <ID, T> getObjectCreatedResponse(id: ID, createdObject: T): ResponseEntity<T> {
+fun <ID, T> getObjectCreatedResponse(id: ID, createdObject: T, status: HttpStatus = HttpStatus.CREATED): ResponseEntity<T> {
     val postRequestPath = ServletUriComponentsBuilder.fromCurrentRequest()
     val pathWithIdAdded = postRequestPath.path("/{id}").buildAndExpand(id).toUriString()
     return ResponseEntity
-        .status(HttpStatus.CREATED)
+        .status(status)
         .header(HttpHeaders.LOCATION, pathWithIdAdded)
         .body(createdObject)
 }

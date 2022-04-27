@@ -34,33 +34,29 @@ import java.util.UUID
 
 class ProjectServiceTests {
     private val testId = UUID.randomUUID()
-    private val testStudent = Student("Lars", "Van Cauter")
+    private val testStudent = Student("Lars", "Van Cauter", "")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
+    private val testEdition = "testEdition"
     private val testSkill = Skill("Backend")
     private val testSkill2 = Skill("Frontend")
     private val testProject = Project(
-        "Test",
-        "Client",
-        "a test project",
+        "Test", "Client", "a test project", testEdition,
         mutableListOf(testCoach),
         listOf(Position(testSkill, 1), Position(testSkill2, 1))
     )
     private val savedProject = Project(
-        "Saved",
-        "Client",
-        "a saved project",
-        mutableListOf(testCoach)
+        "Saved", "Client", "a saved project", testEdition, mutableListOf(testCoach)
     )
     private val suggester = User("username", "email", Role.Coach, "password")
 
     private fun getRepository(projectAlreadyExists: Boolean): ProjectRepository {
         val repository: ProjectRepository = mockk()
-        every { repository.existsById(any()) } returns projectAlreadyExists
-        every { repository.findByIdOrNull(any()) } returns
+        every { repository.existsByIdAndEdition(any(), testEdition) } returns projectAlreadyExists
+        every { repository.findByIdAndEdition(any(), testEdition) } returns
             if (projectAlreadyExists) testProject else null
         every { repository.deleteById(any()) } just Runs
         every { repository.save(any()) } returns savedProject
-        every { repository.findAll() } returns listOf(testProject)
+        every { repository.findByEdition(testEdition) } returns listOf(testProject)
         return repository
     }
 
@@ -68,8 +64,8 @@ class ProjectServiceTests {
         val service = mockk<StudentService>()
         val skills = mutableSetOf<Skill>()
         if (hasSkill) skills.add(testSkill)
-        val student = Student("firstname", "lastname", skills)
-        every { service.getStudentById(any()) } returns student
+        val student = Student("firstname", "lastname", "", skills)
+        every { service.getStudentById(any(), testEdition) } returns student
         return service
     }
 
@@ -82,49 +78,49 @@ class ProjectServiceTests {
     @Test
     fun `getAllProjects does not fail`() {
         val service = ProjectService(getRepository(true), mockk(), getUserService())
-        assertEquals(listOf(testProject), service.getAllProjects(""))
+        assertEquals(listOf(testProject), service.getAllProjects(testEdition))
     }
 
     @Test
     fun `getAllProjects name filtering returns only projects with those names`() {
-        val testProject = Project("Lars", "Client", "Cauter")
-        val testProject2 = Project("Sral", "Client", "Retuac")
-        val testProject3 = Project("Arsl", "Client", "Auterc")
-        val testProject4 = Project("Rsla", "Client", "Uterca")
+        val testProject = Project("Lars", "Client", "Cauter", testEdition)
+        val testProject2 = Project("Sral", "Client", "Retuac", testEdition)
+        val testProject3 = Project("Arsl", "Client", "Auterc", testEdition)
+        val testProject4 = Project("Rsla", "Client", "Uterca", testEdition)
         val repository: ProjectRepository = mockk()
         val allProjects = listOf(testProject, testProject2, testProject3, testProject4)
-        every { repository.findAll() } returns allProjects
+        every { repository.findByEdition(testEdition) } returns allProjects
         val service = ProjectService(repository, mockk(), getUserService())
-        assertEquals(listOf(testProject), service.getAllProjects("lars"))
-        assertEquals(listOf(testProject, testProject3), service.getAllProjects("ars"))
-        assertEquals(listOf<Project>(), service.getAllProjects("uter"))
-        assertEquals(allProjects, service.getAllProjects(""))
+        assertEquals(listOf(testProject), service.getAllProjects(testEdition, "lars"))
+        assertEquals(listOf(testProject, testProject3), service.getAllProjects(testEdition, "ars"))
+        assertEquals(listOf<Project>(), service.getAllProjects(testEdition, "uter"))
+        assertEquals(allProjects, service.getAllProjects(testEdition))
     }
 
     @Test
     fun `getProjectById succeeds when project with id exists`() {
         val service = ProjectService(getRepository(true), mockk(), getUserService())
-        assertEquals(testProject, service.getProjectById(testId))
+        assertEquals(testProject, service.getProjectById(testId, testEdition))
     }
 
     @Test
     fun `getProjectById fails when no project with that id exists`() {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
-        assertThrows<InvalidProjectIdException> { service.getProjectById(testId) }
+        assertThrows<InvalidProjectIdException> { service.getProjectById(testId, testEdition) }
     }
 
     @Test
     fun `deleteProjectById succeeds when project with id exists`() {
         val repo = getRepository(true)
         val service = ProjectService(repo, mockk(), getUserService())
-        service.deleteProjectById(testId)
+        service.deleteProjectById(testId, testEdition)
         verify { repo.deleteById(testId) }
     }
 
     @Test
     fun `deleteProjectById fails when no project with that id exists`() {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
-        assertThrows<InvalidProjectIdException> { service.deleteProjectById(testId) }
+        assertThrows<InvalidProjectIdException> { service.deleteProjectById(testId, testEdition) }
     }
 
     @Test
@@ -137,21 +133,32 @@ class ProjectServiceTests {
     fun `patchProject updates project when project with same id exists`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), getUserService())
-        service.patchProject(testProject)
+        service.patchProject(testProject, testEdition)
         verify { repository.save(testProject) }
     }
 
     @Test
     fun `patchProject fails when no project with same id exists`() {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
-        assertThrows<InvalidProjectIdException> { service.patchProject(testProject) }
+        assertThrows<InvalidProjectIdException> { service.patchProject(testProject, testEdition) }
+    }
+
+    @Test
+    fun `patchProject fails when attempting to change editions`() {
+        val repository = getRepository(true)
+        val service = ProjectService(repository, mockk(), getUserService())
+        assertThrows<ForbiddenOperationException> {
+            service.patchProject(
+                Project("name", "client", "desc", "someEdition"), testEdition
+            )
+        }
     }
 
     @Test
     fun `addCoachToProject runs`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), getUserService())
-        service.addCoachToProject(testProject.id, testCoach.id)
+        service.addCoachToProject(testProject.id, testCoach.id, testEdition)
         verify { repository.save(testProject) }
     }
 
@@ -160,7 +167,7 @@ class ProjectServiceTests {
         val service = ProjectService(getRepository(false), mockk(), getUserService())
         val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
         assertThrows<InvalidProjectIdException> {
-            service.addCoachToProject(testProject.id, coach.id)
+            service.addCoachToProject(testProject.id, coach.id, testEdition)
         }
     }
 
@@ -168,7 +175,7 @@ class ProjectServiceTests {
     fun `removeCoachFromProject succeeds when coach is in project`() {
         val repository = getRepository(true)
         val service = ProjectService(repository, mockk(), getUserService())
-        service.removeCoachFromProject(testProject.id, testCoach.id)
+        service.removeCoachFromProject(testProject.id, testCoach.id, testEdition)
         verify { repository.save(testProject) }
     }
 
@@ -176,51 +183,50 @@ class ProjectServiceTests {
     fun `removeCoachFromProject fails when coach is not in project`() {
         val service = ProjectService(getRepository(true), mockk(), getUserService())
         assertThrows<FailedOperationException> {
-            service.removeCoachFromProject(testProject.id, UUID.randomUUID())
+            service.removeCoachFromProject(testProject.id, UUID.randomUUID(), testEdition)
         }
     }
 
     @Test
     fun `getConflicts returns the correct result`() {
-        val testStudent = Student("Lars", "Van Cauter")
-        val testStudent2 = Student("Lars2", "Van Cauter2")
-        val testStudent3 = Student("Lars3", "Van Cauter3")
+        val testStudent = Student("Lars", "Van Cauter", "")
+        val testStudent2 = Student("Lars2", "Van Cauter2", "")
+        val testStudent3 = Student("Lars3", "Van Cauter3", "")
         val position = Position(Skill("backend"), 2)
         val suggester = User("suggester", "email", Role.Coach, "password")
         val testProjectConflict = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason")
             )
         )
         val testProjectConflict2 = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")
             )
         )
         val testProjectConflict3 = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", testEdition,
             assignments = mutableListOf(
                 Assignment(testStudent2, position, suggester, "reason"),
                 Assignment(testStudent3, position, suggester, "reason")
             )
         )
         val repository = getRepository(true)
-        every { repository.findAll() } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
+        every { repository.findByEdition(testEdition) } returns mutableListOf(testProjectConflict, testProjectConflict2, testProjectConflict3)
         val service = ProjectService(repository, mockk(), getUserService())
 
         val mockRequest = MockHttpServletRequest()
-        mockRequest.setScheme("https")
-        mockRequest.setServerName("example.com")
-        mockRequest.setServerPort(-1)
-        mockRequest.setContextPath("/api")
+        mockRequest.scheme = "https"
+        mockRequest.serverName = "example.com"
+        mockRequest.serverPort = -1
+        mockRequest.contextPath = "/api"
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(mockRequest))
-
-        val conflictlist = service.getConflicts()
+        val conflictList = service.getConflicts(testEdition)
         assert(
-            conflictlist[0] == ProjectService.Conflict(
+            conflictList[0] == ProjectService.Conflict(
                 "https://example.com/api/students/" + testStudent.id,
                 mutableListOf(
                     "https://example.com/api/projects/" + testProjectConflict.id,
@@ -229,7 +235,7 @@ class ProjectServiceTests {
             )
         )
         assert(
-            conflictlist[1] == ProjectService.Conflict(
+            conflictList[1] == ProjectService.Conflict(
                 "https://example.com/api/students/" + testStudent2.id,
                 mutableListOf(
                     "https://example.com/api/projects/" + testProjectConflict2.id,
@@ -237,7 +243,7 @@ class ProjectServiceTests {
                 )
             )
         )
-        assert(conflictlist.size == 2)
+        assert(conflictList.size == 2)
     }
 
     @Test
@@ -256,7 +262,7 @@ class ProjectServiceTests {
             suggester.id,
             "reason"
         )
-        service.postAssignment(testProject.id, assignmentPost)
+        service.postAssignment(testProject.id, assignmentPost, testEdition)
     }
 
     @Test
@@ -269,7 +275,7 @@ class ProjectServiceTests {
             suggester.id,
             "reason"
         )
-        assertThrows<InvalidPositionIdException> { service.postAssignment(testProject.id, assignmentPost) }
+        assertThrows<InvalidPositionIdException> { service.postAssignment(testProject.id, assignmentPost, testEdition) }
     }
 
     @Test
@@ -283,7 +289,7 @@ class ProjectServiceTests {
         )
         val assignment = Assignment(testStudent, testProject.positions.first(), suggester, "reason")
         testProject.assignments.add(assignment)
-        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost) }
+        assertThrows<ForbiddenOperationException> { service.postAssignment(testProject.id, assignmentPost, testEdition) }
         testProject.assignments.remove(assignment)
     }
 
@@ -299,14 +305,14 @@ class ProjectServiceTests {
         )
         val assignment = Assignment(testStudent, positionIterator.next(), suggester, "reason")
         testProject.assignments.add(assignment)
-        service.postAssignment(testProject.id, assignmentPost)
+        service.postAssignment(testProject.id, assignmentPost, testEdition)
         testProject.assignments.remove(assignment)
     }
 
     @Test
     fun `deleteAssignment fails if the assignment is not part of the project`() {
         val service = ProjectService(getRepository(true), getStudentService(true), getUserService(suggester))
-        assertThrows<InvalidAssignmentIdException> { service.deleteAssignment(testProject.id, UUID.randomUUID()) }
+        assertThrows<InvalidAssignmentIdException> { service.deleteAssignment(testProject.id, UUID.randomUUID(), testEdition) }
     }
 
     @Test
@@ -322,7 +328,7 @@ class ProjectServiceTests {
         every { assignmentRepository.findByIdOrNull(assignment.id) } returns assignment
 
         testProject.assignments.add(assignment)
-        service.deleteAssignment(testProject.id, assignment.id)
+        service.deleteAssignment(testProject.id, assignment.id, testEdition)
         testProject.assignments.remove(assignment)
     }
 
@@ -333,11 +339,11 @@ class ProjectServiceTests {
             getStudentService(true),
             getUserService(suggester)
         )
-        val testStudent = Student("Lars", "Van Cauter")
-        val testStudent2 = Student("Lars2", "Van Cauter2")
+        val testStudent = Student("Lars", "Van Cauter", "")
+        val testStudent2 = Student("Lars2", "Van Cauter2", "")
         val position = Position(Skill("backend"), 2)
         val testProject = Project(
-            "Test", "Client", "a test project",
+            "Test", "Client", "a test project", "",
             assignments = mutableListOf(
                 Assignment(testStudent, position, suggester, "reason"),
                 Assignment(testStudent2, position, suggester, "reason")
@@ -353,7 +359,7 @@ class ProjectServiceTests {
             getStudentService(true),
             getUserService(suggester)
         )
-        assertEquals(mutableListOf<Student>(), service.getStudents(testProject.id))
+        assertEquals(mutableListOf<Student>(), service.getStudents(testProject.id, testEdition))
     }
 
     @Test
@@ -363,6 +369,6 @@ class ProjectServiceTests {
             getStudentService(true),
             getUserService(suggester)
         )
-        assertThrows<InvalidProjectIdException> { service.getStudents(testProject.id) }
+        assertThrows<InvalidProjectIdException> { service.getStudents(testProject.id, testEdition) }
     }
 }

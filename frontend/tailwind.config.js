@@ -21,6 +21,16 @@ module.exports = {
         'check-orange': '#fbbf24',
         'check-gray': '#9ca3af',
       },
+      animation: {
+        'spin-reverse': 'spin-reverse 1s linear infinite'
+      },
+      keyframes: {
+        'spin-reverse': {
+          from: {
+            transform: 'rotate(360deg)'
+          }
+        }
+      }
     },
     fontFamily: {
       sans: ['Montserrat', 'sans-serif']

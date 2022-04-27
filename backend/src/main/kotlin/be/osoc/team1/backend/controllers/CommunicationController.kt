@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/communications")
+@RequestMapping("/{edition}/communications")
 class CommunicationController(
     private val communicationService: CommunicationService,
     private val studentService: StudentService
-) : BaseController<Communication>(communicationService) {
+) : BaseController<Communication, UUID>(communicationService) {
 
     /**
      * Add a communication to the database. The communication should be passed in the request body
@@ -38,9 +38,13 @@ class CommunicationController(
     @PostMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
-    fun createCommunication(@PathVariable studentId: UUID, @RequestBody communication: Communication): ResponseEntity<Communication> {
+    fun createCommunication(
+        @PathVariable studentId: UUID,
+        @PathVariable edition: String,
+        @RequestBody communication: Communication
+    ): ResponseEntity<Communication> {
         val createdCommunication = communicationService.createCommunication(communication)
-        studentService.addCommunicationToStudent(studentId, communication)
+        studentService.addCommunicationToStudent(studentId, communication, edition)
         return getObjectCreatedResponse(createdCommunication.id, createdCommunication)
     }
 }

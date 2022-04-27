@@ -5,46 +5,182 @@ info:
     license:
         name: MIT
 servers:
-  - url: 'http://localhost:8080/api'
+    -   url: 'http://localhost:8080/api'
 paths:
-    /students:
+    /editions:
+        post:
+            summary: Create a new inactive edition
+            description: Creates a new inactive edition with the given name
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: string
+                            example: OSOC 2022
+            responses:
+                201:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Edition"
+                400:
+                    description: The edition already exists
+    /editions/active:
+        get:
+            summary: Get the active edition or null
+            description: |
+                Returns the currently active edition,
+                or null if there is no active edition.
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                nullable: true
+                                default: edition name
+    /editions/inactive:
+        get:
+            summary: Get all inactive editions
+            description: Returns all editions that are currently inactive
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    default: edition name
+    /editions/{edition}/activate:
+        post:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            summary: Activate the given edition
+            description: |
+                Activate the given edition, making it the active edition.
+                There can only be one active edition at a time.
+                All endpoints can be used on active editions.
+            responses:
+                200:
+                    description: Successful operation
+                400:
+                    description: The edition is already active
+                403:
+                    description: There is another active edition
+                404:
+                    description: The edition does not exist
+    /editions/{edition}/inactivate:
+        post:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            summary: Inactivate the given edition (DANGEROUS)
+            description: |
+                Inactivate the given active edition.
+                Watch out! All existing coach users will have their accounts disabled!
+                Only GET and DELETE endpoints can be used on active editions,
+                and only by users with Admin permissions.
+            responses:
+                200:
+                    description: Successful operation
+                400:
+                    description: The edition is already inactive
+                404:
+                    description: The edition does not exist
+    /editions/{edition}:
         get:
             parameters:
-              - in: query
-                name: pageNumber
-                schema:
-                  type: integer
-                description: The page number for pagination, using offset pagination (see https://developer.box.com/guides/api-calls/pagination/offset-based/)
-              - in: query
-                name: pageSize
-                schema:
-                  type: integer
-                description: The page size for pagination. For example, if you pass 50 as value, there will be 50 students on one page
-              - in: query
-                name: sortBy
-                schema:
-                  type: string
-                description: The parameter to sort by. Sorting can be done on any parameter. 
-                  The id, firstName and lastName fields are sorted alphabetically. 
-                  Sorting on the status field will first return students with a Yes status, then Maybe, No and finally Undecided. 
-                  Sorting on other parameters is nonsensical. Ties are broken randomly.
-              - in: query
-                name: name
-                schema:
-                  type: string
-                description: Part of a name of a student that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
-              - in: query
-                name: status
-                schema:
-                  type: array
-                  items: 
-                      $ref: '#/components/schemas/Status'
-                description: Status to filter on, only students that have one of the given statuses will be shown (default value is all statuses).
-              - in: query
-                name: includeSuggested
-                schema:
-                  type: boolean
-                description: Whether or not to include students you have already added a suggestion for (default value is true)
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            summary: Get the given edition
+            description: |
+                Returns the Edition object with the given edition name, 
+                or a 404 (NOT FOUND) if there is no such Edition.
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Edition"
+                404:
+                    description: The edition does not exist
+        delete:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            summary: Delete the given edition (DANGEROUS)
+            description: |
+                Deletes the given edition from the database.
+                Watch out! All data related to this edition will also be deleted.
+                This includes students and projects.
+                If this edition does not exist, returns a 404 (NOT FOUND) instead.
+            responses:
+                204:
+                    description: Successful operation
+                404:
+                    description: The edition does not exist
+    /{edition}/students:
+        get:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   in: query
+                    name: pageNumber
+                    schema:
+                        type: integer
+                    description: The page number for pagination, using offset pagination (see https://developer.box.com/guides/api-calls/pagination/offset-based/)
+                -   in: query
+                    name: pageSize
+                    schema:
+                        type: integer
+                    description: The page size for pagination. For example, if you pass 50 as value, there will be 50 students on one page
+                -   in: query
+                    name: sortBy
+                    schema:
+                        type: string
+                    description: The parameter to sort by. Sorting can be done on any parameter.
+                        The id, firstName and lastName fields are sorted alphabetically.
+                        Sorting on the status field will first return students with a Yes status, then Maybe, No and finally Undecided.
+                        Sorting on other parameters is nonsensical. Ties are broken randomly.
+                -   in: query
+                    name: name
+                    schema:
+                        type: string
+                    description: Part of a name of a student that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
+                -   in: query
+                    name: status
+                    required: true
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/components/schemas/Status'
+                    description: Status to filter on, only students that have one of the given statuses will be shown (default value is all statuses).
+                -   in: query
+                    name: includeSuggested
+                    schema:
+                        type: boolean
+                    description: Whether or not to include students you have already added a suggestion for (default value is true)
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -53,20 +189,30 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Student'
+                                allOf:
+                                    -   $ref: '#/components/schemas/PagedCollection'
+                                    -   type: object
+                                        properties:
+                                            collection:
+                                                type: array
+                                                items:
+                                                    $ref: '#/components/schemas/Student'
         post:
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
             summary: Add a new student to the database
             description: |
-                Add a student to the database. The created student object is returned.
-                Note that no checking is done to see if firstName or lastName qualify as valid 'names',
-                this verification is the responsibility of the caller.
+                Add a student to the database. The request body contains a json representation of a tally form.
+                A Student object will be generated from this form, this object will also be returned.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Student'
+                            $ref: '#/components/schemas/TallyForm'
             responses:
                 '201':
                     description: Successful operation.
@@ -82,19 +228,24 @@ paths:
                                 format: url
                 '400':
                     description: Bad Request.
-    /students/{studentId}:
+    /{edition}/students/{studentId}:
         get:
             summary: Get Student by id
             description: |
                 Returns the student with the corresponding id. If no such student exists,
                 returns a "404: Not Found" message instead.
             parameters:
-              - name: studentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: studentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '200':
                     description: |
@@ -113,12 +264,17 @@ paths:
                 Deletes the student with the corresponding id. If no such student exists,
                 returns a "404: Not Found" message instead.
             parameters:
-              - name: studentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: studentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '204':
                     description: |
@@ -126,7 +282,7 @@ paths:
                 '404':
                     description: |
                         The response if there is no student in the database with the given id.
-    /students/{studentId}/suggestions:
+    /{edition}/students/{studentId}/suggestions:
         post:
             summary: Suggest student status
             description: |
@@ -137,17 +293,22 @@ paths:
                 Importantly this includes the "Undecided" value. This is because it's not allowed
                 to suggest to change a student's status to Undecided.
             parameters:
-              - name: studentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: studentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/StatusSuggestion"            
+                            $ref: "#/components/schemas/StatusSuggestion"
             responses:
                 '204':
                     description: |
@@ -158,7 +319,7 @@ paths:
                 '404':
                     description: |
                         The response if there is no student in the database with the given id.
-    /students/{studentId}/suggestions/{coachId}:
+    /{edition}/students/{studentId}/suggestions/{coachId}:
         delete:
             summary: Delete student status suggestion
             description: |
@@ -166,18 +327,23 @@ paths:
                 from the student with the given studentId. If either the student or the suggestion doesn't exist,
                 the method returns a "404: Not Found" message instead.
             parameters:
-              - name: studentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
-              - name: coachId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: studentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+                -   name: coachId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '204':
                     description: |
@@ -194,7 +360,7 @@ paths:
                     description: |
                         The response if the student specified by the given id
                         didn't exist in the database.
-    /students/{studentId}/status:
+    /{edition}/students/{studentId}/status:
         post:
             summary: Set student status
             description: |
@@ -206,12 +372,17 @@ paths:
                 Any other input value will result in a "400: Bad Request" response. 
                 These values are also case-sensitive.
             parameters:
-              - name: studentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: studentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             requestBody:
                 content:
                     application/json:
@@ -225,34 +396,101 @@ paths:
                     description: |
                         The response if there is no student in the database with the given id.
                 '400':
-                    description: Bad Request.                        
-    /projects:
+                    description: Bad Request. Request body does not contain either "Yes", "No", "Maybe" or "Undecided"
+    /{edition}/projects:
         get:
             summary: Get list containing all Project objects
             parameters:
-              - in: query
-                name: name
-                schema:
-                  type: string
-                description: Part of a name of a project that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   in: query
+                    required: true
+                    name: name
+                    schema:
+                        type: string
+                    description: |
+                        Part of a name of a project that you want to filter on
+                        (this string will be made lowercase and spaces will be removed).
+                -   in: query
+                    name: pageNumber
+                    schema:
+                        type: integer
+                    description: The page number for pagination, using offset pagination (see https://developer.box.com/guides/api-calls/pagination/offset-based/)
+                -   in: query
+                    name: pageSize
+                    schema:
+                        type: integer
+                    description: The page size for pagination. For example, if you pass 50 as value, there will be 50 projects on one page
+                -   in: query
+                    name: skills
+                    schema:
+                        type: array
+                        items:
+                            type: string
+                    description: Filter by skill, students that have atleast one of the skills listed are included
+                -   in: query
+                    name: alumnOnly
+                    schema:
+                        type: boolean
+                    description: Only return alumni students
+                -   in: query
+                    name: onlyStudentCoach
+                    schema:
+                        type: boolean
+                    description: Only returns student coach volunteers
+                -   in: query
+                    name: onlyNotAssigned
+                    schema:
+                        type: boolean
+                    description: Only return unassigned students
             responses:
                 '200':
                     description: successful operation
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Project'
+                                allOf:
+                                    -   $ref: '#/components/schemas/PagedCollection'
+                                    -   type: object
+                                        properties:
+                                            collection:
+                                                type: array
+                                                items:
+                                                    $ref: '#/components/schemas/Project'
         post:
             summary: Create a new project. Returns the created project object.
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
             requestBody:
                 content:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/Project'
+                        example:
+                            {
+                                "name": "Project name",
+                                "clientName": "Client name",
+                                "description": "Description",
+                                "positions": [
+                                    {
+                                        "skill": { "skillName": "Backend" },
+                                        "amount": "2"
+                                    },
+                                    {
+                                        "skill": { "skillName": "Frontend" },
+                                        "amount": "1"
+                                    }
+                                ]
+                            }
             responses:
-                '201': 
+                '201':
                     description: |
                         Successful operation.
                     content:
@@ -267,16 +505,21 @@ paths:
                                 format: url
                 '400':
                     description: Bad Request.
-    /projects/{projectId}:
+    /{edition}/projects/{projectId}:
         get:
             summary: Get Project by id
             parameters:
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '200':
                     description: successful operation
@@ -286,30 +529,96 @@ paths:
                                 $ref: '#/components/schemas/Project'
                 '404':
                     description: Not Found. No such projectId.
+        patch:
+            summary: Patch project
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Project'
+                        example:
+                              {
+                                  "name": "Project name",
+                                  "clientName": "Client name",
+                                  "description": "Description",
+                                  "edition": "testEdition",
+                                  "positions": [
+                                      {
+                                          "skill": { "skillName": "Backend" },
+                                          "amount": "2",
+                                          "id": "6adf6cb3-6638-4771-a281-403c0bf3427a"
+                                      },
+                                      {
+                                          "skill": { "skillName": "Frontend" },
+                                          "amount": "1",
+                                          "id": "41e25173-f7cb-4c4b-b4e7-d12f30e5fbe3"
+                                      }
+                                  ],
+                                  "assignments": [
+                                      "http://localhost:8080/api/assignments/f9fefa13-80a3-439a-bf59-3cdacd60e2fc"
+                                  ],
+                                  "id": "68afaeef-48f4-4bf1-9ac7-a6a2c1bcf6d7"
+                              }
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Project'
+                '400':
+                    description: the projectId in the path did not match the request body projectId
+                '403':
+                    description: an attempt was made to change the edition of the project this is forbidden
+                '404':
+                    description: Not Found. No such projectId.
+
         delete:
             summary: Remove project by id
             parameters:
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '204':
                     description: successful operation
                 '404':
-                    description: Not Found. No such projectId.                
-    /projects/{projectId}/students:
+                    description: Not Found. No such projectId.
+    /{edition}/projects/{projectId}/students:
         get:
             summary: Get all students from a project
-            parameters: 
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '200':
                     description: successful operation
@@ -320,16 +629,22 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Student'
                 '404':
-                    description: Not Found. No such projectId. 
+                    description: Not Found. No such projectId.
+
         post:
             summary: Draft student for project
             parameters:
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             requestBody:
                 content:
                     application/json:
@@ -344,37 +659,80 @@ paths:
                     description: Not Found. No such projectId.
                 '400':
                     description: Bad Request.
-    /projects/{projectId}/students/{studentId}:
+    /{edition}/projects/{projectId}/students/{studentId}:
         delete:
             summary: Remove student from project
             parameters:
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
-              - name: studentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+                -   name: studentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
-                '204':
+                '200':
                     description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/User'
                 '404':
                     description: Not Found. No such projectId or studentId.
-    /projects/{projectId}/coaches:
-        post:
-            summary: Assign a coach to project
+    /{edition}/projects/{projectId}/coaches:
+        get:
+            summary: Get all coaches of a project
             parameters:
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+                        description: Not Found. No such projectId.
+            responses:
+                '200':
+                    description: successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/User'
+                '404':
+                    description: Not Found. No such projectId.
+        post:
+            summary: Assign a coach to a project
+            description: Assign a coach to a project, coachId is given in the request body.
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             requestBody:
                 content:
                     application/json:
@@ -389,85 +747,53 @@ paths:
                     description: No such projectId or coachId.
                 '400':
                     description: Bad Request.
-    /projects/{projectId}/coaches/{coachId}:
+    /{edition}/projects/{projectId}/coaches/{coachId}:
         delete:
             summary: Remove a coach from a project
             parameters:
-              - name: projectId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
-              - name: coachId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+                -   name: coachId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '204':
                     description: successful operation
                 '404':
                     description: Not Found. No such projectId or coachId.
-    /projects/{projectId}/devroles:
+    /{edition}/projects/{projectId}/assignments:
         post:
-            summary: Add a new student developer role to a project
+            summary: Add a new student assignment
+            description: Assign a student to a position of a project. Request body expects a studentId, a positionId, a userId and a reason.
             parameters:
-                - name: projectId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             requestBody:
                 content:
-                  application/json:
-                    schema:
-                        $ref: '#/components/schemas/Position'
-            responses:
-                '201':
-                    description: succesful operation
-                '404':
-                    description: Not Found. No such projectId.
-                '400':
-                    description: Bad Request.
-    /projects/{projectId}/devroles/{devroleId}:
-        delete:
-            summary: Remove a student developer role from a project
-            parameters:
-                - name: projectId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
-                - name: devroleId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
-            responses:
-                '204':
-                    description: succesful operation
-                '404':
-                    description: Not Found. No such projectId or devroleId.
-    /projects/{projectId}/assignments:
-        post:
-            summary: Add a new student developer assignment
-            parameters:
-                - name: projectId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
-            requestBody:
-                content:
-                  application/json:
-                    schema:
-                        $ref: '#/components/schemas/Assignment'
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Assignment'
             responses:
                 '200':
                     description: succesful operation
@@ -475,31 +801,42 @@ paths:
                     description: Not Found. No such projectId.
                 '400':
                     description: Bad Request.
-    /projects/{projectId}/assignments/{assignmentId}:
+    /{edition}/projects/{projectId}/assignments/{assignmentId}:
         delete:
-            summary: Remove a student developer assignment from a project
+            summary: Remove a student assignment from a project
             parameters:
-                - name: projectId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
-                - name: assignmentId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+                -   name: projectId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+                -   name: assignmentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '204':
                     description: succesful operation
                 '404':
                     description: Not Found. No such projectId or assignmentId.
-    /projects/conflicts:
+    /{edition}/projects/conflicts:
         get:
-          summary: Get all project-conflicts (a conflict occurs when a student is assigned to multiple projects at the same time)
-          responses:
+            summary: Get all project-conflicts (a conflict occurs when a student is assigned to multiple projects at the same time)
+            parameters:
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            responses:
                 '200':
                     description: successful operation
                     content:
@@ -510,85 +847,22 @@ paths:
                                     $ref: '#/components/schemas/Conflict'
                             example:
                                 student: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
-                                projects: ["https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002"]
-    /studentRoles: 
-        get:
-            summary: Get all types of student Roles that are currently in the database.
-            responses:
-                '200':
-                    description: |
-                        Returns an array all different types of student dev roles that 
-                        are currently present in the database.
-                    content:
-                        application/json:
-                            schema: 
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Position'
-        post:
-            summary: Add a new student dev role
-            requestBody:
-                content:
-                    application/json:
-                        schema: 
-                            $ref: '#/components/schemas/Position'
-            responses:
-                '201':
-                    description: | 
-                        Successful operation. Returns a link to the newly added 
-                        student role in the location header.
-                '400':
-                    description: Bad Request. 
-    /studentRoles/{studentRoleId}: 
-        get:
-            summary: Get a specific student role by id.
-            parameters:
-                - name: studentRoleId
-                  required: true
-                  in: path
-                  schema: 
-                    type: string
-                    format: uuid
-            responses:
-                '200':
-                    description: |
-                        Return the corresponding StudentRole
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Position'
-                '404':
-                    description: |
-                        Not Found. No such StudentRoleId.
-        delete:
-            summary: Remove a specific student role by id.
-            parameters:
-                - name: studentRoleId
-                  required: true
-                  in: path
-                  schema: 
-                    type: string
-                    format: uuid
-            responses:
-                '204':
-                    description: |
-                        Succesful operation.
-                '404':
-                    description: |
-                        Not Found. No such StudentRoleId.
+                                projects: [ "https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
+
     /communications/{communicationId}:
         get:
             summary: Get Communications by id
             description: |
-                Returns the communication with the corresponding id. If no such communication exists,
+                Returns the communication with the corresponding  id.
+                If no such communication exists,
                 returns a "404: Not Found" message instead.
             parameters:
-              - name: communicationId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   name: communicationId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '200':
                     description: |
@@ -608,12 +882,12 @@ paths:
                 Add a communication to the database.
                 The created communication object is returned.
             parameters:
-              - name: studentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   name: studentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             requestBody:
                 content:
                     application/json:
@@ -621,7 +895,7 @@ paths:
                             $ref: '#/components/schemas/Communication'
             responses:
                 '201':
-                    description: Successful operation.
+                    description: successful operation
                     content:
                         application/json:
                             schema:
@@ -640,7 +914,7 @@ paths:
             summary: Get list containing all users
             responses:
                 '200':
-                    description: OK
+                    description: succesful operation
                     content:
                         application/json:
                             schema:
@@ -656,7 +930,7 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '201':
-                    description: Succesful operation.
+                    description: succesful operation
                     content:
                         application/json:
                             schema:
@@ -671,15 +945,15 @@ paths:
         get:
             summary: get User by id
             parameters:
-                - name: userId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
+                -   name: userId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '200':
-                    description: OK
+                    description: succesful operation.
                     content:
                         application/json:
                             schema:
@@ -689,12 +963,12 @@ paths:
         patch:
             summary: update User by id
             parameters:
-                - name: userId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
+                -   name: userId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             requestBody:
                 content:
                     application/json:
@@ -702,55 +976,55 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '200':
-                    description: OK
+                    description: succesful operation
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/User'
                     headers:
                         Location:
-                            schema: 
+                            schema:
                                 description: url to the updated User.
                                 type: string
                                 format: url
 
                 '400':
-                    description: BAD REQUEST
+                    description: Bad request
                 '404':
-                    description: NOT FOUND
+                    description: Not Found. No such userId.
         delete:
             summary: delete user by id
             parameters:
-                - name: userId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
+                -   name: userId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '204':
-                    description: OK
+                    description: succesful operation
                 '404':
-                    description: NOT FOUND
+                    description: Not Found. No such userId.
     /users/{userId}/role:
         post:
             summary: change role of user
             parameters:
-                - name: userId
-                  required: true
-                  in: path
-                  schema:
-                    type: string
-                    format: uuid
+                -   name: userId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             requestBody:
                 content:
                     application/json:
                         schema:
                             type: string
-                            enum: [Disabled, Coach, Admin]
+                            enum: [ Disabled, Coach, Admin ]
             responses:
                 '200':
-                    description: OK
+                    description: succesful operation
                     content:
                         application/json:
                             schema:
@@ -766,12 +1040,12 @@ paths:
                 Returns the assignment with the corresponding id. If no such assignment exists,
                 returns a "404: Not Found" message instead.
             parameters:
-              - name: assignmentId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   name: assignmentId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '200':
                     description: |
@@ -791,12 +1065,12 @@ paths:
                 Returns the position with the corresponding id. If no such position exists,
                 returns a "404: Not Found" message instead.
             parameters:
-              - name: positionId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   name: positionId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '200':
                     description: |
@@ -816,12 +1090,12 @@ paths:
                 Returns the statusSuggestion with the corresponding id. If no such statusSuggestion exists,
                 returns a "404: Not Found" message instead.
             parameters:
-              - name: statusSuggestionId
-                required: true
-                in: path
-                schema:
-                    type: string
-                    format: uuid
+                -   name: statusSuggestionId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
             responses:
                 '200':
                     description: |
@@ -834,6 +1108,42 @@ paths:
                 '404':
                     description: |
                         The response if there is no statusSuggestion in the database with the given id.
+    /answers/{answerId}:
+        get:
+            summary: Get Answer by id
+            description: |
+                Returns the Answer with the corresponding id. If no such Answer exists,
+                returns a "404: Not Found" message instead.
+            parameters:
+                -   name: answerId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+            responses:
+                '200':
+                    description: |
+                        The response if there is an answer in the database with the given id.
+                        Returns the Answer in the response body.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Answer'
+                '404':
+                    description: |
+                        The response if there is no Answer in the database with the given id.
+    /skills:
+        get:
+            responses:
+                '200':
+                    description: Get all Skill objects stored in the database.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Skill'
     /login:
         post:
             summary: login to the user with the correct email and password
@@ -867,33 +1177,44 @@ paths:
                 '401':
                     description: |
                         The response if authorization has failed.
-    /token/refresh:
+    /logout:
       post:
-        summary: renew access token using refresh token
-        requestBody:
-          content:
-            application/x-www-form-urlencoded:
-              schema:
-                type: object
-                properties:
-                  refreshToken:
-                    type: string
-                required:
-                  - refreshToken
+        summary: log user out. invalidate http session, refresh token and redirect to /login?logout
         responses:
-          '200':
-            description: OK
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    accessToken:
-                      type: string
-                    refreshToken:
-                      type: string
+          '302':
+            description: logout successful, redirect to /login?logout
           '400':
-            description: Bad Request.
+            description:
+              Bad Request.
+    /token/refresh:
+        post:
+            summary: renew access token using refresh token
+            requestBody:
+                content:
+                    application/x-www-form-urlencoded:
+                        schema:
+                            type: object
+                            properties:
+                                refreshToken:
+                                    type: string
+                            required:
+                                - refreshToken
+            responses:
+                '200':
+                    description: sucessful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accessToken:
+                                        type: string
+                                    refreshToken:
+                                        type: string
+                                    accessTokenTTL:
+                                        type: integer
+                '400':
+                    description: Bad Request.
 components:
     schemas:
         Student:
@@ -904,6 +1225,7 @@ components:
                 - lastname
                 - skills
                 - alumn
+                - answers
                 - status
                 - statusSuggestions
                 - communications
@@ -914,31 +1236,140 @@ components:
                     readOnly: true
                 firstName:
                     type: string
+                    example: John
                 lastName:
-                    type: string    
+                    type: string
+                    example: Doe
                 status:
                     readOnly: true
                     allOf:
-                      - $ref: '#/components/schemas/Status'
+                        -   $ref: '#/components/schemas/Status'
                 statusSuggestions:
                     readOnly: true
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/statusSuggestions/{statusSuggestionId}'
+                        example: 'https://example.com/api/statusSuggestions/6ea082fd-b0f2-4ec6-a05c-6a4e4a02e4eb'
                 communications:
                     readOnly: true
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/communications/{communicationId}'
+                        example: 'https://example.com/api/communications/f9cdd786-d6a8-4f34-a796-4d55b099f785'
                 alumn:
                     type: boolean
                     default: false
+                answers:
+                    type: array
+                    items:
+                        type: string
+                        format: 'https://example.com/api/answers/{answerId}'
+                        example: 'https://example.com/api/answers/f7b77e33-e69b-4743-a97e-b21acf542e50'
                 skills:
                     type: array
                     items:
                         $ref: '#/components/schemas/Skill'
+        Answer:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                key:
+                    type: string
+                    example: "question_3X4q1V"
+                question:
+                    type: string
+                    example: "Which role are you applying for?"
+                answer:
+                    type: array
+                    items:
+                        type: string
+                    example: [ "Front-end Developer", "Back-end Developer" ]
+        TallyForm:
+            type: object
+            required:
+                - data
+            properties:
+                data:
+                    type: object
+                    properties:
+                        fields:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    key:
+                                        type: string
+                                        example: "question_3X4q1V"
+                                    label:
+                                        type: string
+                                        example: Which role are you applying for?
+                                    "type":
+                                        type: string
+                                        example: "CHECKBOXES"
+                                    value:
+                                        type: object
+                                        example: [ "19b68be9-6c2b-41f8-95f6-439cfb20f792" ]
+                                    options:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                id:
+                                                    type: string
+                                                    format: uuid
+                                                text:
+                                                    type: string
+                                        example:
+                                          [
+                                              {
+                                                  "id": "2fd881eb-68de-4012-988d-7957de663c4f",
+                                                  "text": "Front-end developer"
+                                              },
+                                              {
+                                                  "id": "19b68be9-6c2b-41f8-95f6-439cfb20f792",
+                                                  "text": "Back-end developer"
+                                              },
+                                              {
+                                                  "id": "d27de5b9-3370-44e6-b114-60ddc243a4d8",
+                                                  "text": "UX / UI designer"
+                                              },
+                                              {
+                                                  "id": "eb4b0022-4673-4f96-9c15-c01d870a253f",
+                                                  "text": "Graphic designer"
+                                              },
+                                              {
+                                                  "id": "f812f2d5-b438-49f4-9d95-0b415add300f",
+                                                  "text": "Business Modeller"
+                                              },
+                                              {
+                                                  "id": "3f34960d-1248-49ca-b6c7-fed702c73979",
+                                                  "text": "Storyteller"
+                                              },
+                                              {
+                                                  "id": "9bcb7761-3c86-4ea2-8abc-d45187a007ee",
+                                                  "text": "Marketer"
+                                              },
+                                              {
+                                                  "id": "5df0feb4-87ce-4767-bf99-092c27bc9b24",
+                                                  "text": "Copywriter"
+                                              },
+                                              {
+                                                  "id": "ee956527-6f34-479e-89a8-feb5e73d8979",
+                                                  "text": "Video editor"
+                                              },
+                                              {
+                                                  "id": "aa26de30-7ec2-4255-a949-0e5388dd58be",
+                                                  "text": "Photographer"
+                                              },
+                                              {
+                                                  "id": "ce472fdf-723c-4b94-bcad-a9136d0d8443",
+                                                  "text": "Other"
+                                              }
+                                          ]
         Project:
             type: object
             required:
@@ -956,25 +1387,31 @@ components:
                     readOnly: true
                 name:
                     type: string
+                    example: Selection tool
                 clientName:
                     type: string # Later on this could be a different schema if clients need to be saved in the database
+                    example: OSOC
                 description:
                     type: string
+                    example: desc
                 coaches:
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/users/{coachId}'
+                        example: 'https://example.com/api/users/f9cdd786-d6a8-4f34-a796-4d55b099f785'
                 positions:
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/positions/{positionId}'
+                        example: 'https://example.com/api/positions/e1dfbe14-d0eb-4331-9ccf-2210b2e2c652'
                 assignments:
                     type: array
                     items:
                         type: string
                         format: 'https://example.com/api/assignments/{assignmentId}'
+                        example: 'https://example.com/api/positions/b9e314e7-e5a8-4de1-aeed-7ff5a9106625'
         Communication:
             type: object
             required:
@@ -988,9 +1425,13 @@ components:
                     readOnly: true
                 message:
                     type: string
+                    example: Lorum ipsum
                 type:
                     allOf:
-                      - $ref: '#/components/schemas/CommunicationType'
+                        -   $ref: '#/components/schemas/CommunicationType'
+        CommunicationType:
+            type: string
+            enum: [ Email ]
         User:
             type: object
             required:
@@ -1006,17 +1447,21 @@ components:
                     readOnly: true
                 username:
                     type: string
+                    example: john_doe
                 email:
                     type: string
+                    example: johndoe@mail.com
                 role:
                     type: string
-                    enum: [Disabled, Coach, Admin]
+                    enum: [ Disabled, Coach, Admin ]
+                    example: Coach
                 password:
                     type: string
                     format: bcrypt
+                    example: $2y$10$jntFfHuty8K6FmacwTES3eRJcIma5Almb8z/aEl/prZ246MXqCE1O
         Status:
             type: string
-            enum: [Yes, Maybe, No, Undecided]
+            enum: [ Yes, Maybe, No, Undecided ]
         StatusSuggestion:
             type: object
             required:
@@ -1029,16 +1474,17 @@ components:
                     format: uuid
                 status:
                     type: string
-                    enum: [Yes, Maybe, No]
+                    enum: [ Yes, Maybe, No ]
                 motivation:
                     type: string
         Skill:
-          type: object
-          required:
-              - skillName
-          properties:
-              skillName:
-                  type: string
+            type: object
+            required:
+                - skillName
+            properties:
+                skillName:
+                    type: string
+                    example: Back-end developer
         Position:
             type: object
             required:
@@ -1054,6 +1500,7 @@ components:
                     $ref: '#/components/schemas/Skill'
                 amount:
                     type: integer
+                    example: 1
         Assignment:
             type: object
             required:
@@ -1069,18 +1516,19 @@ components:
                     readOnly: true
                 student:
                     type: string
-                    format: 'https://example.com/api/students/{studentId}'
+                    format: https://example.com/api/students/{studentId}
+                    example: https://example.com/api/students/8b409406-6f82-4f2f-9b02-62326e733877
                 position:
                     type: string
-                    format: 'https://example.com/api/positions/{positionId}'
+                    format: https://example.com/api/positions/{positionId}
+                    example: https://example.com/api/positions/8b409406-6f82-4f2f-9b02-62326e733877
                 suggester:
                     type: string
-                    format: 'https://example.com/api/users/{suggesterId}'
+                    format: https://example.com/api/users/{suggesterId}
+                    example: https://example.com/api/users/7116cc59-d205-4e8e-b975-06063e9744a6
                 reason:
                     type: string
-        CommunicationType:
-            type: string
-            enum: [Email]
+                    example: Lorum ipsum
         Conflict:
             type: object
             required:
@@ -1089,15 +1537,37 @@ components:
             properties:
                 student:
                     type: string
-                    format: uuid
+                    format: https://example.com/api/students/{studentId}
+                    example: https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002
                 projects:
                     type: array
                     items:
                         type: string
-                        format: uuid
+                        format: https://example.com/api/projects/{projectId}
+                    example: [ "https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
+        PagedCollection:
+            type: object
+            required:
+                - collection
+                - totalLength
+            properties:
+                totalLength:
+                    type: integer
+                    example: 1
+        Edition:
+            type: object
+            required:
+                - name
+                - isActive
+            properties:
+                name:
+                    type: string
+                    example: OSOC 2022
+                isActive:
+                    type: boolean
     securitySchemes:
         BasicAuth:
             type: http
             scheme: basic
 security:
-  - BasicAuth: []
+    -   BasicAuth: [ ]

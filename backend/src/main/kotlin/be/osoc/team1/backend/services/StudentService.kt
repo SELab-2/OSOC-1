@@ -11,11 +11,7 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -23,41 +19,17 @@ import java.util.UUID
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
     /**
-     * Get all students within paging range ([pageNumber], [pageSize]) and sorted [sortBy].
-     * Can be filtered by [name] (requested string gets processed to more easily give matches),
-     * [statusFilter] (see if student status matches 1 in the given list),
-     * whether or not the requesting user has already made a suggestion for this student [includeSuggested],
-     * [callee] is the user who made this request
+     * Get all students sorted using [sortBy].
+     * Can be filtered using the List<Student> extension functions.
      */
-    fun getAllStudents(
-        pageNumber: Int,
-        pageSize: Int,
-        sortBy: String,
-        statusFilter: List<StatusEnum>,
-        name: String,
-        includeSuggested: Boolean,
-        callee: User
-    ): Iterable<Student> {
-        val paging: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy))
-        val pagedResult: Page<Student> = repository.findAll(paging)
-        val studentList = mutableListOf<Student>()
-        for (student in pagedResult.content) {
-            val studentHasStatus = statusFilter.contains(student.status)
-            // concat first- and lastname make lowercase and remove spaces and see if that matches the input (which is formatted exactly the same)
-            val studentHasMatchingName = (student.firstName + student.lastName).lowercase().replace(" ", "")
-                .contains(name.lowercase().replace(" ", ""))
-            val studentBeenSuggestedByUserCheck = includeSuggested || student.statusSuggestions.none { it.coachId == callee.id }
-            if (studentHasStatus && studentHasMatchingName && studentBeenSuggestedByUserCheck) {
-                studentList.add(student)
-            }
-        }
-        return studentList
-    }
+    fun getAllStudents(sortBy: Sort, edition: String): List<Student> =
+        repository.findByEdition(edition, sortBy).toList()
 
     /**
      * Get a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student exists.
      */
-    fun getStudentById(studentId: UUID) = repository.findByIdOrNull(studentId) ?: throw InvalidStudentIdException()
+    fun getStudentById(studentId: UUID, edition: String) =
+        repository.findByIdAndEdition(studentId, edition) ?: throw InvalidStudentIdException()
 
     /**
      * Delete a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student existed
@@ -79,8 +51,8 @@ class StudentService(private val repository: StudentRepository, private val user
      * Retrieve the student with the specified [studentId], then set his status to [newStatus].
      * Throws an [InvalidStudentIdException] if no student with that [studentId] exists.
      */
-    fun setStudentStatus(studentId: UUID, newStatus: StatusEnum) {
-        val student = getStudentById(studentId)
+    fun setStudentStatus(studentId: UUID, newStatus: StatusEnum, edition: String) {
+        val student = getStudentById(studentId, edition)
         student.status = newStatus
         repository.save(student)
     }
@@ -97,19 +69,17 @@ class StudentService(private val repository: StudentRepository, private val user
      * the given coachId exists, and a [ForbiddenOperationException] if the [User] exists but doesn't have
      * the coach role.
      */
-    fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion) {
+    fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion, edition: String) {
         val coach = userService.getUserById(statusSuggestion.coachId)
         if (!coach.role.hasPermissionLevel(Role.Coach)) {
             throw ForbiddenOperationException("Only coaches and admins can make status suggestions.")
         }
-        val student = getStudentById(studentId)
+        val student = getStudentById(studentId, edition)
         val sameCoachSuggestion = student.statusSuggestions.find { it.coachId == coach.id }
         if (sameCoachSuggestion !== null) {
             throw ForbiddenOperationException("This coach has already made a suggestion for this student.")
         }
         student.statusSuggestions.add(statusSuggestion)
-        // See the comment at StatusSuggestion.student to understand why we have to do this.
-        statusSuggestion.student = student
         repository.save(student)
     }
 
@@ -121,24 +91,22 @@ class StudentService(private val repository: StudentRepository, private val user
      * or a [FailedOperationException] if the student and the coach exist, but the coach
      * hasn't made a [StatusSuggestion] for this student.
      */
-    fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID) {
+    fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID, edition: String) {
         val coach = userService.getUserById(coachId)
-        val student = getStudentById(studentId)
+        val student = getStudentById(studentId, edition)
         val suggestion = student.statusSuggestions.find { it.coachId == coach.id }
         if (suggestion === null) {
             throw FailedOperationException("This coach hasn't made a suggestion for the given student.")
         }
         student.statusSuggestions.remove(suggestion)
-        // See the comment at StatusSuggestion.student to understand why we have to do this.
-        suggestion.student = null
         repository.save(student)
     }
 
     /**
      * Adds a communication to student based on [studentId], if [studentId] is not in [repository] throw [InvalidStudentIdException]
      */
-    fun addCommunicationToStudent(studentId: UUID, communication: Communication) {
-        val student = getStudentById(studentId)
+    fun addCommunicationToStudent(studentId: UUID, communication: Communication, edition: String) {
+        val student = getStudentById(studentId, edition)
         student.communications.add(communication)
         repository.save(student)
     }

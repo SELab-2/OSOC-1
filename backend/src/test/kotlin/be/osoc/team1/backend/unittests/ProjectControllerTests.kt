@@ -1,15 +1,22 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.ProjectController
+import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.ProjectService
+import be.osoc.team1.backend.util.Serializer
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -17,11 +24,13 @@ import io.mockk.just
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -35,8 +44,13 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var projectService: ProjectService
 
+    @MockkBean
+    private lateinit var assignmentRepository: AssignmentRepository
+
     private val testId = UUID.randomUUID()
-    private val testProject = Project("Proj", "Client", "desc")
+    private val testEdition = "testEdition"
+    private val editionUrl = "/$testEdition/projects"
+    private val testProject = Project("Proj", "Client", "desc", testEdition)
     private val objectMapper = ObjectMapper()
 
     @BeforeEach
@@ -46,53 +60,65 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getAllProjects should not fail`() {
-        every { projectService.getAllProjects("") } returns emptyList()
-        mockMvc.perform(get("/projects")).andExpect(status().isOk)
+        every { projectService.getAllProjects(testEdition) } returns emptyList()
+        mockMvc.perform(get(editionUrl)).andExpect(status().isOk)
     }
 
     @Test
+    fun `getAllProjects paging returns the correct amount`() {
+        val testList = listOf(testProject)
+        every { projectService.getAllProjects(testEdition) } returns listOf(
+            testProject,
+            Project("Foo", "Bar", "desc", testEdition),
+            Project("Fooo", "Baar", "desc", testEdition)
+        )
+        mockMvc.perform(get("$editionUrl?pageNumber=0&pageSize=1"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 3))))
+    }
+    @Test
     fun `getAllProjects name filtering parses the correct name`() {
-        val testList = listOf(Project("_", "_", "_"))
-        val testList2 = listOf(Project("_2", "_2", "_2"))
-        every { projectService.getAllProjects("lars") } returns testList
-        every { projectService.getAllProjects("lars test") } returns testList2
+        val testList = listOf(Project("_", "_", "_", testEdition))
+        val testList2 = listOf(Project("_2", "_2", "_2", testEdition))
+        every { projectService.getAllProjects(testEdition, "lars") } returns testList
+        every { projectService.getAllProjects(testEdition, "lars test") } returns testList2
         // tests the url parsing + with encoding
-        mockMvc.perform(get("/projects?name=lars"))
+        mockMvc.perform(get("$editionUrl?name=lars"))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList)))
-        mockMvc.perform(get("/projects?name=lars%20test"))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList, 1))))
+        mockMvc.perform(get("$editionUrl?name=lars%20test"))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(testList2)))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(testList2, 1))))
     }
 
     @Test
     fun `getProjectById returns project if project with given id exists`() {
         val jsonRepresentation = objectMapper.writeValueAsString(testProject)
-        every { projectService.getProjectById(testId) } returns testProject
-        mockMvc.perform(get("/projects/$testId")).andExpect(status().isOk)
+        every { projectService.getProjectById(testId, testEdition) } returns testProject
+        mockMvc.perform(get("$editionUrl/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
 
     @Test
     fun `getProjectById returns 404 Not Found if project with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { projectService.getProjectById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(get("/projects/$differentId"))
+        every { projectService.getProjectById(differentId, testEdition) }.throws(InvalidIdException())
+        mockMvc.perform(get("$editionUrl/$differentId"))
             .andExpect(status().isNotFound)
     }
 
     @Test
     fun `deleteProjectById succeeds if project with given id exists`() {
-        every { projectService.deleteProjectById(testId) } just Runs
-        mockMvc.perform(delete("/projects/$testId"))
+        every { projectService.deleteProjectById(testId, testEdition) } just Runs
+        mockMvc.perform(delete("$editionUrl/$testId"))
             .andExpect(status().isNoContent)
     }
 
     @Test
     fun `deleteProjectById returns 404 Not Found if project with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { projectService.deleteProjectById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(delete("/projects/$differentId"))
+        every { projectService.deleteProjectById(differentId, testEdition) }.throws(InvalidIdException())
+        mockMvc.perform(delete("$editionUrl/$differentId"))
             .andExpect(status().isNotFound)
     }
 
@@ -101,16 +127,52 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         val jsonRepresentation = objectMapper.writeValueAsString(testProject)
         every { projectService.postProject(any()) } returns testProject
         mockMvc.perform(
-            post("/projects")
+            post(editionUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isCreated).andExpect(content().string(jsonRepresentation))
     }
 
     @Test
+    fun `patchProject should update project`() {
+        val module = SimpleModule()
+        module.addSerializer(Assignment::class.java, Serializer<Assignment> { "/assignments/${it.id}" })
+        val objectMapper = ObjectMapper()
+        objectMapper.registerModule(module)
+
+        val testStudent = Student("firstname", "lastname")
+        val testUser = User("username", "email", Role.Coach, "password")
+        val testPosition = Position(Skill("backend"), 2)
+        val testAssignment = Assignment(testStudent, testPosition, testUser, "reason")
+        testProject.assignments.add(testAssignment)
+
+        every { assignmentRepository.findByIdOrNull(testAssignment.id) } returns testAssignment
+
+        val jsonRepresentation = objectMapper.writeValueAsString(testProject)
+        every { projectService.patchProject(any(), testEdition) } returns testProject
+        mockMvc.perform(
+            patch("$editionUrl/" + testProject.id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isOk).andExpect(content().string(jsonRepresentation))
+
+        testProject.assignments.remove(testAssignment)
+    }
+
+    @Test
+    fun `patchProject should fail when path id does match request body id`() {
+        val jsonRepresentation = objectMapper.writeValueAsString(testProject)
+        mockMvc.perform(
+            patch("$editionUrl/" + UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isBadRequest)
+    }
+
+    @Test
     fun `getStudentsOfProject succeeds if project with given id exists`() {
-        every { projectService.getStudents(testId) } returns emptyList()
-        mockMvc.perform(get("/projects/$testId/students"))
+        every { projectService.getStudents(testId, testEdition) } returns emptyList()
+        mockMvc.perform(get("$editionUrl/$testId/students"))
             .andExpect(status().isOk)
             .andExpect(content().string("[]"))
     }
@@ -118,32 +180,32 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getStudentsOfProject returns 404 Not Found if project with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { projectService.getStudents(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(get("/projects/$differentId/students"))
+        every { projectService.getStudents(differentId, testEdition) }.throws(InvalidIdException())
+        mockMvc.perform(get("$editionUrl/$differentId/students"))
             .andExpect(status().isNotFound)
     }
 
     @Test
     fun `getCoachOfProject succeeds if project with given id exists`() {
-        every { projectService.getProjectById(testId) } returns testProject
-        mockMvc.perform(get("/projects/$testId/coaches"))
+        every { projectService.getProjectById(testId, testEdition) } returns testProject
+        mockMvc.perform(get("$editionUrl/$testId/coaches"))
             .andExpect(status().isOk)
     }
 
     @Test
     fun `getCoachOfProject returns 404 Not Found if project with given id does not exist`() {
         val differentId = UUID.randomUUID()
-        every { projectService.getProjectById(differentId) }.throws(InvalidIdException())
-        mockMvc.perform(get("/projects/$differentId/coaches"))
+        every { projectService.getProjectById(differentId, testEdition) }.throws(InvalidIdException())
+        mockMvc.perform(get("$editionUrl/$differentId/coaches"))
             .andExpect(status().isNotFound)
     }
 
     @Test
     fun `postCoachOfProject succeeds if project with given id exists`() {
         val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
-        every { projectService.addCoachToProject(testId, any()) } just Runs
+        every { projectService.addCoachToProject(testId, any(), testEdition) } just Runs
         mockMvc.perform(
-            post("/projects/$testId/coaches/")
+            post("$editionUrl/$testId/coaches/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(coach.id))
         ).andExpect(status().isNoContent)
@@ -153,9 +215,9 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `postCoachOfProject returns 404 Not Found if project with given id does not exist`() {
         val coach = User("Lars Van Cauter", "lars@email.com", Role.Coach, "password")
         val differentId = UUID.randomUUID()
-        every { projectService.addCoachToProject(differentId, any()) }.throws(InvalidIdException())
+        every { projectService.addCoachToProject(differentId, any(), testEdition) }.throws(InvalidIdException())
         mockMvc.perform(
-            post("/projects/$differentId/coaches/")
+            post("$editionUrl/$differentId/coaches/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(coach.id))
         ).andExpect(status().isNotFound)
@@ -164,8 +226,8 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `deleteCoachOfProject succeeds if project with given id exists`() {
         val coachId = UUID.randomUUID()
-        every { projectService.removeCoachFromProject(testId, coachId) } just Runs
-        mockMvc.perform(delete("/projects/$testId/coaches/$coachId"))
+        every { projectService.removeCoachFromProject(testId, coachId, testEdition) } just Runs
+        mockMvc.perform(delete("$editionUrl/$testId/coaches/$coachId"))
             .andExpect(status().isNoContent)
     }
 
@@ -173,25 +235,25 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `deleteCoachOfProject returns 404 Not Found if project with given id does not exist`() {
         val coachId = UUID.randomUUID()
         val differentId = UUID.randomUUID()
-        every { projectService.removeCoachFromProject(differentId, coachId) }.throws(InvalidIdException())
-        mockMvc.perform(delete("/projects/$differentId/coaches/$coachId"))
+        every { projectService.removeCoachFromProject(differentId, coachId, testEdition) }.throws(InvalidIdException())
+        mockMvc.perform(delete("$editionUrl/$differentId/coaches/$coachId"))
             .andExpect(status().isNotFound)
     }
 
     @Test
     fun `deleteCoachOfProject returns 400 if coach with given id is not assigned to project`() {
         val notAssignedCoachId = UUID.randomUUID()
-        every { projectService.removeCoachFromProject(testId, notAssignedCoachId) }.throws(FailedOperationException())
-        mockMvc.perform(delete("/projects/$testId/coaches/$notAssignedCoachId"))
+        every { projectService.removeCoachFromProject(testId, notAssignedCoachId, testEdition) }.throws(FailedOperationException())
+        mockMvc.perform(delete("$editionUrl/$testId/coaches/$notAssignedCoachId"))
             .andExpect(status().isBadRequest)
     }
 
     @Test
     fun `getProjectConflicts returns conflicts`() {
         // create a conflict
-        val testStudent = Student("Lars", "Van Cauter")
-        val testProjectConflict = Project("Test", "Client", "a test project")
-        val testProjectConflict2 = Project("Test", "Client", "a test project")
+        val testStudent = Student("Lars", "Van Cauter", "")
+        val testProjectConflict = Project("Test", "Client", "a test project", testEdition)
+        val testProjectConflict2 = Project("Test", "Client", "a test project", testEdition)
         val result = mutableListOf(
             ProjectService.Conflict(
                 "https://example.com/api/students/" + testStudent.id,
@@ -201,10 +263,8 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
                 )
             )
         )
-        every { projectService.getConflicts() } returns result
-        mockMvc.perform(get("/projects/conflicts"))
-            .andExpect(status().isOk)
-            .andExpect(content().string(objectMapper.writeValueAsString(result)))
+        every { projectService.getConflicts(testEdition) } returns result
+        mockMvc.perform(get("$editionUrl/conflicts")).andExpect(status().isOk)
     }
 
     @Test
@@ -215,9 +275,9 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
             UUID.randomUUID(),
             "reason"
         )
-        every { projectService.postAssignment(any(), any()) } just Runs
+        every { projectService.postAssignment(any(), any(), testEdition) } just Runs
         mockMvc.perform(
-            post("/projects/$testId/assignments")
+            post("$editionUrl/$testId/assignments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(assignmentPost))
         ).andExpect(status().isOk)
@@ -231,9 +291,9 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
             UUID.randomUUID(),
             "reason"
         )
-        every { projectService.postAssignment(any(), any()) } throws InvalidIdException()
+        every { projectService.postAssignment(any(), any(), testEdition) } throws InvalidIdException()
         mockMvc.perform(
-            post("/projects/$testId/assignments")
+            post("$editionUrl/$testId/assignments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(assignmentPost))
         ).andExpect(status().isNotFound)
@@ -247,9 +307,9 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
             UUID.randomUUID(),
             "reason"
         )
-        every { projectService.postAssignment(any(), any()) } throws ForbiddenOperationException()
+        every { projectService.postAssignment(any(), any(), testEdition) } throws ForbiddenOperationException()
         mockMvc.perform(
-            post("/projects/$testId/assignments")
+            post("$editionUrl/$testId/assignments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(assignmentPost))
         ).andExpect(status().isForbidden)
@@ -257,13 +317,13 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `deleteAssignment succeeds if everything is correct`() {
-        every { projectService.deleteAssignment(any(), any()) } just Runs
-        mockMvc.perform(delete("/projects/$testId/assignments/$testId")).andExpect(status().isNoContent)
+        every { projectService.deleteAssignment(any(), any(), testEdition) } just Runs
+        mockMvc.perform(delete("$editionUrl/$testId/assignments/$testId")).andExpect(status().isNoContent)
     }
 
     @Test
     fun `deleteAssignment returns 404 if an invalid id is used`() {
-        every { projectService.deleteAssignment(any(), any()) } throws InvalidIdException()
-        mockMvc.perform(delete("/projects/$testId/assignments/$testId")).andExpect(status().isNotFound)
+        every { projectService.deleteAssignment(any(), any(), testEdition) } throws InvalidIdException()
+        mockMvc.perform(delete("$editionUrl/$testId/assignments/$testId")).andExpect(status().isNotFound)
     }
 }
