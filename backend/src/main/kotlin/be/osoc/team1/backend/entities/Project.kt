@@ -27,7 +27,7 @@ import javax.validation.constraints.NotBlank
  */
 @Entity
 class Position(
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(cascade = [CascadeType.PERSIST])
     val skill: Skill,
     val amount: Int,
     @JsonIgnore
@@ -83,7 +83,7 @@ class Project(
     @NotBlank
     val edition: String = "",
 
-    @ManyToMany(cascade = [CascadeType.ALL])
+    @ManyToMany
     @JsonSerialize(using = UserListSerializer::class)
     val coaches: MutableCollection<User> = mutableListOf(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
