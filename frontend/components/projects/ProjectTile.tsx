@@ -32,6 +32,7 @@ const edit_icon = <Icon icon="akar-icons:edit" />;
 // Using projectInput and not just project to avoid confusion
 type ProjectProp = {
   projectInput: ProjectBase;
+  refreshProjects: () => void;
 };
 
 type UserProp = {
@@ -117,6 +118,28 @@ function deleteStudentFromProject(
     })
     .catch((err) => {
       parseError(err, setError, signal);
+    });
+}
+
+/**
+ * Function to delete the current project, will refresh projects list when completed
+ *
+ * @param projectId - the UUID of the project to remove
+ * @param refreshProjects - callback to update main projects list
+ * @param setError - Callback to set error message
+ */
+function deleteProject(
+  projectId: UUID,
+  refreshProjects: () => void,
+  setError: (error: string) => void
+) {
+  axiosAuthenticated
+    .delete(Endpoints.PROJECTS + '/' + projectId)
+    .then(() => {
+      refreshProjects();
+    })
+    .catch((err) => {
+      parseError(err, setError, new AbortController().signal);
     });
 }
 
@@ -234,7 +257,10 @@ function convertProjectBase(projectBase: ProjectBase): Project {
   return newProject as Project;
 }
 
-const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
+const ProjectTile: React.FC<ProjectProp> = ({
+  projectInput,
+  refreshProjects,
+}: ProjectProp) => {
   const [user] = useUser();
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
@@ -257,6 +283,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [reason, setReason] = useState('' as string);
   const [currentUser] = useUser();
   const [showEditProject, setShowEditProject] = useState(false);
+  const [deletePopup, setDeletePopup] = useState(false);
 
   let controller = new AbortController();
 
@@ -328,15 +355,17 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         {/* left part of header */}
         <div className="flex min-w-[40%] flex-col xl:min-w-[50%]">
           <div className="flex flex-row items-center">
-            <p className="text-lg font-bold">{myProject.name}</p>
-            <i
-              className={`${
-                user.role == UserRole.Admin ? 'visible' : 'hidden'
-              } pl-2 text-xl opacity-20`}
-              onClick={() => setShowEditProject(true)}
-            >
-              {edit_icon}
-            </i>
+            <p className="inline text-lg font-bold">
+              {myProject.name}
+              <i
+                className={`${
+                  user.role == UserRole.Admin ? 'visible' : 'hidden'
+                } i-inline inline pl-2 text-xl opacity-20`}
+                onClick={() => setShowEditProject(true)}
+              >
+                {edit_icon}
+              </i>
+            </p>
           </div>
           <p>{myProject.clientName}</p>
           <div className="flex flex-row">
@@ -539,7 +568,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         </div>
       </Popup>
 
-      {/* This is the popup to create a new project */}
+      {/* This is the popup to edit this project */}
       <Popup
         open={showEditProject}
         onClose={() => setShowEditProject(false)}
@@ -572,7 +601,52 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
               setProjectForm={setProjectForm}
               setError={setError}
               setMyProjectBase={setMyProjectBase}
+              setDeletePopup={setDeletePopup}
             />
+          </div>
+        </div>
+      </Popup>
+
+      {/* This is the popup to confirm deleting a project */}
+      <Popup
+        open={deletePopup}
+        onClose={() => setDeletePopup(false)}
+        data-backdrop="static"
+        data-keyboard="false"
+        closeOnDocumentClick={false}
+        lockScroll={true}
+      >
+        <div className="modal chart-label max-w-screen absolute left-1/2 top-1/2 flex max-h-[85vh] min-w-[450px] flex-col bg-osoc-neutral-bg py-5">
+          <a
+            className="close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeletePopup(false);
+            }}
+          >
+            &times;
+          </a>
+          <h3 className="px-5 text-lg">
+            Are you sure you wish to remove <i>{myProject.name}</i>?
+          </h3>
+          <div className="mt-3 flex flex-row justify-between px-5">
+            <button
+              onClick={() => setDeletePopup(false)}
+              className={`min-w-[120px] border-2 bg-white`}
+            >
+              Cancel
+            </button>
+
+            <button
+              className={`min-w-[120px] border-2 bg-check-red py-1`}
+              onClick={() => {
+                setDeletePopup(false);
+                setShowEditProject(false);
+                deleteProject(myProject.id, refreshProjects, setError);
+              }}
+            >
+              Delete
+            </button>
           </div>
         </div>
       </Popup>

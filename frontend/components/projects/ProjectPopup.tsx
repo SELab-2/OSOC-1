@@ -19,6 +19,7 @@ type ProjectPopupProp = {
   setProjectForm: (projectForm: ProjectForm) => void;
   setError: (error: string) => void;
   setMyProjectBase: (myProjectBase: ProjectBase) => void;
+  setDeletePopup: (deletePopup: boolean) => void;
 };
 
 /**
@@ -199,6 +200,7 @@ function checkPositions(
  * @param setProjectForm - callback to use to change the passed projectForm, needed to save user changes
  * @param setError - callback to set error message
  * @param setMyProjectBase - callback for the updated ProjectBase object
+ * @param setDeletePopup - callback to open a confirm project deletion popup
  */
 const ProjectPopup: React.FC<ProjectPopupProp> = ({
   projectForm,
@@ -206,6 +208,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
   setProjectForm,
   setError,
   setMyProjectBase,
+  setDeletePopup,
 }: ProjectPopupProp) => {
   /**
    * Update the position dropdown value for the position at index key in projectForm
@@ -497,6 +500,19 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
           className={`min-w-[120px] border-2 bg-white`}
         >
           Cancel
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setDeletePopup(true);
+          }}
+          className={`${
+            projectForm.id ? 'visible' : 'hidden'
+          } min-w-[120px] border-2 bg-check-red py-1`}
+        >
+          Delete
         </button>
 
         <button

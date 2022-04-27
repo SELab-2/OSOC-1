@@ -341,7 +341,11 @@ const Projects: NextPage = () => {
                 <FlatList
                   list={projects}
                   renderItem={(project: ProjectBase) => (
-                    <ProjectTile key={project.id} projectInput={project} />
+                    <ProjectTile
+                      key={project.id}
+                      projectInput={project}
+                      refreshProjects={refreshProjects}
+                    />
                   )}
                   renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
                   hasMoreItems={state.hasMoreItems}
@@ -396,6 +400,7 @@ const Projects: NextPage = () => {
                 setProjectForm={setProjectForm}
                 setError={setError}
                 setMyProjectBase={refreshProjects}
+                setDeletePopup={() => null}
               />
             </div>
           </div>
