@@ -8,7 +8,7 @@ type HeaderProps = PropsWithChildren<unknown>;
 
 const Header: React.FC<HeaderProps> = () => {
   const router = useRouter();
-  const [user,] = useUser();
+  const [user] = useUser();
   const current_path = router.pathname;
 
   return (
@@ -47,19 +47,15 @@ const Header: React.FC<HeaderProps> = () => {
             <Link href="/users">Manage Users</Link>
           </li>
 
-          {
-            [UserRole.Admin].includes(user.role)
-            ? (
-              <li
-                className={`ml-3 hover:underline sm:inline ${
-                  current_path === '/editions' ? 'underline' : ''
-                }`}
-              >
-                <Link href="/editions">Manage Editions</Link>
-              </li>
-            )
-            : undefined
-          }
+          {[UserRole.Admin].includes(user.role) ? (
+            <li
+              className={`ml-3 hover:underline sm:inline ${
+                current_path === '/editions' ? 'underline' : ''
+              }`}
+            >
+              <Link href="/editions">Manage Editions</Link>
+            </li>
+          ) : undefined}
           <li className={`ml-3 hover:underline sm:inline`}>
             <Link href="/logout">Log Out</Link>
           </li>
