@@ -19,7 +19,7 @@ const Students: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
 
   return (
-    <div className="min-w-screen flex min-h-screen flex-col items-center">
+    <div className="h-screen flex flex-col items-center">
       <Header />
       <DndProvider backend={HTML5Backend}>
         <main className="flex w-full flex-row">

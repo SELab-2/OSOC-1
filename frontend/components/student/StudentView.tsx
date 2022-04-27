@@ -70,7 +70,7 @@ const StudentView: React.FC<StudentProp> = ({ student }: StudentProp) => {
           </div>
           <textarea
             placeholder="Motivation"
-            className="mt-3 w-full resize-y border-2 border-check-gray"
+            className="mt-3 w-full h-32 resize-y border-2 border-check-gray"
           />
         </form>
 
