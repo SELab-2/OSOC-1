@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { PropsWithChildren } from 'react';
+import useUser from '../hooks/useUser';
+import { UserRole } from '../lib/types';
 
 type HeaderProps = PropsWithChildren<unknown>;
 
 const Header: React.FC<HeaderProps> = () => {
   const router = useRouter();
+  const [user,] = useUser();
   const current_path = router.pathname;
 
   return (
@@ -43,13 +46,20 @@ const Header: React.FC<HeaderProps> = () => {
           >
             <Link href="/users">Manage Users</Link>
           </li>
-          <li
-            className={`ml-3 hover:underline sm:inline ${
-              current_path === '/editions' ? 'underline' : ''
-            }`}
-          >
-            <Link href="/editions">Manage Editions</Link>
-          </li>
+
+          {
+            [UserRole.Admin].includes(user.role)
+            ? (
+              <li
+                className={`ml-3 hover:underline sm:inline ${
+                  current_path === '/editions' ? 'underline' : ''
+                }`}
+              >
+                <Link href="/editions">Manage Editions</Link>
+              </li>
+            )
+            : undefined
+          }
           <li className={`ml-3 hover:underline sm:inline`}>
             <Link href="/logout">Log Out</Link>
           </li>
