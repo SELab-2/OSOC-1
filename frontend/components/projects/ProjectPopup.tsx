@@ -89,14 +89,14 @@ export function projectFormFromProject(
   newProjectForm.clientName = project.clientName || '';
   newProjectForm.description = project.description || '';
   newProjectForm.coaches = project.coaches || [];
-  newProjectForm.positions = project.positions.map(
-    (value) =>
-      (({
+  newProjectForm.positions = project.positions ?
+  project.positions.map(
+    (value) => {
+      return {
         amount: value.amount.toString(),
         skill: { value: value.id, label: value.skill.skillName },
-      } as positionForm) ||
-      ([JSON.parse(JSON.stringify({ ...defaultPosition }))] as positionForm[]))
-  );
+      }
+    }) : [JSON.parse(JSON.stringify({ ...defaultPosition }))] as positionForm[]
   newProjectForm.assignments = assignmentUrls || ([] as Url[]);
   return newProjectForm;
 }

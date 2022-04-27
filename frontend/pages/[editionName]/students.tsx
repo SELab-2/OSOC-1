@@ -1,7 +1,6 @@
 import type { NextPage } from 'next';
 import Header from '../../components/Header';
 import StudentSidebar from '../../components/StudentSidebar';
-import StudentView from '../../components/student/StudentView';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
 import { StatusSuggestionStatus } from '../../lib/types';
@@ -68,7 +67,7 @@ const Students: NextPage = () => {
 
             {/* This contains the actual student info */}
             <div>
-              <StudentView student={student} />
+              {/*<StudentView student={student} />*/}
             </div>
           </section>
         </main>
