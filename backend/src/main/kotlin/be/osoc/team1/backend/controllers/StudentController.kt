@@ -10,6 +10,7 @@ import be.osoc.team1.backend.entities.filterBySkills
 import be.osoc.team1.backend.entities.filterByStatus
 import be.osoc.team1.backend.entities.filterByStudentCoach
 import be.osoc.team1.backend.entities.filterBySuggested
+import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.OsocUserDetailService
@@ -70,6 +71,13 @@ class StudentController(
         @PathVariable edition: String,
         principal: Principal
     ): PagedCollection<Student> {
+        /*
+         * A trailing comma in the status filter will create a null value in the status set. This check handles that
+         * seemingly impossible scenario and returns status code 400(Bad request).
+         */
+        if (status.filterNotNull().size != status.size)
+            throw FailedOperationException("Status filter cannot contain null values! This might be caused by a trailing comma.")
+
         val decodedName = URLDecoder.decode(name, "UTF-8")
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
@@ -78,7 +86,7 @@ class StudentController(
             .applyIf(alumnOnly) { filterByAlumn() }
             .applyIf(name.isNotBlank()) { filterByName(decodedName) }
             .applyIf(!includeSuggested) { filterBySuggested(callee) }
-            .applyIf(status.size != StatusEnum.values().size) { filterByStatus(status) }
+            .applyIf(status != StatusEnum.values().toSet()) { filterByStatus(status) }
             .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)

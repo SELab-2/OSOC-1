@@ -559,7 +559,8 @@
         "label": "Which role are you applying for?",
         "type": "CHECKBOXES",
         "value": [
-          "19b68be9-6c2b-41f8-95f6-439cfb20f792"
+          "19b68be9-6c2b-41f8-95f6-439cfb20f792",
+          "ce472fdf-723c-4b94-bcad-a9136d0d8443"
         ],
         "options": [
           {
@@ -678,7 +679,7 @@
         "key": "question_w8Ze6o",
         "label": "Which role are you applying for that is not in the list above?",
         "type": "INPUT_TEXT",
-        "value": null
+        "value": "Some other role"
       },
       {
         "key": "question_n0ePZQ",

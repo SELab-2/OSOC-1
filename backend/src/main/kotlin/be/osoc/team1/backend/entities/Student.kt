@@ -16,6 +16,7 @@ import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.ManyToMany
 import javax.persistence.OneToMany
+import javax.persistence.OrderBy
 import javax.validation.constraints.NotBlank
 
 /**
@@ -123,6 +124,7 @@ class Student(
     val edition: String = "",
 
     @ManyToMany(cascade = [CascadeType.ALL])
+    @OrderBy
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
     val possibleStudentCoach: Boolean = false,

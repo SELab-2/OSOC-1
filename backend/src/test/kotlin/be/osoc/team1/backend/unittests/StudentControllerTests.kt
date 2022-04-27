@@ -129,6 +129,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
         mockMvc.perform(get("$editionUrl?status=NonExistentStatus").principal(defaultPrincipal))
             .andExpect(status().isBadRequest)
+        mockMvc.perform(get("$editionUrl?status=Yes,No,Undecided,").principal(defaultPrincipal))
+            .andExpect(status().isBadRequest)
     }
 
     @Test
@@ -332,6 +334,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         assertEquals("Maarten", capturedStudent.firstName)
         assertEquals("Steevens", capturedStudent.lastName)
         assert(capturedStudent.skills.contains(Skill("Back-end developer")))
+        assert(capturedStudent.skills.contains(Skill("Some other role")))
         assertEquals(true, capturedStudent.alumn)
         assertEquals(false, capturedStudent.possibleStudentCoach)
 
