@@ -6,6 +6,7 @@ import { getCoaches, getSkills, parseError } from '../../lib/requestUtils';
 import Select from 'react-select';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
+import Error from '../Error';
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -147,8 +148,36 @@ function postOrPatchProject(
       setMyProjectBase(response.data as ProjectBase);
     })
     .catch((err) => {
-      parseError(err, setError, new AbortSignal());
+      parseError(err, setError, new AbortController().signal);
     });
+}
+
+/**
+ * Function to check if all position dropdown values were filled correctly
+ * @param projectForm - projectForm containing positions
+ * @param setFormError - callback to set error message
+ */
+function checkPositions(
+  projectForm: ProjectForm,
+  setFormError: (formError: string) => void
+) {
+  if (
+    projectForm.positions.filter(
+      (position) => !position.skill || !position.skill.label
+    ).length > 0
+  ) {
+    setFormError('Each position must have a skill.');
+    return false;
+  }
+  if (
+    new Set(projectForm.positions.map((position) => position.skill.label))
+      .size != projectForm.positions.length
+  ) {
+    setFormError('Each position must be unique.');
+    return false;
+  }
+  setFormError('');
+  return true;
 }
 
 /**
@@ -244,6 +273,8 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     [] as Array<{ value: User; label: string }>
   );
 
+  const [formError, setFormError] = useState('');
+
   const addSkillOption = (option: string) => {
     const newSkillOptions = [...skillOptions];
     newSkillOptions.push({ value: '', label: option });
@@ -265,16 +296,19 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        controller.abort();
-        controller = new AbortController();
-        const signal = controller.signal;
-        postOrPatchProject(projectForm, setMyProjectBase, signal, setError);
-        setShowPopup(false);
-        return () => {
+        if (checkPositions(projectForm, setFormError)) {
           controller.abort();
-        };
+          controller = new AbortController();
+          const signal = controller.signal;
+          postOrPatchProject(projectForm, setMyProjectBase, signal, setError);
+          setShowPopup(false);
+          return () => {
+            controller.abort();
+          };
+        }
       }}
     >
+      {formError && <Error error={formError} className="mb-4" />}
       <label className="mb-2 block px-5">
         Project Name
         <input
@@ -285,6 +319,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
           onChange={(e) =>
             handleProjectFormChange('projectName', e.target.value)
           }
+          required
         />
       </label>
 
@@ -298,6 +333,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
           onChange={(e) =>
             handleProjectFormChange('clientName', e.target.value)
           }
+          required
         />
       </label>
 
@@ -321,6 +357,11 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
           })}
           options={coachOptions}
           placeholder="Select coaches"
+          isOptionDisabled={(option) =>
+            (projectForm.coaches as User[])
+              .map((coach) => coach.username)
+              .includes(option.label)
+          }
           onChange={(e) =>
             handleProjectFormChange(
               'coaches',
@@ -393,6 +434,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                       onChange={(e) =>
                         setPositionDropdownAmount(index, e.target.value)
                       }
+                      required
                     />
                   </label>
                   <div className="ml-4 flex flex-col justify-center">
