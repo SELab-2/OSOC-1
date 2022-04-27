@@ -97,6 +97,7 @@ async function searchStudent(
 
 /**
  * function to map the boolean status states onto a string
+ * if no status states are set, will return a string containing a space to avoid calling backend default
  *
  * @param studentSearchParameters - Record that contains the four possible statuses: StatusYes, StatusNo, StatusMaybe, StatusUndecided
  */
@@ -111,7 +112,7 @@ function getStatusFilterList(
   return stringList.join(',') || ' ';
 }
 
-// TODO allow disabling drag on studentView since I don't think it is needed there
+// TODO allow disabling drag on studentView since I don't think it is needed there, don't know how though
 /**
  * This returns the StudentSidebar
  * Any page using this should add a DndProvider backend=\{HTML5Backend\} element
@@ -125,7 +126,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
 
   let controller = new AbortController();
 
-  // Split this from studentSearchParameters to avoid typing hacks
   const [skills, setSkills] = useState(
     [] as Array<{ value: string; label: string }>
   );
@@ -134,7 +134,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     [] as Array<{ value: string; label: string }>
   );
 
-  // Split this to avoid making new object every type action & control when to call filter
+  // Split this to control when to call searchStudent
   const [studentNameSearch, setStudentNameSearch] = useState('' as string);
 
   const [filterAmount, setFilterAmount]: [
@@ -149,8 +149,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
 
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true);
-
-  // const [error, setError]: [string, (error: string) => void] = useState(''); // TODO use this for actual error handling
 
   const defaultStudentSearchParameters = {
     StatusYes: true,
@@ -176,8 +174,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   const clearFilters = () => {
     setStudentSearchParameters(defaultStudentSearchParameters);
     setSkills([] as Array<{ value: string; label: string }>);
+    setStudentNameSearch('');
   };
 
+  /**
+   * function to add new student results instead of overwriting old results
+   * @param studentsList - list of students to add to all students
+   */
   const updateStudents: (param: StudentBase[]) => void = (
     studentsList: StudentBase[]
   ) => {
@@ -239,6 +242,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     };
   }, [studentSearchParameters, skills]);
 
+  /**
+   * State for the infinite scroll FlatList
+   * FlatList has a few bugs so there are two different loading parameters
+   */
   const [state, setState] = useState({
     hasMoreItems: true,
     loading: true,
@@ -246,6 +253,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     pageSize: 50,
   });
 
+  /**
+   * What to show when the students list is empty
+   */
   const showBlank = () => {
     if (loading) {
       return (
@@ -264,6 +274,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     return <div className="text-center">No students found.</div>;
   };
 
+  /**
+   * Called when FlatList is scrolled to the bottom
+   */
   const fetchData = () => {
     if (state.loading) {
       return;
@@ -303,6 +316,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
                 id="StudentsSearch"
                 placeholder="Search students by name"
+                value={studentNameSearch}
                 onChange={(e) => setStudentNameSearch(e.target.value)}
                 onKeyPress={(e) => {
                   if (e.key == 'Enter') {

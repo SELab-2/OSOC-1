@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { StatusSuggestionStatus } from '../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
+import useAxiosAuth from "../hooks/useAxiosAuth";
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -19,6 +20,7 @@ const Students: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
 
   const [, setError]: [string, (error: string) => void] = useState('');
+  useAxiosAuth();
 
   return (
     <div className="min-w-screen flex min-h-screen flex-col items-center">

@@ -100,6 +100,15 @@ export function projectFormFromProject(
   return newProjectForm;
 }
 
+/**
+ * Function to post or patch a new project
+ * Depending on if the value projectForm.id is present, a post or patch will be done
+ *
+ * @param projectForm - the form containing all needed fields to post or patch a project
+ * @param setMyProjectBase - callback function to set result (can be used for reloading)
+ * @param signal - AbortSignal for the axios request
+ * @param setError - callback to set error message
+ */
 function postOrPatchProject(
   projectForm: ProjectForm,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
@@ -275,6 +284,10 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
 
   const [formError, setFormError] = useState('');
 
+  /**
+   * When a new skill is created by the user, add it to the options
+   * @param option - the skillname to be added
+   */
   const addSkillOption = (option: string) => {
     const newSkillOptions = [...skillOptions];
     newSkillOptions.push({ value: '', label: option });

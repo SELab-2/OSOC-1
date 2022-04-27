@@ -49,6 +49,13 @@ const chartHelper = {
   Default: [tilde_mark, 'text-check-gray'],
 } as stringToArrayDict;
 
+/**
+ * Function to dereference needed student fields
+ *
+ * @param studentBase - base object with fields to dereference
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ */
 async function getEntireStudent(
   studentBase: StudentBase,
   signal: AbortSignal,
@@ -64,6 +71,10 @@ async function getEntireStudent(
   return newStudent;
 }
 
+/**
+ * Function to convert a StudentBase object to a Student object
+ * @param studentBase - base student object as returned by get request
+ */
 function convertStudentBase(studentBase: StudentBase): Student {
   const newStudent = {} as Student;
   newStudent.id = studentBase.id;

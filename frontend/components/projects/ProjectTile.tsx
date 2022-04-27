@@ -14,12 +14,14 @@ import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
 import Select from 'react-select';
 import { useDrop } from 'react-dnd';
-import useAxiosAuth from '../../hooks/useAxiosAuth';
 import { Fragment, useEffect, useState } from 'react';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
-import ProjectPopup, { projectFormFromProject } from './ProjectPopup';
+import ProjectPopup, {
+  defaultprojectForm,
+  projectFormFromProject,
+} from './ProjectPopup';
 import { getUrlDict, getUrlList, parseError } from '../../lib/requestUtils';
 import Error from '../Error';
 import { SpinnerCircular } from 'spinners-react';
@@ -61,7 +63,6 @@ type AssignmentProp = {
  * @param setError - Callback to set error message
  */
 // TODO when post is finished, should update the student filter
-// TODO should show success / error
 function postStudentToProject(
   projectId: UUID,
   studentId: UUID,
@@ -91,7 +92,6 @@ function postStudentToProject(
 }
 
 // TODO when delete is finished, should update the student filter
-// TODO should show success / error
 /**
  * This function sends an authenticated DELETE request to remove an assignment from a project
  *
@@ -145,6 +145,13 @@ function reloadProject(
     });
 }
 
+/**
+ * Function to dereference needed project fields
+ * @param projectBase - base object with fields to dereference
+ * @param setLoading - callback to set when loading is finished
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ */
 async function getEntireProject(
   projectBase: ProjectBase,
   setLoading: (loading: boolean) => void,
@@ -210,6 +217,11 @@ async function getEntireProject(
   return newProject;
 }
 
+/**
+ * Function to create a Project object from a ProjectBase object
+ * This is needed to allow rendering of empty fields
+ * @param projectBase - base project object as returned by a get request
+ */
 function convertProjectBase(projectBase: ProjectBase): Project {
   const newProject = {} as Project;
   newProject.name = projectBase.name;
@@ -223,29 +235,21 @@ function convertProjectBase(projectBase: ProjectBase): Project {
 }
 
 const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
+  const [user] = useUser();
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
     useState(convertProjectBase(projectInput) as Project); // using different names to avoid confusion
-  const [user] = useUser();
   const [myProjectBase, setMyProjectBase]: [
     ProjectBase,
     (myProjectBase: ProjectBase) => void
   ] = useState(projectInput as ProjectBase);
-  const [error, setError]: [string, (error: string) => void] = useState('');
-  const [loading, setLoading]: [boolean, (loading: boolean) => void] =
-    useState<boolean>(true);
-  let controller = new AbortController();
-
-  const [openAssignment, setOpenAssignment]: [
-    boolean,
-    (openAssignment: boolean) => void
-  ] = useState<boolean>(false);
-  const closeAssignmentModal = () => setOpenAssignment(false);
-  const [openUnassignment, setOpenUnassignment]: [
-    boolean,
-    (openUnassignment: boolean) => void
-  ] = useState<boolean>(false);
-  const closeUnassignmentModal = () => setOpenUnassignment(false);
+  const [projectForm, setProjectForm] = useState(
+    JSON.parse(JSON.stringify({ ...defaultprojectForm }))
+  );
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [openAssignment, setOpenAssignment] = useState(false);
+  const [openUnassignment, setOpenUnassignment] = useState(false);
   const [assignmentId, setAssignmentId] = useState('' as UUID);
   const [removeStudentName, setRemoveStudentName] = useState('' as string);
   const [student, setStudent] = useState({} as Student);
@@ -253,8 +257,13 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
   const [reason, setReason] = useState('' as string);
   const [currentUser] = useUser();
   const [showEditProject, setShowEditProject] = useState(false);
-  useAxiosAuth();
 
+  let controller = new AbortController();
+
+  /**
+   * called when myProjectBase changes, this includes right after
+   * myProjectBase gets set to projectInput at the start.
+   */
   useEffect(() => {
     setLoading(true);
     controller.abort();
@@ -265,14 +274,11 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
         setMyProject(response);
       }
     );
+    // setProjectForm(projectFormFromProject(myProject, myProjectBase.assignments));
     return () => {
       controller.abort();
     };
   }, [myProjectBase]);
-
-  const [projectForm, setProjectForm] = useState(
-    projectFormFromProject(myProject, myProjectBase.assignments)
-  );
 
   /**
    * This catches the dropped studentTile
@@ -370,7 +376,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
       {/* This is the popup to assign a student to a project */}
       <Popup
         open={openAssignment}
-        onClose={closeAssignmentModal}
+        onClose={() => setOpenAssignment(false)}
         data-backdrop="static"
         data-keyboard="false"
         closeOnDocumentClick={false}
@@ -381,7 +387,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
             className="close"
             onClick={(e) => {
               e.stopPropagation();
-              closeAssignmentModal();
+              setOpenAssignment(false);
             }}
           >
             &times;
@@ -411,7 +417,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
                 signal,
                 setError
               );
-              closeAssignmentModal();
+              setOpenAssignment(false);
               return () => {
                 controller.abort();
               };
@@ -453,7 +459,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
             </label>
             <div className="mt-6 flex flex-row justify-between">
               <button
-                onClick={() => closeAssignmentModal()}
+                onClick={() => setOpenAssignment(false)}
                 className={`min-w-[120px] border-2 bg-white`}
               >
                 Cancel
@@ -473,7 +479,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
       {/* This is the popup to remove a student assignment */}
       <Popup
         open={openUnassignment}
-        onClose={closeUnassignmentModal}
+        onClose={() => setOpenUnassignment(false)}
         data-backdrop="static"
         data-keyboard="false"
         closeOnDocumentClick={false}
@@ -484,7 +490,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
             className="close"
             onClick={(e) => {
               e.stopPropagation();
-              closeUnassignmentModal();
+              setOpenUnassignment(false);
             }}
           >
             &times;
@@ -495,7 +501,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
           </h3>
           <div className="mt-3 flex flex-row justify-between px-5">
             <button
-              onClick={() => closeUnassignmentModal()}
+              onClick={() => setOpenUnassignment(false)}
               className={`min-w-[120px] border-2 bg-white`}
             >
               Cancel
@@ -504,7 +510,7 @@ const ProjectTile: React.FC<ProjectProp> = ({ projectInput }: ProjectProp) => {
             <button
               className={`min-w-[120px] border-2 bg-check-green py-1`}
               onClick={() => {
-                closeUnassignmentModal();
+                setOpenUnassignment(false);
                 controller.abort();
                 controller = new AbortController();
                 const signal = controller.signal;
