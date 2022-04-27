@@ -460,7 +460,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
                 setMyProjectBase,
                 signal,
                 setError,
-                  setRefreshStudents
+                setRefreshStudents
               );
               setOpenAssignment(false);
               return () => {
@@ -565,7 +565,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
                   setMyProjectBase,
                   signal,
                   setError,
-                    setRefreshStudents
+                  setRefreshStudents
                 );
                 return () => {
                   controller.abort();
@@ -652,7 +652,12 @@ const ProjectTile: React.FC<ProjectProp> = ({
               onClick={() => {
                 setDeletePopup(false);
                 setShowEditProject(false);
-                deleteProject(myProject.id, refreshProjects, setError, setRefreshStudents);
+                deleteProject(
+                  myProject.id,
+                  refreshProjects,
+                  setError,
+                  setRefreshStudents
+                );
               }}
             >
               Delete

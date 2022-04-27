@@ -124,7 +124,7 @@ function getStatusFilterList(
 const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   setError,
   refresh,
-  setRefresh
+  setRefresh,
 }: StudentsSidebarProps) => {
   const [showFilter, setShowFilter] = useState(true);
 
@@ -196,7 +196,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   useAxiosAuth();
   let controller = new AbortController();
 
-
   /**
    * when a search parameter changes, call the function to reload results
    * This will also get called on first render
@@ -211,42 +210,42 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * need to be reloaded. This can be quite slow and does a lot of useless work.
    */
   useEffect(() => {
-    if (refresh && studentSearchParameters.ExcludeAssigned){
-      let prevPageSize = state.pageSize;
-      let prevPage = state.page
+    if (refresh && studentSearchParameters.ExcludeAssigned) {
+      const prevPageSize = state.pageSize;
+      const prevPage = state.page;
       state.pageSize = state.page * state.pageSize;
       search();
       state.page = prevPage;
       state.pageSize = prevPageSize;
     }
     setRefresh(false);
-  },[refresh]);
+  }, [refresh]);
 
   /**
    * Call to refresh students list from page 0 with current filters applied
    */
-  const search = (refreshSkills: boolean = false) => {
+  const search = (refreshSkills = false) => {
     state.page = 0;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
     refreshSkills ? getSkills(setSkillOptions, signal, setError) : null;
     searchStudent(
-        studentNameSearch,
-        skills,
-        studentSearchParameters,
-        setStudents,
-        setFilterAmount,
-        state,
-        setState,
-        setLoading,
-        signal,
-        setError
+      studentNameSearch,
+      skills,
+      studentSearchParameters,
+      setStudents,
+      setFilterAmount,
+      state,
+      setState,
+      setLoading,
+      signal,
+      setError
     );
     return () => {
       controller.abort();
     };
-  }
+  };
 
   /**
    * State for the infinite scroll FlatList

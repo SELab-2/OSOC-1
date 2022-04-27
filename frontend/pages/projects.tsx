@@ -144,19 +144,18 @@ const Projects: NextPage = () => {
    * Call to refresh projects list from page 0 with current filters applied
    */
   const search = () => {
-    setRefreshStudents(true);
     state.page = 0;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
     searchProject(
-        projectSearch,
-        setProjects,
-        state,
-        setState,
-        setLoading,
-        signal,
-        setError
+      projectSearch,
+      setProjects,
+      state,
+      setState,
+      setLoading,
+      signal,
+      setError
     );
     return () => {
       controller.abort();
@@ -236,7 +235,11 @@ const Projects: NextPage = () => {
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>
-              <StudentSidebar setError={setError} refresh={refreshStudents} setRefresh={setRefreshStudents} />
+              <StudentSidebar
+                setError={setError}
+                refresh={refreshStudents}
+                setRefresh={setRefreshStudents}
+              />
             </section>
 
             {/* Holds the projects searchbar + project tiles */}
