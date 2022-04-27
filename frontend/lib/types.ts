@@ -19,6 +19,18 @@ export enum UserRole {
   Disabled = 'Disabled',
 }
 
+export type Edition = {
+  /**
+   * unique name of the edition
+   */
+  name: string;
+
+  /**
+   * Whether this edition is the current active edition
+   */
+  isActive: boolean;
+};
+
 export type User = {
   /**
    * Unique identifier for the user

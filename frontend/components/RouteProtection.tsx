@@ -1,12 +1,12 @@
-import { useRouter } from "next/router";
-import { FC, PropsWithChildren, useEffect, useState } from "react";
-import useUser from "../hooks/useUser";
-import { UserRole } from "../lib/types";
+import { useRouter } from 'next/router';
+import { FC, PropsWithChildren, useEffect, useState } from 'react';
+import useUser from '../hooks/useUser';
+import { UserRole } from '../lib/types';
 
 type RouteProtectionProps = PropsWithChildren<{
   /**
    * array of allowed roles that can visit this page passed as child component
-   * 
+   *
    * @see {@link UserRole}
    */
   allowedRoles: UserRole[];
@@ -20,7 +20,7 @@ type RouteProtectionProps = PropsWithChildren<{
 
 /**
  * Route Protection component that needs to be used to protect certain pages from certain users
- * 
+ *
  * @example
  * ```
  * const Page = () => {
@@ -36,13 +36,16 @@ type RouteProtectionProps = PropsWithChildren<{
  *  )
  * }
  * ```
- * 
+ *
  * @see {@link RouteProtectionProps}
- * 
+ *
  * @returns RouteProtection component
  */
-const RouteProtection: FC<RouteProtectionProps> = ({ children, allowedRoles, fallbackPath }: RouteProtectionProps) => {
-
+const RouteProtection: FC<RouteProtectionProps> = ({
+  children,
+  allowedRoles,
+  fallbackPath,
+}: RouteProtectionProps) => {
   const [loading, setLoading] = useState(true);
   const [user] = useUser();
   const router = useRouter();
@@ -54,24 +57,14 @@ const RouteProtection: FC<RouteProtectionProps> = ({ children, allowedRoles, fal
    * runs when `router` or `user` is updated
    */
   useEffect(() => {
-
     if (!user || !allowedRoles.includes(user.role)) {
       router.push(fallbackPath || '/login');
     } else {
       setLoading(false);
     }
-
   }, [user, router]);
 
-  return (
-    <>
-      {
-        loading
-        ? undefined
-        : children
-      }
-    </>
-  );
-}
+  return <>{loading ? undefined : children}</>;
+};
 
 export default RouteProtection;
