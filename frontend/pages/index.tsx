@@ -7,7 +7,7 @@ import { UserRole } from '../lib/types';
 const Home: NextPage = () => {
   return (
     <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
-      <div className="flex min-h-screen flex-col items-center justify-center py-2">
+      <div className="h-screen min-h-screen">
         <Head>
           <title>Create Next App</title>
           <link rel="icon" href="/favicon.ico" />
