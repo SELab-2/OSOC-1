@@ -1,13 +1,13 @@
 import type { NextPage } from 'next';
-import Header from '../components/Header';
-import StudentSidebar from '../components/StudentSidebar';
-import StudentView from '../components/student/StudentView';
+import Header from '../../components/Header';
+import StudentSidebar from '../../components/StudentSidebar';
+import StudentView from '../../components/student/StudentView';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import { StatusSuggestionStatus } from '../lib/types';
+import { StatusSuggestionStatus } from '../../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
-import useAxiosAuth from '../hooks/useAxiosAuth';
+import useAxiosAuth from '../../hooks/useAxiosAuth';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -41,7 +41,12 @@ const Students: NextPage = () => {
             >
               <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
             </div>
-            <StudentSidebar setError={setError} />
+            {/* TODO fix this */}
+            <StudentSidebar
+              setError={setError}
+              refresh={false}
+              setRefresh={() => null}
+            />
           </section>
 
           {/* Holds main student content */}

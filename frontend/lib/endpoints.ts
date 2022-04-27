@@ -6,8 +6,10 @@ enum Endpoints {
   USERS = '/users',
   LOGIN = '/login',
   REFRESH = '/token/refresh',
-  PROJECTS = '/ed/projects',
-  STUDENTS = '/ed/students',
+  EDITIONS = '/editions',
+  EDITIONACTIVE = '/editions/active',
+  PROJECTS = '/projects',
+  STUDENTS = '/students',
   SKILLS = '/skills',
 }
 

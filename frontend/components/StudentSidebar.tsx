@@ -10,6 +10,7 @@ import FlatList from 'flatlist-react';
 import { getSkills, parseError } from '../lib/requestUtils';
 import StudentTile from './students/StudentTile';
 import { SpinnerCircular } from 'spinners-react';
+import { useRouter } from 'next/router';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 /**
@@ -35,6 +36,7 @@ type StudentsSidebarProps = {
  * @param setLoading              - set loading or not, this is not the same as the state loading due to styling bug otherwise
  * @param signal                  - AbortSignal for the axios request
  * @param setError                - callback to set error message
+ * @param edition                 - the active edition
  */
 async function searchStudent(
   studentNameSearch: string,
@@ -56,11 +58,12 @@ async function searchStudent(
   }) => void,
   setLoading: (loading: boolean) => void,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  edition: string
 ) {
   setLoading(true);
   axiosAuthenticated
-    .get<StudentData>(Endpoints.STUDENTS, {
+    .get<StudentData>('/' + edition + Endpoints.STUDENTS, {
       params: {
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
@@ -126,6 +129,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   refresh,
   setRefresh,
 }: StudentsSidebarProps) => {
+  const edition = useRouter().query.editionName as string;
   const [showFilter, setShowFilter] = useState(true);
 
   const [skills, setSkills] = useState(
@@ -240,7 +244,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       setState,
       setLoading,
       signal,
-      setError
+      setError,
+      edition
     );
     return () => {
       controller.abort();
@@ -300,7 +305,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       setState,
       setLoading,
       signal,
-      setError
+      setError,
+      edition
     );
     return () => {
       controller.abort();

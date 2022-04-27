@@ -25,9 +25,12 @@ import ProjectPopup, {
 import { getUrlDict, getUrlList, parseError } from '../../lib/requestUtils';
 import Error from '../Error';
 import { SpinnerCircular } from 'spinners-react';
+import { useRouter } from 'next/router';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
+
+// const edition = useRouter().query.editionName;
 
 // Using projectInput and not just project to avoid confusion
 type ProjectProp = {
@@ -63,6 +66,8 @@ type AssignmentProp = {
  * @param setMyProjectBase  - callback for reloadProject that is called after this POST completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
+ * @param setRefreshStudents - callback to set if students list should refresh
+ * @param edition - the active edition
  */
 // TODO when post is finished, should update the student filter
 function postStudentToProject(
@@ -74,11 +79,12 @@ function postStudentToProject(
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: boolean) => void
+  setRefreshStudents: (refreshStudents: boolean) => void,
+  edition: string
 ) {
   axiosAuthenticated
     .post(
-      Endpoints.PROJECTS + '/' + projectId + '/assignments', // TODO import this url somehow
+      '/' + edition + Endpoints.PROJECTS + '/' + projectId + '/assignments', // TODO import this url somehow
       {
         student: studentId,
         position: positionId,
@@ -87,7 +93,7 @@ function postStudentToProject(
       }
     )
     .then(() => {
-      reloadProject(projectId, setMyProjectBase, signal, setError);
+      reloadProject(projectId, setMyProjectBase, signal, setError, edition);
       setRefreshStudents(true);
     })
     .catch((err) => {
@@ -104,6 +110,8 @@ function postStudentToProject(
  * @param setMyProjectBase    - callback for reloadProject that is called after this DELETE completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
+ * @param setRefreshStudents - callback to set if students list should refresh
+ * @param edition - the active edition
  */
 function deleteStudentFromProject(
   projectId: UUID,
@@ -111,14 +119,21 @@ function deleteStudentFromProject(
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: boolean) => void
+  setRefreshStudents: (refreshStudents: boolean) => void,
+  edition: string
 ) {
   axiosAuthenticated
     .delete(
-      Endpoints.PROJECTS + '/' + projectId + '/assignments/' + assignmentId // TODO import this url somehow
+      '/' +
+        edition +
+        Endpoints.PROJECTS +
+        '/' +
+        projectId +
+        '/assignments/' +
+        assignmentId // TODO import this url somehow
     )
     .then(() => {
-      reloadProject(projectId, setMyProjectBase, signal, setError);
+      reloadProject(projectId, setMyProjectBase, signal, setError, edition);
       setRefreshStudents(true);
     })
     .catch((err) => {
@@ -132,15 +147,18 @@ function deleteStudentFromProject(
  * @param projectId - the UUID of the project to remove
  * @param refreshProjects - callback to update main projects list
  * @param setError - Callback to set error message
+ * @param setRefreshStudents - callback to set if students list should refresh
+ * @param edition - the active edition
  */
 function deleteProject(
   projectId: UUID,
   refreshProjects: () => void,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: boolean) => void
+  setRefreshStudents: (refreshStudents: boolean) => void,
+  edition: string
 ) {
   axiosAuthenticated
-    .delete(Endpoints.PROJECTS + '/' + projectId)
+    .delete('/' + edition + Endpoints.PROJECTS + '/' + projectId)
     .then(() => {
       refreshProjects();
       setRefreshStudents(true);
@@ -158,15 +176,17 @@ function deleteProject(
  * @param setMyProjectBase - a hook to set the reloaded project information
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
+ * @param edition - the active edition
  */
 function reloadProject(
   projectId: UUID,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  edition: string
 ) {
   axiosAuthenticated
-    .get<ProjectBase>(Endpoints.PROJECTS + '/' + projectId)
+    .get<ProjectBase>('/' + edition + Endpoints.PROJECTS + '/' + projectId)
     .then((response) => {
       setMyProjectBase(response.data as ProjectBase);
     })
@@ -269,6 +289,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
   refreshProjects,
   setRefreshStudents,
 }: ProjectProp) => {
+  const edition = useRouter().query.editionName as string;
   const [user] = useUser();
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
@@ -460,7 +481,8 @@ const ProjectTile: React.FC<ProjectProp> = ({
                 setMyProjectBase,
                 signal,
                 setError,
-                setRefreshStudents
+                setRefreshStudents,
+                edition
               );
               setOpenAssignment(false);
               return () => {
@@ -565,7 +587,8 @@ const ProjectTile: React.FC<ProjectProp> = ({
                   setMyProjectBase,
                   signal,
                   setError,
-                  setRefreshStudents
+                  setRefreshStudents,
+                  edition
                 );
                 return () => {
                   controller.abort();
@@ -656,7 +679,8 @@ const ProjectTile: React.FC<ProjectProp> = ({
                   myProject.id,
                   refreshProjects,
                   setError,
-                  setRefreshStudents
+                  setRefreshStudents,
+                  edition
                 );
               }}
             >
