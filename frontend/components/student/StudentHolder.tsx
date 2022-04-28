@@ -1,16 +1,18 @@
-import { useState } from 'react';
 import { ItemTypes, Student, StudentBase } from '../../lib/types';
 import { useDrop } from 'react-dnd';
 import StudentView from './StudentView';
 
 type StudentHolderProp = {
   setRefresh: (refresh: [boolean, boolean]) => void;
+  studentBase: StudentBase;
+  setStudentBase: (studentBase: StudentBase) => void;
 };
 
 const StudentHolder: React.FC<StudentHolderProp> = ({
   setRefresh,
+  studentBase,
+  setStudentBase,
 }: StudentHolderProp) => {
-  const [studentBase, setStudentBase] = useState({} as StudentBase);
   /**
    * This catches the dropped studentTile
    * The studentTile passes its student as the DragObject to this function on drop
@@ -41,7 +43,11 @@ const StudentHolder: React.FC<StudentHolderProp> = ({
       {/* hold the student information, only load this if an actual studentBase object exists */}
       {/* studentBase.id is used to check if this is an actual object or just an empty dummy */}
       {studentBase.id && (
-        <StudentView studentInput={studentBase} setRefresh={setRefresh} />
+        <StudentView
+          studentInput={studentBase}
+          setRefresh={setRefresh}
+          setOriginalStudentBase={setStudentBase}
+        />
       )}
     </section>
   );

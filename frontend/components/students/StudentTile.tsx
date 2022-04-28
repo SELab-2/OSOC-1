@@ -25,6 +25,8 @@ const tilde_mark = <Icon icon="mdi:tilde" />;
  */
 type StudentProp = {
   student: StudentBase;
+  setStudentBase: (studentBase: StudentBase) => void;
+  studentBase: StudentBase;
 };
 
 /**
@@ -82,20 +84,34 @@ async function getEntireStudent(
 /**
  * This creates the tiles show in the StudentSidebar
  * @param student - The student whose information should be shown
+ * @param setStudentBase - callback to set studentBase object from dragndrop
+ * @param studentBase - object
  */
-const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
+const StudentTile: React.FC<StudentProp> = ({
+  student,
+  setStudentBase,
+  studentBase,
+}: StudentProp) => {
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
     useState(convertStudentBase(student) as Student); // using different names to avoid confusion
 
-  const [myStudentBase]: [StudentBase, (myStudentBase: StudentBase) => void] =
-    useState(student as StudentBase);
+  const [myStudentBase, setMyStudentBase]: [
+    StudentBase,
+    (myStudentBase: StudentBase) => void
+  ] = useState(student as StudentBase);
 
   // TODO find a place to actually show this error
   const [, setError]: [string, (error: string) => void] = useState('');
   const router = useRouter();
   useAxiosAuth();
   let controller = new AbortController();
+
+  useEffect(() => {
+    if (studentBase.id == student.id) {
+      setMyStudentBase(studentBase);
+    }
+  }, [studentBase, student]);
 
   useEffect(() => {
     controller.abort();
@@ -111,16 +127,23 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
     };
   }, [myStudentBase]);
 
+  useEffect(() => {
+    const newSuggestionCount = {} as statusSuggestionStatusToNumberDict;
+    myStudent.statusSuggestions.forEach((suggestion) => {
+      newSuggestionCount[suggestion.status] =
+        newSuggestionCount[suggestion.status] + 1 || 1;
+    });
+    setSuggestionCounts(newSuggestionCount);
+  }, [myStudent]);
+
   /**
    * This counts the different status suggestions to create the pie chart
    * The dict is empty without default values so when using suggestionCounts
    * you should add '|| 0' to avoid getting an undefined error
    */
-  const suggestionCounts = {} as statusSuggestionStatusToNumberDict;
-  myStudent.statusSuggestions.forEach((suggestion) => {
-    suggestionCounts[suggestion.status] =
-      suggestionCounts[suggestion.status] + 1 || 1;
-  });
+  const [suggestionCounts, setSuggestionCounts] = useState(
+    {} as statusSuggestionStatusToNumberDict
+  );
 
   /**
    * This hook allows dragging the StudentTile
@@ -139,7 +162,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
 
   return (
     // TODO add a chevron dropdown to show possible roles, student coach, ...
-    <div ref={drag} key={student.id}>
+    <div ref={drag} key={student.id} onClick={() => setStudentBase(student)}>
       <div
         className={`my-4 mx-1 flex flex-row justify-between p-2 opacity-100 shadow-sm shadow-gray-500`}
       >

@@ -30,6 +30,7 @@ const x_mark = <FontAwesomeIcon icon={faXmark} />;
 type StudentViewProp = {
   studentInput: StudentBase;
   setRefresh: (refresh: [boolean, boolean]) => void;
+  setOriginalStudentBase: (originalStudentBase: StudentBase) => void;
 };
 
 type StatusSuggestionProp = {
@@ -87,7 +88,6 @@ async function setStudentSuggestion(
     )
     .then(() => {
       reloadStudent(studentId, setStudentBase, signal, setError, router);
-      setRefresh([true, true]);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -163,6 +163,7 @@ async function getEntireStudent(
 const StudentView: React.FC<StudentViewProp> = ({
   studentInput,
   setRefresh,
+  setOriginalStudentBase,
 }: StudentViewProp) => {
   const [user] = useUser();
   // Needed to reload student when a suggestion is done or status is changed
@@ -194,6 +195,7 @@ const StudentView: React.FC<StudentViewProp> = ({
     const signal = controller.signal;
     // This is a safety check, not really needed right now but it avoids accidents
     if (studentBase.id !== undefined) {
+      setOriginalStudentBase(studentBase);
       setStatus({ value: '', label: studentBase.status } as {
         value: string;
         label: string;

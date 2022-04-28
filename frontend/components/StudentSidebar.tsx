@@ -21,6 +21,8 @@ type StudentsSidebarProps = {
   setError: (error: string) => void;
   refresh: [boolean, boolean];
   setRefresh: (refresh: [boolean, boolean]) => void;
+  setStudentBase: (studentBase: StudentBase) => void;
+  studentBase: StudentBase;
 };
 
 /**
@@ -67,7 +69,7 @@ async function searchStudent(
   // Fallback for no status selected
   if (!getStatusFilterList(studentSearchParameters)) {
     const newState = { ...state };
-    newState.page = state.page + 1;
+    newState.page = 0;
     newState.hasMoreItems = false;
     newState.loading = false;
     setState(newState);
@@ -143,6 +145,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   setError,
   refresh,
   setRefresh,
+  setStudentBase,
+  studentBase,
 }: StudentsSidebarProps) => {
   const router = useRouter();
   const [showFilter, setShowFilter] = useState(true);
@@ -238,7 +242,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       state.pageSize = prevPageSize;
       setRefresh([false, refresh[1]]);
     }
-  }, [refresh[0]]);
+  }, [refresh]);
 
   /**
    * Call to refresh students list from page 0 with current filters applied
@@ -601,7 +605,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
           <FlatList
             list={students}
             renderItem={(student: StudentBase) => (
-              <StudentTile key={student.id} student={student} />
+              <StudentTile
+                key={student.id}
+                student={student}
+                setStudentBase={setStudentBase}
+                studentBase={studentBase}
+              />
             )}
             renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
             hasMoreItems={state.hasMoreItems}

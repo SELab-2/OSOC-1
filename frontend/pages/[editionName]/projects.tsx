@@ -5,7 +5,12 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
-import { ProjectBase, ProjectData, UserRole } from '../../lib/types';
+import {
+  ProjectBase,
+  ProjectData,
+  StudentBase,
+  UserRole,
+} from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
@@ -250,6 +255,8 @@ const Projects: NextPage = () => {
                 setError={setError}
                 refresh={refreshStudents}
                 setRefresh={setRefreshStudents}
+                setStudentBase={() => null}
+                studentBase={{} as StudentBase}
               />
             </section>
 
