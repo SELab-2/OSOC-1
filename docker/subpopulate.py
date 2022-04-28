@@ -10,6 +10,11 @@ testerid = login["user"]["id"]
 
 authheaders = {'Authorization': f'Basic {token}',
                'Content-Type': 'application/json'}
+# activate edition
+requests.post('http://localhost:8080/api/editions',
+              headers=authheaders, json="ed")
+requests.post('http://localhost:8080/api/editions/ed/activate',
+              headers=authheaders)
 
 
 def make_student():
@@ -738,14 +743,10 @@ def make_student():
     }
 
 
-# requests.post('http://localhost:8080/api/ed/students',
-#               json=make_student(), headers={'Authorization': f'Basic {token}', 'Content-Type': 'application/json'})
-
 studentsids = []
 for _ in range(1000):
     studentsids.append(requests.post('http://localhost:8080/api/ed/students',
                                      json=make_student(), headers=authheaders).json()["id"])
-
 yes = requests.get('http://localhost:8080/api/ed/students',
                    headers=authheaders, params={"pageNumber": 0, "pageSize": 50, "sortBy": "id"}).json()["collection"]
 no = requests.get('http://localhost:8080/api/ed/students',
