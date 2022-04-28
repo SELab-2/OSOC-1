@@ -8,7 +8,7 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import Error from '../Error';
 import { useRouter } from 'next/router';
-import {NextRouter} from "next/dist/client/router";
+import { NextRouter } from 'next/dist/client/router';
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -329,7 +329,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
             setMyProjectBase,
             signal,
             setError,
-              router
+            router
           );
           setShowPopup(false);
           return () => {

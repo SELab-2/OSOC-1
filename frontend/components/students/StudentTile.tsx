@@ -1,7 +1,6 @@
 import { PieChart } from 'react-minimal-pie-chart';
 import { Icon } from '@iconify/react';
 import {
-  Answer,
   ItemTypes,
   StatusSuggestion,
   StatusSuggestionStatus,
@@ -11,9 +10,9 @@ import {
 import { useDrag } from 'react-dnd';
 import { getUrlList } from '../../lib/requestUtils';
 import { useEffect, useState } from 'react';
-import {convertStudentBase} from "../../lib/conversionUtils";
-import {useRouter} from "next/router";
-import {NextRouter} from "next/dist/client/router";
+import { convertStudentBase } from '../../lib/conversionUtils';
+import { useRouter } from 'next/router';
+import { NextRouter } from 'next/dist/client/router';
 const check_mark = <Icon icon="bi:check-lg" />;
 const question_mark = <Icon icon="bi:question-lg" />;
 const x_mark = <Icon icon="bx:x" />;
@@ -74,7 +73,7 @@ async function getEntireStudent(
     newStudent.statusSuggestions,
     signal,
     setError,
-      router
+    router
   );
   return newStudent;
 }
@@ -100,9 +99,11 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireStudent(myStudentBase, signal, setError, router).then((response) => {
-      setMyStudent(response);
-    });
+    getEntireStudent(myStudentBase, signal, setError, router).then(
+      (response) => {
+        setMyStudent(response);
+      }
+    );
     return () => {
       controller.abort();
     };

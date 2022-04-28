@@ -22,12 +22,12 @@ import ProjectPopup, {
   defaultprojectForm,
   projectFormFromProject,
 } from './ProjectPopup';
-import {getUrlList, getUrlMap, parseError} from '../../lib/requestUtils';
+import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import Error from '../Error';
 import { SpinnerCircular } from 'spinners-react';
 import { useRouter } from 'next/router';
-import {convertProjectBase} from "../../lib/conversionUtils";
-import {NextRouter} from "next/dist/client/router";
+import { convertProjectBase } from '../../lib/conversionUtils';
+import { NextRouter } from 'next/dist/client/router';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
@@ -217,14 +217,27 @@ async function getEntireProject(
   const newProject: Project = convertProjectBase(projectBase);
   const positionMap = new Map<Url, Position>();
   await Promise.all([
-    getUrlList<User>(projectBase.coaches, newProject.coaches, signal, setError, router),
+    getUrlList<User>(
+      projectBase.coaches,
+      newProject.coaches,
+      signal,
+      setError,
+      router
+    ),
     getUrlList<Assignment>(
       projectBase.assignments,
       newProject.assignments,
       signal,
-      setError, router
+      setError,
+      router
     ),
-    getUrlMap<Position>(projectBase.positions, positionMap, signal, setError, router),
+    getUrlMap<Position>(
+      projectBase.positions,
+      positionMap,
+      signal,
+      setError,
+      router
+    ),
   ]);
 
   if (signal.aborted) {
@@ -240,7 +253,8 @@ async function getEntireProject(
     ) as unknown as string[],
     studentMap,
     signal,
-    setError, router
+    setError,
+    router
   );
 
   const suggesterMap = new Map<Url, User>();
@@ -250,7 +264,8 @@ async function getEntireProject(
     ) as unknown as string[],
     suggesterMap,
     signal,
-    setError, router
+    setError,
+    router
   );
 
   if (signal.aborted) {

@@ -188,7 +188,7 @@ export type Answer = {
   question: string;
   answer: string[];
   optionId: string;
-}
+};
 
 /**
  * Used for drag n drop

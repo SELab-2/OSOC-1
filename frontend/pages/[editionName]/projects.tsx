@@ -23,7 +23,7 @@ import Error from '../../components/Error';
 import { parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
-import {NextRouter} from "next/dist/client/router";
+import { NextRouter } from 'next/dist/client/router';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -162,7 +162,7 @@ const Projects: NextPage = () => {
       setLoading,
       signal,
       setError,
-        router
+      router
     );
     return () => {
       controller.abort();
@@ -216,7 +216,7 @@ const Projects: NextPage = () => {
       setLoading,
       signal,
       setError,
-        router
+      router
     );
     return () => {
       controller.abort();

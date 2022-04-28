@@ -2,7 +2,7 @@ import { axiosAuthenticated } from './axios';
 import { Skill, Url, User, UserRole } from './types';
 import Endpoints from './endpoints';
 import axios, { AxiosError } from 'axios';
-import {NextRouter} from "next/dist/client/router";
+import { NextRouter } from 'next/dist/client/router';
 
 /**
  * Function to parse axios request errors
