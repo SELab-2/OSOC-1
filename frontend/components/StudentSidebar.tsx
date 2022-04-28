@@ -63,6 +63,20 @@ async function searchStudent(
   router: NextRouter
 ) {
   setLoading(true);
+
+  // Fallback for no status selected
+  if (!getStatusFilterList(studentSearchParameters)) {
+    const newState = { ...state };
+    newState.page = state.page + 1;
+    newState.hasMoreItems = false;
+    newState.loading = false;
+    setState(newState);
+    setStudents([] as StudentBase[]);
+    setFilterAmount(0 as number);
+    setLoading(false);
+    return;
+  }
+
   const edition = router.query.editionName as string;
   axiosAuthenticated
     .get<StudentData>('/' + edition + Endpoints.STUDENTS, {
@@ -116,7 +130,7 @@ function getStatusFilterList(
   studentSearchParameters.StatusNo ? stringList.push('No') : null;
   studentSearchParameters.StatusMaybe ? stringList.push('Maybe') : null;
   studentSearchParameters.StatusUndecided ? stringList.push('Undecided') : null;
-  return stringList.join(',') || ' ';
+  return stringList.join(',');
 }
 
 /**

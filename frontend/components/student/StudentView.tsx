@@ -188,7 +188,6 @@ const StudentView: React.FC<StudentViewProp> = ({
           >
             <Fragment>
               {/* TODO fix this becoming wider when something is selected */}
-              {/* TODO fix this looking horrible when a lot is selected */}
               <Select
                 className="basic-single"
                 classNamePrefix="select"
@@ -196,8 +195,8 @@ const StudentView: React.FC<StudentViewProp> = ({
                 isLoading={false}
                 isClearable={true}
                 isRtl={false}
-                isSearchable={true}
-                isMulti={true}
+                isSearchable={false}
+                isMulti={false}
                 name="Status"
                 placeholder="Select Status"
                 options={[
