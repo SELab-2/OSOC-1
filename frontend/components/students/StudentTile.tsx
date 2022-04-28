@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { convertStudentBase } from '../../lib/conversionUtils';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
+import useAxiosAuth from '../../hooks/useAxiosAuth';
 const check_mark = <Icon icon="bi:check-lg" />;
 const question_mark = <Icon icon="bi:question-lg" />;
 const x_mark = <Icon icon="bx:x" />;
@@ -93,6 +94,7 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
   // TODO find a place to actually show this error
   const [, setError]: [string, (error: string) => void] = useState('');
   const router = useRouter();
+  useAxiosAuth();
   let controller = new AbortController();
 
   useEffect(() => {

@@ -102,7 +102,10 @@ const Projects: NextPage = () => {
   const router = useRouter();
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
-  const [refreshStudents, setRefreshStudents] = useState(false);
+  const [refreshStudents, setRefreshStudents] = useState([false, false] as [
+    boolean,
+    boolean
+  ]);
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState('' as string);
   const [loading, setLoading] = useState(true);

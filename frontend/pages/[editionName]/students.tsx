@@ -20,7 +20,10 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
-  const [refreshStudents, setRefreshStudents] = useState(false);
+  const [refreshStudents, setRefreshStudents] = useState([false, true] as [
+    boolean,
+    boolean
+  ]);
   const [error, setError]: [string, (error: string) => void] = useState('');
   useAxiosAuth();
 
@@ -75,7 +78,7 @@ const Students: NextPage = () => {
 
               {/* This contains the actual student info */}
               <div>
-                <StudentHolder />
+                <StudentHolder setRefresh={setRefreshStudents} />
               </div>
             </section>
           </main>

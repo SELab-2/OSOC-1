@@ -36,7 +36,7 @@ const edit_icon = <Icon icon="akar-icons:edit" />;
 type ProjectProp = {
   projectInput: ProjectBase;
   refreshProjects: () => void;
-  setRefreshStudents: (refreshStudents: boolean) => void;
+  setRefreshStudents: (refreshStudents: [boolean, boolean]) => void;
 };
 
 type UserProp = {
@@ -79,7 +79,7 @@ function postStudentToProject(
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: boolean) => void,
+  setRefreshStudents: (refreshStudents: [boolean, boolean]) => void,
   router: NextRouter
 ) {
   const edition = router.query.editionName as string;
@@ -95,7 +95,7 @@ function postStudentToProject(
     )
     .then(() => {
       reloadProject(projectId, setMyProjectBase, signal, setError, router);
-      setRefreshStudents(true);
+      setRefreshStudents([true, false]);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -120,7 +120,7 @@ function deleteStudentFromProject(
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: boolean) => void,
+  setRefreshStudents: (refreshStudents: [boolean, boolean]) => void,
   router: NextRouter
 ) {
   const edition = router.query.editionName as string;
@@ -136,7 +136,7 @@ function deleteStudentFromProject(
     )
     .then(() => {
       reloadProject(projectId, setMyProjectBase, signal, setError, router);
-      setRefreshStudents(true);
+      setRefreshStudents([true, false]);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -156,7 +156,7 @@ function deleteProject(
   projectId: UUID,
   refreshProjects: () => void,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: boolean) => void,
+  setRefreshStudents: (refreshStudents: [boolean, boolean]) => void,
   router: NextRouter
 ) {
   const edition = router.query.editionName as string;
@@ -164,7 +164,7 @@ function deleteProject(
     .delete('/' + edition + Endpoints.PROJECTS + '/' + projectId)
     .then(() => {
       refreshProjects();
-      setRefreshStudents(true);
+      setRefreshStudents([true, false]);
     })
     .catch((err) => {
       parseError(err, setError, new AbortController().signal, router);

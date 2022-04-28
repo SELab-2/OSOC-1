@@ -22,18 +22,95 @@ import { useRouter } from 'next/router';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
+import Error from '../Error';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
 
 type StudentViewProp = {
   studentInput: StudentBase;
+  setRefresh: (refresh: [boolean, boolean]) => void;
 };
 
 type StatusSuggestionProp = {
   statusSuggestion: StatusSuggestion;
   coachMap: Map<UUID, string>;
 };
+
+async function setStudentStatus(
+  status: { value: string; label: string },
+  studentId: UUID,
+  setRefresh: (refresh: [boolean, boolean]) => void,
+  myStudent: Student,
+  setMyStudent: (myStudent: Student) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  const edition = router.query.editionName as string;
+  await axiosAuthenticated
+    .post(
+      '/' + edition + Endpoints.STUDENTS + '/' + studentId + '/status', // TODO import this url somehow
+      status.label
+    )
+    .then(() => {
+      const newStudent = { ...myStudent };
+      newStudent.status = status.label;
+      setMyStudent(newStudent);
+      setRefresh([true, true]);
+    })
+    .catch((err) => {
+      parseError(err, setError, signal, router);
+    });
+}
+
+async function setStudentSuggestion(
+  status: string,
+  studentId: UUID,
+  coachId: UUID,
+  motivation: string,
+  setRefresh: (refresh: [boolean, boolean]) => void,
+  setStudentBase: (studentBase: StudentBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  const edition = router.query.editionName as string;
+  await axiosAuthenticated
+    .post(
+      '/' + edition + Endpoints.STUDENTS + '/' + studentId + '/suggestions', // TODO import this url somehow
+      {
+        coachId: coachId,
+        status: status,
+        motivation: motivation,
+      }
+    )
+    .then(() => {
+      reloadStudent(studentId, setStudentBase, signal, setError, router);
+      setRefresh([true, true]);
+    })
+    .catch((err) => {
+      parseError(err, setError, signal, router);
+    });
+}
+
+function reloadStudent(
+  studentId: UUID,
+  setStudentBase: (studentBase: StudentBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  const edition = router.query.editionName as string;
+  axiosAuthenticated
+    .get<StudentBase>('/' + edition + Endpoints.STUDENTS + '/' + studentId)
+    .then((response) => {
+      setStudentBase(response.data as StudentBase);
+    })
+    .catch((err) => {
+      parseError(err, setError, signal, router);
+    });
+}
 
 // TODO Communication not yet included!!
 // TODO currently a suggestion has a coachId and not a User object, needs to be fixed in backend first
@@ -85,27 +162,43 @@ async function getEntireStudent(
 
 const StudentView: React.FC<StudentViewProp> = ({
   studentInput,
+  setRefresh,
 }: StudentViewProp) => {
   const [user] = useUser();
   // Needed to reload student when a suggestion is done or status is changed
-  // TODO don't reload everything when only status or suggestions or changed, save the rest somewhere
+  // TODO don't reload everything when only status or suggestions are changed, save the rest somewhere
   const [studentBase, setStudentBase] = useState(studentInput as StudentBase);
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
     useState(convertStudentBase(studentBase) as Student);
 
   const [coachMap, setCoachMap] = useState(new Map<UUID, string>());
+  const [status, setStatus] = useState({
+    value: '',
+    label: studentBase.status,
+  } as { value: string; label: string });
+  const [suggestion, setSuggestion] = useState('');
+  const [motivation, setMotivation] = useState('');
 
-  const [, setError]: [string, (error: string) => void] = useState('');
+  const [error, setError]: [string, (error: string) => void] = useState('');
   const router = useRouter();
   let controller = new AbortController();
+
+  useEffect(() => {
+    setMotivation('');
+    setStudentBase(studentInput);
+  }, [studentInput]);
 
   useEffect(() => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
     // This is a safety check, not really needed right now but it avoids accidents
-    if (studentInput.id !== undefined) {
-      getEntireStudent(studentInput, signal, setError, router).then(
+    if (studentBase.id !== undefined) {
+      setStatus({ value: '', label: studentBase.status } as {
+        value: string;
+        label: string;
+      });
+      getEntireStudent(studentBase, signal, setError, router).then(
         (response) => {
           setMyStudent(response[0]);
           setCoachMap(response[1]);
@@ -115,10 +208,20 @@ const StudentView: React.FC<StudentViewProp> = ({
     return () => {
       controller.abort();
     };
-  }, [studentInput, studentBase]);
+  }, [studentBase]);
+
+  useEffect(() => {
+    setMotivation('');
+    myStudent.statusSuggestions.forEach((suggestion) => {
+      if (suggestion.coachId == user.id) {
+        setMotivation(suggestion.motivation);
+      }
+    });
+  }, [myStudent]);
 
   return (
     <div className={`flex flex-col-reverse justify-between xl:flex-row`}>
+      {error && <Error error={error} className="mb-4" />}
       {/* hold the student information */}
       <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
         <div>
@@ -151,20 +254,49 @@ const StudentView: React.FC<StudentViewProp> = ({
       {/* holds suggestion controls */}
       <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
         {/* regular coach status suggestion form */}
-        <form className={`border-2 p-2`}>
+        <form
+          className={`border-2 p-2`}
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            controller.abort();
+            controller = new AbortController();
+            const signal = controller.signal;
+            setStudentSuggestion(
+              suggestion,
+              studentBase.id,
+              user.id,
+              motivation,
+              setRefresh,
+              setStudentBase,
+              signal,
+              setError,
+              router
+            );
+            return () => {
+              controller.abort();
+            };
+          }}
+        >
           <div className={`flex w-[380px] flex-row justify-between`}>
             <button
               className={`w-[30%] bg-check-green py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              onClick={() => setSuggestion('Yes')}
+              type={`submit`}
             >
               Suggest Yes
             </button>
             <button
               className={`w-[30%] bg-check-orange py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              onClick={() => setSuggestion('Maybe')}
+              type={`submit`}
             >
               Suggest Maybe
             </button>
             <button
               className={`w-[30%] bg-check-red py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              onClick={() => setSuggestion('No')}
+              type={`submit`}
             >
               Suggest No
             </button>
@@ -173,6 +305,8 @@ const StudentView: React.FC<StudentViewProp> = ({
             placeholder="Motivation"
             className="mt-3 w-full resize-y border-2 border-check-gray"
             required
+            value={motivation}
+            onChange={(e) => setMotivation(e.target.value || '')}
           />
         </form>
 
@@ -181,6 +315,27 @@ const StudentView: React.FC<StudentViewProp> = ({
           className={`${
             user.role == UserRole.Admin ? 'visible' : 'hidden'
           } mt-10 flex flex-row justify-between border-2 p-2`}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (status.label != studentBase.status) {
+              controller.abort();
+              controller = new AbortController();
+              const signal = controller.signal;
+              setStudentStatus(
+                status,
+                studentBase.id,
+                setRefresh,
+                myStudent,
+                setMyStudent,
+                signal,
+                setError,
+                router
+              );
+              return () => {
+                controller.abort();
+              };
+            }
+          }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -199,21 +354,19 @@ const StudentView: React.FC<StudentViewProp> = ({
                 isMulti={false}
                 name="Status"
                 placeholder="Select Status"
+                // TODO don't hardcode this
                 options={[
                   { value: '', label: 'Yes' },
                   { value: '', label: 'No' },
                   { value: '', label: 'Maybe' },
                   { value: '', label: 'Undecided' },
                 ]}
-                // value={skills}
-                // options={skillOptions}
-                // onChange={(e) =>
-                //     setSkills(
-                //         e.map((x) => {
-                //           return { value: x.value, label: x.label };
-                //         })
-                //     )
-                // }
+                value={status}
+                onChange={(e) => {
+                  e
+                    ? setStatus(e)
+                    : setStatus({} as { value: string; label: string });
+                }}
               />
             </Fragment>
           </div>
@@ -221,6 +374,7 @@ const StudentView: React.FC<StudentViewProp> = ({
           {/* button to submit the admin status choice */}
           <button
             className={`bg-check-gray px-2 py-[2px] text-sm shadow-md shadow-gray-400`}
+            type={`submit`}
           >
             Submit
           </button>

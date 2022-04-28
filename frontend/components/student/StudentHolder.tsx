@@ -1,12 +1,16 @@
-import { PropsWithChildren, useState } from 'react';
+import { useState } from 'react';
 import { ItemTypes, Student, StudentBase } from '../../lib/types';
 import { useDrop } from 'react-dnd';
 import StudentView from './StudentView';
 
-type StudentHolderProp = PropsWithChildren<unknown>;
+type StudentHolderProp = {
+  setRefresh: (refresh: [boolean, boolean]) => void;
+};
 
 // TODO no actual functionality present yet
-const StudentHolder: React.FC<StudentHolderProp> = () => {
+const StudentHolder: React.FC<StudentHolderProp> = ({
+  setRefresh,
+}: StudentHolderProp) => {
   const [studentBase, setStudentBase] = useState({} as StudentBase);
   /**
    * This catches the dropped studentTile
@@ -37,7 +41,9 @@ const StudentHolder: React.FC<StudentHolderProp> = () => {
     <section className={`min-h-[80vh]`} ref={drop}>
       {/* hold the student information, only load this if an actual studentBase object exists */}
       {/* studentBase.id is used to check if this is an actual object or just an empty dummy */}
-      {studentBase.id && <StudentView studentInput={studentBase} />}
+      {studentBase.id && (
+        <StudentView studentInput={studentBase} setRefresh={setRefresh} />
+      )}
     </section>
   );
 };

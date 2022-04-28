@@ -19,8 +19,8 @@ const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
  */
 type StudentsSidebarProps = {
   setError: (error: string) => void;
-  refresh: boolean;
-  setRefresh: (refresh: boolean) => void;
+  refresh: [boolean, boolean];
+  setRefresh: (refresh: [boolean, boolean]) => void;
 };
 
 /**
@@ -229,16 +229,16 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * need to be reloaded. This can be quite slow and does a lot of useless work.
    */
   useEffect(() => {
-    if (refresh && studentSearchParameters.ExcludeAssigned) {
+    if (refresh[0] && (refresh[1] || studentSearchParameters.ExcludeAssigned)) {
       const prevPageSize = state.pageSize;
       const prevPage = state.page;
       state.pageSize = state.page * state.pageSize;
       search();
       state.page = prevPage;
       state.pageSize = prevPageSize;
+      setRefresh([false, refresh[1]]);
     }
-    setRefresh(false);
-  }, [refresh]);
+  }, [refresh[0]]);
 
   /**
    * Call to refresh students list from page 0 with current filters applied
