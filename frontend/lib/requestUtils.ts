@@ -2,18 +2,20 @@ import { axiosAuthenticated } from './axios';
 import { Skill, Url, User, UserRole } from './types';
 import Endpoints from './endpoints';
 import axios, { AxiosError } from 'axios';
-import { useRouter } from 'next/router';
+import { NextRouter } from 'next/dist/client/router';
 
 /**
  * Function to parse axios request errors
  * @param error - The error thrown
  * @param setError - Callback to set error message
  * @param signal - AbortSignal for the original request
+ * @param router - Router object needed for error handling on 400 response
  */
 export function parseError(
   error: unknown,
   setError: (error: string) => void,
-  signal: AbortSignal
+  signal: AbortSignal,
+  router: NextRouter
 ) {
   if (signal.aborted) {
     return;
@@ -21,7 +23,7 @@ export function parseError(
   if (axios.isAxiosError(error)) {
     const _error = error as AxiosError;
     if (_error.response?.status === 400) {
-      useRouter().push('/login');
+      router.push('/login');
       return;
     }
     setError(_error.response?.statusText || 'An unknown error occurred');
@@ -37,13 +39,15 @@ export function parseError(
  * @param setSkillOptions - setter for the resulting options list
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
  */
 export async function getSkills(
   setSkillOptions: (
     skillOptions: Array<{ value: string; label: string }>
   ) => void,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  router: NextRouter
 ) {
   await axiosAuthenticated
     .get<Skill[]>(Endpoints.SKILLS, { signal: signal })
@@ -55,7 +59,7 @@ export async function getSkills(
       )
     )
     .catch((err) => {
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
     });
 }
 
@@ -66,13 +70,15 @@ export async function getSkills(
  * @param setCoachOptions - Setter for the resulting options list
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
  */
 export async function getCoaches(
   setCoachOptions: (
     CoachOptions: Array<{ value: User; label: string }>
   ) => void,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  router: NextRouter
 ) {
   await axiosAuthenticated
     .get<User[]>(Endpoints.USERS, { signal: signal })
@@ -86,7 +92,7 @@ export async function getCoaches(
       )
     )
     .catch((err) => {
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
     });
 }
 
@@ -97,12 +103,14 @@ export async function getCoaches(
  * @param resultList - List to push results unto
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
  */
 export async function getUrlList<Type>(
   urls: Url[],
   resultList: Type[],
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  router: NextRouter
 ) {
   await axios
     .all(
@@ -115,7 +123,7 @@ export async function getUrlList<Type>(
       response.forEach((resp) => resultList.push(resp.data));
     })
     .catch((err) => {
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
     });
 }
 
@@ -127,12 +135,14 @@ export async function getUrlList<Type>(
  * @param resultMap - Map to set the results in
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
  */
-export async function getUrlDict<Type>(
+export async function getUrlMap<Type>(
   urls: Url[],
   resultMap: Map<Url, Type>,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  router: NextRouter
 ) {
   await axios
     .all(
@@ -147,6 +157,6 @@ export async function getUrlDict<Type>(
       );
     })
     .catch((err) => {
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
     });
 }

@@ -11,6 +11,7 @@ import { getSkills, parseError } from '../lib/requestUtils';
 import StudentTile from './students/StudentTile';
 import { SpinnerCircular } from 'spinners-react';
 import { useRouter } from 'next/router';
+import { NextRouter } from 'next/dist/client/router';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 /**
@@ -36,7 +37,7 @@ type StudentsSidebarProps = {
  * @param setLoading              - set loading or not, this is not the same as the state loading due to styling bug otherwise
  * @param signal                  - AbortSignal for the axios request
  * @param setError                - callback to set error message
- * @param edition                 - the active edition
+ * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 async function searchStudent(
   studentNameSearch: string,
@@ -59,9 +60,10 @@ async function searchStudent(
   setLoading: (loading: boolean) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  edition: string
+  router: NextRouter
 ) {
   setLoading(true);
+  const edition = router.query.editionName as string;
   axiosAuthenticated
     .get<StudentData>('/' + edition + Endpoints.STUDENTS, {
       params: {
@@ -93,7 +95,7 @@ async function searchStudent(
       const newState = { ...state };
       newState.loading = false;
       setState(newState);
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
       if (!signal.aborted) {
         setLoading(false);
       }
@@ -117,7 +119,6 @@ function getStatusFilterList(
   return stringList.join(',') || ' ';
 }
 
-// TODO allow disabling drag on studentView since I don't think it is needed there, don't know how though
 /**
  * This returns the StudentSidebar
  * Any page using this should add a DndProvider backend=\{HTML5Backend\} element
@@ -129,7 +130,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   refresh,
   setRefresh,
 }: StudentsSidebarProps) => {
-  const edition = useRouter().query.editionName as string;
+  const router = useRouter();
   const [showFilter, setShowFilter] = useState(true);
 
   const [skills, setSkills] = useState(
@@ -233,7 +234,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    refreshSkills ? getSkills(setSkillOptions, signal, setError) : null;
+    refreshSkills ? getSkills(setSkillOptions, signal, setError, router) : null;
     searchStudent(
       studentNameSearch,
       skills,
@@ -245,7 +246,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       setLoading,
       signal,
       setError,
-      edition
+      router
     );
     return () => {
       controller.abort();
@@ -306,7 +307,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       setLoading,
       signal,
       setError,
-      edition
+      router
     );
     return () => {
       controller.abort();

@@ -22,15 +22,15 @@ import ProjectPopup, {
   defaultprojectForm,
   projectFormFromProject,
 } from './ProjectPopup';
-import { getUrlDict, getUrlList, parseError } from '../../lib/requestUtils';
+import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import Error from '../Error';
 import { SpinnerCircular } from 'spinners-react';
 import { useRouter } from 'next/router';
+import { convertProjectBase } from '../../lib/conversionUtils';
+import { NextRouter } from 'next/dist/client/router';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
-
-// const edition = useRouter().query.editionName;
 
 // Using projectInput and not just project to avoid confusion
 type ProjectProp = {
@@ -67,7 +67,7 @@ type AssignmentProp = {
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
  * @param setRefreshStudents - callback to set if students list should refresh
- * @param edition - the active edition
+ * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 // TODO when post is finished, should update the student filter
 function postStudentToProject(
@@ -80,8 +80,9 @@ function postStudentToProject(
   signal: AbortSignal,
   setError: (error: string) => void,
   setRefreshStudents: (refreshStudents: boolean) => void,
-  edition: string
+  router: NextRouter
 ) {
+  const edition = router.query.editionName as string;
   axiosAuthenticated
     .post(
       '/' + edition + Endpoints.PROJECTS + '/' + projectId + '/assignments', // TODO import this url somehow
@@ -93,11 +94,11 @@ function postStudentToProject(
       }
     )
     .then(() => {
-      reloadProject(projectId, setMyProjectBase, signal, setError, edition);
+      reloadProject(projectId, setMyProjectBase, signal, setError, router);
       setRefreshStudents(true);
     })
     .catch((err) => {
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
     });
 }
 
@@ -111,7 +112,7 @@ function postStudentToProject(
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
  * @param setRefreshStudents - callback to set if students list should refresh
- * @param edition - the active edition
+ * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function deleteStudentFromProject(
   projectId: UUID,
@@ -120,8 +121,9 @@ function deleteStudentFromProject(
   signal: AbortSignal,
   setError: (error: string) => void,
   setRefreshStudents: (refreshStudents: boolean) => void,
-  edition: string
+  router: NextRouter
 ) {
+  const edition = router.query.editionName as string;
   axiosAuthenticated
     .delete(
       '/' +
@@ -133,11 +135,11 @@ function deleteStudentFromProject(
         assignmentId // TODO import this url somehow
     )
     .then(() => {
-      reloadProject(projectId, setMyProjectBase, signal, setError, edition);
+      reloadProject(projectId, setMyProjectBase, signal, setError, router);
       setRefreshStudents(true);
     })
     .catch((err) => {
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
     });
 }
 
@@ -148,15 +150,16 @@ function deleteStudentFromProject(
  * @param refreshProjects - callback to update main projects list
  * @param setError - Callback to set error message
  * @param setRefreshStudents - callback to set if students list should refresh
- * @param edition - the active edition
+ * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function deleteProject(
   projectId: UUID,
   refreshProjects: () => void,
   setError: (error: string) => void,
   setRefreshStudents: (refreshStudents: boolean) => void,
-  edition: string
+  router: NextRouter
 ) {
+  const edition = router.query.editionName as string;
   axiosAuthenticated
     .delete('/' + edition + Endpoints.PROJECTS + '/' + projectId)
     .then(() => {
@@ -164,7 +167,7 @@ function deleteProject(
       setRefreshStudents(true);
     })
     .catch((err) => {
-      parseError(err, setError, new AbortController().signal);
+      parseError(err, setError, new AbortController().signal, router);
     });
 }
 
@@ -176,22 +179,23 @@ function deleteProject(
  * @param setMyProjectBase - a hook to set the reloaded project information
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param edition - the active edition
+ * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function reloadProject(
   projectId: UUID,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  edition: string
+  router: NextRouter
 ) {
+  const edition = router.query.editionName as string;
   axiosAuthenticated
     .get<ProjectBase>('/' + edition + Endpoints.PROJECTS + '/' + projectId)
     .then((response) => {
       setMyProjectBase(response.data as ProjectBase);
     })
     .catch((err) => {
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
     });
 }
 
@@ -201,25 +205,39 @@ function reloadProject(
  * @param setLoading - callback to set when loading is finished
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
  */
 async function getEntireProject(
   projectBase: ProjectBase,
   setLoading: (loading: boolean) => void,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  router: NextRouter
 ): Promise<Project> {
   const newProject: Project = convertProjectBase(projectBase);
-
   const positionMap = new Map<Url, Position>();
   await Promise.all([
-    getUrlList<User>(projectBase.coaches, newProject.coaches, signal, setError),
+    getUrlList<User>(
+      projectBase.coaches,
+      newProject.coaches,
+      signal,
+      setError,
+      router
+    ),
     getUrlList<Assignment>(
       projectBase.assignments,
       newProject.assignments,
       signal,
-      setError
+      setError,
+      router
     ),
-    getUrlDict<Position>(projectBase.positions, positionMap, signal, setError),
+    getUrlMap<Position>(
+      projectBase.positions,
+      positionMap,
+      signal,
+      setError,
+      router
+    ),
   ]);
 
   if (signal.aborted) {
@@ -229,23 +247,25 @@ async function getEntireProject(
   newProject.positions = Array.from(positionMap.values());
 
   const studentMap = new Map<Url, Student>();
-  await getUrlDict<Student>(
+  await getUrlMap<Student>(
     newProject.assignments.map(
       (assignment) => assignment.student
     ) as unknown as string[],
     studentMap,
     signal,
-    setError
+    setError,
+    router
   );
 
   const suggesterMap = new Map<Url, User>();
-  await getUrlDict<User>(
+  await getUrlMap<User>(
     newProject.assignments.map(
       (assignment) => assignment.suggester
     ) as unknown as string[],
     suggesterMap,
     signal,
-    setError
+    setError,
+    router
   );
 
   if (signal.aborted) {
@@ -267,29 +287,12 @@ async function getEntireProject(
   return newProject;
 }
 
-/**
- * Function to create a Project object from a ProjectBase object
- * This is needed to allow rendering of empty fields
- * @param projectBase - base project object as returned by a get request
- */
-function convertProjectBase(projectBase: ProjectBase): Project {
-  const newProject = {} as Project;
-  newProject.name = projectBase.name;
-  newProject.id = projectBase.id;
-  newProject.description = projectBase.description;
-  newProject.clientName = projectBase.clientName;
-  newProject.coaches = [] as User[];
-  newProject.positions = [] as Position[];
-  newProject.assignments = [] as Assignment[];
-  return newProject as Project;
-}
-
 const ProjectTile: React.FC<ProjectProp> = ({
   projectInput,
   refreshProjects,
   setRefreshStudents,
 }: ProjectProp) => {
-  const edition = useRouter().query.editionName as string;
+  const router = useRouter();
   const [user] = useUser();
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myProject, setMyProject]: [Project, (myProject: Project) => void] =
@@ -325,7 +328,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireProject(myProjectBase, setLoading, signal, setError).then(
+    getEntireProject(myProjectBase, setLoading, signal, setError, router).then(
       (response) => {
         setMyProject(response);
       }
@@ -339,6 +342,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
    * This catches the dropped studentTile
    * The studentTile passes its student as the DragObject to this function on drop
    * Then we allow the suggester to choose a position & reason, then assign student to project
+   * Dropping is only allowed if the student is not yet assigned to this project
    */
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
@@ -482,7 +486,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
                 signal,
                 setError,
                 setRefreshStudents,
-                edition
+                router
               );
               setOpenAssignment(false);
               return () => {
@@ -588,7 +592,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
                   signal,
                   setError,
                   setRefreshStudents,
-                  edition
+                  router
                 );
                 return () => {
                   controller.abort();
@@ -680,7 +684,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
                   refreshProjects,
                   setError,
                   setRefreshStudents,
-                  edition
+                  router
                 );
               }}
             >

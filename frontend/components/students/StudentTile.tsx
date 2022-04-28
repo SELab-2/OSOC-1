@@ -10,6 +10,9 @@ import {
 import { useDrag } from 'react-dnd';
 import { getUrlList } from '../../lib/requestUtils';
 import { useEffect, useState } from 'react';
+import { convertStudentBase } from '../../lib/conversionUtils';
+import { useRouter } from 'next/router';
+import { NextRouter } from 'next/dist/client/router';
 const check_mark = <Icon icon="bi:check-lg" />;
 const question_mark = <Icon icon="bi:question-lg" />;
 const x_mark = <Icon icon="bx:x" />;
@@ -50,44 +53,29 @@ const chartHelper = {
 } as stringToArrayDict;
 
 /**
- * Function to dereference needed student fields
+ * Function to dereference needed student fields, currently only gets the statusSuggestions
+ * Be aware that the return value is not an actual full Student and should not be used as such!
  *
  * @param studentBase - base object with fields to dereference
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
  */
 async function getEntireStudent(
   studentBase: StudentBase,
   signal: AbortSignal,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  router: NextRouter
 ): Promise<Student> {
   const newStudent = convertStudentBase(studentBase);
   await getUrlList<StatusSuggestion>(
     studentBase.statusSuggestions,
     newStudent.statusSuggestions,
     signal,
-    setError
+    setError,
+    router
   );
   return newStudent;
-}
-
-/**
- * Function to convert a StudentBase object to a Student object
- * @param studentBase - base student object as returned by get request
- */
-function convertStudentBase(studentBase: StudentBase): Student {
-  const newStudent = {} as Student;
-  newStudent.id = studentBase.id;
-  newStudent.firstName = studentBase.firstName;
-  newStudent.lastName = studentBase.lastName;
-  newStudent.status = studentBase.status;
-  newStudent.statusSuggestions = [] as StatusSuggestion[];
-  newStudent.alumn = studentBase.alumn;
-  newStudent.possibleStudentCoach = studentBase.possibleStudentCoach;
-  newStudent.skills = studentBase.skills;
-  newStudent.communications = studentBase.communications;
-  newStudent.answers = studentBase.answers;
-  return newStudent as Student;
 }
 
 /**
@@ -104,15 +92,18 @@ const StudentTile: React.FC<StudentProp> = ({ student }: StudentProp) => {
 
   // TODO find a place to actually show this error
   const [, setError]: [string, (error: string) => void] = useState('');
+  const router = useRouter();
   let controller = new AbortController();
 
   useEffect(() => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireStudent(myStudentBase, signal, setError).then((response) => {
-      setMyStudent(response);
-    });
+    getEntireStudent(myStudentBase, signal, setError, router).then(
+      (response) => {
+        setMyStudent(response);
+      }
+    );
     return () => {
       controller.abort();
     };
