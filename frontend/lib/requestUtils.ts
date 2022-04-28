@@ -2,7 +2,7 @@ import { axiosAuthenticated } from './axios';
 import { Skill, Url, User, UserRole } from './types';
 import Endpoints from './endpoints';
 import axios, { AxiosError } from 'axios';
-import { router } from 'next/client';
+import { useRouter } from 'next/router';
 
 /**
  * Function to parse axios request errors
@@ -21,7 +21,7 @@ export function parseError(
   if (axios.isAxiosError(error)) {
     const _error = error as AxiosError;
     if (_error.response?.status === 400) {
-      router.push('/login');
+      useRouter().push('/login');
       return;
     }
     setError(_error.response?.statusText || 'An unknown error occurred');
