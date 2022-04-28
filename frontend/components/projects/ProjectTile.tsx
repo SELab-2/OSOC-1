@@ -729,6 +729,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
           <div className="tooltip pl-2 pt-1">
             <i className="icon-speech-blue text-xs">{speech_bubble}</i>
             {/* TODO Make this tooltip look nicer */}
+            {/* TODO this tooltip should have a max width since it can bug the layout atm */}
             <span className="tooltiptext bg-osoc-neutral-bg">
               {assignment.reason}
             </span>

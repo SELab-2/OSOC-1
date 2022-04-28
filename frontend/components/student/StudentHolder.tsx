@@ -7,7 +7,6 @@ type StudentHolderProp = {
   setRefresh: (refresh: [boolean, boolean]) => void;
 };
 
-// TODO no actual functionality present yet
 const StudentHolder: React.FC<StudentHolderProp> = ({
   setRefresh,
 }: StudentHolderProp) => {
