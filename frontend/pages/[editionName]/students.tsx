@@ -7,6 +7,7 @@ import { StatusSuggestionStatus } from '../../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
+import StudentView from '../../components/student/StudentView';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -67,7 +68,7 @@ const Students: NextPage = () => {
 
             {/* This contains the actual student info */}
             <div>
-              {/*<StudentView student={student} />*/}
+              <StudentView student={student} />
             </div>
           </section>
         </main>

@@ -7,7 +7,7 @@ import Select from 'react-select';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import Error from '../Error';
-import {useRouter} from "next/router";
+import { useRouter } from 'next/router';
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -90,14 +90,14 @@ export function projectFormFromProject(
   newProjectForm.clientName = project.clientName || '';
   newProjectForm.description = project.description || '';
   newProjectForm.coaches = project.coaches || [];
-  newProjectForm.positions = project.positions ?
-  project.positions.map(
-    (value) => {
-      return {
-        amount: value.amount.toString(),
-        skill: { value: value.id, label: value.skill.skillName },
-      }
-    }) : [JSON.parse(JSON.stringify({ ...defaultPosition }))] as positionForm[]
+  newProjectForm.positions = project.positions
+    ? project.positions.map((value) => {
+        return {
+          amount: value.amount.toString(),
+          skill: { value: value.id, label: value.skill.skillName },
+        };
+      })
+    : ([JSON.parse(JSON.stringify({ ...defaultPosition }))] as positionForm[]);
   newProjectForm.assignments = assignmentUrls || ([] as Url[]);
   return newProjectForm;
 }
@@ -153,7 +153,10 @@ function postOrPatchProject(
   (projectForm.id
     ? axiosAuthenticated.patch
     : axiosAuthenticated.post)<ProjectBase>(
-      '/' + edition + Endpoints.PROJECTS + (projectForm.id ? '/' + projectForm.id : ''),
+    '/' +
+      edition +
+      Endpoints.PROJECTS +
+      (projectForm.id ? '/' + projectForm.id : ''),
     data
   )
     .then((response) => {
@@ -319,7 +322,13 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
           controller.abort();
           controller = new AbortController();
           const signal = controller.signal;
-          postOrPatchProject(projectForm, setMyProjectBase, signal, setError, edition);
+          postOrPatchProject(
+            projectForm,
+            setMyProjectBase,
+            signal,
+            setError,
+            edition
+          );
           setShowPopup(false);
           return () => {
             controller.abort();
