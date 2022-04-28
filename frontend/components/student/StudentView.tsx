@@ -4,6 +4,7 @@ import {
   Student,
   StudentBase,
   User,
+  UserRole,
   UUID,
 } from '../../lib/types';
 import { Fragment, useEffect, useState } from 'react';
@@ -20,6 +21,7 @@ import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
+import useUser from '../../hooks/useUser';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
@@ -84,6 +86,7 @@ async function getEntireStudent(
 const StudentView: React.FC<StudentViewProp> = ({
   studentInput,
 }: StudentViewProp) => {
+  const [user] = useUser();
   // Needed to reload student when a suggestion is done or status is changed
   // TODO don't reload everything when only status or suggestions or changed, save the rest somewhere
   const [studentBase, setStudentBase] = useState(studentInput as StudentBase);
@@ -169,12 +172,16 @@ const StudentView: React.FC<StudentViewProp> = ({
           <textarea
             placeholder="Motivation"
             className="mt-3 w-full resize-y border-2 border-check-gray"
+            required
           />
         </form>
 
-        {/* TODO this should only be visible to admin role */}
         {/* admin status selection form */}
-        <form className={`mt-10 flex flex-row justify-between border-2 p-2`}>
+        <form
+          className={`${
+            user.role == UserRole.Admin ? 'visible' : 'hidden'
+          } mt-10 flex flex-row justify-between border-2 p-2`}
+        >
           <div
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
