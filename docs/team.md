@@ -1,9 +1,6 @@
 # Team management
 
-TODO:
-- Front-end administrator
-
-## Project Lead: [Niels Praet](https://github.com/NielsPraet)
+## Project Lead + Frontend Administrator: [Niels Praet](https://github.com/NielsPraet)
 - Point of contact for the group.
 - Responsible for checking & bundling timesheets.
 - Managing team.

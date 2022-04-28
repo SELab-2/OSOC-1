@@ -32,31 +32,31 @@ class UserService(private val repository: UserRepository, private val passwordEn
     }
 
     /**
-     * Register a new [User] in the [repository]. Returns the id of the newly created user object. A
+     * Register a new [User] in the [repository]. Returns the newly created user object. A
      * [ForbiddenOperationException] will be thrown if a constraint on the user is violated. This should only happen if
      * there already exists another user with the specified email address. The newly created user will have the
      * [Role.Disabled] role by default.
      */
-    fun registerUser(username: String, email: String, password: String): UUID {
-        val user = User(
-            username,
-            email,
+    fun registerUser(plaintextPasswordUser: User): User {
+        val encodedPassword = passwordEncoder.encode(plaintextPasswordUser.password)
+        val encodedPasswordUser = User(
+            plaintextPasswordUser.username,
+            plaintextPasswordUser.email,
             Role.Disabled,
-            passwordEncoder.encode(password)
+            encodedPassword
         )
-
         try {
-            return repository.save(user).id
+            return repository.save(encodedPasswordUser)
         } catch (_: DataIntegrityViolationException) {
-            throw ForbiddenOperationException("User with email = '$email' already exists!")
+            throw ForbiddenOperationException("User with email = '${encodedPasswordUser.email}' already exists!")
         }
     }
 
     /**
      * Change the role of the user with this [id] to [newRole]. If this user does not exist an [InvalidUserIdException]
      * will be thrown. If the role of the last remaining admin is changed to a role with fewer permissions a
-     * [ForbiddenOperationException] will be thrown. Currently, anyone can change the role of any other user, this will
-     * be changed when we have functional authentication in place.
+     * [ForbiddenOperationException] will be thrown. Currently, anyone can change the role of
+     * any other user, this will be changed when we have functional authentication in place.
      */
     fun changeRole(id: UUID, newRole: Role) {
         val user = getUserById(id)
@@ -70,13 +70,16 @@ class UserService(private val repository: UserRepository, private val passwordEn
     }
 
     /**
-     * Update a user object with the data defined in [updatedUser]. If this user does not exist an
-     * [InvalidUserIdException] will be thrown.
+     * Update a user object with the data defined in [updatedUser].
+     * If this user does not exist an [InvalidUserIdException] will be thrown.
+     * If password gets changed a [ForbiddenOperationException] will be thrown.
      */
-    fun patchUser(updatedUser: User) {
-        if (!repository.existsById(updatedUser.id))
-            throw InvalidUserIdException()
+    fun patchUser(updatedUser: User): User {
+        val oldUser = getUserById(updatedUser.id)
+        if (oldUser.password != updatedUser.password) {
+            throw ForbiddenOperationException("Not allowed to update password field of users")
+        }
 
-        repository.save(updatedUser)
+        return repository.save(updatedUser)
     }
 }

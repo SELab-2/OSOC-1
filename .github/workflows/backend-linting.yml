@@ -1,5 +1,8 @@
 name: backend-linting
-on: [pull_request]
+on: 
+  pull_request:
+    paths:
+      - 'backend/**'
 
 jobs:
   ktlint:
@@ -7,6 +10,7 @@ jobs:
     runs-on: self-hosted
     container:
       image: mikxox/maven-test-action:latest
+      options: --rm
     env:
       GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 

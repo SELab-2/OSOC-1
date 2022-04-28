@@ -1,13 +1,16 @@
-const envURL: string = process.env.NEXT_PUBLIC_API_ENDPOINT || '';
-const baseURL = envURL.replace(/\/$/, '');
-
 /**
- * Typescript doesn't allow computed enums, this is a little work-around to get the required functionality
+ * A collection of all available endpoint URLs
+ * {@label ENDPOINT_ENUM}
  */
-type Endpoints = typeof Endpoints[keyof typeof Endpoints];
-const Endpoints = {
-  USERS: baseURL + '/users',
-  LOGIN: baseURL + '/login',
-} as const;
+enum Endpoints {
+  USERS = '/users',
+  LOGIN = '/login',
+  REFRESH = '/token/refresh',
+  EDITIONS = '/editions',
+  EDITIONACTIVE = '/editions/active',
+  PROJECTS = '/projects',
+  STUDENTS = '/students',
+  SKILLS = '/skills',
+}
 
 export default Endpoints;

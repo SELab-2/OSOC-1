@@ -15,11 +15,11 @@ type FormContainerProps = PropsWithChildren<{
 
 /**
  * Container for register and login forms
- * 
+ *
  * @remarks
  * This is a container with 2 colums with 2 images on either side of a central form,
  * which is passed as a child component.
- * 
+ *
  * {@label FormContainer}
  *
  * @see {@link FormContainerProps}

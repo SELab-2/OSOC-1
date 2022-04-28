@@ -48,7 +48,7 @@ class UserServiceTests {
     @Test
     fun `getUserById does not fail when the user with id exists`() {
         val service = UserService(getRepository(true), getPasswordEncoder())
-        assertEquals(service.getUserById(testId), testUser)
+        assertEquals(testUser, service.getUserById(testId))
     }
 
     @Test
@@ -77,16 +77,17 @@ class UserServiceTests {
         val service = UserService(repository, getPasswordEncoder())
 
         val slot = slot<User>()
-        every { repository.save(capture(slot)) } returns User("username", "email", Role.Disabled, "password")
+        val testUser2 = User("username", "email", Role.Disabled, "password")
+        every { repository.save(capture(slot)) } returns testUser2
 
-        service.registerUser("username", "email", "password")
+        service.registerUser(testUser2)
 
         verify { repository.save(any()) }
         val capturedUser = slot.captured
-        assertEquals(capturedUser.username, "username")
-        assertEquals(capturedUser.email, "email")
-        assertEquals(capturedUser.role, Role.Disabled)
-        assertEquals(capturedUser.password, "Encoded password")
+        assertEquals("username", capturedUser.username)
+        assertEquals("email", capturedUser.email)
+        assertEquals(Role.Disabled, capturedUser.role)
+        assertEquals("Encoded password", capturedUser.password)
     }
 
     @Test
@@ -96,7 +97,8 @@ class UserServiceTests {
 
         every { repository.save(any()) }.throws(DataIntegrityViolationException("Duplicate email"))
 
-        assertThrows<ForbiddenOperationException> { service.registerUser("username", "email", "password") }
+        val testUser2 = User("username", "email", Role.Disabled, "password")
+        assertThrows<ForbiddenOperationException> { service.registerUser(testUser2) }
     }
 
     @Test
@@ -107,7 +109,7 @@ class UserServiceTests {
         val service = UserService(repository, getPasswordEncoder())
         service.changeRole(testId, Role.Coach)
         verify { repository.save(testUser) }
-        assertEquals(testUser.role, Role.Coach)
+        assertEquals(Role.Coach, testUser.role)
         service.changeRole(testId, Role.Admin)
     }
 
@@ -135,13 +137,13 @@ class UserServiceTests {
         val service = UserService(repository, getPasswordEncoder())
         service.changeRole(testCoachId, Role.Disabled)
         verify { repository.save(testCoachUser) }
-        assertEquals(testCoachUser.role, Role.Disabled)
+        assertEquals(Role.Disabled, testCoachUser.role)
         service.changeRole(testCoachId, Role.Admin)
         verify { repository.save(testCoachUser) }
-        assertEquals(testCoachUser.role, Role.Admin)
+        assertEquals(Role.Admin, testCoachUser.role)
         service.changeRole(testCoachId, Role.Admin)
         verify { repository.save(testCoachUser) }
-        assertEquals(testCoachUser.role, Role.Admin)
+        assertEquals(Role.Admin, testCoachUser.role)
     }
 
     @Test
@@ -156,5 +158,14 @@ class UserServiceTests {
     fun `patchUser fails when no user with id exists`() {
         val service = UserService(getRepository(false), getPasswordEncoder())
         assertThrows<InvalidIdException> { service.patchUser(testUser) }
+    }
+
+    @Test
+    fun `patchUser fails when password gets changed`() {
+        val repository: UserRepository = mockk()
+        val user = User(testUser.username, testUser.email, password = "azerty")
+        every { repository.findByIdOrNull(user.id) } returns testUser
+        val service = UserService(repository, getPasswordEncoder())
+        assertThrows<ForbiddenOperationException> { service.patchUser(user) }
     }
 }

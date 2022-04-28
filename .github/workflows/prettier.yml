@@ -3,8 +3,12 @@ name: Run prettier and eslint
 on:
   push:
     branches: [ master, development ]
+    paths:
+      - 'frontend/**'
   pull_request:
     branches: [ master, development ]
+    paths:
+      - 'frontend/**'
 
 jobs:
   container-job:
@@ -12,7 +16,7 @@ jobs:
     runs-on: self-hosted
     container:
       image: mikxox/maven-test-action:latest
-
+      options: --rm
     steps:
       - uses: actions/checkout@v2
         with:

@@ -52,3 +52,63 @@ $ ktlint --reporter=plain --reporter=checkstyle,output=ktlint-report-in-checksty
 ```
 
 A .editorconfig file is also added to ensure everyone uses the same coding style, make sure to enable the editorconfig plugin in IntelliJ to use this!
+
+### Populate script
+To run the populate script the Faker library is needed on your root user, you can install it as follows:
+```sh
+sudo pip3 install Faker
+```
+Then you can run the script with (make sure your intellij isn't running the application!):
+```sh
+cd docker
+sudo ./populate
+```
+## Setting up the first admin
+
+Please make sure a user had been created using the register page or using the POST method onto https://localhost:8080/api/users.
+This is to create the first admin in the database since there is no other admin that can grant a user the admin role.
+
+Note: Editing the database this way should only be done to create the first admin. 
+If you want to edit anything else, please use the frontend or use the different endpoints.
+
+### Development
+It is also possible to follow the [production](#production) instructions for this, as the terminal is used for that.
+
+For development, you can also use the intellij interface.
+On the very far right of intellij, you can clik on the database tab.
+Next, you need to click on the '+' and then select Data Source > PostgreSQL. You need to fill out the correct information.
+If you haven't setup environment variables, postgres should be running on the default values.
+The username default is postgres, the password default is postgres and the database name default is osoc.
+After this is correctly entered, select apply and ok.
+In the database tab, there should now be a PostgreSQL tab. 
+If you don't see anthing when you try and open it, you need to right click it and then click refresh.
+Next, go to databases > osoc > schemas > public
+Then, double click on the account table.
+Change the role of the correct row to 0 and the submit using ctrl+enter or using the button on the taskbar.
+
+### Production
+#### Without docker
+If you are just using postgresql, then you should run the following and only follow the [last few steps](#postgresql-statements).
+```shell 
+psql -U $OSOC_DB_USERNAME $OSOC_DB_DBNAME -W
+```
+
+#### With docker
+The container name can be found using
+```shell
+sudo docker ps
+```
+
+Then we want to go into the psql cli.
+**If you have setup environment variables, then you should only enter the container name. 
+Otherwise you need to enter the default values. This should only be done in development since we highly recommend using environment variables in production.**
+The username default is postgres, the password default is postgres and the database name default is osoc.
+```shell
+sudo docker exec -it <container-name> psql -U $OSOC_DB_USERNAME $OSOC_DB_DBNAME -W
+```
+#### PostgreSQL statements
+After that, we want to list all the users to get their ids and assign the admin role to the correct user using the corresponding id.
+```shell
+SELECT * FROM account;
+UPDATE account SET role=0 WHERE id='<id>';
+```

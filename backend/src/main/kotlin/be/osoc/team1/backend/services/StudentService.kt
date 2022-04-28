@@ -11,19 +11,25 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.StudentRepository
-import org.springframework.data.repository.findByIdOrNull
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class StudentService(private val repository: StudentRepository, private val userService: UserService) {
 
-    fun getAllStudents(): Iterable<Student> = repository.findAll()
+    /**
+     * Get all students sorted using [sortBy].
+     * Can be filtered using the List<Student> extension functions.
+     */
+    fun getAllStudents(sortBy: Sort, edition: String): List<Student> =
+        repository.findByEdition(edition, sortBy).toList()
 
     /**
      * Get a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student exists.
      */
-    fun getStudentById(studentId: UUID) = repository.findByIdOrNull(studentId) ?: throw InvalidStudentIdException()
+    fun getStudentById(studentId: UUID, edition: String) =
+        repository.findByIdAndEdition(studentId, edition) ?: throw InvalidStudentIdException()
 
     /**
      * Delete a student by their [studentId]. Throws an [InvalidStudentIdException] if no such student existed
@@ -37,16 +43,16 @@ class StudentService(private val repository: StudentRepository, private val user
     }
 
     /**
-     * Add the given [student] entity to the database. Returns the student's new id as decided by the database.
+     * Add the given [student] entity to the database. Returns the created student.
      */
-    fun addStudent(student: Student) = repository.save(student).id
+    fun addStudent(student: Student): Student = repository.save(student)
 
     /**
      * Retrieve the student with the specified [studentId], then set his status to [newStatus].
      * Throws an [InvalidStudentIdException] if no student with that [studentId] exists.
      */
-    fun setStudentStatus(studentId: UUID, newStatus: StatusEnum) {
-        val student = getStudentById(studentId)
+    fun setStudentStatus(studentId: UUID, newStatus: StatusEnum, edition: String) {
+        val student = getStudentById(studentId, edition)
         student.status = newStatus
         repository.save(student)
     }
@@ -63,19 +69,17 @@ class StudentService(private val repository: StudentRepository, private val user
      * the given coachId exists, and a [ForbiddenOperationException] if the [User] exists but doesn't have
      * the coach role.
      */
-    fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion) {
+    fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion, edition: String) {
         val coach = userService.getUserById(statusSuggestion.coachId)
         if (!coach.role.hasPermissionLevel(Role.Coach)) {
             throw ForbiddenOperationException("Only coaches and admins can make status suggestions.")
         }
-        val student = getStudentById(studentId)
+        val student = getStudentById(studentId, edition)
         val sameCoachSuggestion = student.statusSuggestions.find { it.coachId == coach.id }
         if (sameCoachSuggestion !== null) {
             throw ForbiddenOperationException("This coach has already made a suggestion for this student.")
         }
         student.statusSuggestions.add(statusSuggestion)
-        // See the comment at StatusSuggestion.student to understand why we have to do this.
-        statusSuggestion.student = student
         repository.save(student)
     }
 
@@ -87,24 +91,22 @@ class StudentService(private val repository: StudentRepository, private val user
      * or a [FailedOperationException] if the student and the coach exist, but the coach
      * hasn't made a [StatusSuggestion] for this student.
      */
-    fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID) {
+    fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID, edition: String) {
         val coach = userService.getUserById(coachId)
-        val student = getStudentById(studentId)
+        val student = getStudentById(studentId, edition)
         val suggestion = student.statusSuggestions.find { it.coachId == coach.id }
         if (suggestion === null) {
             throw FailedOperationException("This coach hasn't made a suggestion for the given student.")
         }
         student.statusSuggestions.remove(suggestion)
-        // See the comment at StatusSuggestion.student to understand why we have to do this.
-        suggestion.student = null
         repository.save(student)
     }
 
     /**
      * Adds a communication to student based on [studentId], if [studentId] is not in [repository] throw [InvalidStudentIdException]
      */
-    fun addCommunicationToStudent(studentId: UUID, communication: Communication) {
-        val student = getStudentById(studentId)
+    fun addCommunicationToStudent(studentId: UUID, communication: Communication, edition: String) {
+        val student = getStudentById(studentId, edition)
         student.communications.add(communication)
         repository.save(student)
     }

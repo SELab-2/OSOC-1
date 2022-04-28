@@ -1,22 +1,17 @@
 package be.osoc.team1.backend.security
 
-import com.auth0.jwt.JWT
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import be.osoc.team1.backend.security.TokenUtil.createAccessAndRefreshToken
+import be.osoc.team1.backend.services.OsocUserDetailService
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import java.util.Date
-import java.util.stream.Collectors
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import kotlin.collections.HashMap
 
 /**
  * This filter gets called by the filter-chain (see [SecurityConfig] for more info)
@@ -25,7 +20,7 @@ import kotlin.collections.HashMap
  * If the authentication is successful, then a response gets send with a new access token.
  * The now authenticated user can use this access token to authorize himself in the following requests.
  */
-class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
+class AuthenticationFilter(authenticationManager: AuthenticationManager?, private val userDetailsService: OsocUserDetailService) :
     UsernamePasswordAuthenticationFilter(authenticationManager) {
 
     /**
@@ -48,8 +43,8 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
     }
 
     /**
-     * add an access token to the response when authentication is successful
-     * this token can be used by the user to authorise itself in the following requests
+     * Add an access token, refresh token, TTL of access token and information about the successfully authenticated
+     * user to the response.
      */
     override fun successfulAuthentication(
         request: HttpServletRequest,
@@ -58,26 +53,12 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?) :
         authentication: Authentication
     ) {
         val authenticatedUser: User = authentication.principal as User
-        val accessToken: String = createToken(authenticatedUser, 5)
+        val email: String = authenticatedUser.username
+        val authorities: List<String> = authenticatedUser.authorities.map { it.authority }.toList()
+        val newTokenResponseData = createAccessAndRefreshToken(email, authorities)
 
-        val tokens: MutableMap<String, String> = HashMap()
-        tokens["accessToken"] = accessToken
-        response.contentType = APPLICATION_JSON_VALUE
-        ObjectMapper().writeValue(response.outputStream, tokens)
-    }
-
-    /**
-     * create a JSON web token
-     * the token contains username, expiration date and roles of user
-     * this function can be used for making an access token or even a refresh token
-     */
-    private fun createToken(user: User, minutesToLive: Int): String {
-        val roles: List<String> =
-            user.authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())
-        return JWT.create()
-            .withSubject(user.username)
-            .withExpiresAt(Date(System.currentTimeMillis() + minutesToLive * 60 * 1000))
-            .withClaim("roles", roles)
-            .sign(SecretUtil.algorithm)
+        val osocUser = userDetailsService.getUserFromPrincipal(authentication)
+        val authResponseData = AuthResponseData(newTokenResponseData, osocUser)
+        authResponseData.addDataToHttpResponse(response)
     }
 }

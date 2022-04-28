@@ -1,120 +1,157 @@
 package be.osoc.team1.backend.services
 
+import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
-import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
+import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidAssignmentIdException
+import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
+import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.UUID
 
 @Service
-class ProjectService(private val repository: ProjectRepository) {
+class ProjectService(
+    private val repository: ProjectRepository,
+    private val studentService: StudentService,
+    private val userService: UserService
+) {
     /**
-     * Get all projects
+     * Get all projects that are a part of the given OSOC [edition].
+     * The projects can also be filtered by the optional [searchQuery] parameter.
+     * See the documentation of the [nameMatchesSearchQuery] function to understand how the filtering is done.
      */
-    fun getAllProjects(): Iterable<Project> = repository.findAll()
+    fun getAllProjects(edition: String, searchQuery: String = ""): List<Project> =
+        repository.findByEdition(edition).filter { nameMatchesSearchQuery(it.name, searchQuery) }.toList()
 
     /**
-     * Get a project by its [id], if this id doesn't exist throw an InvalidProjectIdException
+     * Get a project by its [id]. If there is no project with the given [id] and [edition],
+     * throw an [InvalidProjectIdException].
      */
-    fun getProjectById(id: UUID): Project = repository.findByIdOrNull(id) ?: throw InvalidProjectIdException()
+    fun getProjectById(id: UUID, edition: String): Project =
+        repository.findByIdAndEdition(id, edition) ?: throw InvalidProjectIdException()
 
     /**
-     * Deletes a project by its [id], if this id doesn't exist throw an InvalidProjectIdException
+     * Deletes a project by its [id]. If there is no project with the given [id] and [edition],
+     * throw an [InvalidProjectIdException].
      */
-    fun deleteProjectById(id: UUID) {
-        if (!repository.existsById(id))
+    fun deleteProjectById(id: UUID, edition: String) {
+        if (!repository.existsByIdAndEdition(id, edition))
             throw InvalidProjectIdException()
 
         repository.deleteById(id)
     }
 
     /**
-     * Creates a new project based on [project]
+     * Creates a new project based on [project]. Returns the created project.
      */
-    fun postProject(project: Project): UUID {
-        return repository.save(project).id
+    fun postProject(project: Project): Project = repository.save(project)
+
+    /**
+     * Updates a project based on [project]. If there is no project with the same id as the given project
+     * and the given [edition], throw an [InvalidProjectIdException]. If an attempt is made to change the edition of the
+     * project then a [ForbiddenOperationException] is thrown.
+     */
+    fun patchProject(project: Project, edition: String): Project {
+        val oldProject = getProjectById(project.id, edition)
+        if (oldProject.edition != project.edition)
+            throw ForbiddenOperationException("The edition field cannot be changed!")
+
+        return repository.save(project)
     }
 
     /**
-     * Updates a project based on [project], if [project] is not in [repository] throw InvalidProjectIdException
+     * Adds a coach to project based on [projectId].
+     * If there is no project with the given [projectId] and [edition], throw an [InvalidProjectIdException].
+     * If there is no user with [coachId] a [InvalidUserIdException] will be thrown.
      */
-    fun patchProject(project: Project) {
-        if (!repository.existsById(project.id))
-            throw InvalidProjectIdException()
-
-        repository.save(project)
-    }
-
-    /**
-     * Adds a student to project based on [projectId], if [projectId] is not in [repository] throw InvalidProjectIdException
-     */
-    fun addStudentToProject(projectId: UUID, student: Student) {
-        val project: Project = getProjectById(projectId)
-        project.students.add(student)
-        repository.save(project)
-    }
-
-    /**
-     * removes a student from project based on [projectId] and [studentId],
-     * if [projectId] is not in [repository] throw InvalidProjectIdException
-     * if [studentId] not assigned to project throw FailedOperationException
-     */
-    fun removeStudentFromProject(projectId: UUID, studentId: UUID) {
-        val project: Project = getProjectById(projectId)
-        if (!project.students.removeIf { it.id == studentId }) {
-            throw FailedOperationException("Given student is not assigned to project")
-        }
-        repository.save(project)
-    }
-
-    /**
-     * Adds a coach to project based on [projectId],
-     * if [projectId] is not in [repository] throw InvalidProjectIdException
-     */
-    fun addCoachToProject(projectId: UUID, coach: User) {
-        val project: Project = getProjectById(projectId)
+    fun addCoachToProject(projectId: UUID, coachId: UUID, edition: String) {
+        val project = getProjectById(projectId, edition)
+        val coach = userService.getUserById(coachId)
         project.coaches.add(coach)
         repository.save(project)
     }
 
     /**
-     * removes a coach from project based on [projectId] and [coachId],
-     * if [projectId] is not in [repository] throw InvalidProjectIdException
-     * if [coachId] not assigned to project throw FailedOperationException
+     * removes a coach from project based on [projectId] and [coachId].
+     * If there is no project with the given [projectId] and [edition], throw an [InvalidProjectIdException].
+     * if [coachId] not assigned to project throw [FailedOperationException].
      */
-    fun removeCoachFromProject(projectId: UUID, coachId: UUID) {
-        val project: Project = getProjectById(projectId)
+    fun removeCoachFromProject(projectId: UUID, coachId: UUID, edition: String) {
+        val project: Project = getProjectById(projectId, edition)
         if (!project.coaches.removeIf { it.id == coachId }) {
             throw FailedOperationException("Given coach is not assigned to project")
         }
         repository.save(project)
     }
 
+    fun getStudents(projectId: UUID, edition: String): List<Student> = getStudents(getProjectById(projectId, edition))
+
+    fun getStudents(project: Project): List<Student> = project.assignments.map(Assignment::student).distinct()
+
     /**
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
      */
-    fun getConflicts(): MutableList<Conflict> {
-        val studentsMap = mutableMapOf<UUID, MutableList<UUID>>()
-        for (project in getAllProjects()) {
-            for (student in project.students) {
+    fun getConflicts(edition: String): MutableList<Conflict> {
+        val baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+        val studentsMap = mutableMapOf<UUID, MutableList<String>>()
+        for (project in getAllProjects(edition)) {
+            for (student in getStudents(project)) {
                 // add project id to map with student as key
                 studentsMap.putIfAbsent(student.id, mutableListOf())
-                studentsMap[student.id]?.add(project.id)
+                studentsMap[student.id]!!.add("$baseUrl/projects/" + project.id)
             }
         }
         val conflicts = mutableListOf<Conflict>()
         for ((studentId, projectIds) in studentsMap.entries) {
             if (projectIds.size > 1) {
                 // this student has a conflict
-                conflicts.add(Conflict(studentId, projectIds))
+                conflicts.add(Conflict("$baseUrl/students/$studentId", projectIds))
             }
         }
         return conflicts
     }
 
-    data class Conflict(val student: UUID, val projects: MutableList<UUID> = mutableListOf())
+    /**
+     * Assigns a student to a specific position on the project identified with the given [projectId] and [edition].
+     * A [ForbiddenOperationException] will be thrown if the student was already assigned this position.
+     * An [InvalidAssignmentIdException] will be thrown if the position is not part of the the project.
+     * If the project, student or suggester don't exist then a corresponding [InvalidIdException] will be thrown.
+     */
+    fun postAssignment(projectId: UUID, assignmentForm: AssignmentPost, edition: String) {
+        val project = getProjectById(projectId, edition)
+        val position = project.positions.find { it.id == assignmentForm.position }
+            ?: throw InvalidPositionIdException("The specified position is not part of the specified project.")
+
+        if (project.assignments.find { it.student.id == assignmentForm.student && position == it.position } != null)
+            throw ForbiddenOperationException("This student was already assigned this position on the project!")
+
+        val student = studentService.getStudentById(assignmentForm.student, edition)
+        val suggester = userService.getUserById(assignmentForm.suggester)
+        val assignment = Assignment(student, position, suggester, assignmentForm.reason, edition)
+        project.assignments.add(assignment)
+        repository.save(project)
+    }
+
+    /**
+     * Unassign a student by removing the assignment with [assignmentId] from the project with [projectId]. If this
+     * assignment is not part of the project, or it just outright doesn't exist then an [InvalidAssignmentIdException]
+     * will be thrown. If there is no project with the given [projectId] and [edition], throw an [InvalidProjectIdException].
+     */
+    fun deleteAssignment(projectId: UUID, assignmentId: UUID, edition: String) {
+        val project = getProjectById(projectId, edition)
+        val assignment = project.assignments.find { it.id == assignmentId }
+            ?: throw InvalidAssignmentIdException("The specified assignment is not part of the specified project!")
+
+        project.assignments.remove(assignment)
+        repository.save(project)
+    }
+
+    data class Conflict(val student: String, val projects: MutableList<String> = mutableListOf())
+    data class AssignmentPost(val student: UUID, val position: UUID, val suggester: UUID, val reason: String)
 }
