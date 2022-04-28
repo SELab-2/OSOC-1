@@ -147,7 +147,7 @@ function postOrPatchProject(
         },
         amount: position.amount,
       } as { [key: string]: unknown };
-      position.skill.value ? (newPos.id = position.skill.value) : null;
+      (position.skill.value && position.skill.value != '0') ? (newPos.id = position.skill.value) : null;
       return newPos;
     });
   }
@@ -301,7 +301,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
    */
   const addSkillOption = (option: string) => {
     const newSkillOptions = [...skillOptions];
-    newSkillOptions.push({ value: '', label: option });
+    newSkillOptions.push({ value: '0', label: option });
     setSkillOptions(newSkillOptions);
   };
 
@@ -428,7 +428,15 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                     isSearchable={true}
                     name={`"Position-" +${index}`}
                     value={position.skill}
-                    options={skillOptions}
+                    options={skillOptions.map(opt => {
+                      if (opt.value){
+                        return opt;
+                      }
+                      return {
+                        value: '0',
+                        label: opt.label
+                      };
+                    })}
                     isOptionDisabled={(option) =>
                       (projectForm['positions'] as positionForm[])
                         .map((v) => v.skill.label)
@@ -446,7 +454,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                       setPositionDropdownValue(
                         index,
                         e
-                          ? { value: '', label: e }
+                          ? { value: '0', label: e }
                           : ({} as { value: string; label: string })
                       );
                     }}

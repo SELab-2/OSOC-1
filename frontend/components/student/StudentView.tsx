@@ -359,10 +359,10 @@ const StudentView: React.FC<StudentViewProp> = ({
                 placeholder="Select Status"
                 // TODO don't hardcode this
                 options={[
-                  { value: '', label: 'Yes' },
-                  { value: '', label: 'No' },
-                  { value: '', label: 'Maybe' },
-                  { value: '', label: 'Undecided' },
+                  { value: 'Yes', label: 'Yes' },
+                  { value: 'No', label: 'No' },
+                  { value: 'Maybe', label: 'Maybe' },
+                  { value: 'Undecided', label: 'Undecided' },
                 ]}
                 value={status}
                 onChange={(e) => {
