@@ -271,12 +271,14 @@ const Projects: NextPage = () => {
                   </i>
                 </div>
 
-                <div className={`flex flex-row`}>
+                <div
+                  className={`flex w-full flex-row justify-center xl:mr-8 xl1920:mr-10`}
+                >
                   {/* TODO add an easy reset/undo search button */}
                   {/* TODO either move search icon left and add xmark to the right or vice versa */}
                   {/* This is the projects searchbar */}
-                  <div className="ml-6 flex w-full justify-center md:mx-6 md:mr-4">
-                    <div className="relative mx-4 w-full md:mr-0 lg:w-[80%]">
+                  <div className="ml-6 mr-4 flex w-full justify-center md:mr-4 md:ml-0 lg:ml-6 lg:mr-4">
+                    <div className="lg:w-[calc(100% - 200px)] relative mx-4 w-full md:mr-0">
                       <input
                         type="text"
                         className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
@@ -298,18 +300,18 @@ const Projects: NextPage = () => {
                         {magnifying_glass}
                       </i>
                     </div>
-                  </div>
 
-                  {/* Button to create new project */}
-                  <button
-                    className={`${
-                      user.role == UserRole.Admin ? 'visible' : 'hidden'
-                    } justify - right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
-                    type="submit"
-                    onClick={() => setShowCreateProject(true)}
-                  >
-                    Create new project
-                  </button>
+                    {/* Button to create new project */}
+                    <button
+                      className={`${
+                        user.role == UserRole.Admin ? 'visible' : 'hidden'
+                      } justify - right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                      type="submit"
+                      onClick={() => setShowCreateProject(true)}
+                    >
+                      Create new project
+                    </button>
+                  </div>
                 </div>
               </div>
 
