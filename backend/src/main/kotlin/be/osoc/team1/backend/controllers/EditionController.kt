@@ -46,7 +46,6 @@ class EditionController(val service: EditionService) {
      * Returns the currently active edition, or null if there is no active edition.
      */
     @GetMapping("/active")
-    @Secured("ROLE_ADMIN")
     fun getActiveEdition(): Edition? = service.getActiveEdition()
 
     /**

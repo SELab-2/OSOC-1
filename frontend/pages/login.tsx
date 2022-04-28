@@ -5,10 +5,11 @@ import toast from 'react-hot-toast';
 import FormContainer from '../components/FormContainer';
 import useTokens from '../hooks/useTokens';
 import useUser from '../hooks/useUser';
-import { UserRole } from '../lib/types';
+import { Edition, UserRole } from '../lib/types';
 import axios from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import usePersistentInput from '../hooks/usePersistentInput';
+import useEdition from '../hooks/useEdition';
 
 /**
  * Login page for OSOC application
@@ -28,6 +29,7 @@ const Login = () => {
 
   const [, setUser] = useUser();
   const [, setTokens] = useTokens();
+  const [, setEdition] = useEdition();
 
   const router = useRouter();
 
@@ -64,12 +66,20 @@ const Login = () => {
           if (user.role === UserRole.Disabled) {
             router.push('/wait');
           } else {
+            // TODO this is a temporary fix
+            const response = await axios.get<Edition>(Endpoints.EDITIONACTIVE, {
+              headers: { Authorization: `Basic ${accessToken}` },
+            });
+            if (response) {
+              setEdition(response.data.name);
+            }
             router.push('/');
           }
         } else {
           toast.error('Something went wrong trying to process the request.');
         }
       } catch (err) {
+        console.log(err);
         toast.error('An error occurred while trying to log in.');
       }
     }

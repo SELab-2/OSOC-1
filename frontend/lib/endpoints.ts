@@ -7,6 +7,10 @@ enum Endpoints {
   LOGIN = '/login',
   REFRESH = '/token/refresh',
   EDITIONS = '/editions',
+  EDITIONACTIVE = '/editions/active',
+  PROJECTS = '/projects',
+  STUDENTS = '/students',
+  SKILLS = '/skills',
 }
 
 export default Endpoints;
