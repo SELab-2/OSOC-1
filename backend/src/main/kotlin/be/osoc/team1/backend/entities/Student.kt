@@ -123,7 +123,7 @@ class Student(
     @NotBlank
     val edition: String = "",
 
-    @ManyToMany(cascade = [CascadeType.PERSIST])
+    @ManyToMany(cascade = [CascadeType.ALL])
     @OrderBy
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
