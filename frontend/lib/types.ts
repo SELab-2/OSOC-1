@@ -84,7 +84,7 @@ export type ProjectData = {
 /**
  * This is the Student type as defined in osoc.yaml
  */
-// TODO fix this once tally form & communications is done
+// TODO fix this once communications is done
 export type Student = {
   id: UUID;
   firstName: string;
@@ -95,11 +95,13 @@ export type Student = {
   possibleStudentCoach: boolean;
   skills: Skill[];
   communications: Url[];
-  answers: Url[];
+  answers: Answer[];
 };
 
 /**
  * This is the exact collection type returned by a get to the Student endpoint
+ * Currently statusSuggestions, communications and answers still need to be dereferenced
+ * Skills are returned as list of full objects
  */
 export type StudentBase = {
   id: UUID;
@@ -175,6 +177,18 @@ export type Assignment = {
 export type Skill = {
   skillName: string;
 };
+
+/**
+ * This is the Answer type as defined in osoc.yaml
+ * optionId and key are dependent on tally and should probably not be used
+ */
+export type Answer = {
+  id: UUID;
+  key: string;
+  question: string;
+  answer: string[];
+  optionId: string;
+}
 
 /**
  * Used for drag n drop

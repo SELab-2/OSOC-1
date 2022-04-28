@@ -3,11 +3,13 @@ import Header from '../../components/Header';
 import StudentSidebar from '../../components/StudentSidebar';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import { StatusSuggestionStatus } from '../../lib/types';
+import {UserRole} from '../../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
-import StudentView from '../../components/student/StudentView';
+import StudentHolder from '../../components/student/StudentHolder';
+import RouteProtection from "../../components/RouteProtection";
+import Error from "../../components/Error";
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -18,11 +20,12 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
-
-  const [, setError]: [string, (error: string) => void] = useState('');
+  const [refreshStudents, setRefreshStudents] = useState(false);
+  const [error, setError]: [string, (error: string) => void] = useState('');
   useAxiosAuth();
 
   return (
+      <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
     <div className="min-w-screen flex min-h-screen flex-col items-center">
       <Header />
       <DndProvider backend={HTML5Backend}>
@@ -41,11 +44,11 @@ const Students: NextPage = () => {
             >
               <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
             </div>
-            {/* TODO fix this */}
+            {/* actual sidebar */}
             <StudentSidebar
               setError={setError}
-              refresh={false}
-              setRefresh={() => null}
+              refresh={refreshStudents}
+              setRefresh={setRefreshStudents}
             />
           </section>
 
@@ -66,20 +69,24 @@ const Students: NextPage = () => {
               </div>
             </div>
 
+            {error && <Error error={error} className="mb-4" />}
+
             {/* This contains the actual student info */}
             <div>
-              <StudentView student={student} />
+              <StudentHolder />
             </div>
           </section>
         </main>
       </DndProvider>
     </div>
+      </RouteProtection>
   );
 };
 
 export default Students;
 
 // Temporary fake data to test with
+/*
 const student = {
   id: '1',
   firstName: 'FNaam1',
@@ -130,3 +137,4 @@ const student = {
     studentCoach: true,
   },
 };
+ */

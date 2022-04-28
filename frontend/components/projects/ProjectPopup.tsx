@@ -8,6 +8,7 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import Error from '../Error';
 import { useRouter } from 'next/router';
+import {NextRouter} from "next/dist/client/router";
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -110,15 +111,16 @@ export function projectFormFromProject(
  * @param setMyProjectBase - callback function to set result (can be used for reloading)
  * @param signal - AbortSignal for the axios request
  * @param setError - callback to set error message
- * @param edition - the active edition
+ * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function postOrPatchProject(
   projectForm: ProjectForm,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  edition: string
+  router: NextRouter
 ) {
+  const edition = router.query.editionName as string;
   const data = {
     name: projectForm.projectName,
     clientName: projectForm.clientName,
@@ -163,7 +165,7 @@ function postOrPatchProject(
       setMyProjectBase(response.data as ProjectBase);
     })
     .catch((err) => {
-      parseError(err, setError, new AbortController().signal);
+      parseError(err, setError, new AbortController().signal, router);
     });
 }
 
@@ -215,7 +217,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
   setMyProjectBase,
   setDeletePopup,
 }: ProjectPopupProp) => {
-  const edition = useRouter().query.editionName as string;
+  const router = useRouter();
   /**
    * Update the position dropdown value for the position at index key in projectForm
    * @param key - the index in projectForm['positions']
@@ -307,8 +309,8 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getSkills(setSkillOptions, signal, setError);
-    getCoaches(setCoachOptions, signal, setError);
+    getSkills(setSkillOptions, signal, setError, router);
+    getCoaches(setCoachOptions, signal, setError, router);
     return () => {
       controller.abort();
     };
@@ -327,7 +329,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
             setMyProjectBase,
             signal,
             setError,
-            edition
+              router
           );
           setShowPopup(false);
           return () => {

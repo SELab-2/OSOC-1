@@ -117,7 +117,6 @@ function getStatusFilterList(
   return stringList.join(',') || ' ';
 }
 
-// TODO allow disabling drag on studentView since I don't think it is needed there, don't know how though
 /**
  * This returns the StudentSidebar
  * Any page using this should add a DndProvider backend=\{HTML5Backend\} element

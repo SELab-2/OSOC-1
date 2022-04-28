@@ -23,6 +23,7 @@ import Error from '../../components/Error';
 import { parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
+import {NextRouter} from "next/dist/client/router";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -37,7 +38,7 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
  * @param setLoading - set loading or not, this is not the same as the state loading due to styling bug otherwise
  * @param signal - AbortSignal for the axios request
  * @param setError - callback to set error message
- * @param edition - the active edition
+ * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function searchProject(
   projectSearch: string,
@@ -57,9 +58,10 @@ function searchProject(
   setLoading: (loading: boolean) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  edition: string
+  router: NextRouter
 ) {
   setLoading(true);
+  const edition = router.query.editionName as string;
   axiosAuthenticated
     .get<ProjectData>('/' + edition + Endpoints.PROJECTS, {
       params: {
@@ -84,7 +86,7 @@ function searchProject(
       const newState = { ...state };
       newState.loading = false;
       setState(newState);
-      parseError(err, setError, signal);
+      parseError(err, setError, signal, router);
       if (!signal.aborted) {
         setLoading(false);
       }
@@ -97,7 +99,7 @@ function searchProject(
  */
 const Projects: NextPage = () => {
   const [user] = useUser();
-  const edition = useRouter().query.editionName as string;
+  const router = useRouter();
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
   const [refreshStudents, setRefreshStudents] = useState(false);
@@ -160,7 +162,7 @@ const Projects: NextPage = () => {
       setLoading,
       signal,
       setError,
-      edition
+        router
     );
     return () => {
       controller.abort();
@@ -214,7 +216,7 @@ const Projects: NextPage = () => {
       setLoading,
       signal,
       setError,
-      edition
+        router
     );
     return () => {
       controller.abort();
