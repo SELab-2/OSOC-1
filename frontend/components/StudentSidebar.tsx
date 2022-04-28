@@ -43,7 +43,7 @@ type StudentsSidebarProps = {
  */
 async function searchStudent(
   studentNameSearch: string,
-  skills: Array<{ value: string; label: string }>,
+  skills: { value: string; label: string }[],
   studentSearchParameters: Record<string, boolean>,
   setStudents: (students: StudentBase[]) => void,
   setFilterAmount: (filterAmount: number) => void,
@@ -152,11 +152,11 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   const [showFilter, setShowFilter] = useState(true);
 
   const [skills, setSkills] = useState(
-    [] as Array<{ value: string; label: string }>
+    [] as { value: string; label: string }[]
   );
 
   const [skillOptions, setSkillOptions] = useState(
-    [] as Array<{ value: string; label: string }>
+    [] as { value: string; label: string }[]
   );
 
   // Split this to control when to call searchStudent
@@ -198,7 +198,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
 
   const clearFilters = () => {
     setStudentSearchParameters(defaultStudentSearchParameters);
-    setSkills([] as Array<{ value: string; label: string }>);
+    setSkills([] as { value: string; label: string }[]);
     setStudentNameSearch('');
   };
 
@@ -224,7 +224,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * This will also get called on first render
    */
   useEffect(() => {
-    return search(true);
+    search(true);
   }, [studentSearchParameters, skills]);
 
   /**
@@ -233,7 +233,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * need to be reloaded. This can be quite slow and does a lot of useless work.
    */
   useEffect(() => {
-    if (refresh[0] && (refresh[1] || studentSearchParameters.ExcludeAssigned)) {
+    if (refresh[0] && (refresh[1] || studentSearchParameters.ExcludeAssigned || studentSearchParameters.ExcludeSuggested)) {
       const prevPageSize = state.pageSize;
       const prevPage = state.page;
       state.pageSize = state.page * state.pageSize;
@@ -393,7 +393,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 {/* TODO fix this becoming wider when something is selected */}
                 {/* TODO fix this looking horrible when a lot is selected */}
                 <Select
-                  className="basic-single"
+                  className="basic-multi-select"
                   classNamePrefix="select"
                   isDisabled={false}
                   isLoading={false}
@@ -402,15 +402,25 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                   isSearchable={true}
                   isMulti={true}
                   name="Skills"
-                  value={skills}
+                  value={skills.map(skill => {
+                    return {
+                      value: skill.label,
+                      label: skill.label
+                    }
+                  })}
                   options={skillOptions}
                   placeholder="Select skills"
-                  onChange={(e) =>
-                    setSkills(
-                      e.map((x) => {
-                        return { value: x.value, label: x.label };
-                      })
-                    )
+                  onChange={(e) => {
+                    if (e) {
+                      setSkills(
+                          e.map((x) => {
+                            return {value: x.value, label: x.label};
+                          }) as {value: string, label: string}[]
+                      );
+                    } else {
+                      setSkills([] as {value: string, label: string}[]);
+                    }
+                  }
                   }
                 />
               </Fragment>

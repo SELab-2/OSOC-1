@@ -88,6 +88,7 @@ async function setStudentSuggestion(
     )
     .then(() => {
       reloadStudent(studentId, setStudentBase, signal, setError, router);
+      setRefresh([true, false]);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);

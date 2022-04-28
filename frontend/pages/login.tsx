@@ -73,7 +73,12 @@ const Login = () => {
             if (response) {
               setEdition(response.data.name);
             }
-            router.push('/');
+            if (user.role === UserRole.Admin){
+              router.push(Endpoints.EDITIONS);
+            } else {
+              router.push('/' + response.data.name + Endpoints.STUDENTS);
+            }
+
           }
         } else {
           toast.error('Something went wrong trying to process the request.');

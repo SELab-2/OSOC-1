@@ -78,8 +78,7 @@ const Editions: NextPage = () => {
 
   const updateEdition = (_edition: string) => {
     setEdition(_edition);
-    router.push(''); // TODO. update this when students/projects page has been added
-    console.log(_edition);
+    router.push('/' + _edition + Endpoints.STUDENTS);
   };
 
   const deleteEdition = async (_edition: string) => {
