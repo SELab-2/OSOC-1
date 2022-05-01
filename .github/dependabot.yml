@@ -7,8 +7,6 @@ updates:
     labels:
       - "dependencies"
     open-pull-requests-limit: 5
-    commit-message:
-      prefix: "chore: "
     reviewers:
       - "NielsPraet"
       - "Mikxox"
@@ -21,8 +19,6 @@ updates:
     labels:
       - "dependencies"
     open-pull-requests-limit: 5
-    commit-message:
-      prefix: "chore: "
     reviewers:
       - "MaartenS11"
       - "TomAlard"
