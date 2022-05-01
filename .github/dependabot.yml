@@ -4,3 +4,27 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "daily"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore: "
+    reviewers:
+      - "NielsPraet"
+      - "Mikxox"
+      - "tvhimme"
+      
+  - package-ecosystem: "maven"
+    directory: "/backend"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore: "
+    reviewers:
+      - "MaartenS11"
+      - "TomAlard"
+      - "NinjaJay"
+      - "lars-vc"
