@@ -1,23 +1,28 @@
 #!/bin/bash
 
-# REQUIRED PACKAGES "docker, curl"
-
 if ! [ $(id -u) = 0 ]; then
    echo "The script needs to be run as root." >&2
    exit 1
 fi
-# DOCKER
-# stop and remove docker if it was running
-printf "Clearing docker: "
-sudo docker container stop osoc_postgres_container_local_dev &> /dev/null
-sudo docker container rm osoc_postgres_container_local_dev &> /dev/null
-printf "done\n"
-# start up docker
-printf "Starting up docker: "
-sudo docker build -t osoc_postgres_image_local_dev:latest . > /dev/null
-sudo docker run -d --name osoc_postgres_container_local_dev -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=osoc osoc_postgres_image_local_dev:latest > /dev/null
-sudo docker container start osoc_postgres_container_local_dev > /dev/null
-printf "done\n"
+
+if [[ $1 == "--wsl" ]] || [[ $1 == "-w" ]]
+then
+    printf "MAKE SURE YOUR DOCKER IS RUNNING!\n"
+else
+    # DOCKER
+    # stop and remove docker if it was running
+    printf "Clearing docker: "
+    sudo docker container stop osoc_postgres_container_local_dev &> /dev/null
+    sudo docker container rm osoc_postgres_container_local_dev &> /dev/null
+    printf "done\n"
+    # start up docker
+    printf "Starting up docker: "
+    sudo docker build -t osoc_postgres_image_local_dev:latest . > /dev/null
+    sudo docker run -d --name osoc_postgres_container_local_dev -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=osoc osoc_postgres_image_local_dev:latest > /dev/null
+    sudo docker container start osoc_postgres_container_local_dev > /dev/null
+    printf "done\n"
+fi
+
 
 # starting backend
 printf "Starting backend: "
@@ -36,7 +41,12 @@ printf "created\n"
 # ADD DATA
 printf "Adding other data: "
 # call a python script for convenience
-python3 ../docker/subpopulate.py
+if [[ $1 == "--wsl" ]] || [[ $1 == "-w" ]]
+then
+    python3 ../docker/subpopulate.py --wsl
+else
+    python3 ../docker/subpopulate.py
+fi
 printf "added\n"
 
 # stopping backend
