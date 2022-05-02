@@ -45,7 +45,8 @@ class EntitySaveTests {
 
     @Test
     fun `test if saving a project with a new skill saves the new skill first`() {
-        val project = Project("name", "clientName", "description",
+        val project = Project(
+            "name", "clientName", "description",
             positions = listOf(Position(Skill("test"), 2))
         )
         projectRepository.save(project)
@@ -54,10 +55,12 @@ class EntitySaveTests {
     @Test
     fun `test if deleting a project with a shared skill doesn't cause issues`() {
         val skill = Skill("test")
-        val project1 = Project("name", "clientName", "description",
+        val project1 = Project(
+            "name", "clientName", "description",
             positions = listOf(Position(skill, 2))
         )
-        val project2 = Project("name", "clientName", "description",
+        val project2 = Project(
+            "name", "clientName", "description",
             positions = listOf(Position(skill, 2))
         )
         projectRepository.save(project1)
