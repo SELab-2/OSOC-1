@@ -58,10 +58,16 @@ To run the populate script the Faker library is needed on your root user, you ca
 ```sh
 sudo pip3 install Faker
 ```
-Then you can run the script with (make sure your intellij isn't running the application!):
+Then you can run the script with:
 ```sh
 cd docker
 sudo ./populate
+```
+If you are a WSL-user you probably don't use the `docker` command to run your docker containers, therefore the regular populate script won't work for you!
+**You need to run the docker container yourself** and then run:
+```sh
+cd docker
+sudo ./populate --wsl
 ```
 ## Setting up the first admin
 
