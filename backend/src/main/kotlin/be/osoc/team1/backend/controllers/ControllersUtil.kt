@@ -1,10 +1,10 @@
 package be.osoc.team1.backend.controllers
 
-import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.OsocUserDetailService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
@@ -12,9 +12,8 @@ import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import java.security.Principal
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -32,7 +31,11 @@ import javax.servlet.http.HttpServletResponse
  *
  * `/api/students/(INSERT ID)`
  */
-fun <ID, T> getObjectCreatedResponse(id: ID, createdObject: T, status: HttpStatus = HttpStatus.CREATED): ResponseEntity<T> {
+fun <ID, T> getObjectCreatedResponse(
+    id: ID,
+    createdObject: T,
+    status: HttpStatus = HttpStatus.CREATED
+): ResponseEntity<T> {
     val postRequestPath = ServletUriComponentsBuilder.fromCurrentRequest()
     val pathWithIdAdded = postRequestPath.path("/{id}").buildAndExpand(id).toUriString()
     return ResponseEntity
@@ -42,7 +45,8 @@ fun <ID, T> getObjectCreatedResponse(id: ID, createdObject: T, status: HttpStatu
 }
 
 @Component
-class TestingInterceptor(val editionService: EditionService, val userDetailService: OsocUserDetailService) : HandlerInterceptor {
+class TestingInterceptor(val editionService: EditionService, val userDetailService: OsocUserDetailService) :
+    HandlerInterceptor {
     @Throws(Exception::class)
     @Override
     override fun preHandle(
@@ -50,30 +54,21 @@ class TestingInterceptor(val editionService: EditionService, val userDetailServi
         response: HttpServletResponse,
         handler: Any
     ): Boolean {
-        if (request.requestURI != "/api/error") {
+        // URLs that are always allowed
+        val regex =
+            Regex("^.*/api/(error|editions|login|communications|users|assignments|positions|statusSuggestions|answers|skills|logout|token).*$")
+        // this !is check is here so invalid requests (such as gets to endpoints that don't exist) still get handled regularly
+        if (!regex.matches(request.requestURI) && handler !is ResourceHttpRequestHandler) {
             println(request.requestURI)
-            println("ese")
             println(handler)
-            response.addHeader("WIE", "WOO")
-            response.sendError(411, "test")
             println(editionService.getActiveEdition())
-            return false
+            val editionName = request.requestURI.split("/")[2]
+            if (editionService.getActiveEdition()?.name != editionName && request.method != "GET" && request.method != "DELETE") {
+                response.sendError(405, "Entries from inactive editions can only be viewed or deleted")
+                return false
+            }
         }
         return super.preHandle(request, response, handler)
-
-        // set few parameters to handle ajax request from different host
-        response.addHeader("Access-Control-Allow-Origin", "*")
-        response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-        response.addHeader("Access-Control-Max-Age", "1000")
-        response.addHeader("Access-Control-Allow-Headers", "Content-Type")
-        response.addHeader("Cache-Control", "private")
-        val reqUri = request.requestURI
-        val serviceName = reqUri.substring(
-            reqUri.lastIndexOf("/") + 1,
-            reqUri.length
-        )
-        if (serviceName == "SOMETHING") {
-        }
     }
 
     @Throws(Exception::class)
