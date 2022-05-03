@@ -19,26 +19,15 @@ on:
 jobs:
   container-job:
 
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container: 
       image: mikxox/maven-test-action:latest
       options: --rm
-    env:
-      GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          path: 'temppath'
 
       - name: Test with Maven
         # -B: run in non-interactive (batch) mode
-        run: |
-          cd /__w/OSOC-1/OSOC-1/temppath/backend
-          ./mvnw -B -Dtest="unittests.**" -DfailIfNoTests=false test --file pom.xml
-
-      - name: remove temppath
-        if: always()
-        run: |
-          cd /__w/OSOC-1/OSOC-1/
-          sudo rm -rf temppath
+        run: ./mvnw -B -Dtest="unittests.**" -DfailIfNoTests=false test --file pom.xml
+        working-directory: ./backend
