@@ -4,9 +4,9 @@ import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.OsocUserDetailService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView
@@ -45,7 +45,7 @@ fun <ID, T> getObjectCreatedResponse(
 }
 
 @Component
-class TestingInterceptor(val editionService: EditionService, val userDetailService: OsocUserDetailService) :
+class EditionInterceptor(val editionService: EditionService) :
     HandlerInterceptor {
     @Throws(Exception::class)
     @Override
@@ -57,15 +57,19 @@ class TestingInterceptor(val editionService: EditionService, val userDetailServi
         // URLs that are always allowed
         val regex =
             Regex("^.*/api/(error|editions|login|communications|users|assignments|positions|statusSuggestions|answers|skills|logout|token).*$")
-        // this !is check is here so invalid requests (such as gets to endpoints that don't exist) still get handled regularly
+        // this !is check is here so invalid requests (such as GETs to endpoints that don't exist) still get handled regularly
         if (!regex.matches(request.requestURI) && handler !is ResourceHttpRequestHandler) {
-            println(request.requestURI)
-            println(handler)
-            println(editionService.getActiveEdition())
+            val roles = SecurityContextHolder.getContext().authentication.authorities.map { it.toString() }
             val editionName = request.requestURI.split("/")[2]
-            if (editionService.getActiveEdition()?.name != editionName && request.method != "GET" && request.method != "DELETE") {
-                response.sendError(405, "Entries from inactive editions can only be viewed or deleted")
-                return false
+            if (editionService.getActiveEdition()?.name != editionName) {
+                if (!roles.contains("ROLE_ADMIN")) {
+                    response.sendError(401, "Inactive editions can only be accessed by admins")
+                    return false
+                }
+                if (request.method != "GET" && request.method != "DELETE") {
+                    response.sendError(405, "Entries from inactive editions can only be viewed or deleted")
+                    return false
+                }
             }
         }
         return super.preHandle(request, response, handler)
@@ -82,10 +86,10 @@ class TestingInterceptor(val editionService: EditionService, val userDetailServi
 }
 
 @Component
-class ProductServiceInterceptorAppConfig : WebMvcConfigurer {
+class InterceptorConfig : WebMvcConfigurer {
     @Autowired
-    lateinit var testServiceInterceptor: TestingInterceptor
+    lateinit var editionInterceptor: EditionInterceptor
     override fun addInterceptors(registry: InterceptorRegistry) {
-        registry.addInterceptor(testServiceInterceptor)
+        registry.addInterceptor(editionInterceptor)
     }
 }
