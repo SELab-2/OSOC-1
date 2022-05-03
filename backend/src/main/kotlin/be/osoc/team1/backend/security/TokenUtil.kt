@@ -38,6 +38,12 @@ object TokenUtil {
     private val validRefreshTokens: MutableMap<String, String> = mutableMapOf()
 
     /**
+     * This map holds the latest resetPasswordToken per email, so the keys are emails and the values are
+     * resetPasswordTokens.
+     */
+    private val validResetPasswordTokens: MutableMap<String, String> = mutableMapOf()
+
+    /**
      * Create a JSON web token. The token contains email, an id, expiration date of token, whether the token is an
      * access token and the authorities of the user. Set [isAccessToken] to true when making an access token, set it to
      * false when creating a refresh token. Access tokens are valid for 5 minutes, while refresh tokens stay valid for
@@ -59,6 +65,21 @@ object TokenUtil {
             )
             .withClaim("isAccessToken", isAccessToken)
             .withClaim("authorities", authorities)
+            .sign(hashingAlgorithm)
+    }
+
+    /**
+     * Create a JSON web token. The token contains email and expiration date of token. resetPasswordTokens are valid for
+     * 15 minutes.
+     * The created token gets signed using above hashing algorithm and secret.
+     */
+    fun createResetPasswordToken(email: String): String {
+        return JWT.create()
+            .withSubject(email)
+            .withJWTId(nextInt().toString())
+            .withExpiresAt(
+                Date(System.currentTimeMillis() + 15 * 60 * 1000)
+            )
             .sign(hashingAlgorithm)
     }
 

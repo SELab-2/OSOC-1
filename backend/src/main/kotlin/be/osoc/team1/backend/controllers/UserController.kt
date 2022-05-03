@@ -78,4 +78,10 @@ class UserController(private val service: UserService) {
     @Secured("ROLE_ADMIN")
     fun postUserRole(@PathVariable id: UUID, @RequestBody role: Role) =
         service.changeRole(id, role)
+
+    /**
+     * Reset password
+     */
+    @PostMapping("/resetpassword")
+    fun postEmail(@RequestBody email: String) = service.getTokenByMail(email)
 }

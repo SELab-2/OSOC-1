@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.UserRepository
+import be.osoc.team1.backend.security.TokenUtil
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -81,5 +82,15 @@ class UserService(private val repository: UserRepository, private val passwordEn
         }
 
         return repository.save(updatedUser)
+    }
+
+    /**
+     * Send an email with a resetPasswordToken to [email] if [email] is the email address of an existing user.
+     */
+    fun getTokenByMail(email: String) {
+        if (repository.findByEmail(email) != null) {
+            val resetPasswordToken = TokenUtil.createResetPasswordToken(email)
+            // send mail to [email] containing resetpasswordtoken
+        }
     }
 }
