@@ -16,7 +16,7 @@ import kotlin.random.Random.Default.nextBytes
 import kotlin.random.Random.Default.nextInt
 
 /**
- * This object contains every function needed to create and process a token (works with both access and refresh tokens).
+ * This object contains every function needed to create and process a token.
  */
 object TokenUtil {
     /**

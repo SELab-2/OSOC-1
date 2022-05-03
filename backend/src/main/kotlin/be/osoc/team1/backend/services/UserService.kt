@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.UserRepository
+import be.osoc.team1.backend.security.EmailUtil
 import be.osoc.team1.backend.security.TokenUtil
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
@@ -90,7 +91,7 @@ class UserService(private val repository: UserRepository, private val passwordEn
     fun getTokenByMail(email: String) {
         if (repository.findByEmail(email) != null) {
             val resetPasswordToken = TokenUtil.createResetPasswordToken(email)
-            // send mail to [email] containing resetpasswordtoken
+            EmailUtil.sendEmail(email, resetPasswordToken)
         }
     }
 }
