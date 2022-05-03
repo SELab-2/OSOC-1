@@ -89,9 +89,9 @@ class UserService(private val repository: UserRepository, private val passwordEn
      * Send an email with a resetPasswordToken to [email] if [email] is the email address of an existing user.
      */
     fun getTokenByMail(email: String) {
-        if (repository.findByEmail(email) != null) {
-            val resetPasswordToken = TokenUtil.createResetPasswordToken(email)
-            EmailUtil.sendEmail(email, resetPasswordToken)
-        }
+        // if (repository.findByEmail(email) != null) {
+        val resetPasswordToken = TokenUtil.createResetPasswordToken(email)
+        EmailUtil.sendEmail(email, resetPasswordToken)
+        // }
     }
 }
