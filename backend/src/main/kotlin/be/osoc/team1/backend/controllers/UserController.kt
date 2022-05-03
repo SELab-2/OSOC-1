@@ -80,8 +80,8 @@ class UserController(private val service: UserService) {
         service.changeRole(id, role)
 
     /**
-     * Reset password
+     * Request a resetPasswordToken for [email].
      */
     @PostMapping("/resetPassword")
-    fun postEmail(/*@RequestBody email: String*/) = service.getTokenByMail("tymenvanhimme@gmail.com")
+    fun postEmail(@RequestBody email: String) = service.getResetPasswordTokenByMail(email)
 }
