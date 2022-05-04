@@ -7,19 +7,16 @@ on:
 jobs:
   ktlint:
     name: Check Code Quality
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: mikxox/maven-test-action:latest
       options: --rm
-    env:
-      GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 
     steps:
       - name: Clone repo
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-          path: 'temppath'
 
       - name: install reviewdog
         run: |
@@ -29,13 +26,8 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath/backend
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint
           chmod a+x ktlint
           ./ktlint --reporter=checkstyle | reviewdog -f=checkstyle -name="ktlint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="false"
+        working-directory: ./backend
 
-      - name: remove temppath
-        if: always()
-        run: |
-          cd /__w/OSOC-1/OSOC-1/
-          sudo rm -rf temppath
