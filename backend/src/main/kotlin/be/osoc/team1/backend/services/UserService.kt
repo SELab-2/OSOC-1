@@ -3,6 +3,7 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidTokenException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.EmailUtil
@@ -93,6 +94,22 @@ class UserService(private val repository: UserRepository, private val passwordEn
         if (repository.findByEmail(email) != null) {
             val resetPasswordToken = TokenUtil.createResetPasswordToken(email)
             EmailUtil.sendEmail(email, resetPasswordToken)
+        }
+    }
+
+    /**
+     * change the password of [email].
+     */
+    fun changePassword(resetPasswordToken: String, newPassword: String) {
+        try {
+            val email = TokenUtil.decodeAndVerifyToken(resetPasswordToken).subject
+            val user: User = repository.findByEmail(email)!!
+            user.password = passwordEncoder.encode(newPassword)
+            repository.save(user)
+        } catch (_: NullPointerException) {
+            throw InvalidTokenException("ResetPasswordToken contains invalid email.")
+        } catch (_: Exception) {
+            throw InvalidTokenException("invalid resetPasswordToken given.")
         }
     }
 }

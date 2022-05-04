@@ -14,7 +14,7 @@ object EmailUtil {
     private const val baseUrl = "http://localhost:8080/api"
 
     private fun getResetPasswordEmailBody(resetPasswordToken: String): String {
-        val url = "$baseUrl/users/resetPassword?$resetPasswordToken"
+        val url = "$baseUrl/users/resetPassword/$resetPasswordToken"
         return """
             Hello,
             Use the link below to set your new password.
