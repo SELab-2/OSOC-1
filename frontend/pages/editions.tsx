@@ -85,7 +85,7 @@ const Editions: NextPage = () => {
   };
 
   const deleteEdition = async (_edition: string) => {
-    if (! _edition) return;
+    if (!_edition) return;
 
     try {
       await axiosAuth.delete(Endpoints.EDITIONS + `/${_edition}`);
@@ -131,10 +131,9 @@ const Editions: NextPage = () => {
                 edition={val}
                 updateEdition={updateEdition}
                 deleteEdition={() => {
-                    setShowDeletePopup(true);
-                    setEditionToDelete(val.name);
-                  }
-                }
+                  setShowDeletePopup(true);
+                  setEditionToDelete(val.name);
+                }}
               />
             ))}
         </div>
