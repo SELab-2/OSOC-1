@@ -38,7 +38,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          /__w/OSOC-1/OSOC-1/node_modules/.bin/eslint -f=rdjson . | reviewdog -f=rdjson -name="eslint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="true"
+          node_modules/.bin/eslint -f=rdjson . | reviewdog -f=rdjson -name="eslint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="true"
         working-directory: ./frontend
 
       - name: prettier with reviewdog
@@ -46,7 +46,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          /__w/OSOC-1/OSOC-1/node_modules/.bin/prettier --check --config /__w/OSOC-1/OSOC-1/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/frontend/.prettierignore .  2>&1 | sed --regexp-extended 's/(\[warn\].*)$/\1 File is not properly formatted./' \
+          node_modules/.bin/prettier --check --config /__w/OSOC-1/OSOC-1/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/frontend/.prettierignore .  2>&1 | sed --regexp-extended 's/(\[warn\].*)$/\1 File is not properly formatted./' \
           | reviewdog \
           -efm="%-G[warn] Code style issues found in the above file(s). Forgot to run Prettier%. File is not properly formatted." \
           -efm="[%tarn] %f %m" \
