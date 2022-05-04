@@ -29,9 +29,9 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}µ
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          files: ./backend/target/site/jacoco/jacoco.xml
+          files: /__w/OSOC-1/OSOC-1/backend/target/site/jacoco/jacoco.xml
           flags: all_tests
           name: codecov-umbrella
           verbose: true
