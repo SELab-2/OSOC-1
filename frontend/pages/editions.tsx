@@ -12,6 +12,7 @@ import EditionCreateForm from '../components/editions/EditionCreateForm';
 import Error from '../components/Error';
 import { Edition, UserRole } from '../lib/types';
 import RouteProtection from '../components/RouteProtection';
+import EditionDeletionPopup from '../components/editions/EditionDeletionPopup';
 
 /**
  * Editions page where we list editions, show a form to create new editions and
@@ -26,6 +27,8 @@ const Editions: NextPage = () => {
   const [allEditions, setAllEditions] = useState([] as Edition[]);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [editionToDelete, setEditionToDelete] = useState('');
   const [error, setError] = useState('');
 
   const axiosAuth = useAxiosAuth();
@@ -82,6 +85,8 @@ const Editions: NextPage = () => {
   };
 
   const deleteEdition = async (_edition: string) => {
+    if (! _edition) return;
+
     try {
       await axiosAuth.delete(Endpoints.EDITIONS + `/${_edition}`);
       setAllEditions(allEditions.filter((val) => val.name !== _edition));
@@ -125,10 +130,19 @@ const Editions: NextPage = () => {
                 key={idx}
                 edition={val}
                 updateEdition={updateEdition}
-                deleteEdition={deleteEdition}
+                deleteEdition={() => {
+                    setShowDeletePopup(true);
+                    setEditionToDelete(val.name);
+                  }
+                }
               />
             ))}
         </div>
+        <EditionDeletionPopup
+          deleteEdition={async () => await deleteEdition(editionToDelete)}
+          openDeleteForm={showDeletePopup}
+          setOpenDeleteForm={setShowDeletePopup}
+        />
       </div>
     </RouteProtection>
   );
