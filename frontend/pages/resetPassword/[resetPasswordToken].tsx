@@ -18,25 +18,27 @@ const ResetPassword: NextPage = () => {
 
     if (password) {
       try {
-        const response = await axios.post(
-          Endpoints.RESETPASSWORD,
+        const response = await axios.patch(
+          Endpoints.RESETPASSWORD + "/" + token,
           password,
           {
             headers: { 'Content-Type' : 'text/plain' }
           }
         );
-        console.log(response)
         // router.push('/');
-        toast.success(
-          (t) => (
-            <span>
-              <b>Email sent</b> <br />
-              Password has been reset to {password} <br />
-              <button onClick={() => toast.dismiss(t.id)} className="okButton">OK</button>
-            </span>
-          ),
-          { duration: 12000 }
-        );
+        if (response?.data) {
+          toast.success(
+            (t) => (
+              <span>
+                <b>Password reset</b> <br />
+                Password has been reset to {password} <br />
+                <button onClick={() => toast.dismiss(t.id)} className="okButton">OK</button>
+              </span>
+            ),
+            { duration: 12000 }
+          );
+        }
+        console.log(response)
       } catch (err) {
         console.log(err);
         toast.error('An error occurred while trying to reset password.');

@@ -106,6 +106,7 @@ class UserService(private val repository: UserRepository, private val passwordEn
             user.password = passwordEncoder.encode(newPassword)
             repository.save(user)
         } catch (_: NullPointerException) {
+            println("invalid email")
             throw InvalidTokenException("ResetPasswordToken contains invalid email.")
         } catch (_: Exception) {
             throw InvalidTokenException("invalid resetPasswordToken given.")
