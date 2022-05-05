@@ -1,41 +1,72 @@
 import type { NextPage } from 'next';
-import Header from '../../components/Header';
-import StudentSidebar from '../../components/StudentSidebar';
-import { Icon } from '@iconify/react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import {
-  ProjectBase,
-  ProjectData,
-  StudentBase,
-  UserRole,
-} from '../../lib/types';
-import { axiosAuthenticated } from '../../lib/axios';
-import Endpoints from '../../lib/endpoints';
-import useAxiosAuth from '../../hooks/useAxiosAuth';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import Popup from 'reactjs-popup';
-import ProjectTile from '../../components/projects/ProjectTile';
-import ProjectPopup, {
-  defaultprojectForm,
-} from '../../components/projects/ProjectPopup';
-import FlatList from 'flatlist-react';
-import useUser from '../../hooks/useUser';
-import { SpinnerCircular } from 'spinners-react';
-import Error from '../../components/Error';
-import { parseError } from '../../lib/requestUtils';
-import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
-import { NextRouter } from 'next/dist/client/router';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import FormContainer from '../../components/FormContainer';
+import axios from '../../lib/axios';
+import Endpoints from '../../lib/endpoints';
+import usePersistentInput from '../../hooks/usePersistentInput';
 
 const ResetPassword: NextPage = () => {
   const router = useRouter();
   const token = router.query.resetPasswordToken as string;
 
+  const [password, setPassword] = useState('');
+
+  const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+
+    if (password) {
+      try {
+        const response = await axios.post(
+          Endpoints.RESETPASSWORD,
+          password,
+          {
+            headers: { 'Content-Type' : 'text/plain' }
+          }
+        );
+        console.log(response)
+        // router.push('/');
+        toast.success(
+          (t) => (
+            <span>
+              <b>Email sent</b> <br />
+              Password has been reset to {password} <br />
+              <button onClick={() => toast.dismiss(t.id)} className="okButton">OK</button>
+            </span>
+          ),
+          { duration: 12000 }
+        );
+      } catch (err) {
+        console.log(err);
+        toast.error('An error occurred while trying to reset password.');
+      }
+    }
+  };
+
   return (
-    <div>{token}</div>
+    <>
+			<FormContainer pageTitle="Reset Password">
+				<form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
+        <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
+            New password
+            <input
+              className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
+              name="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          <button
+            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
+            type="submit"
+          >
+            Change password
+          </button>
+				</form>
+			</FormContainer>
+		</>
   );
 };
 
