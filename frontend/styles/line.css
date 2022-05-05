@@ -73,14 +73,9 @@
   display: inline;
 }
 
-.closeButton {
-  all: initial;
+.okButton {
   border: solid 2px #efefff;
   border-radius: 0.4em;
-  line-height: 1.4em;
-  width: 1.5em;
-  padding-bottom: 0.1em;
-  text-align: center;
-  margin-left: 0.5em;
+  width: 2.4em;
   cursor: pointer;
 }

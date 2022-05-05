@@ -41,13 +41,12 @@ const ResetPassword: NextPage = () => {
           }
         );
         // router.push('/');
-        toast.success("An email has been sent to "+email+".\nMake sure this is your email");
         toast.success(
           (t) => (
             <span>
               <b>Email sent</b> <br />
-              An email has been sent to email. <br />
-              <button onClick={() => toast.dismiss(t.id)} className={styles.closeButton}>OK</button>
+              An email has been sent to {email} <br />
+              <button onClick={() => toast.dismiss(t.id)} className="okButton">OK</button>
             </span>
           ),
           { duration: 12000 }
