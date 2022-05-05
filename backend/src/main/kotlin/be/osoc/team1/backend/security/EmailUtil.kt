@@ -11,10 +11,9 @@ import java.util.Properties
 object EmailUtil {
     private const val emailAddressSender = "noreply@osoc.com"
     private const val passwordSender = "insert.password.here"
-    private const val baseUrl = "http://localhost:8080/api"
 
     private fun getResetPasswordEmailBody(resetPasswordToken: String): String {
-        val url = "$baseUrl/users/resetPassword/$resetPasswordToken"
+        val url = "http://localhost:3000/resetPassword/$resetPasswordToken"
         return """
             Hello,
             Use the link below to set your new password.

@@ -1,18 +1,11 @@
 import { NextPage } from 'next';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEventHandler, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import FormContainer from '../components/FormContainer';
-import useTokens from '../hooks/useTokens';
-import useUser from '../hooks/useUser';
-import { Edition, UserRole } from '../lib/types';
 import axios from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import usePersistentInput from '../hooks/usePersistentInput';
-import useEdition from '../hooks/useEdition';
-import HotToastNotifications from '../components/HotToast';
-import StudentTile from '../components/students/StudentTile';
 
 const ResetPassword: NextPage = () => {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -33,13 +26,12 @@ const ResetPassword: NextPage = () => {
       try {
         const response = await axios.post(
           Endpoints.RESETPASSWORD,
-          new URLSearchParams({email}),
+          email,
           {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: { 'Content-Type' : 'text/plain' }
           }
         );
+        console.log(response)
         // router.push('/');
         toast.success(
           (t) => (
