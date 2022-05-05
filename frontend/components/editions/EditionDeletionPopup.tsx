@@ -11,12 +11,12 @@ type EDPProps = {
   deleteEdition: () => Promise<void>;
 
   /**
-   * state that holds wether the deletion confirm should be shown or not
+   * state that holds whether the deletion confirm should be shown or not
    */
   openDeleteForm: boolean;
 
   /**
-   * state update function that sets wether the deletion confirm should be shown or not
+   * state update function that sets whether the deletion confirm should be shown or not
    */
   setOpenDeleteForm: Dispatch<SetStateAction<boolean>>;
 };
