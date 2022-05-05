@@ -1,14 +1,14 @@
 package be.osoc.team1.backend.security
 
 import org.springframework.security.crypto.password.PasswordEncoder
-import kotlin.random.Random
+import java.util.UUID
 
 object ResetPasswordUtil {
     private val resetTokens: MutableMap<String, ResetToken> = mutableMapOf()
 
-    fun newToken(email: String, passwordEncoder: PasswordEncoder): String {
-        val uuid: String = Random.nextBytes(64).toString()
-        val hashedUuid = passwordEncoder.encode(uuid)
+    fun newToken(email: String, passwordEncoder: PasswordEncoder): UUID {
+        val uuid: UUID = UUID.randomUUID()
+        val hashedUuid = passwordEncoder.encode(uuid.toString())
         resetTokens[hashedUuid] = ResetToken(email)
         println("uuid: $uuid")
         println("hashed: $hashedUuid")
@@ -16,7 +16,6 @@ object ResetPasswordUtil {
     }
 
     private fun isTokenValid(hashedUuid: String): Boolean {
-        val resetToken: ResetToken? = resetTokens[hashedUuid]
         return (hashedUuid in resetTokens && !resetTokens[hashedUuid]!!.isExpired())
     }
 
