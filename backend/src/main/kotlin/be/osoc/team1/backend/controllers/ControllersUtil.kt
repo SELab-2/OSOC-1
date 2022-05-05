@@ -1,7 +1,12 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.OsocUserDetailService
+import org.aspectj.lang.JoinPoint
+import org.aspectj.lang.annotation.Aspect
+import org.aspectj.lang.annotation.Before
+import org.aspectj.lang.reflect.MethodSignature
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -14,6 +19,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.lang.annotation.Inherited
+import java.security.Principal
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -44,6 +51,18 @@ fun <ID, T> getObjectCreatedResponse(
         .body(createdObject)
 }
 
+fun attemptEditionAccess(
+    editionName: String,
+    editionService: EditionService,
+    userDetailService: OsocUserDetailService
+) {
+    val edition = editionService.getEdition(editionName)
+    val authentication = SecurityContextHolder.getContext().authentication
+    val user = userDetailService.getUserFromPrincipal(authentication)
+    if (!edition.accessibleBy(user))
+        throw UnauthorizedOperationException("Inactive editions can only be accessed by admins!")
+}
+
 @Component
 class EditionInterceptor(val editionService: EditionService) :
     HandlerInterceptor {
@@ -54,12 +73,14 @@ class EditionInterceptor(val editionService: EditionService) :
         response: HttpServletResponse,
         handler: Any
     ): Boolean {
+        return super.preHandle(request, response, handler)
         // URLs that are always allowed
         val regex =
             Regex("^.*/api/(error|editions|login|communications|users|assignments|positions|statusSuggestions|answers|skills|logout|token).*$")
         // this !is check is here so invalid requests (such as GETs to endpoints that don't exist) still get handled regularly
         if (!regex.matches(request.requestURI) && handler !is ResourceHttpRequestHandler) {
             val roles = SecurityContextHolder.getContext().authentication.authorities.map { it.toString() }
+            SecurityContextHolder.getContext().authentication as Principal
             val editionName = request.requestURI.split("/")[2]
             if (editionService.getActiveEdition()?.name != editionName) {
                 if (!roles.contains("ROLE_ADMIN")) {
@@ -93,3 +114,29 @@ class InterceptorConfig : WebMvcConfigurer {
         registry.addInterceptor(editionInterceptor)
     }
 }
+
+@Aspect
+@Component
+class EditionSecurityAspect(val editionService: EditionService, val userDetailService: OsocUserDetailService) {
+
+    @Before(value = "@annotation(SecuredEdition)")
+    @Throws(Throwable::class)
+    fun validateEditionArgument(joinPoint: JoinPoint): Any {
+        val method = (joinPoint.signature as MethodSignature).method
+        val securedEdition = method.annotations.find { SecuredEdition::class.java.isInstance(it) } as SecuredEdition
+        val editionFieldIndex = method.parameters.indexOfFirst { it.name == securedEdition.editionArgument }
+        if (editionFieldIndex < 0)
+            throw IllegalStateException("The specified @SecuredEdition editionArgument was not found!")
+        val editionName = joinPoint.args[editionFieldIndex] as String
+
+        attemptEditionAccess(editionName, editionService, userDetailService)
+
+        return joinPoint
+    }
+}
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+@Inherited //Doesn't work in kotlin...
+annotation class SecuredEdition(val editionArgument: String)
