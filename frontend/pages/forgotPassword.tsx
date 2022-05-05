@@ -7,7 +7,7 @@ import axios from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import usePersistentInput from '../hooks/usePersistentInput';
 
-const ResetPassword: NextPage = () => {
+const ForgotPassword: NextPage = () => {
   const emailRef = useRef<HTMLInputElement>(null);
 
   /* eslint-disable */
@@ -77,4 +77,4 @@ const ResetPassword: NextPage = () => {
 }
 
 
-export default ResetPassword;
+export default ForgotPassword;
