@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 import FormContainer from '../../components/FormContainer';
 import axios from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
-import usePersistentInput from '../../hooks/usePersistentInput';
 
 const ResetPassword: NextPage = () => {
   const router = useRouter();

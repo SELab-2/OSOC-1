@@ -38,12 +38,6 @@ object TokenUtil {
     private val validRefreshTokens: MutableMap<String, String> = mutableMapOf()
 
     /**
-     * This map holds the latest resetPasswordToken per email, so the keys are emails and the values are
-     * resetPasswordTokens.
-     */
-    private val validResetPasswordTokens: MutableMap<String, String> = mutableMapOf()
-
-    /**
      * Create a JSON web token. The token contains email, an id, expiration date of token, whether the token is an
      * access token and the authorities of the user. Set [isAccessToken] to true when making an access token, set it to
      * false when creating a refresh token. Access tokens are valid for 5 minutes, while refresh tokens stay valid for

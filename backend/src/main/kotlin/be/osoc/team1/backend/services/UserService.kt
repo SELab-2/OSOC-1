@@ -7,6 +7,7 @@ import be.osoc.team1.backend.exceptions.InvalidTokenException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.EmailUtil
+import be.osoc.team1.backend.security.ResetPasswordUtil
 import be.osoc.team1.backend.security.TokenUtil
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
@@ -82,7 +83,6 @@ class UserService(private val repository: UserRepository, private val passwordEn
         if (oldUser.password != updatedUser.password) {
             throw ForbiddenOperationException("Not allowed to update password field of users")
         }
-
         return repository.save(updatedUser)
     }
 
@@ -91,25 +91,20 @@ class UserService(private val repository: UserRepository, private val passwordEn
      */
     fun getResetPasswordTokenByMail(email: String) {
         if (repository.findByEmail(email) != null) {
-            val resetPasswordToken = TokenUtil.createResetPasswordToken(email)
+            val resetPasswordToken = ResetPasswordUtil.newToken(email, passwordEncoder)
             EmailUtil.sendEmail(email, resetPasswordToken)
         }
     }
 
     /**
-     * change the password of [email].
+     * Get the email address from [resetPasswordToken] and set its password to [newPassword].
      */
     fun changePassword(resetPasswordToken: String, newPassword: String) {
-        try {
-            val email = TokenUtil.decodeAndVerifyToken(resetPasswordToken).subject
-            val user: User = repository.findByEmail(email)!!
-            user.password = passwordEncoder.encode(newPassword)
-            repository.save(user)
-        } catch (_: NullPointerException) {
-            println("invalid email")
-            throw InvalidTokenException("ResetPasswordToken contains invalid email.")
-        } catch (_: Exception) {
-            throw InvalidTokenException("invalid resetPasswordToken given.")
-        }
+        val email = ResetPasswordUtil.getEmailFromToken(resetPasswordToken)
+            ?: throw InvalidTokenException("ResetPasswordToken is invalid.")
+        val user: User = repository.findByEmail(email)
+            ?: throw InvalidTokenException("ResetPasswordToken contains invalid email.")
+        user.password = passwordEncoder.encode(newPassword)
+        repository.save(user)
     }
 }
