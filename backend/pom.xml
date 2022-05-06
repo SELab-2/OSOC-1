@@ -180,7 +180,7 @@
 <!-- 			<plugin>
 				<groupId>com.github.gantsign.maven</groupId>
 				<artifactId>ktlint-maven-plugin</artifactId>
-				<version>1.11.2</version>
+				<version>1.13.1</version>
 				<executions>
 					<execution>
 						<id>format-and-check</id>
@@ -212,7 +212,7 @@
 			<plugin>
 				<groupId>com.github.gantsign.maven</groupId>
 				<artifactId>ktlint-maven-plugin</artifactId>
-				<version>1.11.2</version>
+				<version>1.13.1</version>
 			</plugin>
 		</plugins>
 	</reporting>
