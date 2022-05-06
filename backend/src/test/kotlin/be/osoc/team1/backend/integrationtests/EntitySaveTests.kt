@@ -61,7 +61,7 @@ class EntitySaveTests {
 
         val project = Project(
             "name", "clientName", "description",
-                positions = listOf(position)
+            positions = listOf(position)
         )
         /*
          * We save the project before assigning students, this is how it is normally done in the application and it is
@@ -69,12 +69,14 @@ class EntitySaveTests {
          * assignments.
          */
         projectRepository.save(project)
-        project.assignments.add(Assignment(
-            student,
-            position,
-            user,
-            "reason"
-        ))
+        project.assignments.add(
+            Assignment(
+                student,
+                position,
+                user,
+                "reason"
+            )
+        )
         projectRepository.save(project)
     }
 
