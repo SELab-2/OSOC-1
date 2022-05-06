@@ -83,7 +83,7 @@ class UserController(private val service: UserService) {
      * Request a resetPasswordToken for [email].
      */
     @PostMapping("/resetPassword")
-    fun postEmail(@RequestBody email: String) = service.getResetPasswordTokenByMail(email)
+    fun postEmail(@RequestBody email: String) = service.sendEmailWithToken(email)
 
     /**
      * Reset password using [resetPasswordUUID].

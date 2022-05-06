@@ -1,10 +1,13 @@
 package be.osoc.team1.backend.security
 
 import java.security.MessageDigest
+import java.util.SortedMap
 import java.util.UUID
 
 object ResetPasswordUtil {
-    private val resetTokens: MutableMap<ByteArray, ResetToken> = mutableMapOf()
+    private val resetTokens: SortedMap<ByteArray, ResetToken> = sortedMapOf(
+        { a, b -> return@sortedMapOf if (a.contentEquals(b)) 0 else 1 }
+    )
 
     private val sha256: MessageDigest = MessageDigest.getInstance("SHA256")
 
