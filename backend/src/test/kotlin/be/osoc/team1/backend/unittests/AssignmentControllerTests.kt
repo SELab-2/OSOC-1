@@ -9,6 +9,8 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.AssignmentService
+import be.osoc.team1.backend.services.EditionService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.util.PositionSerializer
 import be.osoc.team1.backend.util.StudentSerializer
 import be.osoc.team1.backend.util.UserSerializer
@@ -33,6 +35,12 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @MockkBean
     private lateinit var assignmentService: AssignmentService
+
+    // These MockkBean are necessary because the BaseController uses these under the hood
+    @MockkBean
+    private lateinit var editionService: EditionService
+    @MockkBean
+    private lateinit var osocUserDetailService: OsocUserDetailService
 
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Jitse", "Willaert", "testEdition")

@@ -4,6 +4,8 @@ import be.osoc.team1.backend.controllers.StatusSuggestionController
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.exceptions.InvalidIdException
+import be.osoc.team1.backend.services.EditionService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StatusSuggestionService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -25,6 +27,12 @@ class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @MockkBean
     private lateinit var statusSuggestionService: StatusSuggestionService
+
+    // These MockkBean are necessary because the BaseController uses these under the hood
+    @MockkBean
+    private lateinit var editionService: EditionService
+    @MockkBean
+    private lateinit var osocUserDetailService: OsocUserDetailService
 
     private val testId = UUID.randomUUID()
     private val coachId = UUID.randomUUID()
