@@ -80,10 +80,14 @@ class UserController(private val service: UserService) {
         service.changeRole(id, role)
 
     /**
-     * Request a resetPasswordToken for [email].
+     * Request to reset the password of the user with given [emailAddress]. The link to actually reset the password is
+     * sent in an email to [emailAddress].
+     * This request will always succeed, even when an invalid [emailAddress] is given. Otherwise, people with bad intent
+     * could track down which email addresses are linked to existing accounts.
      */
     @PostMapping("/resetPassword")
-    fun postEmail(@RequestBody email: String) = service.sendEmailWithToken(email)
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    fun postEmail(@RequestBody emailAddress: String) = service.sendEmailWithToken(emailAddress)
 
     /**
      * Reset password using [resetPasswordUUID].

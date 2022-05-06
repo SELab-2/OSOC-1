@@ -88,10 +88,10 @@ class UserService(private val repository: UserRepository, private val passwordEn
     /**
      * Send an email with a resetPasswordToken to [email] if [email] is the email address of an existing user.
      */
-    fun sendEmailWithToken(email: String) {
-        if (repository.findByEmail(email) != null) {
-            val resetPasswordUUID: UUID = ResetPasswordUtil.newToken(email)
-            EmailUtil.sendEmail(email, resetPasswordUUID)
+    fun sendEmailWithToken(emailAddress: String) {
+        if (repository.findByEmail(emailAddress) != null) {
+            val resetPasswordUUID: UUID = ResetPasswordUtil.newToken(emailAddress)
+            EmailUtil.sendEmail(emailAddress, resetPasswordUUID)
         }
     }
 
@@ -99,9 +99,9 @@ class UserService(private val repository: UserRepository, private val passwordEn
      * Get the email address from [resetPasswordUUID] and set its password to [newPassword].
      */
     fun changePassword(resetPasswordUUID: UUID, newPassword: String) {
-        val email = ResetPasswordUtil.getEmailFromUUID(resetPasswordUUID)
+        val emailAddress = ResetPasswordUtil.getEmailFromUUID(resetPasswordUUID)
             ?: throw InvalidTokenException("resetPasswordUUID is invalid.")
-        val user: User = repository.findByEmail(email)
+        val user: User = repository.findByEmail(emailAddress)
             ?: throw InvalidTokenException("ResetPasswordToken contains invalid email.")
         user.password = passwordEncoder.encode(newPassword)
         repository.save(user)

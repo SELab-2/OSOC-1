@@ -15,10 +15,10 @@ object ResetPasswordUtil {
         return sha256.digest(uuid.toString().toByteArray())
     }
 
-    fun newToken(email: String): UUID {
+    fun newToken(emailAddress: String): UUID {
         val uuid: UUID = UUID.randomUUID()
         val hashedUUID: ByteArray = hash(uuid)
-        resetTokens[hashedUUID] = ResetToken(email)
+        resetTokens[hashedUUID] = ResetToken(emailAddress)
         return uuid
     }
 
@@ -29,14 +29,14 @@ object ResetPasswordUtil {
     fun getEmailFromUUID(uuid: UUID): String? {
         val hashedUUID = hash(uuid)
         if (isTokenValid(hashedUUID)) {
-            return resetTokens[hashedUUID]!!.email
+            return resetTokens[hashedUUID]!!.emailAddress
         }
         return null
     }
 }
 
 data class ResetToken(
-    val email: String,
+    val emailAddress: String,
     val ttl: Long = System.currentTimeMillis() + 30 * 60 * 1000
 ) {
     fun isExpired(): Boolean {
