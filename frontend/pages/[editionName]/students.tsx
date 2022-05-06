@@ -20,6 +20,7 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
+  // Needed to allow for click select from the sidebar to the main screen
   const [studentBase, setStudentBase] = useState({} as StudentBase);
   const [refreshStudents, setRefreshStudents] = useState([false, true] as [
     boolean,
@@ -54,7 +55,6 @@ const Students: NextPage = () => {
                 refresh={refreshStudents}
                 setRefresh={setRefreshStudents}
                 setStudentBase={setStudentBase}
-                studentBase={studentBase}
               />
             </section>
 
