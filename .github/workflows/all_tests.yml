@@ -25,6 +25,7 @@ jobs:
       - name: Test with Maven
         # -B: run in non-interactive (batch) mode
         run: ./mvnw -B -DfailIfNoTests=false test --file pom.xml
+        working-directory: ./backend
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
