@@ -35,6 +35,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getAllProjects(
         @RequestParam(defaultValue = "") name: String,
         @PathVariable edition: String,
@@ -51,6 +52,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping("/{projectId}")
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getProjectById(@PathVariable projectId: UUID, @PathVariable edition: String): Project =
         service.getProjectById(projectId, edition)
 
@@ -61,6 +63,7 @@ class ProjectController(private val service: ProjectService) {
     @DeleteMapping("/{projectId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun deleteProjectById(@PathVariable projectId: UUID, @PathVariable edition: String) =
         service.deleteProjectById(projectId, edition)
 
@@ -70,6 +73,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @PostMapping
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun postProject(
         @RequestBody projectRegistration: Project,
         @PathVariable edition: String
