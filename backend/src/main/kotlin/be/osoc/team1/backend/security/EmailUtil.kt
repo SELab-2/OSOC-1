@@ -4,6 +4,7 @@ import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import java.util.Properties
+import java.util.UUID
 
 /**
  * This object contains every function needed to create and send emails.
@@ -12,7 +13,7 @@ object EmailUtil {
     private const val emailAddressSender = "noreply@osoc.com"
     private const val passwordSender = "insert.password.here"
 
-    private fun getResetPasswordEmailBody(resetPasswordToken: String): String {
+    private fun getResetPasswordEmailBody(resetPasswordToken: UUID): String {
         val url = "http://localhost:3000/resetPassword/$resetPasswordToken"
         return """
             Hello,
@@ -35,7 +36,7 @@ object EmailUtil {
         return mailSender
     }
 
-    fun sendEmail(emailaddressReceiver: String, resetPasswordToken: String) {
+    fun sendEmail(emailaddressReceiver: String, resetPasswordToken: UUID) {
         val mailSender = getJavaMailSender()
 
         val email = SimpleMailMessage()

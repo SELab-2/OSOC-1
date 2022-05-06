@@ -1,27 +1,32 @@
 package be.osoc.team1.backend.security
 
-import org.springframework.security.crypto.password.PasswordEncoder
+import java.security.MessageDigest
 import java.util.UUID
 
 object ResetPasswordUtil {
-    private val resetTokens: MutableMap<String, ResetToken> = mutableMapOf()
+    private val resetTokens: MutableMap<ByteArray, ResetToken> = mutableMapOf()
 
-    fun newToken(email: String, passwordEncoder: PasswordEncoder): UUID {
+    private val sha256: MessageDigest = MessageDigest.getInstance("SHA256")
+
+    private fun hash(uuid: UUID): ByteArray {
+        return sha256.digest(uuid.toString().toByteArray())
+    }
+
+    fun newToken(email: String): UUID {
         val uuid: UUID = UUID.randomUUID()
-        val hashedUuid = passwordEncoder.encode(uuid.toString())
-        resetTokens[hashedUuid] = ResetToken(email)
-        println("uuid: $uuid")
-        println("hashed: $hashedUuid")
+        val hashedUUID: ByteArray = hash(uuid)
+        resetTokens[hashedUUID] = ResetToken(email)
         return uuid
     }
 
-    private fun isTokenValid(hashedUuid: String): Boolean {
-        return (hashedUuid in resetTokens && !resetTokens[hashedUuid]!!.isExpired())
+    private fun isTokenValid(hashedUUID: ByteArray): Boolean {
+        return (hashedUUID in resetTokens && !resetTokens[hashedUUID]!!.isExpired())
     }
 
-    fun getEmailFromToken(hashedUuid: String): String? {
-        if (isTokenValid(hashedUuid)) {
-            return resetTokens[hashedUuid]!!.email
+    fun getEmailFromUUID(uuid: UUID): String? {
+        val hashedUUID = hash(uuid)
+        if (isTokenValid(hashedUUID)) {
+            return resetTokens[hashedUUID]!!.email
         }
         return null
     }
