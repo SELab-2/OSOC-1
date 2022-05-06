@@ -4,6 +4,8 @@ import be.osoc.team1.backend.controllers.CommunicationController
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.CommunicationTypeEnum
 import be.osoc.team1.backend.entities.Edition
+import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.CommunicationService
 import be.osoc.team1.backend.services.EditionService
@@ -14,10 +16,15 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -39,6 +46,10 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var editionService: EditionService
     @MockkBean
     private lateinit var osocUserDetailService: OsocUserDetailService
+    @MockkBean
+    private lateinit var authentication: Authentication
+    @MockkBean
+    private lateinit var securityContext: SecurityContext
 
     private val testId = UUID.randomUUID()
     private val testEdition = "testEdition"
@@ -47,10 +58,20 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testCommunication)
 
+    private val authenticatedAdmin = User("name", "email", Role.Admin, "password")
+    @BeforeEach
+    fun setup() {
+        SecurityContextHolder.setContext(securityContext)
+        every { securityContext.authentication } returns authentication
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns authenticatedAdmin
+    }
+
     @Test
     fun `getCommunicationById returns communication if communication with given id exists`() {
         every { communicationService.getById(testId) } returns testCommunication
         every { editionService.getEdition(any()) } returns Edition(testEdition, true)
+        val resp = mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null)))
+        println(resp)
         mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null))).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
