@@ -120,7 +120,7 @@ const Login = () => {
               no account yet? <br /> register here!
             </p>
           </Link>
-          <Link href="/resetPassword">
+          <Link href="/forgotPassword">
             <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
               password forgotten?
             </p>

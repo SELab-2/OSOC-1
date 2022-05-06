@@ -1,4 +1,5 @@
 import type { NextPage } from 'next';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEventHandler, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -37,7 +38,16 @@ const ResetPassword: NextPage = () => {
             { duration: 12000 }
           );
         }
-        console.log(response)
+        toast.success(
+          (t) => (
+            <span>
+              <b>Success</b> <br />
+              Password has been reset <br />
+              <button onClick={() => toast.dismiss(t.id)} className="okButton">OK</button>
+            </span>
+          ),
+          { duration: 12000 }
+        );
       } catch (err) {
         console.log(err);
         toast.error('An error occurred while trying to reset password.');
@@ -65,6 +75,11 @@ const ResetPassword: NextPage = () => {
           >
             Change password
           </button>
+          <Link href="/login">
+            <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+              Got back to login
+            </p>
+          </Link>
 				</form>
 			</FormContainer>
 		</>
