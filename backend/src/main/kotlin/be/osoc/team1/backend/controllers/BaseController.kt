@@ -20,8 +20,12 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
 import java.util.*
 import javax.servlet.http.HttpServletRequest
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 abstract class BaseController<T : Any, K>(open val service: BaseService<T, K>) {
     @Autowired
@@ -31,14 +35,16 @@ abstract class BaseController<T : Any, K>(open val service: BaseService<T, K>) {
     lateinit var userDetailService: OsocUserDetailService
 
     @Autowired
-    private lateinit var request: HttpServletRequest
+    lateinit var request: HttpServletRequest
 
     /**
      * Checks if this [entity] can be accessed by the requesting user.
      * If the edition of the [entity] isn't active and the requesting user isn't admin [attemptEditionAccess] will throw an [UnauthorizedOperationException]
      */
     private fun attemptAccess(entity: T): T {
-        val editionName = entity::class.java.getDeclaredField("edition").get(entity) as String
+        val reflection = entity::class.java.getDeclaredField("edition")
+        reflection.isAccessible = true
+        val editionName = reflection.get(entity) as String
         attemptEditionAccess(editionName, editionService, userDetailService, request)
 
         return entity

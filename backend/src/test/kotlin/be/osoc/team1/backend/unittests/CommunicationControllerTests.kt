@@ -3,6 +3,7 @@ package be.osoc.team1.backend.unittests
 import be.osoc.team1.backend.controllers.CommunicationController
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.CommunicationTypeEnum
+import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.CommunicationService
 import be.osoc.team1.backend.services.EditionService
@@ -16,6 +17,7 @@ import io.mockk.just
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -48,7 +50,8 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getCommunicationById returns communication if communication with given id exists`() {
         every { communicationService.getById(testId) } returns testCommunication
-        mockMvc.perform(get("$editionUrl/$testId")).andExpect(status().isOk)
+        every { editionService.getEdition(any()) } returns Edition(testEdition, true)
+        mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null))).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
 
