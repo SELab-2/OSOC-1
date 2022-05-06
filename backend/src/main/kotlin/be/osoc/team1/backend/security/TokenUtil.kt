@@ -63,21 +63,6 @@ object TokenUtil {
     }
 
     /**
-     * Create a JSON web token. The token contains email and expiration date of token. resetPasswordTokens are valid for
-     * 15 minutes.
-     * The created token gets signed using above hashing algorithm and secret.
-     */
-    fun createResetPasswordToken(email: String): String {
-        return JWT.create()
-            .withSubject(email)
-            .withJWTId(nextInt().toString())
-            .withExpiresAt(
-                Date(System.currentTimeMillis() + 15 * 60 * 1000)
-            )
-            .sign(hashingAlgorithm)
-    }
-
-    /**
      * Extract access token from request header. return null when there is no access token given.
      */
     fun getAccessTokenFromRequest(request: HttpServletRequest): String? {

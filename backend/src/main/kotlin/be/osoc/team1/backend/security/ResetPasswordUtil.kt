@@ -5,7 +5,7 @@ import java.util.SortedMap
 import java.util.UUID
 
 object ResetPasswordUtil {
-    private val resetTokens: SortedMap<ByteArray, ResetToken> = sortedMapOf(
+    private val resetTokens: SortedMap<ByteArray, ResetPasswordToken> = sortedMapOf(
         { a, b -> return@sortedMapOf if (a.contentEquals(b)) 0 else 1 }
     )
 
@@ -18,7 +18,7 @@ object ResetPasswordUtil {
     fun newToken(emailAddress: String): UUID {
         val uuid: UUID = UUID.randomUUID()
         val hashedUUID: ByteArray = hash(uuid)
-        resetTokens[hashedUUID] = ResetToken(emailAddress)
+        resetTokens[hashedUUID] = ResetPasswordToken(emailAddress)
         return uuid
     }
 
@@ -32,14 +32,5 @@ object ResetPasswordUtil {
             return resetTokens[hashedUUID]!!.emailAddress
         }
         return null
-    }
-}
-
-data class ResetToken(
-    val emailAddress: String,
-    val ttl: Long = System.currentTimeMillis() + 30 * 60 * 1000
-) {
-    fun isExpired(): Boolean {
-        return ttl < System.currentTimeMillis()
     }
 }

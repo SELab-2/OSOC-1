@@ -7,7 +7,7 @@ import java.util.Properties
 import java.util.UUID
 
 /**
- * This object contains every function needed to create and send emails.
+ * This object contains every function needed to make and send emails.
  */
 object EmailUtil {
     private const val emailAddressSender = "noreply@osoc.com"
