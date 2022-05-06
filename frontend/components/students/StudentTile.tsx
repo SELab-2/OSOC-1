@@ -14,6 +14,7 @@ import { convertStudentBase } from '../../lib/conversionUtils';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
+import { AxiosInstance } from 'axios';
 const check_mark = <Icon icon="bi:check-lg" />;
 const question_mark = <Icon icon="bi:question-lg" />;
 const x_mark = <Icon icon="bx:x" />;
@@ -24,6 +25,7 @@ const tilde_mark = <Icon icon="mdi:tilde" />;
  * @See StudentTile for more information
  */
 type StudentProp = {
+  axiosAuthenticated: AxiosInstance;
   student: StudentBase;
   setStudentBase: (studentBase: StudentBase) => void;
   studentBase: StudentBase;
@@ -65,6 +67,7 @@ const chartHelper = {
  * @param router - Router object needed for error handling on 400 response
  */
 async function getEntireStudent(
+  axiosAuthenticated: AxiosInstance,
   studentBase: StudentBase,
   signal: AbortSignal,
   setError: (error: string) => void,
@@ -72,6 +75,7 @@ async function getEntireStudent(
 ): Promise<Student> {
   const newStudent = convertStudentBase(studentBase);
   await getUrlList<StatusSuggestion>(
+    axiosAuthenticated,
     studentBase.statusSuggestions,
     newStudent.statusSuggestions,
     signal,
@@ -88,6 +92,7 @@ async function getEntireStudent(
  * @param studentBase - object
  */
 const StudentTile: React.FC<StudentProp> = ({
+  axiosAuthenticated,
   student,
   setStudentBase,
   studentBase,
@@ -104,7 +109,7 @@ const StudentTile: React.FC<StudentProp> = ({
   // TODO find a place to actually show this error
   const [, setError]: [string, (error: string) => void] = useState('');
   const router = useRouter();
-  useAxiosAuth();
+  // useAxiosAuth();
   let controller = new AbortController();
 
   useEffect(() => {
@@ -117,11 +122,15 @@ const StudentTile: React.FC<StudentProp> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireStudent(myStudentBase, signal, setError, router).then(
-      (response) => {
-        setMyStudent(response);
-      }
-    );
+    getEntireStudent(
+      axiosAuthenticated,
+      myStudentBase,
+      signal,
+      setError,
+      router
+    ).then((response) => {
+      setMyStudent(response);
+    });
     return () => {
       controller.abort();
     };

@@ -1,7 +1,7 @@
-import { axiosAuthenticated } from './axios';
+// import { axiosAuthenticated } from './axios';
 import { Skill, Url, User, UserRole } from './types';
 import Endpoints from './endpoints';
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { NextRouter } from 'next/dist/client/router';
 
 /**
@@ -36,12 +36,14 @@ export function parseError(
  * Function to get all skills in dropdown options format
  * this function will wait to return until the request is done
  *
+ * @param axiosAuthenticated
  * @param setSkillOptions - setter for the resulting options list
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
  * @param router - Router object needed for error handling on 400 response
  */
 export async function getSkills(
+  axiosAuthenticated: AxiosInstance,
   setSkillOptions: (
     skillOptions: Array<{ value: string; label: string }>
   ) => void,
@@ -67,12 +69,14 @@ export async function getSkills(
  * Function to get all non-disabled users in a dropdown options format
  * This function will wait to return until the request is done
  *
+ * @param axiosAuthenticated
  * @param setCoachOptions - Setter for the resulting options list
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
  * @param router - Router object needed for error handling on 400 response
  */
 export async function getCoaches(
+  axiosAuthenticated: AxiosInstance,
   setCoachOptions: (
     CoachOptions: Array<{ value: User; label: string }>
   ) => void,
@@ -99,6 +103,7 @@ export async function getCoaches(
 /**
  * Function that will get all urls given and push them into the resultList
  *
+ * @param axiosAuthenticated
  * @param urls - List of urls to get
  * @param resultList - List to push results unto
  * @param signal - AbortSignal for the axios request
@@ -106,6 +111,7 @@ export async function getCoaches(
  * @param router - Router object needed for error handling on 400 response
  */
 export async function getUrlList<Type>(
+  axiosAuthenticated: AxiosInstance,
   urls: Url[],
   resultList: Type[],
   signal: AbortSignal,
@@ -131,6 +137,7 @@ export async function getUrlList<Type>(
  * Function that will get all urls given and set them into the resultMap
  * This will map each url onto the object from the request
  *
+ * @param axiosAuthenticated
  * @param urls - List of urls to get
  * @param resultMap - Map to set the results in
  * @param signal - AbortSignal for the axios request
@@ -138,6 +145,7 @@ export async function getUrlList<Type>(
  * @param router - Router object needed for error handling on 400 response
  */
 export async function getUrlMap<Type>(
+  axiosAuthenticated: AxiosInstance,
   urls: Url[],
   resultMap: Map<Url, Type>,
   signal: AbortSignal,

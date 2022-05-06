@@ -15,7 +15,7 @@ import Popup from 'reactjs-popup';
 import Select from 'react-select';
 import { useDrop } from 'react-dnd';
 import { Fragment, useEffect, useState } from 'react';
-import { axiosAuthenticated } from '../../lib/axios';
+// import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import ProjectPopup, {
@@ -28,12 +28,14 @@ import { SpinnerCircular } from 'spinners-react';
 import { useRouter } from 'next/router';
 import { convertProjectBase } from '../../lib/conversionUtils';
 import { NextRouter } from 'next/dist/client/router';
+import { AxiosInstance } from 'axios';
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 const edit_icon = <Icon icon="akar-icons:edit" />;
 
 // Using projectInput and not just project to avoid confusion
 type ProjectProp = {
+  axiosAuthenticated: AxiosInstance;
   projectInput: ProjectBase;
   refreshProjects: () => void;
   setRefreshStudents: (refreshStudents: [boolean, boolean]) => void;
@@ -71,6 +73,7 @@ type AssignmentProp = {
  */
 // TODO when post is finished, should update the student filter
 function postStudentToProject(
+  axiosAuthenticated: AxiosInstance,
   projectId: UUID,
   studentId: UUID,
   positionId: UUID,
@@ -94,7 +97,14 @@ function postStudentToProject(
       }
     )
     .then(() => {
-      reloadProject(projectId, setMyProjectBase, signal, setError, router);
+      reloadProject(
+        axiosAuthenticated,
+        projectId,
+        setMyProjectBase,
+        signal,
+        setError,
+        router
+      );
       setRefreshStudents([true, false]);
     })
     .catch((err) => {
@@ -115,6 +125,7 @@ function postStudentToProject(
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function deleteStudentFromProject(
+  axiosAuthenticated: AxiosInstance,
   projectId: UUID,
   assignmentId: UUID,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
@@ -135,7 +146,14 @@ function deleteStudentFromProject(
         assignmentId // TODO import this url somehow
     )
     .then(() => {
-      reloadProject(projectId, setMyProjectBase, signal, setError, router);
+      reloadProject(
+        axiosAuthenticated,
+        projectId,
+        setMyProjectBase,
+        signal,
+        setError,
+        router
+      );
       setRefreshStudents([true, false]);
     })
     .catch((err) => {
@@ -153,6 +171,7 @@ function deleteStudentFromProject(
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function deleteProject(
+  axiosAuthenticated: AxiosInstance,
   projectId: UUID,
   refreshProjects: () => void,
   setError: (error: string) => void,
@@ -182,6 +201,7 @@ function deleteProject(
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function reloadProject(
+  axiosAuthenticated: AxiosInstance,
   projectId: UUID,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
@@ -208,6 +228,7 @@ function reloadProject(
  * @param router - Router object needed for error handling on 400 response
  */
 async function getEntireProject(
+  axiosAuthenticated: AxiosInstance,
   projectBase: ProjectBase,
   setLoading: (loading: boolean) => void,
   signal: AbortSignal,
@@ -218,6 +239,7 @@ async function getEntireProject(
   const positionMap = new Map<Url, Position>();
   await Promise.all([
     getUrlList<User>(
+      axiosAuthenticated,
       projectBase.coaches,
       newProject.coaches,
       signal,
@@ -225,6 +247,7 @@ async function getEntireProject(
       router
     ),
     getUrlList<Assignment>(
+      axiosAuthenticated,
       projectBase.assignments,
       newProject.assignments,
       signal,
@@ -232,6 +255,7 @@ async function getEntireProject(
       router
     ),
     getUrlMap<Position>(
+      axiosAuthenticated,
       projectBase.positions,
       positionMap,
       signal,
@@ -248,6 +272,7 @@ async function getEntireProject(
 
   const studentMap = new Map<Url, Student>();
   await getUrlMap<Student>(
+    axiosAuthenticated,
     newProject.assignments.map(
       (assignment) => assignment.student
     ) as unknown as string[],
@@ -259,6 +284,7 @@ async function getEntireProject(
 
   const suggesterMap = new Map<Url, User>();
   await getUrlMap<User>(
+    axiosAuthenticated,
     newProject.assignments.map(
       (assignment) => assignment.suggester
     ) as unknown as string[],
@@ -288,6 +314,7 @@ async function getEntireProject(
 }
 
 const ProjectTile: React.FC<ProjectProp> = ({
+  axiosAuthenticated,
   projectInput,
   refreshProjects,
   setRefreshStudents,
@@ -328,11 +355,16 @@ const ProjectTile: React.FC<ProjectProp> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireProject(myProjectBase, setLoading, signal, setError, router).then(
-      (response) => {
-        setMyProject(response);
-      }
-    );
+    getEntireProject(
+      axiosAuthenticated,
+      myProjectBase,
+      setLoading,
+      signal,
+      setError,
+      router
+    ).then((response) => {
+      setMyProject(response);
+    });
     return () => {
       controller.abort();
     };
@@ -477,6 +509,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               controller = new AbortController();
               const signal = controller.signal;
               postStudentToProject(
+                axiosAuthenticated,
                 myProject.id,
                 student.id,
                 positionId,
@@ -586,6 +619,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
                 controller = new AbortController();
                 const signal = controller.signal;
                 deleteStudentFromProject(
+                  axiosAuthenticated,
                   myProject.id,
                   assignmentId,
                   setMyProjectBase,
@@ -633,6 +667,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
           <h3 className="mb-3 px-5 text-xl">Edit Project</h3>
           <div className="mb-4 flex flex-col overflow-y-auto">
             <ProjectPopup
+              axiosAuthenticated={axiosAuthenticated}
               projectForm={projectForm}
               setShowPopup={setShowEditProject}
               setProjectForm={setProjectForm}
@@ -680,6 +715,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
                 setDeletePopup(false);
                 setShowEditProject(false);
                 deleteProject(
+                  axiosAuthenticated,
                   myProject.id,
                   refreshProjects,
                   setError,

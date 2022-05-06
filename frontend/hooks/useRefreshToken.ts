@@ -14,6 +14,7 @@ const useRefreshToken = () => {
   const [tokens, setTokens] = useTokens();
 
   const refresh: () => Promise<AuthToken> = async () => {
+    console.log('posting refresh');
     const response = await axios.post(
       Endpoints.REFRESH,
       new URLSearchParams({
@@ -25,7 +26,7 @@ const useRefreshToken = () => {
         },
       }
     );
-
+    console.log(response);
     setTokens({
       accessToken: response.data.accessToken,
       refreshToken: response.data.refreshToken,

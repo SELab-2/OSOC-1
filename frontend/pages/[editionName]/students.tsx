@@ -26,7 +26,7 @@ const Students: NextPage = () => {
     boolean
   ]);
   const [error, setError]: [string, (error: string) => void] = useState('');
-  useAxiosAuth();
+  const axiosAuthenticated = useAxiosAuth();
 
   return (
     <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
@@ -50,6 +50,7 @@ const Students: NextPage = () => {
               </div>
               {/* actual sidebar */}
               <StudentSidebar
+                axiosAuthenticated={axiosAuthenticated}
                 setError={setError}
                 refresh={refreshStudents}
                 setRefresh={setRefreshStudents}
@@ -82,6 +83,7 @@ const Students: NextPage = () => {
               {/* This contains the actual student info */}
               <div>
                 <StudentHolder
+                  axiosAuthenticated={axiosAuthenticated}
                   setRefresh={setRefreshStudents}
                   studentBase={studentBase}
                   setStudentBase={setStudentBase}

@@ -19,15 +19,17 @@ import { convertStudentBase } from '../../lib/conversionUtils';
 import { getUrlList, parseError } from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
-import { axiosAuthenticated } from '../../lib/axios';
+// import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import Error from '../Error';
+import { AxiosInstance } from 'axios';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
 
 type StudentViewProp = {
+  axiosAuthenticated: AxiosInstance;
   studentInput: StudentBase;
   setRefresh: (refresh: [boolean, boolean]) => void;
   setOriginalStudentBase: (originalStudentBase: StudentBase) => void;
@@ -39,6 +41,7 @@ type StatusSuggestionProp = {
 };
 
 async function setStudentStatus(
+  axiosAuthenticated: AxiosInstance,
   status: { value: string; label: string },
   studentId: UUID,
   setRefresh: (refresh: [boolean, boolean]) => void,
@@ -66,6 +69,7 @@ async function setStudentStatus(
 }
 
 async function setStudentSuggestion(
+  axiosAuthenticated: AxiosInstance,
   status: string,
   studentId: UUID,
   coachId: UUID,
@@ -87,7 +91,14 @@ async function setStudentSuggestion(
       }
     )
     .then(() => {
-      reloadStudent(studentId, setStudentBase, signal, setError, router);
+      reloadStudent(
+        axiosAuthenticated,
+        studentId,
+        setStudentBase,
+        signal,
+        setError,
+        router
+      );
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -95,6 +106,7 @@ async function setStudentSuggestion(
 }
 
 function reloadStudent(
+  axiosAuthenticated: AxiosInstance,
   studentId: UUID,
   setStudentBase: (studentBase: StudentBase) => void,
   signal: AbortSignal,
@@ -123,6 +135,7 @@ function reloadStudent(
  * @param router - Router object needed for error handling on 400 response
  */
 async function getEntireStudent(
+  axiosAuthenticated: AxiosInstance,
   studentBase: StudentBase,
   signal: AbortSignal,
   setError: (error: string) => void,
@@ -130,6 +143,7 @@ async function getEntireStudent(
 ): Promise<[Student, Map<UUID, string>]> {
   const newStudent = convertStudentBase(studentBase);
   await getUrlList<StatusSuggestion>(
+    axiosAuthenticated,
     studentBase.statusSuggestions,
     newStudent.statusSuggestions,
     signal,
@@ -137,6 +151,7 @@ async function getEntireStudent(
     router
   );
   await getUrlList<Answer>(
+    axiosAuthenticated,
     studentBase.answers,
     newStudent.answers,
     signal,
@@ -161,6 +176,7 @@ async function getEntireStudent(
 }
 
 const StudentView: React.FC<StudentViewProp> = ({
+  axiosAuthenticated,
   studentInput,
   setRefresh,
   setOriginalStudentBase,
@@ -200,12 +216,16 @@ const StudentView: React.FC<StudentViewProp> = ({
         value: string;
         label: string;
       });
-      getEntireStudent(studentBase, signal, setError, router).then(
-        (response) => {
-          setMyStudent(response[0]);
-          setCoachMap(response[1]);
-        }
-      );
+      getEntireStudent(
+        axiosAuthenticated,
+        studentBase,
+        signal,
+        setError,
+        router
+      ).then((response) => {
+        setMyStudent(response[0]);
+        setCoachMap(response[1]);
+      });
     }
     return () => {
       controller.abort();
@@ -265,6 +285,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             controller = new AbortController();
             const signal = controller.signal;
             setStudentSuggestion(
+              axiosAuthenticated,
               suggestion,
               studentBase.id,
               user.id,
@@ -324,6 +345,7 @@ const StudentView: React.FC<StudentViewProp> = ({
               controller = new AbortController();
               const signal = controller.signal;
               setStudentStatus(
+                axiosAuthenticated,
                 status,
                 studentBase.id,
                 setRefresh,

@@ -24,6 +24,9 @@ const useAxiosAuth = () => {
   const [tokens] = useTokens();
 
   useEffect(() => {
+    // const refresh = useRefreshToken();
+    // const [tokens] = useTokens();
+    console.log('useEffect?');
     const requestIntercept = axiosAuthenticated.interceptors.request.use(
       (config) => {
         if (!config) {
@@ -65,11 +68,11 @@ const useAxiosAuth = () => {
     );
 
     // Cleanup function to remove interceptors so that they don't stack up
-    return () => {
-      axiosAuthenticated.interceptors.request.eject(requestIntercept);
-      axiosAuthenticated.interceptors.response.eject(responseIntercept);
-    };
-  }, [refresh, tokens]);
+    // return () => {
+    //   axiosAuthenticated.interceptors.request.eject(requestIntercept);
+    //   axiosAuthenticated.interceptors.response.eject(responseIntercept);
+    // };
+  }, []);
 
   return axiosAuthenticated;
 };

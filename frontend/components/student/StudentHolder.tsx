@@ -1,14 +1,17 @@
 import { ItemTypes, Student, StudentBase } from '../../lib/types';
 import { useDrop } from 'react-dnd';
 import StudentView from './StudentView';
+import { AxiosInstance } from 'axios';
 
 type StudentHolderProp = {
+  axiosAuthenticated: AxiosInstance;
   setRefresh: (refresh: [boolean, boolean]) => void;
   studentBase: StudentBase;
   setStudentBase: (studentBase: StudentBase) => void;
 };
 
 const StudentHolder: React.FC<StudentHolderProp> = ({
+  axiosAuthenticated,
   setRefresh,
   studentBase,
   setStudentBase,
@@ -44,6 +47,7 @@ const StudentHolder: React.FC<StudentHolderProp> = ({
       {/* studentBase.id is used to check if this is an actual object or just an empty dummy */}
       {studentBase.id && (
         <StudentView
+          axiosAuthenticated={axiosAuthenticated}
           studentInput={studentBase}
           setRefresh={setRefresh}
           setOriginalStudentBase={setStudentBase}

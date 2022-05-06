@@ -11,7 +11,7 @@ import {
   StudentBase,
   UserRole,
 } from '../../lib/types';
-import { axiosAuthenticated } from '../../lib/axios';
+// import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
 import { DndProvider } from 'react-dnd';
@@ -29,6 +29,7 @@ import { parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
+import { AxiosInstance } from 'axios';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -36,6 +37,7 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 /**
  * function that allows searching projects by name
  *
+ * @param axiosAuthenticated - axios instance
  * @param projectSearch - (part of) the name of a project
  * @param setProjects   - callback to set the results
  * @param state - holds page, loading, hasMoreItems, pageSize
@@ -46,6 +48,7 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function searchProject(
+  axiosAuthenticated: AxiosInstance,
   projectSearch: string,
   setProjects: (projects: ProjectBase[]) => void,
   state: {
@@ -124,7 +127,7 @@ const Projects: NextPage = () => {
   );
 
   let controller = new AbortController();
-  useAxiosAuth();
+  const axiosAuthenticated = useAxiosAuth();
 
   useEffect(() => {
     state.page = 0;
@@ -163,6 +166,7 @@ const Projects: NextPage = () => {
     controller = new AbortController();
     const signal = controller.signal;
     searchProject(
+      axiosAuthenticated,
       projectSearch,
       setProjects,
       state,
@@ -217,6 +221,7 @@ const Projects: NextPage = () => {
     controller = new AbortController();
     const signal = controller.signal;
     searchProject(
+      axiosAuthenticated,
       projectSearch,
       updateProjects,
       state,
@@ -252,6 +257,7 @@ const Projects: NextPage = () => {
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>
               <StudentSidebar
+                axiosAuthenticated={axiosAuthenticated}
                 setError={setError}
                 refresh={refreshStudents}
                 setRefresh={setRefreshStudents}
@@ -330,6 +336,7 @@ const Projects: NextPage = () => {
                   list={projects}
                   renderItem={(project: ProjectBase) => (
                     <ProjectTile
+                      axiosAuthenticated={axiosAuthenticated}
                       key={project.id}
                       projectInput={project}
                       refreshProjects={refreshProjects}
@@ -384,6 +391,7 @@ const Projects: NextPage = () => {
             <h3 className="mb-3 px-5 text-xl">Create New Project</h3>
             <div className="mb-4 flex flex-col overflow-y-auto">
               <ProjectPopup
+                axiosAuthenticated={axiosAuthenticated}
                 projectForm={projectForm}
                 setShowPopup={setShowCreateProject}
                 setProjectForm={setProjectForm}

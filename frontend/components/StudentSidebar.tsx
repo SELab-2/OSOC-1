@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { StudentBase, StudentData } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
-import { axiosAuthenticated } from '../lib/axios';
+// import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import Select from 'react-select';
 import FlatList from 'flatlist-react';
@@ -12,12 +12,14 @@ import StudentTile from './students/StudentTile';
 import { SpinnerCircular } from 'spinners-react';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
+import { AxiosInstance } from 'axios';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 /**
  * This is what StudentsSidebar expects as its argument
  */
 type StudentsSidebarProps = {
+  axiosAuthenticated: AxiosInstance;
   setError: (error: string) => void;
   refresh: [boolean, boolean];
   setRefresh: (refresh: [boolean, boolean]) => void;
@@ -42,6 +44,7 @@ type StudentsSidebarProps = {
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 async function searchStudent(
+  axiosAuthenticated: AxiosInstance,
   studentNameSearch: string,
   skills: Array<{ value: string; label: string }>,
   studentSearchParameters: Record<string, boolean>,
@@ -142,6 +145,7 @@ function getStatusFilterList(
  * The DndProvider is needed even when the drag function is not needed or used on that page
  */
 const StudentSidebar: React.FC<StudentsSidebarProps> = ({
+  axiosAuthenticated,
   setError,
   refresh,
   setRefresh,
@@ -216,7 +220,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     setStudents(newStudents);
   };
 
-  useAxiosAuth();
+  // useAxiosAuth();
   let controller = new AbortController();
 
   /**
@@ -252,8 +256,11 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    refreshSkills ? getSkills(setSkillOptions, signal, setError, router) : null;
+    refreshSkills
+      ? getSkills(axiosAuthenticated, setSkillOptions, signal, setError, router)
+      : null;
     searchStudent(
+      axiosAuthenticated,
       studentNameSearch,
       skills,
       studentSearchParameters,
@@ -315,6 +322,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     const signal = controller.signal;
     state.loading = true;
     searchStudent(
+      axiosAuthenticated,
       studentNameSearch,
       skills,
       studentSearchParameters,
@@ -606,6 +614,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
             list={students}
             renderItem={(student: StudentBase) => (
               <StudentTile
+                axiosAuthenticated={axiosAuthenticated}
                 key={student.id}
                 student={student}
                 setStudentBase={setStudentBase}

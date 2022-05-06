@@ -4,11 +4,12 @@ import { Project, ProjectBase, Url, User, UUID } from '../../lib/types';
 import CreatableSelect from 'react-select/creatable';
 import { getCoaches, getSkills, parseError } from '../../lib/requestUtils';
 import Select from 'react-select';
-import { axiosAuthenticated } from '../../lib/axios';
+// import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import Error from '../Error';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
+import { AxiosInstance } from 'axios';
 const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 /**
@@ -16,6 +17,7 @@ const xmark_circle = <Icon icon="akar-icons:circle-x" />;
  * @See ProjectPopup for more information
  */
 type ProjectPopupProp = {
+  axiosAuthenticated: AxiosInstance;
   projectForm: ProjectForm;
   setShowPopup: (showPopup: boolean) => void;
   setProjectForm: (projectForm: ProjectForm) => void;
@@ -114,6 +116,7 @@ export function projectFormFromProject(
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function postOrPatchProject(
+  axiosAuthenticated: AxiosInstance,
   projectForm: ProjectForm,
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
@@ -210,6 +213,7 @@ function checkPositions(
  * @param setDeletePopup - callback to open a confirm project deletion popup
  */
 const ProjectPopup: React.FC<ProjectPopupProp> = ({
+  axiosAuthenticated,
   projectForm,
   setShowPopup,
   setProjectForm,
@@ -309,8 +313,8 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getSkills(setSkillOptions, signal, setError, router);
-    getCoaches(setCoachOptions, signal, setError, router);
+    getSkills(axiosAuthenticated, setSkillOptions, signal, setError, router);
+    getCoaches(axiosAuthenticated, setCoachOptions, signal, setError, router);
     return () => {
       controller.abort();
     };
@@ -325,6 +329,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
           controller = new AbortController();
           const signal = controller.signal;
           postOrPatchProject(
+            axiosAuthenticated,
             projectForm,
             setMyProjectBase,
             signal,
