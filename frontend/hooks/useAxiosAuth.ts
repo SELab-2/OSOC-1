@@ -55,18 +55,19 @@ const useAxiosAuth = () => {
         ) {
           try {
             prevRequest.sent = true;
-            
-            if (refreshTokenPromise == null) { // check for an existing in-progress request
-              refreshTokenPromise = refresh().then(token => {
-                refreshTokenPromise = null // clear state
-                return token // resolve with the new token
-              })
+
+            if (refreshTokenPromise == null) {
+              // check for an existing in-progress request
+              refreshTokenPromise = refresh().then((token) => {
+                refreshTokenPromise = null; // clear state
+                return token; // resolve with the new token
+              });
             }
 
-            return refreshTokenPromise.then(newAccessToken => {
+            return refreshTokenPromise.then((newAccessToken) => {
               prevRequest.headers['Authorization'] = `Basic ${newAccessToken}`;
               return axiosAuthenticated(prevRequest);
-            })
+            });
           } catch (err: unknown) {
             return Promise.reject(err);
           }
