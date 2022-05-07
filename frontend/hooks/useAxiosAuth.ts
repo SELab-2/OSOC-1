@@ -56,8 +56,8 @@ const useAxiosAuth = () => {
           try {
             prevRequest.sent = true;
 
+            // check for an existing in-progress request
             if (refreshTokenPromise == null) {
-              // check for an existing in-progress request
               refreshTokenPromise = refresh().then((token) => {
                 refreshTokenPromise = null; // clear state
                 return token; // resolve with the new token
