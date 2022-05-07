@@ -10,19 +10,33 @@ import java.util.UUID
  * This object contains every function needed to make and send emails.
  */
 object EmailUtil {
+    /**
+     * Set email account to send emails with.
+     */
     private const val emailAddressSender = "noreply@osoc.com"
     private const val passwordSender = "insert.password.here"
 
-    private fun getResetPasswordEmailBody(resetPasswordToken: UUID): String {
-        val url = "http://localhost:3000/resetPassword/$resetPasswordToken"
+    /**
+     * Make the body of the email users receive when they request a password change.
+     */
+    private fun getResetPasswordEmailBody(resetPasswordUUID: UUID): String {
+        val url = "http://localhost:3000/resetPassword/$resetPasswordUUID"
         return """
-            Hello,
-            Use the link below to set your new password.
-            $url            
+            Hi,
+            
+            Trouble signing in?
+            Resetting your password is easy.
+            Use the link below to choose your new password.
+            $url
+            
+            If you did not forget your password, please disregard this email.
         """.trimIndent()
     }
 
-    private fun getJavaMailSender(): JavaMailSender {
+    /**
+     * Get a [JavaMailSender] object which is correctly configured.
+     */
+    private fun getMailSender(): JavaMailSender {
         val mailSender = JavaMailSenderImpl()
         mailSender.host = "smtp.gmail.com"
         mailSender.port = 587
@@ -36,19 +50,22 @@ object EmailUtil {
         return mailSender
     }
 
-    fun sendEmail(emailaddressReceiver: String, resetPasswordToken: UUID) {
-        val mailSender = getJavaMailSender()
+    /**
+     * Email [emailAddressReceiver] with a [resetPasswordUUID], so [emailAddressReceiver] can reset its email.
+     */
+    fun sendEmail(emailAddressReceiver: String, resetPasswordUUID: UUID) {
+        // val mailSender = getMailSender()
 
         val email = SimpleMailMessage()
         email.setSubject("Reset Password")
-        email.setText(getResetPasswordEmailBody(resetPasswordToken))
-        email.setTo(emailaddressReceiver)
+        email.setText(getResetPasswordEmailBody(resetPasswordUUID))
+        email.setTo(emailAddressReceiver)
         email.setFrom(emailAddressSender)
 
         println(">>>>>>>")
-        println("To: $emailaddressReceiver")
+        println("To: $emailAddressReceiver")
         println("From: $emailAddressSender")
-        println(email.subject)
+        println("> ${email.subject}")
         println(email.text)
         println(">>>>>>>")
         // mailSender.send(email)
