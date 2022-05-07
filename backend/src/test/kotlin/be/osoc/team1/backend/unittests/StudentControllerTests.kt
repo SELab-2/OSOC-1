@@ -243,8 +243,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val student2 = Student("firstname", "lastname")
         val studentList = listOf(student1, student2)
         every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
-        every { assignmentRepository.findByStudent(student1) } returns setOf(Assignment(student1, Position(Skill("Backend"), 1), User("username", "email", Role.Coach, "password"), "reason"))
-        every { assignmentRepository.findByStudent(student2) } returns setOf()
+        every { assignmentRepository.findAll() } returns setOf(Assignment(student1, Position(Skill("Backend"), 1), User("username", "email", Role.Coach, "password"), "reason"))
         mockMvc.perform(get("$editionUrl?unassignedOnly=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
