@@ -2,14 +2,18 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.EditionController
 import be.osoc.team1.backend.entities.Edition
+import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.EditionService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -26,8 +30,17 @@ class EditionControllerTests(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var editionService: EditionService
 
+    @MockkBean
+    private lateinit var osocUserDetailService: OsocUserDetailService
+
     private val editionName = "testEdition"
     private val editionUrl = "/editions/$editionName"
+    private val authenticatedAdmin = User("name", "email", Role.Admin, "password")
+
+    @BeforeEach
+    fun setup() {
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns authenticatedAdmin
+    }
 
     @Test
     fun `createInactiveEdition returns created edition when it succeeds`() {
