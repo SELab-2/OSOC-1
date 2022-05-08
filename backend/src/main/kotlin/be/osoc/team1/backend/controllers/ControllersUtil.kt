@@ -45,6 +45,10 @@ fun <ID, T> getObjectCreatedResponse(
         .body(createdObject)
 }
 
+/**
+ * This function checks if a request is allowed based on the active edition,
+ * entries of inactive editions can only be viewed or deleted by admins
+ */
 fun attemptEditionAccess(
     editionName: String,
     editionService: EditionService,
@@ -57,63 +61,13 @@ fun attemptEditionAccess(
 
     if (!edition.accessibleBy(user))
         throw UnauthorizedOperationException("Entries of inactive editions can only be accessed by admins!")
-
-    if (httpServletRequest.method != "GET" && httpServletRequest.method != "DELETE")
+    if (!edition.isActive && httpServletRequest.method != "GET" && httpServletRequest.method != "DELETE")
         throw ForbiddenOperationException("Entries of inactive editions can only be viewed or delete (Allowed methods: GET, DELETE)")
 }
 
-//@Component
-//class EditionInterceptor(val editionService: EditionService) :
-//    HandlerInterceptor {
-//    @Throws(Exception::class)
-//    @Override
-//    override fun preHandle(
-//        request: HttpServletRequest,
-//        response: HttpServletResponse,
-//        handler: Any
-//    ): Boolean {
-//        return super.preHandle(request, response, handler)
-//        // URLs that are always allowed
-//        val regex =
-//            Regex("^.*/api/(error|editions|login|communications|users|assignments|positions|statusSuggestions|answers|skills|logout|token).*$")
-//        // this !is check is here so invalid requests (such as GETs to endpoints that don't exist) still get handled regularly
-//        if (!regex.matches(request.requestURI) && handler !is ResourceHttpRequestHandler) {
-//            val roles = SecurityContextHolder.getContext().authentication.authorities.map { it.toString() }
-//            SecurityContextHolder.getContext().authentication as Principal
-//            val editionName = request.requestURI.split("/")[2]
-//            if (editionService.getActiveEdition()?.name != editionName) {
-//                if (!roles.contains("ROLE_ADMIN")) {
-//                    response.sendError(401, "Inactive editions can only be accessed by admins")
-//                    return false
-//                }
-//                if (request.method != "GET" && request.method != "DELETE") {
-//                    response.sendError(405, "Entries from inactive editions can only be viewed or deleted")
-//                    return false
-//                }
-//            }
-//        }
-//        return super.preHandle(request, response, handler)
-//    }
-//
-//    @Throws(Exception::class)
-//    override fun postHandle(
-//        request: HttpServletRequest,
-//        response: HttpServletResponse, handler: Any,
-//        modelAndView: ModelAndView?
-//    ) {
-//        super.postHandle(request, response, handler, modelAndView)
-//    }
-//}
-//
-//@Component
-//class InterceptorConfig : WebMvcConfigurer {
-//    @Autowired
-//    lateinit var editionInterceptor: EditionInterceptor
-//    override fun addInterceptors(registry: InterceptorRegistry) {
-//        registry.addInterceptor(editionInterceptor)
-//    }
-//}
-
+/**
+ * This class adds the code of the SecuredEdition annotation
+ */
 @Aspect
 @Component
 class EditionSecurityAspect(val editionService: EditionService, val userDetailService: OsocUserDetailService) {
@@ -139,5 +93,5 @@ class EditionSecurityAspect(val editionService: EditionService, val userDetailSe
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
-@Inherited //Doesn't work in kotlin...
+@Inherited
 annotation class SecuredEdition
