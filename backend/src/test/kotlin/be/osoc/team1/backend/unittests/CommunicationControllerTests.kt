@@ -16,7 +16,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,7 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.UUID
+import java.util.*
 
 @UnsecuredWebMvcTest(CommunicationController::class)
 class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
@@ -44,10 +43,13 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     // These MockkBean are necessary because the BaseController uses these under the hood
     @MockkBean
     private lateinit var editionService: EditionService
+
     @MockkBean
     private lateinit var osocUserDetailService: OsocUserDetailService
+
     @MockkBean
     private lateinit var authentication: Authentication
+
     @MockkBean
     private lateinit var securityContext: SecurityContext
 
@@ -59,6 +61,7 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val jsonRepresentation = objectMapper.writeValueAsString(testCommunication)
 
     private val authenticatedAdmin = User("name", "email", Role.Admin, "password")
+
     @BeforeEach
     fun setup() {
         SecurityContextHolder.setContext(securityContext)
@@ -70,9 +73,8 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getCommunicationById returns communication if communication with given id exists`() {
         every { communicationService.getById(testId) } returns testCommunication
         every { editionService.getEdition(any()) } returns Edition(testEdition, true)
-        val resp = mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null)))
-        println(resp)
-        mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null))).andExpect(status().isOk)
+        mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
 
@@ -105,5 +107,54 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `Inactive editions can be accessed by admins`() {
+        every { communicationService.getById(testId) } returns testCommunication
+        every { editionService.getEdition(any()) } returns Edition(testEdition, false)
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns User(
+            "name",
+            "email",
+            Role.Admin,
+            "password"
+        )
+        mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
+    }
+
+    @Test
+    fun `Inactive editions cannot be accessed by others`() {
+        every { communicationService.getById(testId) } returns testCommunication
+        every { editionService.getEdition(any()) } returns Edition(testEdition, false)
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns User(
+            "name",
+            "email",
+            Role.Coach,
+            "password"
+        )
+        mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun `Gets and deletes are the only allowed HTTP methods on inactive editions`() {
+        every { communicationService.getById(testId) } returns testCommunication
+        every { communicationService.createCommunication(any()) } returns testCommunication
+        every { editionService.getEdition(any()) } returns Edition(testEdition, false)
+        every { studentService.addCommunicationToStudent(testId, any(), testEdition) } just Runs
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns User(
+            "name",
+            "email",
+            Role.Admin,
+            "password"
+        )
+        mockMvc.perform(get("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null)))
+            .andExpect(status().isOk)
+        mockMvc.perform(
+            post("$editionUrl/$testId").principal(TestingAuthenticationToken(null, null))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isForbidden)
     }
 }

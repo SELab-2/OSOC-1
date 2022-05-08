@@ -2,6 +2,7 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.AssignmentController
 import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Skill
@@ -22,6 +23,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -41,6 +45,10 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var editionService: EditionService
     @MockkBean
     private lateinit var osocUserDetailService: OsocUserDetailService
+    @MockkBean
+    private lateinit var authentication: Authentication
+    @MockkBean
+    private lateinit var securityContext: SecurityContext
 
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Jitse", "Willaert", "testEdition")
@@ -50,10 +58,13 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val testAssignment = Assignment(testStudent, testPosition, testSuggester, "reason")
     private val objectMapper = ObjectMapper()
 
+    private val authenticatedAdmin = User("name", "email", Role.Admin, "password")
     @BeforeEach
     fun beforeEach() {
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest()))
-
+        SecurityContextHolder.setContext(securityContext)
+        every { securityContext.authentication } returns authentication
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns authenticatedAdmin
         val simpleModule = SimpleModule()
         simpleModule.addSerializer(Position::class.java, PositionSerializer())
         simpleModule.addSerializer(Student::class.java, StudentSerializer())
@@ -65,6 +76,7 @@ class AssignmentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getAssignmentById returns assignment if assignment with given id exists`() {
         val jsonRepresentation = objectMapper.writeValueAsString(testAssignment)
         every { assignmentService.getById(testId) } returns testAssignment
+        every { editionService.getEdition(any()) } returns Edition("edition", true)
         mockMvc.perform(get("/assignments/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }

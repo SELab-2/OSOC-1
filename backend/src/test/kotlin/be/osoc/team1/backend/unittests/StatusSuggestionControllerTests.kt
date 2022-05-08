@@ -1,8 +1,11 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StatusSuggestionController
+import be.osoc.team1.backend.entities.Edition
+import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.SuggestionEnum
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.OsocUserDetailService
@@ -14,6 +17,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -33,21 +39,30 @@ class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var editionService: EditionService
     @MockkBean
     private lateinit var osocUserDetailService: OsocUserDetailService
+    @MockkBean
+    private lateinit var authentication: Authentication
+    @MockkBean
+    private lateinit var securityContext: SecurityContext
 
     private val testId = UUID.randomUUID()
     private val coachId = UUID.randomUUID()
     private val testStatusSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "motivation")
     private val objectMapper = ObjectMapper()
 
+    private val authenticatedAdmin = User("name", "email", Role.Admin, "password")
     @BeforeEach
     fun beforeEach() {
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest()))
+        SecurityContextHolder.setContext(securityContext)
+        every { securityContext.authentication } returns authentication
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns authenticatedAdmin
     }
 
     @Test
     fun `getStatusSuggestionById returns statusSuggestion if statusSuggestion with given id exists`() {
         val jsonRepresentation = objectMapper.writeValueAsString(testStatusSuggestion)
         every { statusSuggestionService.getById(testId) } returns testStatusSuggestion
+        every { editionService.getEdition(any()) } returns Edition("edition", true)
         mockMvc.perform(get("/statusSuggestions/$testId")).andExpect(status().isOk)
             .andExpect(content().json(jsonRepresentation))
     }
