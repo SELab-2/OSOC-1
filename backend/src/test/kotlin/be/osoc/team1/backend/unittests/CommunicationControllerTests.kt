@@ -61,12 +61,14 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val jsonRepresentation = objectMapper.writeValueAsString(testCommunication)
 
     private val authenticatedAdmin = User("name", "email", Role.Admin, "password")
+    private val activeEdition = Edition("activeEdition", true)
 
     @BeforeEach
     fun setup() {
         SecurityContextHolder.setContext(securityContext)
         every { securityContext.authentication } returns authentication
         every { osocUserDetailService.getUserFromPrincipal(any()) } returns authenticatedAdmin
+        every { editionService.getEdition(any()) } returns activeEdition
     }
 
     @Test
