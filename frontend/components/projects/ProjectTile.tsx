@@ -367,7 +367,6 @@ const ProjectTile: React.FC<ProjectProp> = ({
         setError,
         router
       ).then((response) => {
-        console.log('changing project');
         setMyProject(response);
       });
     })();
