@@ -332,8 +332,14 @@ const ProjectTile: React.FC<ProjectProp> = ({
           setError,
           router
         );
+        // This check does two things, it checks if the positions have changed
+        // But it also checks if the project itself has actually been loaded fully via the second check
+        // If we don't do this second check, it could change myProject before everything is loaded
+        // And rendering will then fail due to undefined errors
         if (
-          JSON.stringify(newPositions) != JSON.stringify(myProject.positions)
+          JSON.stringify(newPositions) != JSON.stringify(myProject.positions) &&
+          JSON.stringify(myProject.positions) !=
+            JSON.stringify(myProjectBase.positions)
         ) {
           myProject.positions = newPositions;
         }
@@ -361,6 +367,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
         setError,
         router
       ).then((response) => {
+        console.log('changing project');
         setMyProject(response);
       });
     })();

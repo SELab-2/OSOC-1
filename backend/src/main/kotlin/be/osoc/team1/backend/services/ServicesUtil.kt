@@ -1,7 +1,5 @@
 package be.osoc.team1.backend.services
 
-import be.osoc.team1.backend.entities.StatusEnum
-
 private fun preprocess(string: String) = string.lowercase().replace(" ", "")
 
 /**
@@ -48,8 +46,6 @@ class Pager(val pageNumber: Int, val pageSize: Int) {
  * [PagedCollection] is a data class that holds a paginated [collection] and its pre-pagination length ([totalLength])
  */
 data class PagedCollection<T>(val collection: List<T>, val totalLength: Int)
-
-data class StudentFilter(val statusFilter: List<StatusEnum>, val nameQuery: String, val includeSuggested: Boolean)
 
 fun <T> List<T>.page(pager: Pager) = pager.paginate(this)
 

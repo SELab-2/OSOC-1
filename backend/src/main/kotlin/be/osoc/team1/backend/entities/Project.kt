@@ -27,7 +27,7 @@ import javax.validation.constraints.NotBlank
  */
 @Entity
 class Position(
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(cascade = [CascadeType.MERGE])
     val skill: Skill,
     val amount: Int,
     @JsonIgnore

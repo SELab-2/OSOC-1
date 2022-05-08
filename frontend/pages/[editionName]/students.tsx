@@ -22,10 +22,6 @@ const Students: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   // Needed to allow for click select from the sidebar to the main screen
   const [studentBase, setStudentBase] = useState({} as StudentBase);
-  const [refreshStudents, setRefreshStudents] = useState([false, true] as [
-    boolean,
-    boolean
-  ]);
   const [error, setError]: [string, (error: string) => void] = useState('');
   useAxiosAuth();
 
@@ -52,8 +48,6 @@ const Students: NextPage = () => {
               {/* actual sidebar */}
               <StudentSidebar
                 setError={setError}
-                refresh={refreshStudents}
-                setRefresh={setRefreshStudents}
                 setStudentBase={setStudentBase}
               />
             </section>
@@ -82,7 +76,6 @@ const Students: NextPage = () => {
               {/* This contains the actual student info */}
               <div>
                 <StudentHolder
-                  setRefresh={setRefreshStudents}
                   studentBase={studentBase}
                   setStudentBase={setStudentBase}
                 />
