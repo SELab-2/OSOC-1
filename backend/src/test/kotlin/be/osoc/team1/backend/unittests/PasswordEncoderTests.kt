@@ -38,7 +38,7 @@ class PasswordEncoderTests {
         encoder.encode("Password.test1")
         val passedTimeMillis = System.currentTimeMillis() - startTimeMillis
         assert(passedTimeMillis > 700)
-        assert(passedTimeMillis < 2000)
+        assert(passedTimeMillis < 2500)
     }
 
     @Test
