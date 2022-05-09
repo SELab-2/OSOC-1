@@ -34,6 +34,7 @@ const ForgotPassword: NextPage = () => {
             <span>
               <b>Email sent</b> <br />
               An email has been sent to {email} <br />
+              You might want to look in spam. <br />
               <button onClick={() => toast.dismiss(t.id)} className="okButton">
                 OK
               </button>

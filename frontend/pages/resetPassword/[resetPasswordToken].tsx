@@ -1,26 +1,36 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FormEventHandler, useState } from 'react';
+import { FormEventHandler, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import FormContainer from '../../components/FormContainer';
+import useInput from '../../hooks/useInput';
 import axios from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
+import { customPasswordRegex } from '../../lib/regex';
 
 const ResetPassword: NextPage = () => {
   const router = useRouter();
   const token = router.query.resetPasswordToken as string;
 
-  const [password, setPassword] = useState('');
+  /* eslint-disable */
+  const [password, resetPassword, passwordProps] = useInput('');
+  const [validPassword, setValidPassword] = useState(true);
+
+  useEffect(() => {
+    setValidPassword(customPasswordRegex.test(password));
+  }, [validPassword]);
 
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    console.log("password:"+password)
+    console.log("validPassword:"+validPassword)
 
-    if (password) {
+    if (validPassword) {
       try {
         const response = await axios.patch(
           Endpoints.RESETPASSWORD + '/' + token,
-          password,
+          validPassword,
           {
             headers: { 'Content-Type': 'text/plain' },
           }
@@ -31,7 +41,7 @@ const ResetPassword: NextPage = () => {
             (t) => (
               <span>
                 <b>Password reset</b> <br />
-                Password has been reset to {password} <br />
+                Password has been reset to {validPassword} <br />
                 <button
                   onClick={() => toast.dismiss(t.id)}
                   className="okButton"
@@ -66,14 +76,19 @@ const ResetPassword: NextPage = () => {
     <>
       <FormContainer pageTitle="Reset Password">
         <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
-          <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
-            New password
+          <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
+            New Password
             <input
-              className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
+              className={`mt-1 box-border block h-8 w-full border-2 ${
+                validPassword || password.length === 0
+                  ? 'border-[#C4C4C4]'
+                  : 'border-red-500'
+              } p-1 text-sm`}
               name="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              minLength={8}
+              maxLength={64}
+              {...passwordProps}
             />
           </label>
           <button
