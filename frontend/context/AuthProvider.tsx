@@ -67,10 +67,9 @@ export const AuthProvider = ({
   const [edition, setEdition] = useState('');
 
   useEffect(() => {
-    
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      const storedEdition = localStorage.getItem("edition");
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      const storedEdition = localStorage.getItem('edition');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
@@ -78,7 +77,6 @@ export const AuthProvider = ({
         setEdition(storedEdition);
       }
     }
-  
   }, []);
 
   return (

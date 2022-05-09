@@ -14,14 +14,13 @@ const useRefreshToken = () => {
   const [tokens, setTokens] = useTokens();
 
   const refresh: () => Promise<AuthToken> = async () => {
-    
     let _refreshToken = tokens.refreshToken;
 
-    if (!_refreshToken && typeof window !== "undefined") {
+    if (!_refreshToken && typeof window !== 'undefined') {
       // Check to see if there is a refreshToken stored in localStorage when tokens are still null
-      _refreshToken = localStorage.getItem("refreshToken") || '';
+      _refreshToken = localStorage.getItem('refreshToken') || '';
     }
-    
+
     const response = await axios.post(
       Endpoints.REFRESH,
       new URLSearchParams({
@@ -36,13 +35,13 @@ const useRefreshToken = () => {
 
     const refreshToken = response.data.refreshToken;
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem("refreshToken", refreshToken);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('refreshToken', refreshToken);
     }
 
     setTokens({
       accessToken: response.data.accessToken,
-      refreshToken
+      refreshToken,
     });
 
     return response.data.accessToken;

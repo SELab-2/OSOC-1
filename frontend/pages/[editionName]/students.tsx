@@ -31,69 +31,69 @@ const Students: NextPage = () => {
 
   return (
     <PersistLogin>
-    <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
-      <div className="min-w-screen flex min-h-screen flex-col items-center">
-        <Header />
-        <DndProvider backend={HTML5Backend}>
-          <main className="flex w-full flex-row">
-            {/* Holds the sidebar with search, filter and student results */}
-            <section
-              className={`${
-                showSidebar ? 'visible' : 'hidden'
-              } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
-            >
-              {/* button to close sidebar on mobile */}
-              <div
+      <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
+        <div className="min-w-screen flex min-h-screen flex-col items-center">
+          <Header />
+          <DndProvider backend={HTML5Backend}>
+            <main className="flex w-full flex-row">
+              {/* Holds the sidebar with search, filter and student results */}
+              <section
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
               >
-                <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
-              </div>
-              {/* actual sidebar */}
-              <StudentSidebar
-                setError={setError}
-                refresh={refreshStudents}
-                setRefresh={setRefreshStudents}
-                setStudentBase={setStudentBase}
-                studentBase={studentBase}
-              />
-            </section>
-
-            {/* Holds main student content */}
-            <section
-              className={`${
-                showSidebar ? 'hidden' : 'visible'
-              } mt-[30px] w-full md:visible md:block`}
-            >
-              <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
-                {/* button to open sidebar on mobile */}
+                {/* button to close sidebar on mobile */}
                 <div
                   className={`${
-                    showSidebar ? 'hidden' : 'visible w-auto'
-                  } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                    showSidebar ? 'visible' : 'hidden'
+                  } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
                 >
-                  <i onClick={() => setShowSidebar(!showSidebar)}>
-                    {arrow_out}
-                  </i>
+                  <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
                 </div>
-              </div>
-
-              {error && <Error error={error} className="mb-4" />}
-
-              {/* This contains the actual student info */}
-              <div>
-                <StudentHolder
+                {/* actual sidebar */}
+                <StudentSidebar
+                  setError={setError}
+                  refresh={refreshStudents}
                   setRefresh={setRefreshStudents}
-                  studentBase={studentBase}
                   setStudentBase={setStudentBase}
+                  studentBase={studentBase}
                 />
-              </div>
-            </section>
-          </main>
-        </DndProvider>
-      </div>
-    </RouteProtection>
+              </section>
+
+              {/* Holds main student content */}
+              <section
+                className={`${
+                  showSidebar ? 'hidden' : 'visible'
+                } mt-[30px] w-full md:visible md:block`}
+              >
+                <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
+                  {/* button to open sidebar on mobile */}
+                  <div
+                    className={`${
+                      showSidebar ? 'hidden' : 'visible w-auto'
+                    } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                  >
+                    <i onClick={() => setShowSidebar(!showSidebar)}>
+                      {arrow_out}
+                    </i>
+                  </div>
+                </div>
+
+                {error && <Error error={error} className="mb-4" />}
+
+                {/* This contains the actual student info */}
+                <div>
+                  <StudentHolder
+                    setRefresh={setRefreshStudents}
+                    studentBase={studentBase}
+                    setStudentBase={setStudentBase}
+                  />
+                </div>
+              </section>
+            </main>
+          </DndProvider>
+        </div>
+      </RouteProtection>
     </PersistLogin>
   );
 };
