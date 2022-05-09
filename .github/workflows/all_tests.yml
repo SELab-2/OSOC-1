@@ -14,39 +14,25 @@ on:
 jobs:
   container-job:
 
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: mikxox/maven-test-action:latest
       options: --rm
-    env:
-      GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          path: 'temppath'
 
       - name: Test with Maven
         # -B: run in non-interactive (batch) mode
-        run: |
-          cd /__w/OSOC-1/OSOC-1/temppath/backend
-          ./mvnw -B -DfailIfNoTests=false test --file pom.xml
+        run: ./mvnw -B -DfailIfNoTests=false test --file pom.xml
+        working-directory: ./backend
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: /__w/OSOC-1/OSOC-1/temppath
-          working-directory: /__w/OSOC-1/OSOC-1/temppath
-          root_dir: /__w/OSOC-1/OSOC-1/temppath
           fail_ci_if_error: true
-          files: /__w/OSOC-1/OSOC-1/temppath/backend/target/site/jacoco/jacoco.xml
+          files: /__w/OSOC-1/OSOC-1/backend/target/site/jacoco/jacoco.xml
           flags: all_tests
           name: codecov-umbrella
           verbose: true
-
-      - name: remove temppath
-        if: always()
-        run: |
-          cd /__w/OSOC-1/OSOC-1/
-          sudo rm -rf temppath
