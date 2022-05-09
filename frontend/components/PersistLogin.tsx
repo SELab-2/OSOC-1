@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, PropsWithChildren, useEffect, useState } from 'react';
 import useEdition from '../hooks/useEdition';
 import useRefreshToken from '../hooks/useRefreshToken';
 import useTokens from '../hooks/useTokens';
@@ -24,7 +24,7 @@ import useUser from '../hooks/useUser';
  *
  * @returns PersistLogin component
  */
-const PersistLogin: FC = ({ children }) => {
+const PersistLogin: FC<PropsWithChildren<unknown>> = ({ children }: PropsWithChildren<unknown>) => {
   const [loading, setLoading] = useState(true);
   const refresh = useRefreshToken();
   const [tokens] = useTokens();
