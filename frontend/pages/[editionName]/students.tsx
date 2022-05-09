@@ -10,6 +10,7 @@ import useAxiosAuth from '../../hooks/useAxiosAuth';
 import StudentHolder from '../../components/student/StudentHolder';
 import RouteProtection from '../../components/RouteProtection';
 import Error from '../../components/Error';
+import PersistLogin from '../../components/PersistLogin';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -29,6 +30,7 @@ const Students: NextPage = () => {
   useAxiosAuth();
 
   return (
+    <PersistLogin>
     <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
       <div className="min-w-screen flex min-h-screen flex-col items-center">
         <Header />
@@ -92,6 +94,7 @@ const Students: NextPage = () => {
         </DndProvider>
       </div>
     </RouteProtection>
+    </PersistLogin>
   );
 };
 

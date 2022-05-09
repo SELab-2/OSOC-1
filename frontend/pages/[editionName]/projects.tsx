@@ -29,6 +29,7 @@ import { parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
+import PersistLogin from '../../components/PersistLogin';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -232,6 +233,7 @@ const Projects: NextPage = () => {
   };
 
   return (
+    <PersistLogin>
     <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
       <div className="min-w-screen flex min-h-screen flex-col items-center">
         <Header />
@@ -396,6 +398,7 @@ const Projects: NextPage = () => {
         </Popup>
       </div>
     </RouteProtection>
+    </PersistLogin>
   );
 };
 

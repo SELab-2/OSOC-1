@@ -13,6 +13,7 @@ import Error from '../components/Error';
 import { Edition, UserRole } from '../lib/types';
 import RouteProtection from '../components/RouteProtection';
 import EditionDeletionPopup from '../components/editions/EditionDeletionPopup';
+import PersistLogin from '../components/PersistLogin';
 
 /**
  * Editions page where we list editions, show a form to create new editions and
@@ -102,48 +103,50 @@ const Editions: NextPage = () => {
   };
 
   return (
-    <RouteProtection allowedRoles={[UserRole.Admin]}>
-      <div className="h-screen">
-        <Header />
-
-        {error && <Error error={error} className="mt-4 w-3/5" />}
-
-        <div className="row-auto m-auto mt-4 grid w-9/12 grid-cols-1 items-center gap-4 md:mt-8 md:grid-cols-2 lg:mt-12 lg:grid-cols-3 xl:grid-cols-4">
-          {showCreateForm ? (
-            <EditionCreateForm
-              setShowCreateForm={setShowCreateForm}
-              createEdition={createEdition}
-            />
-          ) : (
-            <div
-              className="m-auto max-w-sm hover:cursor-pointer"
-              title="Create New Edition"
-              onClick={() => setShowCreateForm(true)}
-            >
-              <PlusCircleIcon className="h-12 w-12" color="#d3d3d3" />
-            </div>
-          )}
-          {allEditions
-            .sort((ed1, ed2) => Number(ed2.isActive) - Number(ed1.isActive))
-            .map((val: Edition, idx: number) => (
-              <EditionCard
-                key={idx}
-                edition={val}
-                updateEdition={updateEdition}
-                deleteEdition={() => {
-                  setShowDeletePopup(true);
-                  setEditionToDelete(val.name);
-                }}
+    <PersistLogin>
+      <RouteProtection allowedRoles={[UserRole.Admin]}>
+        <div className="h-screen">
+          <Header />
+    
+          {error && <Error error={error} className="mt-4 w-3/5" />}
+    
+          <div className="row-auto m-auto mt-4 grid w-9/12 grid-cols-1 items-center gap-4 md:mt-8 md:grid-cols-2 lg:mt-12 lg:grid-cols-3 xl:grid-cols-4">
+            {showCreateForm ? (
+              <EditionCreateForm
+                setShowCreateForm={setShowCreateForm}
+                createEdition={createEdition}
               />
-            ))}
+            ) : (
+              <div
+                className="m-auto max-w-sm hover:cursor-pointer"
+                title="Create New Edition"
+                onClick={() => setShowCreateForm(true)}
+              >
+                <PlusCircleIcon className="h-12 w-12" color="#d3d3d3" />
+              </div>
+            )}
+            {allEditions
+              .sort((ed1, ed2) => Number(ed2.isActive) - Number(ed1.isActive))
+              .map((val: Edition, idx: number) => (
+                <EditionCard
+                  key={idx}
+                  edition={val}
+                  updateEdition={updateEdition}
+                  deleteEdition={() => {
+                    setShowDeletePopup(true);
+                    setEditionToDelete(val.name);
+                  }}
+                />
+              ))}
+          </div>
+          <EditionDeletionPopup
+            deleteEdition={async () => await deleteEdition(editionToDelete)}
+            openDeleteForm={showDeletePopup}
+            setOpenDeleteForm={setShowDeletePopup}
+          />
         </div>
-        <EditionDeletionPopup
-          deleteEdition={async () => await deleteEdition(editionToDelete)}
-          openDeleteForm={showDeletePopup}
-          setOpenDeleteForm={setShowDeletePopup}
-        />
-      </div>
-    </RouteProtection>
+      </RouteProtection>
+    </PersistLogin>
   );
 };
 

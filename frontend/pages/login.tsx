@@ -63,6 +63,11 @@ const Login = () => {
             refreshToken,
           });
 
+          if (typeof window !== "undefined") {
+            if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+            if (user) localStorage.setItem("user", JSON.stringify(user));
+          }
+
           if (user.role === UserRole.Disabled) {
             router.push('/wait');
           } else {
@@ -71,7 +76,11 @@ const Login = () => {
               headers: { Authorization: `Basic ${accessToken}` },
             });
             if (response) {
-              setEdition(response.data.name);
+              const editionName = response.data.name;
+              setEdition(editionName);
+              if (typeof window !== "undefined" && editionName) {
+                localStorage.setItem("edition", editionName);
+              }
             }
             router.push('/');
           }

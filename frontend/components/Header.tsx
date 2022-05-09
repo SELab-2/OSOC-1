@@ -27,20 +27,26 @@ const Header: React.FC<HeaderProps> = () => {
       </div>
       <nav className="text-center">
         <ul className="m-0 p-0">
-          <li
-            className={`hover:underline sm:inline ${
-              current_path === '/students' ? 'underline' : ''
-            }`}
-          >
-            <Link href={`/${edition}/students`}>Select Students</Link>
-          </li>
-          <li
-            className={`ml-3 hover:underline sm:inline ${
-              current_path === '/projects' ? 'underline' : ''
-            }`}
-          >
-            <Link href={`/${edition}/projects`}>Projects</Link>
-          </li>
+          {
+            edition && (
+              <>
+                <li
+                  className={`hover:underline sm:inline ${
+                    current_path === '/students' ? 'underline' : ''
+                  }`}
+                >
+                  <Link href={`/${edition}/students`}>Select Students</Link>
+                </li>
+                <li
+                  className={`ml-3 hover:underline sm:inline ${
+                    current_path === '/projects' ? 'underline' : ''
+                  }`}
+                >
+                  <Link href={`/${edition}/projects`}>Projects</Link>
+                </li>
+              </>
+            )
+          }
           <li
             className={`ml-3 hover:underline sm:inline ${
               current_path === '/users' ? 'underline' : ''
