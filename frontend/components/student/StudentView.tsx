@@ -145,11 +145,8 @@ async function getEntireStudent(
     router
   );
 
-  statusSuggestionBaseList.forEach((suggestion, i) => {
+  statusSuggestionBaseList.forEach((suggestion) => {
     axiosAuthenticated.get(suggestion.suggester).then((response) => {
-      console.log("Response user");
-      console.log(response.data);
-
       const statusSuggestion = {} as StatusSuggestion;
       statusSuggestion.suggester = response.data as User;
       statusSuggestion.status = suggestion.status;
