@@ -9,7 +9,9 @@ import java.util.UUID
  */
 object ResetPasswordUtil {
     /**
-     * This map holds a [ResetPasswordToken] per ...
+     * When a user requests to change its password, a random [UUID] gets generated and a new entry gets added to
+     * [resetTokens]. The key of the entry is the hashed uuid, the value consists of a [ResetPasswordToken] containing
+     * TTL and email of the user. The uuid is used to generate a unique url for the user to reset its password.
      */
     private val resetTokens: SortedMap<ByteArray, ResetPasswordToken> = sortedMapOf(
         { a, b -> return@sortedMapOf if (a.contentEquals(b)) 0 else 1 }
