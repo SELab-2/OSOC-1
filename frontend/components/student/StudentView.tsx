@@ -81,7 +81,7 @@ async function setStudentSuggestion(
     .post(
       '/' + edition + Endpoints.STUDENTS + '/' + studentId + '/suggestions', // TODO import this url somehow
       {
-        coachId: coachId,
+        suggester: '/' + edition + Endpoints.USERS + '/' + coachId,
         status: status,
         motivation: motivation,
       }
