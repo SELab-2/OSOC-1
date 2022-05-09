@@ -192,10 +192,8 @@ class StudentController(
         principal: Principal,
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
-        if (statusSuggestion.coachId != user.id)
-            throw UnauthorizedOperationException(
-                "The 'coachId' did not equal authenticated user id!"
-            )
+        if (statusSuggestion.suggester != user)
+            throw UnauthorizedOperationException("The 'coachId' did not equal authenticated user id!")
 
         service.addStudentStatusSuggestion(studentId, statusSuggestion, edition)
     }

@@ -1,11 +1,15 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StatusSuggestionController
+import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.SuggestionEnum
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.StatusSuggestionService
+import be.osoc.team1.backend.util.UserSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.junit.jupiter.api.BeforeEach
@@ -27,9 +31,8 @@ class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
     private lateinit var statusSuggestionService: StatusSuggestionService
 
     private val testId = UUID.randomUUID()
-    private val coachId = UUID.randomUUID()
-    private val testStatusSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "motivation")
-    private val objectMapper = ObjectMapper()
+    private val coach = User("username", "email", Role.Coach, "password")
+    private val testStatusSuggestion = StatusSuggestion(coach, SuggestionEnum.Yes, "motivation")
 
     @BeforeEach
     fun beforeEach() {
@@ -38,6 +41,10 @@ class StatusSuggestionControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getStatusSuggestionById returns statusSuggestion if statusSuggestion with given id exists`() {
+        val objectMapper = ObjectMapper()
+        val simpleModule = SimpleModule()
+        simpleModule.addSerializer(User::class.java, UserSerializer())
+        objectMapper.registerModule(simpleModule)
         val jsonRepresentation = objectMapper.writeValueAsString(testStatusSuggestion)
         every { statusSuggestionService.getById(testId) } returns testStatusSuggestion
         mockMvc.perform(get("/statusSuggestions/$testId")).andExpect(status().isOk)
