@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FormEventHandler, useEffect, useRef, useState } from 'react';
+import { FormEventHandler, useState } from 'react';
 import toast from 'react-hot-toast';
 import FormContainer from '../../components/FormContainer';
 import axios from '../../lib/axios';
@@ -19,10 +19,10 @@ const ResetPassword: NextPage = () => {
     if (password) {
       try {
         const response = await axios.patch(
-          Endpoints.RESETPASSWORD + "/" + token,
+          Endpoints.RESETPASSWORD + '/' + token,
           password,
           {
-            headers: { 'Content-Type' : 'text/plain' }
+            headers: { 'Content-Type': 'text/plain' },
           }
         );
         // router.push('/');
@@ -32,7 +32,12 @@ const ResetPassword: NextPage = () => {
               <span>
                 <b>Password reset</b> <br />
                 Password has been reset to {password} <br />
-                <button onClick={() => toast.dismiss(t.id)} className="okButton">OK</button>
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="okButton"
+                >
+                  OK
+                </button>
               </span>
             ),
             { duration: 12000 }
@@ -43,7 +48,9 @@ const ResetPassword: NextPage = () => {
             <span>
               <b>Success</b> <br />
               Password has been reset <br />
-              <button onClick={() => toast.dismiss(t.id)} className="okButton">OK</button>
+              <button onClick={() => toast.dismiss(t.id)} className="okButton">
+                OK
+              </button>
             </span>
           ),
           { duration: 12000 }
@@ -57,9 +64,9 @@ const ResetPassword: NextPage = () => {
 
   return (
     <>
-			<FormContainer pageTitle="Reset Password">
-				<form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
-        <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
+      <FormContainer pageTitle="Reset Password">
+        <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
+          <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             New password
             <input
               className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
@@ -80,9 +87,9 @@ const ResetPassword: NextPage = () => {
               Got back to login
             </p>
           </Link>
-				</form>
-			</FormContainer>
-		</>
+        </form>
+      </FormContainer>
+    </>
   );
 };
 

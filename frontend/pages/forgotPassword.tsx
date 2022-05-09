@@ -24,21 +24,19 @@ const ForgotPassword: NextPage = () => {
 
     if (email) {
       try {
-        const response = await axios.post(
-          Endpoints.RESETPASSWORD,
-          email,
-          {
-            headers: { 'Content-Type' : 'text/plain' }
-          }
-        );
-        console.log(response)
+        const response = await axios.post(Endpoints.RESETPASSWORD, email, {
+          headers: { 'Content-Type': 'text/plain' },
+        });
+        console.log(response);
         // router.push('/');
         toast.success(
           (t) => (
             <span>
               <b>Email sent</b> <br />
               An email has been sent to {email} <br />
-              <button onClick={() => toast.dismiss(t.id)} className="okButton">OK</button>
+              <button onClick={() => toast.dismiss(t.id)} className="okButton">
+                OK
+              </button>
             </span>
           ),
           { duration: 12000 }
@@ -50,18 +48,18 @@ const ForgotPassword: NextPage = () => {
     }
   };
 
-	return (
-		<>
-			<FormContainer pageTitle="Password forgotten">
-				<form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
+  return (
+    <>
+      <FormContainer pageTitle="Password forgotten">
+        <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             Email Address
             <input
-            className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
-            name="email"
-            type="email"
-            {...emailProps}
-            ref={emailRef}
+              className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
+              name="email"
+              type="email"
+              {...emailProps}
+              ref={emailRef}
             />
           </label>
           <button
@@ -70,11 +68,10 @@ const ForgotPassword: NextPage = () => {
           >
             Change password
           </button>
-				</form>
-			</FormContainer>
-		</>
-	)
-}
-
+        </form>
+      </FormContainer>
+    </>
+  );
+};
 
 export default ForgotPassword;
