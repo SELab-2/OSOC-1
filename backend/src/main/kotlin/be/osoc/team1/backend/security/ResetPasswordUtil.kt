@@ -10,10 +10,10 @@ import java.util.UUID
 object ResetPasswordUtil {
     /**
      * When a user requests to change its password, a random [UUID] gets generated and a new entry gets added to
-     * [resetTokens]. The key of the entry is the hashed uuid, the value consists of a [ResetPasswordToken] containing
+     * [resetPasswordTokens]. The key of the entry is the hashed uuid, the value consists of a [ResetPasswordToken] containing
      * TTL and email of the user. The uuid is used to generate a unique url for the user to reset its password.
      */
-    private val resetTokens: SortedMap<ByteArray, ResetPasswordToken> = sortedMapOf(
+    private val resetPasswordTokens: SortedMap<ByteArray, ResetPasswordToken> = sortedMapOf(
         { a, b -> return@sortedMapOf if (a.contentEquals(b)) 0 else 1 }
     )
 
@@ -30,12 +30,20 @@ object ResetPasswordUtil {
     }
 
     /**
+     * Remove expired tokens from [resetPasswordTokens].
+     */
+    private fun removeExpiredTokens() {
+        resetPasswordTokens.values.removeIf { it.isExpired() }
+    }
+
+    /**
      * Create a [ResetPasswordToken] for [emailAddress].
      */
     fun newToken(emailAddress: String): UUID {
+        removeExpiredTokens()
         val uuid: UUID = UUID.randomUUID()
         val hashedUUID: ByteArray = hash(uuid)
-        resetTokens[hashedUUID] = ResetPasswordToken(emailAddress)
+        resetPasswordTokens[hashedUUID] = ResetPasswordToken(emailAddress)
         return uuid
     }
 
@@ -43,7 +51,7 @@ object ResetPasswordUtil {
      * Check whether resetPasswordToken linked to [hashedUUID] is valid and hasn't expired yet.
      */
     private fun isTokenValid(hashedUUID: ByteArray): Boolean {
-        return (hashedUUID in resetTokens && !resetTokens[hashedUUID]!!.isExpired())
+        return (hashedUUID in resetPasswordTokens && !resetPasswordTokens[hashedUUID]!!.isExpired())
     }
 
     /**
@@ -52,7 +60,7 @@ object ResetPasswordUtil {
     fun getEmailFromUUID(resetPasswordUUID: UUID): String? {
         val hashedUUID = hash(resetPasswordUUID)
         if (isTokenValid(hashedUUID)) {
-            return resetTokens[hashedUUID]!!.emailAddress
+            return resetPasswordTokens[hashedUUID]!!.emailAddress
         }
         return null
     }
