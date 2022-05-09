@@ -5,12 +5,7 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
-import {
-  ProjectBase,
-  ProjectData,
-  StudentBase,
-  UserRole,
-} from '../../lib/types';
+import { ProjectBase, ProjectData, UserRole } from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
@@ -29,6 +24,7 @@ import { parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
+import usePoll from 'react-use-poll';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -107,10 +103,6 @@ const Projects: NextPage = () => {
   const router = useRouter();
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
-  const [refreshStudents, setRefreshStudents] = useState([false, false] as [
-    boolean,
-    boolean
-  ]);
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState('' as string);
   const [loading, setLoading] = useState(true);
@@ -189,6 +181,42 @@ const Projects: NextPage = () => {
   });
 
   /**
+   * This is the polling hook that will reload the projects list every 3000 ms
+   * This does not change state or loading but will show error messages
+   */
+  usePoll(
+    () => {
+      if (!state.loading) {
+        controller.abort();
+        controller = new AbortController();
+        const signal = controller.signal;
+        searchProject(
+          projectSearch,
+          setProjects,
+          {
+            hasMoreItems: state.hasMoreItems,
+            loading: state.loading,
+            page: 0,
+            pageSize: Math.max(state.page, 1) * state.pageSize,
+          },
+          () => null,
+          () => null,
+          signal,
+          setError,
+          router
+        );
+        return () => {
+          controller.abort();
+        };
+      }
+    },
+    [state, projectSearch],
+    {
+      interval: 3000,
+    }
+  );
+
+  /**
    * What to show when the projects list is empty
    */
   const showBlank = () => {
@@ -251,13 +279,7 @@ const Projects: NextPage = () => {
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>
-              <StudentSidebar
-                setError={setError}
-                refresh={refreshStudents}
-                setRefresh={setRefreshStudents}
-                setStudentBase={() => null}
-                studentBase={{} as StudentBase}
-              />
+              <StudentSidebar setError={setError} setStudentBase={() => null} />
             </section>
 
             {/* Holds the projects searchbar + project tiles */}
@@ -333,7 +355,6 @@ const Projects: NextPage = () => {
                       key={project.id}
                       projectInput={project}
                       refreshProjects={refreshProjects}
-                      setRefreshStudents={setRefreshStudents}
                     />
                   )}
                   renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
