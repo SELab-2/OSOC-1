@@ -46,8 +46,9 @@ fun <ID, T> getObjectCreatedResponse(
 }
 
 /**
- * This function checks if a request is allowed based on the active edition,
- * entries of inactive editions can only be viewed or deleted by admins
+ * This function checks if a request is allowed based on the edition of the accessed resource ([editionName]),
+ * (entries of inactive editions can only be viewed or deleted by admins).
+ * [editionService], [userDetailService] and [httpServletRequest] should be injected in the caller of this function.
  */
 fun attemptEditionAccess(
     editionName: String,
