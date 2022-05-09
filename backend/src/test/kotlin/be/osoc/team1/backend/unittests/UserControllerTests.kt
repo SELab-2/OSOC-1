@@ -135,14 +135,4 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
                 .content(ObjectMapper().writeValueAsString(Role.Admin))
         ).andExpect(status().isNotFound)
     }
-
-    @Test
-    fun `postEmail should not fail`() {
-        every { userService.sendEmailWithToken(any()) } just Runs
-        mockMvc.perform(
-            post("/users/resetPassword")
-                .contentType(MediaType.TEXT_PLAIN)
-                .content(ObjectMapper().writeValueAsString("test@mail.com"))
-        ).andExpect(status().isNoContent)
-    }
 }
