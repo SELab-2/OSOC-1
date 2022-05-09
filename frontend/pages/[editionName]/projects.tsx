@@ -273,17 +273,19 @@ const Projects: NextPage = () => {
                   showSidebar ? 'visible' : 'hidden'
                 } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
               >
-              <div
-                className={`${
-                  showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
-              >
-                {/* button to close sidebar on mobile */}
-                <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
-              </div>
-              <StudentSidebar setError={setError} setStudentBase={() => null} />
-            </section>
-
+                <div
+                  className={`${
+                    showSidebar ? 'visible' : 'hidden'
+                  } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                >
+                  {/* button to close sidebar on mobile */}
+                  <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
+                </div>
+                <StudentSidebar
+                  setError={setError}
+                  setStudentBase={() => null}
+                />
+              </section>
 
               {/* Holds the projects searchbar + project tiles */}
               <section
@@ -349,36 +351,22 @@ const Projects: NextPage = () => {
 
                 {error && <Error error={error} className="mb-4" />}
 
-
-              {/* This contains the project tiles */}
-              <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
-                <FlatList
-                  list={projects}
-                  renderItem={(project: ProjectBase) => (
-                    <ProjectTile
-                      key={project.id}
-                      projectInput={project}
-                      refreshProjects={refreshProjects}
-                    />
-                  )}
-                  renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
-                  hasMoreItems={state.hasMoreItems}
-                  loadMoreItems={fetchData}
-                  paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
-                  paginationLoadingIndicatorPosition="center"
-                />
-                <div
-                  className={`${
-                    state.loading && state.page > 0 ? 'visible block' : 'hidden'
-                  } text-center`}
-                >
-                  <p>Loading Projects</p>
-                  <SpinnerCircular
-                    size={100}
-                    thickness={100}
-                    color="#FCB70F"
-                    secondaryColor="rgba(252, 183, 15, 0.4)"
-                    className="mx-auto"
+                {/* This contains the project tiles */}
+                <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
+                  <FlatList
+                    list={projects}
+                    renderItem={(project: ProjectBase) => (
+                      <ProjectTile
+                        key={project.id}
+                        projectInput={project}
+                        refreshProjects={refreshProjects}
+                      />
+                    )}
+                    renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
+                    hasMoreItems={state.hasMoreItems}
+                    loadMoreItems={fetchData}
+                    paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
+                    paginationLoadingIndicatorPosition="center"
                   />
                   <div
                     className={`${
@@ -395,9 +383,24 @@ const Projects: NextPage = () => {
                       secondaryColor="rgba(252, 183, 15, 0.4)"
                       className="mx-auto"
                     />
+                    <div
+                      className={`${
+                        state.loading && state.page > 0
+                          ? 'visible block'
+                          : 'hidden'
+                      } text-center`}
+                    >
+                      <p>Loading Projects</p>
+                      <SpinnerCircular
+                        size={100}
+                        thickness={100}
+                        color="#FCB70F"
+                        secondaryColor="rgba(252, 183, 15, 0.4)"
+                        className="mx-auto"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
               </section>
             </main>
           </DndProvider>

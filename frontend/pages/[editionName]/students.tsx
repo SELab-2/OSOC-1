@@ -39,20 +39,20 @@ const Students: NextPage = () => {
                   showSidebar ? 'visible' : 'hidden'
                 } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
               >
-              <div
-                className={`${
-                  showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
-              >  
-                {/* button to close sidebar on mobile */}
-                <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
-              </div>
-              {/* actual sidebar */}
-              <StudentSidebar
-                setError={setError}
-                setStudentBase={setStudentBase}
-              />
-            </section>
+                <div
+                  className={`${
+                    showSidebar ? 'visible' : 'hidden'
+                  } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                >
+                  {/* button to close sidebar on mobile */}
+                  <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
+                </div>
+                {/* actual sidebar */}
+                <StudentSidebar
+                  setError={setError}
+                  setStudentBase={setStudentBase}
+                />
+              </section>
 
               {/* Holds main student content */}
               <section
