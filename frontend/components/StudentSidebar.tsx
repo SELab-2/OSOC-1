@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
+import usePoll from 'react-use-poll';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { StudentBase, StudentData } from '../lib/types';
@@ -19,10 +20,7 @@ const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
  */
 type StudentsSidebarProps = {
   setError: (error: string) => void;
-  refresh: [boolean, boolean];
-  setRefresh: (refresh: [boolean, boolean]) => void;
   setStudentBase: (studentBase: StudentBase) => void;
-  studentBase: StudentBase;
 };
 
 /**
@@ -143,10 +141,7 @@ function getStatusFilterList(
  */
 const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   setError,
-  refresh,
-  setRefresh,
   setStudentBase,
-  studentBase,
 }: StudentsSidebarProps) => {
   const router = useRouter();
   const [showFilter, setShowFilter] = useState(true);
@@ -228,23 +223,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   }, [studentSearchParameters, skills]);
 
   /**
-   * This call refreshes the students without changing the current scroll position
-   * The downside here is that if the students length is 500 elements, all 500 elements
-   * need to be reloaded. This can be quite slow and does a lot of useless work.
-   */
-  useEffect(() => {
-    if (refresh[0] && (refresh[1] || studentSearchParameters.ExcludeAssigned)) {
-      const prevPageSize = state.pageSize;
-      const prevPage = state.page;
-      state.pageSize = state.page * state.pageSize;
-      search();
-      state.page = prevPage;
-      state.pageSize = prevPageSize;
-      setRefresh([false, refresh[1]]);
-    }
-  }, [refresh]);
-
-  /**
    * Call to refresh students list from page 0 with current filters applied
    */
   const search = (refreshSkills = false) => {
@@ -281,6 +259,46 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     page: 0,
     pageSize: 50,
   });
+
+  /**
+   * This is the polling hook that will reload the students list every 3000 ms
+   * We're not reloading the skills dropdown list because this gives some annoying user experiences
+   * This does not change state or loading but will show error messages
+   */
+  usePoll(
+    () => {
+      if (!state.loading) {
+        controller.abort();
+        controller = new AbortController();
+        const signal = controller.signal;
+        searchStudent(
+          studentNameSearch,
+          skills,
+          studentSearchParameters,
+          setStudents,
+          setFilterAmount,
+          {
+            hasMoreItems: state.hasMoreItems,
+            loading: state.loading,
+            page: 0,
+            pageSize: Math.max(state.page, 1) * state.pageSize,
+          },
+          () => null,
+          () => null,
+          signal,
+          setError,
+          router
+        );
+        return () => {
+          controller.abort();
+        };
+      }
+    },
+    [state, studentSearchParameters, skills],
+    {
+      interval: 3000,
+    }
+  );
 
   /**
    * What to show when the students list is empty
@@ -607,9 +625,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
             renderItem={(student: StudentBase) => (
               <StudentTile
                 key={student.id}
-                student={student}
+                studentInput={student}
                 setStudentBase={setStudentBase}
-                studentBase={studentBase}
               />
             )}
             renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show

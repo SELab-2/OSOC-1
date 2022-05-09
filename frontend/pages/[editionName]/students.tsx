@@ -21,11 +21,8 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
+  // Needed to allow for click select from the sidebar to the main screen
   const [studentBase, setStudentBase] = useState({} as StudentBase);
-  const [refreshStudents, setRefreshStudents] = useState([false, true] as [
-    boolean,
-    boolean
-  ]);
   const [error, setError]: [string, (error: string) => void] = useState('');
   useAxiosAuth();
 
@@ -43,6 +40,23 @@ const Students: NextPage = () => {
                 } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
               >
                 {/* button to close sidebar on mobile */}
+                <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
+              </div>
+              {/* actual sidebar */}
+              <StudentSidebar
+                setError={setError}
+                setStudentBase={setStudentBase}
+              />
+            </section>
+
+            {/* Holds main student content */}
+            <section
+              className={`${
+                showSidebar ? 'hidden' : 'visible'
+              } mt-[30px] w-full md:visible md:block`}
+            >
+              <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
+                {/* button to open sidebar on mobile */}
                 <div
                   className={`${
                     showSidebar ? 'visible' : 'hidden'
@@ -50,11 +64,14 @@ const Students: NextPage = () => {
                 >
                   <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
                 </div>
-                {/* actual sidebar */}
-                <StudentSidebar
-                  setError={setError}
-                  refresh={refreshStudents}
-                  setRefresh={setRefreshStudents}
+              </div>
+
+              {error && <Error error={error} className="mb-4" />}
+
+              {/* This contains the actual student info */}
+              <div>
+                <StudentHolder
+                  studentBase={studentBase}
                   setStudentBase={setStudentBase}
                   studentBase={studentBase}
                 />

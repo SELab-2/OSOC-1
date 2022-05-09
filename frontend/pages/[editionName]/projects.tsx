@@ -5,12 +5,7 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
-import {
-  ProjectBase,
-  ProjectData,
-  StudentBase,
-  UserRole,
-} from '../../lib/types';
+import { ProjectBase, ProjectData, UserRole } from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
@@ -30,6 +25,7 @@ import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import PersistLogin from '../../components/PersistLogin';
+import usePoll from 'react-use-poll';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -108,10 +104,6 @@ const Projects: NextPage = () => {
   const router = useRouter();
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
-  const [refreshStudents, setRefreshStudents] = useState([false, false] as [
-    boolean,
-    boolean
-  ]);
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState('' as string);
   const [loading, setLoading] = useState(true);
@@ -190,6 +182,42 @@ const Projects: NextPage = () => {
   });
 
   /**
+   * This is the polling hook that will reload the projects list every 3000 ms
+   * This does not change state or loading but will show error messages
+   */
+  usePoll(
+    () => {
+      if (!state.loading) {
+        controller.abort();
+        controller = new AbortController();
+        const signal = controller.signal;
+        searchProject(
+          projectSearch,
+          setProjects,
+          {
+            hasMoreItems: state.hasMoreItems,
+            loading: state.loading,
+            page: 0,
+            pageSize: Math.max(state.page, 1) * state.pageSize,
+          },
+          () => null,
+          () => null,
+          signal,
+          setError,
+          router
+        );
+        return () => {
+          controller.abort();
+        };
+      }
+    },
+    [state, projectSearch],
+    {
+      interval: 3000,
+    }
+  );
+
+  /**
    * What to show when the projects list is empty
    */
   const showBlank = () => {
@@ -246,6 +274,19 @@ const Projects: NextPage = () => {
                 } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
               >
                 {/* button to close sidebar on mobile */}
+                <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
+              </div>
+              <StudentSidebar setError={setError} setStudentBase={() => null} />
+            </section>
+
+            {/* Holds the projects searchbar + project tiles */}
+            <section
+              className={`${
+                showSidebar ? 'hidden' : 'visible'
+              } mt-[30px] w-full md:visible md:block`}
+            >
+              <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
+                {/* button to open sidebar on mobile */}
                 <div
                   className={`${
                     showSidebar ? 'visible' : 'hidden'
@@ -326,23 +367,36 @@ const Projects: NextPage = () => {
 
                 {error && <Error error={error} className="mb-4" />}
 
-                {/* This contains the project tiles */}
-                <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
-                  <FlatList
-                    list={projects}
-                    renderItem={(project: ProjectBase) => (
-                      <ProjectTile
-                        key={project.id}
-                        projectInput={project}
-                        refreshProjects={refreshProjects}
-                        setRefreshStudents={setRefreshStudents}
-                      />
-                    )}
-                    renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
-                    hasMoreItems={state.hasMoreItems}
-                    loadMoreItems={fetchData}
-                    paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
-                    paginationLoadingIndicatorPosition="center"
+
+              {/* This contains the project tiles */}
+              <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
+                <FlatList
+                  list={projects}
+                  renderItem={(project: ProjectBase) => (
+                    <ProjectTile
+                      key={project.id}
+                      projectInput={project}
+                      refreshProjects={refreshProjects}
+                    />
+                  )}
+                  renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
+                  hasMoreItems={state.hasMoreItems}
+                  loadMoreItems={fetchData}
+                  paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
+                  paginationLoadingIndicatorPosition="center"
+                />
+                <div
+                  className={`${
+                    state.loading && state.page > 0 ? 'visible block' : 'hidden'
+                  } text-center`}
+                >
+                  <p>Loading Projects</p>
+                  <SpinnerCircular
+                    size={100}
+                    thickness={100}
+                    color="#FCB70F"
+                    secondaryColor="rgba(252, 183, 15, 0.4)"
+                    className="mx-auto"
                   />
                   <div
                     className={`${
