@@ -25,7 +25,7 @@
     "react-dom": "^18.1.0",
     "react-hot-toast": "^2.2.0",
     "react-minimal-pie-chart": "^8.3.0",
-    "react-select": "^5.3.0",
+    "react-select": "^5.3.2",
     "react-use-poll": "^1.1.5",
     "reactjs-popup": "^2.0.5",
     "recoil": "^0.7.2",
