@@ -1,7 +1,7 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.User
-import be.osoc.team1.backend.exceptions.InvalidTokenException
+import be.osoc.team1.backend.exceptions.InvalidForgotPasswordUUIDException
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.EmailUtil
 import be.osoc.team1.backend.security.ResetPasswordUtil
@@ -26,9 +26,9 @@ class ForgotPasswordService(private val repository: UserRepository, private val 
      */
     fun changePassword(resetPasswordUUID: UUID, newPassword: String) {
         val emailAddress = ResetPasswordUtil.getEmailFromUUID(resetPasswordUUID)
-            ?: throw InvalidTokenException("resetPasswordUUID is invalid.")
+            ?: throw InvalidForgotPasswordUUIDException("resetPasswordUUID is invalid.")
         val user: User = repository.findByEmail(emailAddress)
-            ?: throw InvalidTokenException("ResetPasswordToken contains invalid email.")
+            ?: throw InvalidForgotPasswordUUIDException("ResetPasswordToken contains invalid email.")
         user.password = passwordEncoder.encode(newPassword)
         repository.save(user)
     }
