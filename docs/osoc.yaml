@@ -1465,13 +1465,14 @@ components:
         StatusSuggestion:
             type: object
             required:
-                - coachId
+                - suggester
                 - status
                 - motivation
             properties:
-                coachId:
+                suggester:
                     type: string
-                    format: uuid
+                    format: https://example.com/api/users/{userId}
+                    example: https://example.com/api/users/389a58ce-6bc2-496e-bea1-4991cd598651
                 status:
                     type: string
                     enum: [ Yes, Maybe, No ]
