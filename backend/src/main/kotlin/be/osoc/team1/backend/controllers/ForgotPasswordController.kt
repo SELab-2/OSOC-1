@@ -25,9 +25,9 @@ class ForgotPasswordController(private val service: ForgotPasswordService) {
     fun postEmail(@RequestBody emailAddress: String) = service.sendEmailWithToken(emailAddress)
 
     /**
-     * Reset password using [resetPasswordUUID].
+     * Reset password using [forgotPasswordUUID].
      */
-    @PatchMapping("/{resetPasswordUUID}")
-    fun patchPassword(@PathVariable resetPasswordUUID: UUID, @RequestBody newPassword: String) =
-        service.changePassword(resetPasswordUUID, newPassword)
+    @PatchMapping("/{forgotPasswordUUID}")
+    fun patchPassword(@PathVariable forgotPasswordUUID: UUID, @RequestBody newPassword: String) =
+        service.changePassword(forgotPasswordUUID, newPassword)
 }

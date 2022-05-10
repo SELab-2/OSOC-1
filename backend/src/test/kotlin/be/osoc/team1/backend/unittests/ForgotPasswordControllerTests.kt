@@ -1,7 +1,7 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.ForgotPasswordController
-import be.osoc.team1.backend.exceptions.InvalidTokenException
+import be.osoc.team1.backend.exceptions.InvalidForgotPasswordUUIDException
 import be.osoc.team1.backend.security.PasswordEncoderConfig
 import be.osoc.team1.backend.services.ForgotPasswordService
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -41,18 +41,18 @@ class ForgotPasswordControllerTests(@Autowired val mockMvc: MockMvc) {
         mockMvc.perform(
             MockMvcRequestBuilders.patch("/forgotPassword/$validUUID")
                 .contentType(MediaType.TEXT_PLAIN)
-                .content(ObjectMapper().writeValueAsString(validNewPassword))
-        ).andExpect(MockMvcResultMatchers.status().isNoContent)
+                .content(validNewPassword)
+        ).andExpect(MockMvcResultMatchers.status().isOk)
     }
 
     @Test
     fun `changePassword should fail when invalid uuid given`() {
         val invalidUUID = UUID.randomUUID()
-        every { service.changePassword(invalidUUID, validNewPassword) } throws InvalidTokenException()
+        every { service.changePassword(invalidUUID, validNewPassword) } throws InvalidForgotPasswordUUIDException()
         mockMvc.perform(
-            MockMvcRequestBuilders.patch("/forgotPassword/$validUUID")
+            MockMvcRequestBuilders.patch("/forgotPassword/$invalidUUID")
                 .contentType(MediaType.TEXT_PLAIN)
-                .content(ObjectMapper().writeValueAsString(validNewPassword))
-        ).andExpect(MockMvcResultMatchers.status().isNoContent)
+                .content(validNewPassword)
+        ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 }
