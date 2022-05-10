@@ -1033,7 +1033,7 @@ paths:
                     description: NOT FOUND
                 '400':
                     description: Bad Request.
-    /users/resetPassword:
+    /forgotPassword:
         post:
             summary: request to change password of given email
             requestBody:
@@ -1046,11 +1046,11 @@ paths:
                     description: successful operation
                 '400':
                     description: Bad Request.
-    /users/{resetPasswordUUID}/:
+    /forgotPassword/{forgotPasswordUUID}/:
         patch:
-            summary: reset password of user linked to resetPasswordUUID
+            summary: reset password of user linked to forgotPasswordUUID
             parameters:
-                -   name: resetPasswordUUID
+                -   name: forgotPasswordUUID
                     required: true
                     in: path
                     schema:

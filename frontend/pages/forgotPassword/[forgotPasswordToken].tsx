@@ -9,9 +9,9 @@ import axios from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import { customPasswordRegex } from '../../lib/regex';
 
-const ResetPassword: NextPage = () => {
+const ForgotPassword: NextPage = () => {
   const router = useRouter();
-  const token = router.query.resetPasswordToken as string;
+  const token = router.query.forgotPasswordToken as string;
 
   /* eslint-disable */
   const [password, resetPassword, passwordProps] = useInput('');
@@ -108,4 +108,4 @@ const ResetPassword: NextPage = () => {
   );
 };
 
-export default ResetPassword;
+export default ForgotPassword;

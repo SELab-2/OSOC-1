@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 */
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 class InvalidForgotPasswordUUIDException(
-    message: String = "resetPasswordUUID is invalid.",
+    message: String = "forgotPasswordUUID is invalid.",
     cause: Throwable? = null
 ) : Exception(message, cause)

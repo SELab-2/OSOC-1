@@ -20,7 +20,7 @@ object EmailUtil {
      * Make the body of the email users receive when they request a password change.
      */
     private fun getForgotPasswordEmailBody(forgotPasswordUUID: UUID): String {
-        val url = "http://localhost:3000/forgotPassword/$forgotPasswordUUID"
+        val url = "https://sel2-1.ugent.be/forgotPassword/$forgotPasswordUUID"
         return """
             Hi,
             
