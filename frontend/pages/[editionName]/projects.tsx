@@ -4,13 +4,8 @@ import StudentSidebar from '../../components/StudentSidebar';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import {
-  ProjectBase,
-  ProjectData,
-  StudentBase,
-  UserRole,
-} from '../../lib/types';
+import { useEffect, useRef, useState } from 'react';
+import { ProjectBase, ProjectData, UserRole } from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
@@ -29,6 +24,8 @@ import { parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
+import usePoll from 'react-use-poll';
+import useOnScreen from '../../hooks/useOnScreen';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -107,10 +104,6 @@ const Projects: NextPage = () => {
   const router = useRouter();
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
-  const [refreshStudents, setRefreshStudents] = useState([false, false] as [
-    boolean,
-    boolean
-  ]);
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState('' as string);
   const [loading, setLoading] = useState(true);
@@ -122,6 +115,8 @@ const Projects: NextPage = () => {
   const [projectForm, setProjectForm] = useState(
     JSON.parse(JSON.stringify({ ...defaultprojectForm }))
   );
+  const elementRef = useRef(null);
+  const isOnScreen = useOnScreen(elementRef);
 
   let controller = new AbortController();
   useAxiosAuth();
@@ -148,6 +143,7 @@ const Projects: NextPage = () => {
   /**
    * Used as a callback to ProjectPopup, this gets called when a new project is added.
    * Can't cheat this by manually adding since project would then get shown twice on fetching new projects.
+   * Keeping this even though we have polling since it is weird having to wait on this otherwise.
    */
   const refreshProjects = () => {
     setProjectForm(JSON.parse(JSON.stringify({ ...defaultprojectForm })));
@@ -189,6 +185,42 @@ const Projects: NextPage = () => {
   });
 
   /**
+   * This is the polling hook that will reload the projects list every 3000 ms
+   * This does not change state or loading but will show error messages
+   */
+  usePoll(
+    () => {
+      if (!state.loading && { isOnScreen }.isOnScreen) {
+        controller.abort();
+        controller = new AbortController();
+        const signal = controller.signal;
+        searchProject(
+          projectSearch,
+          setProjects,
+          {
+            hasMoreItems: state.hasMoreItems,
+            loading: state.loading,
+            page: 0,
+            pageSize: Math.max(state.page, 1) * state.pageSize,
+          },
+          () => null,
+          () => null,
+          signal,
+          setError,
+          router
+        );
+        return () => {
+          controller.abort();
+        };
+      }
+    },
+    [state, projectSearch, { isOnScreen }.isOnScreen],
+    {
+      interval: 3000,
+    }
+  );
+
+  /**
    * What to show when the projects list is empty
    */
   const showBlank = () => {
@@ -213,6 +245,9 @@ const Projects: NextPage = () => {
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
+    if (!{ isOnScreen }.isOnScreen) {
+      return;
+    }
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
@@ -247,21 +282,16 @@ const Projects: NextPage = () => {
               <div
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                } absolute left-[24px] top-[16px] z-50 flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>
-              <StudentSidebar
-                setError={setError}
-                refresh={refreshStudents}
-                setRefresh={setRefreshStudents}
-                setStudentBase={() => null}
-                studentBase={{} as StudentBase}
-              />
+              <StudentSidebar setError={setError} setStudentBase={() => null} />
             </section>
 
             {/* Holds the projects searchbar + project tiles */}
             <section
+              ref={elementRef}
               className={`${
                 showSidebar ? 'hidden' : 'visible'
               } mt-[30px] w-full md:visible md:block`}
@@ -333,7 +363,6 @@ const Projects: NextPage = () => {
                       key={project.id}
                       projectInput={project}
                       refreshProjects={refreshProjects}
-                      setRefreshStudents={setRefreshStudents}
                     />
                   )}
                   renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show

@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "NielsPraet"
+      - "Mikxox"
+      - "tvhimme"
+      
+  - package-ecosystem: "maven"
+    directory: "/backend"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "MaartenS11"
+      - "TomAlard"
+      - "NinjaJay"
+      - "lars-vc"
