@@ -48,6 +48,13 @@ object ForgotPasswordUtil {
     }
 
     /**
+     * Remove token linked to [forgotPasswordUUID] from [forgotPasswordTokens].
+     */
+    fun removeToken(forgotPasswordUUID: UUID) {
+        forgotPasswordTokens.remove(hash(forgotPasswordUUID))
+    }
+
+    /**
      * Check whether forgotPasswordToken linked to [hashedUUID] is valid and hasn't expired yet.
      */
     private fun isTokenValid(hashedUUID: ByteArray): Boolean {

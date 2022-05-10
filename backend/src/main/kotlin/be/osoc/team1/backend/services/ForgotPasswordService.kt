@@ -31,5 +31,6 @@ class ForgotPasswordService(private val repository: UserRepository, private val 
             ?: throw InvalidForgotPasswordUUIDException("ForgotPasswordToken contains invalid email.")
         user.password = passwordEncoder.encode(newPassword)
         repository.save(user)
+        ForgotPasswordUtil.removeToken(forgotPasswordUUID)
     }
 }

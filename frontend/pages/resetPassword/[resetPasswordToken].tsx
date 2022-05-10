@@ -23,8 +23,8 @@ const ResetPassword: NextPage = () => {
 
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    console.log("password:"+password)
-    console.log("validPassword:"+validPassword)
+    console.log('password:' + password);
+    console.log('validPassword:' + validPassword);
 
     if (validPassword) {
       try {
