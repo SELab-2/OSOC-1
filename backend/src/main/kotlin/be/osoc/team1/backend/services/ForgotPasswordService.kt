@@ -4,7 +4,7 @@ import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidForgotPasswordUUIDException
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.EmailUtil
-import be.osoc.team1.backend.security.ResetPasswordUtil
+import be.osoc.team1.backend.security.ForgotPasswordUtil
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -16,19 +16,19 @@ class ForgotPasswordService(private val repository: UserRepository, private val 
      */
     fun sendEmailWithToken(emailAddress: String) {
         if (repository.findByEmail(emailAddress) != null) {
-            val resetPasswordUUID: UUID = ResetPasswordUtil.newToken(emailAddress)
-            EmailUtil.sendEmail(emailAddress, resetPasswordUUID)
+            val forgotPasswordUUID: UUID = ForgotPasswordUtil.newToken(emailAddress)
+            EmailUtil.sendEmail(emailAddress, forgotPasswordUUID)
         }
     }
 
     /**
-     * Extract the email address from [resetPasswordUUID] and set the password of that user to [newPassword].
+     * Extract the email address from [forgotPasswordUUID] and set the password of that user to [newPassword].
      */
-    fun changePassword(resetPasswordUUID: UUID, newPassword: String) {
-        val emailAddress = ResetPasswordUtil.getEmailFromUUID(resetPasswordUUID)
-            ?: throw InvalidForgotPasswordUUIDException("resetPasswordUUID is invalid.")
+    fun changePassword(forgotPasswordUUID: UUID, newPassword: String) {
+        val emailAddress = ForgotPasswordUtil.getEmailFromUUID(forgotPasswordUUID)
+            ?: throw InvalidForgotPasswordUUIDException("forgotPasswordUUID is invalid.")
         val user: User = repository.findByEmail(emailAddress)
-            ?: throw InvalidForgotPasswordUUIDException("ResetPasswordToken contains invalid email.")
+            ?: throw InvalidForgotPasswordUUIDException("ForgotPasswordToken contains invalid email.")
         user.password = passwordEncoder.encode(newPassword)
         repository.save(user)
     }

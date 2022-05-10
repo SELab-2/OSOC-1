@@ -19,8 +19,8 @@ object EmailUtil {
     /**
      * Make the body of the email users receive when they request a password change.
      */
-    private fun getResetPasswordEmailBody(resetPasswordUUID: UUID): String {
-        val url = "http://localhost:3000/resetPassword/$resetPasswordUUID"
+    private fun getForgotPasswordEmailBody(forgotPasswordUUID: UUID): String {
+        val url = "http://localhost:3000/forgotPassword/$forgotPasswordUUID"
         return """
             Hi,
             
@@ -52,12 +52,12 @@ object EmailUtil {
     }
 
     /**
-     * Email [emailAddressReceiver] with a [resetPasswordUUID], so [emailAddressReceiver] can reset its email.
+     * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
-    fun sendEmail(emailAddressReceiver: String, resetPasswordUUID: UUID) {
+    fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID) {
         val email = SimpleMailMessage()
         email.setSubject("Reset Password")
-        email.setText(getResetPasswordEmailBody(resetPasswordUUID))
+        email.setText(getForgotPasswordEmailBody(forgotPasswordUUID))
         email.setTo(emailAddressReceiver)
         email.setFrom(emailAddressSender)
 
