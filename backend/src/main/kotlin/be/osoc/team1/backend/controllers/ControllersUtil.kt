@@ -63,11 +63,11 @@ fun attemptEditionAccess(
     if (!edition.accessibleBy(user))
         throw UnauthorizedOperationException("Entries of inactive editions can only be accessed by admins!")
     if (!edition.isActive && httpServletRequest.method != "GET" && httpServletRequest.method != "DELETE")
-        throw ForbiddenOperationException("Entries of inactive editions can only be viewed or delete (Allowed methods: GET, DELETE)")
+        throw ForbiddenOperationException("Entries of inactive editions can only be viewed or deleted (Allowed methods: GET, DELETE)")
 }
 
 /**
- * This class adds the code of the SecuredEdition annotation
+ * This class adds the code for the SecuredEdition annotation
  */
 @Aspect
 @Component
@@ -84,9 +84,7 @@ class EditionSecurityAspect(val editionService: EditionService, val userDetailSe
         if (editionFieldIndex < 0)
             throw IllegalStateException("The @SecuredEdition edition argument was not found! (With this annotation the function needs an edition argument)")
         val editionName = joinPoint.args[editionFieldIndex] as String
-
         attemptEditionAccess(editionName, editionService, userDetailService, request)
-
         return joinPoint
     }
 }
