@@ -4,7 +4,7 @@ import StudentSidebar from '../../components/StudentSidebar';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ProjectBase, ProjectData, UserRole } from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
@@ -25,7 +25,7 @@ import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import usePoll from 'react-use-poll';
-import useOnScreen from "../../hooks/useOnScreen";
+import useOnScreen from '../../hooks/useOnScreen';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -190,7 +190,7 @@ const Projects: NextPage = () => {
    */
   usePoll(
     () => {
-      if (!state.loading && {isOnScreen}.isOnScreen) {
+      if (!state.loading && { isOnScreen }.isOnScreen) {
         controller.abort();
         controller = new AbortController();
         const signal = controller.signal;
@@ -214,7 +214,7 @@ const Projects: NextPage = () => {
         };
       }
     },
-    [state, projectSearch, {isOnScreen}.isOnScreen],
+    [state, projectSearch, { isOnScreen }.isOnScreen],
     {
       interval: 3000,
     }
@@ -245,7 +245,7 @@ const Projects: NextPage = () => {
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    if(!({isOnScreen}.isOnScreen)){
+    if (!{ isOnScreen }.isOnScreen) {
       return;
     }
     controller.abort();
@@ -282,17 +282,17 @@ const Projects: NextPage = () => {
               <div
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[16px] flex flex-col justify-center text-[30px] opacity-20 md:hidden z-50`}
+                } absolute left-[24px] top-[16px] z-50 flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>
-              <StudentSidebar setError={setError} setStudentBase={() => null}/>
+              <StudentSidebar setError={setError} setStudentBase={() => null} />
             </section>
 
             {/* Holds the projects searchbar + project tiles */}
             <section
-                ref={elementRef}
-                className={`${
+              ref={elementRef}
+              className={`${
                 showSidebar ? 'hidden' : 'visible'
               } mt-[30px] w-full md:visible md:block`}
             >

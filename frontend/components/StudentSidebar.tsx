@@ -1,4 +1,4 @@
-import {Fragment, RefObject, useEffect, useState} from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import usePoll from 'react-use-poll';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
@@ -223,10 +223,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * This will also get called on first render
    */
   useEffect(() => {
-    if ({isOnScreen}.isOnScreen) {
+    if ({ isOnScreen }.isOnScreen) {
       return search(true);
     }
-  }, [studentSearchParameters, skills, {isOnScreen}.isOnScreen]);
+  }, [studentSearchParameters, skills, { isOnScreen }.isOnScreen]);
 
   /**
    * Call to refresh students list from page 0 with current filters applied
@@ -273,28 +273,28 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    */
   usePoll(
     () => {
-      if (!state.loading && {isOnScreen}.isOnScreen) {
+      if (!state.loading && { isOnScreen }.isOnScreen) {
         controller.abort();
         controller = new AbortController();
         const signal = controller.signal;
         (async () => {
           await searchStudent(
-              studentNameSearch,
-              skills,
-              studentSearchParameters,
-              setStudents,
-              setFilterAmount,
-              {
-                hasMoreItems: state.hasMoreItems,
-                loading: state.loading,
-                page: 0,
-                pageSize: Math.max(state.page, 1) * state.pageSize,
-              },
-              () => null,
-              () => null,
-              signal,
-              setError,
-              router
+            studentNameSearch,
+            skills,
+            studentSearchParameters,
+            setStudents,
+            setFilterAmount,
+            {
+              hasMoreItems: state.hasMoreItems,
+              loading: state.loading,
+              page: 0,
+              pageSize: Math.max(state.page, 1) * state.pageSize,
+            },
+            () => null,
+            () => null,
+            signal,
+            setError,
+            router
           );
         })();
         return () => {
@@ -302,7 +302,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
         };
       }
     },
-    [state, studentSearchParameters, skills, {isOnScreen}.isOnScreen],
+    [state, studentSearchParameters, skills, { isOnScreen }.isOnScreen],
     {
       interval: 3000,
     }
@@ -333,7 +333,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    if (state.loading || !({isOnScreen}.isOnScreen)) {
+    if (state.loading || !{ isOnScreen }.isOnScreen) {
       return;
     }
     controller.abort();
@@ -360,7 +360,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
 
   return (
     // holds searchbar + hide filter button
-    <div className="sidebar mt-[50px] max-h-screen py-4 sm:mt-0" ref={elementRef} >
+    <div
+      className="sidebar mt-[50px] max-h-screen py-4 sm:mt-0"
+      ref={elementRef}
+    >
       <div className="flex max-h-[calc(100vh-32px)] flex-col">
         <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
           {/* TODO add an easy reset/undo search button */}
