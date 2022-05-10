@@ -29,7 +29,7 @@ const Students: NextPage = () => {
     <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
       <div className="min-w-screen flex min-h-screen flex-col items-center">
         <Header />
-        <DndProvider backend={HTML5Backend}>
+        <DndProvider backend={HTML5Backend} key={2}>
           <main className="flex w-full flex-row">
             {/* Holds the sidebar with search, filter and student results */}
             <section
@@ -41,7 +41,7 @@ const Students: NextPage = () => {
               <div
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                } absolute left-[24px] top-[16px] flex flex-col justify-center text-[30px] opacity-20 md:hidden z-50`}
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>

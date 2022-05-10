@@ -4,7 +4,7 @@ import StudentSidebar from '../../components/StudentSidebar';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { ProjectBase, ProjectData, UserRole } from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
@@ -25,6 +25,7 @@ import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import usePoll from 'react-use-poll';
+import useOnScreen from "../../hooks/useOnScreen";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -114,6 +115,8 @@ const Projects: NextPage = () => {
   const [projectForm, setProjectForm] = useState(
     JSON.parse(JSON.stringify({ ...defaultprojectForm }))
   );
+  const elementRef = useRef(null);
+  const isOnScreen = useOnScreen(elementRef);
 
   let controller = new AbortController();
   useAxiosAuth();
@@ -140,6 +143,7 @@ const Projects: NextPage = () => {
   /**
    * Used as a callback to ProjectPopup, this gets called when a new project is added.
    * Can't cheat this by manually adding since project would then get shown twice on fetching new projects.
+   * Keeping this even though we have polling since it is weird having to wait on this otherwise.
    */
   const refreshProjects = () => {
     setProjectForm(JSON.parse(JSON.stringify({ ...defaultprojectForm })));
@@ -186,7 +190,7 @@ const Projects: NextPage = () => {
    */
   usePoll(
     () => {
-      if (!state.loading) {
+      if (!state.loading && {isOnScreen}.isOnScreen) {
         controller.abort();
         controller = new AbortController();
         const signal = controller.signal;
@@ -210,7 +214,7 @@ const Projects: NextPage = () => {
         };
       }
     },
-    [state, projectSearch],
+    [state, projectSearch, {isOnScreen}.isOnScreen],
     {
       interval: 3000,
     }
@@ -241,6 +245,9 @@ const Projects: NextPage = () => {
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
+    if(!({isOnScreen}.isOnScreen)){
+      return;
+    }
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
@@ -275,16 +282,17 @@ const Projects: NextPage = () => {
               <div
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                } absolute left-[24px] top-[16px] flex flex-col justify-center text-[30px] opacity-20 md:hidden z-50`}
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>
-              <StudentSidebar setError={setError} setStudentBase={() => null} />
+              <StudentSidebar setError={setError} setStudentBase={() => null}/>
             </section>
 
             {/* Holds the projects searchbar + project tiles */}
             <section
-              className={`${
+                ref={elementRef}
+                className={`${
                 showSidebar ? 'hidden' : 'visible'
               } mt-[30px] w-full md:visible md:block`}
             >
