@@ -20,11 +20,8 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
+  // Needed to allow for click select from the sidebar to the main screen
   const [studentBase, setStudentBase] = useState({} as StudentBase);
-  const [refreshStudents, setRefreshStudents] = useState([false, true] as [
-    boolean,
-    boolean
-  ]);
   const [error, setError]: [string, (error: string) => void] = useState('');
   useAxiosAuth();
 
@@ -32,7 +29,7 @@ const Students: NextPage = () => {
     <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
       <div className="min-w-screen flex min-h-screen flex-col items-center">
         <Header />
-        <DndProvider backend={HTML5Backend}>
+        <DndProvider backend={HTML5Backend} key={2}>
           <main className="flex w-full flex-row">
             {/* Holds the sidebar with search, filter and student results */}
             <section
@@ -44,17 +41,14 @@ const Students: NextPage = () => {
               <div
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                } absolute left-[24px] top-[16px] z-50 flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
               </div>
               {/* actual sidebar */}
               <StudentSidebar
                 setError={setError}
-                refresh={refreshStudents}
-                setRefresh={setRefreshStudents}
                 setStudentBase={setStudentBase}
-                studentBase={studentBase}
               />
             </section>
 
@@ -82,7 +76,6 @@ const Students: NextPage = () => {
               {/* This contains the actual student info */}
               <div>
                 <StudentHolder
-                  setRefresh={setRefreshStudents}
                   studentBase={studentBase}
                   setStudentBase={setStudentBase}
                 />

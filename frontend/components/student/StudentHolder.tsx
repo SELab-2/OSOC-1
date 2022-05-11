@@ -3,13 +3,11 @@ import { useDrop } from 'react-dnd';
 import StudentView from './StudentView';
 
 type StudentHolderProp = {
-  setRefresh: (refresh: [boolean, boolean]) => void;
   studentBase: StudentBase;
   setStudentBase: (studentBase: StudentBase) => void;
 };
 
 const StudentHolder: React.FC<StudentHolderProp> = ({
-  setRefresh,
   studentBase,
   setStudentBase,
 }: StudentHolderProp) => {
@@ -45,7 +43,6 @@ const StudentHolder: React.FC<StudentHolderProp> = ({
       {studentBase.id && (
         <StudentView
           studentInput={studentBase}
-          setRefresh={setRefresh}
           setOriginalStudentBase={setStudentBase}
         />
       )}
