@@ -152,8 +152,8 @@ async function getEntireStudent(
       statusSuggestion.status = suggestion.status;
       statusSuggestion.motivation = suggestion.motivation;
       newStudent.statusSuggestions.push(statusSuggestion);
-    })
-  })
+    });
+  });
 
   // TODO temp solution until this gets fixed
   const coaches = new Map<UUID, string>();
@@ -395,7 +395,7 @@ const StudentView: React.FC<StudentViewProp> = ({
 };
 
 const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
-  statusSuggestion
+  statusSuggestion,
 }: StatusSuggestionProp) => {
   let myLabel = question_mark;
   let myColor = 'text-check-orange';
