@@ -17,7 +17,7 @@ export default function useOnScreen(ref: RefObject<HTMLElement>) {
 
   useEffect(() => {
     if (observerRef.current && ref.current) {
-      observerRef.current?.observe(ref.current);
+      observerRef.current.observe(ref.current);
 
       return () => {
         observerRef.current?.disconnect();
