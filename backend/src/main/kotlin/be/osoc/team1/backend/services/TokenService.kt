@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.services
 
+import be.osoc.team1.backend.exceptions.InvalidRefreshTokenException
 import be.osoc.team1.backend.exceptions.InvalidTokenException
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import be.osoc.team1.backend.security.TokenUtil.refreshTokenRotation
@@ -14,11 +15,11 @@ class TokenService {
      */
     fun renewAccessToken(request: HttpServletRequest, response: HttpServletResponse) {
         val refreshToken: String = request.getParameter("refreshToken")
-            ?: throw InvalidTokenException("No refresh token found in request body.")
+            ?: throw InvalidRefreshTokenException("No refresh token found in request body.")
 
         val decodedToken = decodeAndVerifyToken(refreshToken)
         if (decodedToken.getClaim("isAccessToken").asBoolean()) {
-            throw InvalidTokenException("Expected a refresh token, got an access token.")
+            throw InvalidRefreshTokenException("Expected a refresh token, got an access token.")
         }
 
         val email: String = decodedToken.subject
