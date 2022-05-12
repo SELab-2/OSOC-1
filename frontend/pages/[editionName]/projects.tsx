@@ -115,8 +115,8 @@ const Projects: NextPage = () => {
   const [projectForm, setProjectForm] = useState(
     JSON.parse(JSON.stringify({ ...defaultprojectForm }))
   );
-  const elementRef = useRef(null);
-  const isOnScreen = useOnScreen(elementRef);
+  const elementRef1 = useRef<HTMLDivElement>(null);
+  const isOnScreen = useOnScreen(elementRef1);
 
   let controller = new AbortController();
   useAxiosAuth();
@@ -291,7 +291,6 @@ const Projects: NextPage = () => {
 
             {/* Holds the projects searchbar + project tiles */}
             <section
-              ref={elementRef}
               className={`${
                 showSidebar ? 'hidden' : 'visible'
               } mt-[30px] w-full md:visible md:block`}
@@ -310,6 +309,7 @@ const Projects: NextPage = () => {
 
                 <div
                   className={`flex w-full flex-row justify-center xl:mr-8 xl1920:mr-10`}
+                  ref={elementRef1}
                 >
                   {/* TODO add an easy reset/undo search button */}
                   {/* TODO either move search icon left and add xmark to the right or vice versa */}
