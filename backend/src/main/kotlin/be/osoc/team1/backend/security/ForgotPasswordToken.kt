@@ -6,7 +6,7 @@ package be.osoc.team1.backend.security
  */
 data class ForgotPasswordToken(
     val emailAddress: String,
-    val ttl: Long = System.currentTimeMillis() + 20 * 60 * 1000 // 20 minutes
+    val ttl: Long = System.currentTimeMillis() + 20 * 60 * 1000
 ) {
     fun isExpired(): Boolean {
         return ttl < System.currentTimeMillis()

@@ -19,42 +19,39 @@ const ForgotPassword: NextPage = () => {
 
   useEffect(() => {
     setValidPassword(customPasswordRegex.test(password));
-  }, [validPassword]);
+  }, [password]);
 
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    if (!validPassword) { return; }
 
-    if (validPassword) {
-      try {
-        const response = await axios.patch(
-          Endpoints.FORGOTPASSWORD + '/' + token,
-          validPassword,
-          {
-            headers: { 'Content-Type': 'text/plain' },
-          }
-        );
-
-        if (response?.data) {
-          toast.success(
-            (t) => (
-              <span>
-                <b>Password reset</b> <br />
-                Password has been reset to {validPassword} <br />
-                <button
-                  onClick={() => toast.dismiss(t.id)}
-                  className="okButton"
-                >
-                  OK
-                </button>
-              </span>
-            ),
-            { duration: 12000 }
-          );
+    try {
+      const response = await axios.patch(
+        Endpoints.FORGOTPASSWORD + '/' + token,
+        password,
+        {
+          headers: { 'Content-Type': 'text/plain' },
         }
-      } catch (err) {
-        console.log(err);
-        toast.error('An error occurred while trying to reset password.');
-      }
+      );
+
+      toast.success(
+        (t) => (
+          <span>
+            <b>Password reset</b> <br />
+            Password has been reset. <br />
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="okButton"
+            >
+              OK
+            </button>
+          </span>
+        ),
+        { duration: 12000 }
+      );
+    } catch (err) {
+      console.log(err);
+      toast.error('An error occurred while trying to reset password.');
     }
   };
 

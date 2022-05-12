@@ -24,9 +24,9 @@ object EmailUtil {
         return """
             Hi,
             
-            Trouble signing in?
-            Resetting your password is easy.
+            Trouble signing in? Resetting your password is easy.
             Use the link below to choose a new password.
+            You can only use this link once to reset your password and it is only valid for 20 minutes.
             $url
             (if this link isn't clickable, you can copy and paste it into search bar)
             
