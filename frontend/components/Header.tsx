@@ -1,17 +1,48 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { PropsWithChildren } from 'react';
+import { FC, PropsWithChildren } from 'react';
 import useUser from '../hooks/useUser';
 import { UserRole } from '../lib/types';
 import useEdition from '../hooks/useEdition';
 
 type HeaderProps = PropsWithChildren<unknown>;
 
-const Header: React.FC<HeaderProps> = () => {
+type EditionHeaderLinkProps = HeaderLinkProps;
+
+const EditionHeaderLink: FC<EditionHeaderLinkProps> = ({ href, children }) => {
+  
+  const [edition] = useEdition();
+  
+  return (
+    <HeaderLink
+      href={`/${edition}${href}`}
+    >{ children }
+    </HeaderLink>
+  )
+}
+
+type HeaderLinkProps = PropsWithChildren<{
+  href: string;
+}>
+
+const HeaderLink: FC<HeaderLinkProps> = ({ href, children }: HeaderLinkProps) => {
   const router = useRouter();
+  const current_path = router.pathname;
+  
+  return (
+    <li
+      className={`ml-3 hover:underline sm:inline ${
+        current_path.endsWith(href) ? 'underline' : ''
+      }`}
+    >
+      <Link href={href}>{ children }</Link>
+    </li>
+  )
+}
+
+const Header: React.FC<HeaderProps> = () => {
   const [user] = useUser();
   const [edition] = useEdition();
-  const current_path = router.pathname;
 
   return (
     <header className="flex h-fit w-full flex-col items-center justify-between px-4 shadow-lg sm:h-12 sm:flex-row">
@@ -27,37 +58,33 @@ const Header: React.FC<HeaderProps> = () => {
       </div>
       <nav className="text-center">
         <ul className="m-0 p-0">
-          <li
-            className={`hover:underline sm:inline ${
-              current_path.endsWith('/students') ? 'underline' : ''
-            }`}
-          >
-            <Link href={`/${edition}/students`}>Select Students</Link>
-          </li>
-          <li
-            className={`ml-3 hover:underline sm:inline ${
-              current_path.endsWith('/projects') ? 'underline' : ''
-            }`}
-          >
-            <Link href={`/${edition}/projects`}>Projects</Link>
-          </li>
-          <li
-            className={`ml-3 hover:underline sm:inline ${
-              current_path === '/users' ? 'underline' : ''
-            }`}
-          >
-            <Link href="/users">Manage Users</Link>
-          </li>
+          {
+            edition && (
+              <>
+              <EditionHeaderLink
+                href='/students'
+              >Select Students</EditionHeaderLink>
+              <EditionHeaderLink
+                href='/projects'
+              >Projects</EditionHeaderLink>
+              <EditionHeaderLink
+                href='/communications'
+              >Communications</EditionHeaderLink>
+            </>
+            )
+          }
+          <HeaderLink
+            href='/users'
+          >Manage Users</HeaderLink>
 
-          {[UserRole.Admin].includes(user.role) ? (
-            <li
-              className={`ml-3 hover:underline sm:inline ${
-                current_path === '/editions' ? 'underline' : ''
-              }`}
+          {[UserRole.Admin].includes(user.role) && (
+            <HeaderLink
+              href='/editions'
             >
-              <Link href="/editions">Manage Editions</Link>
-            </li>
-          ) : undefined}
+              Manage Editions
+            </HeaderLink>
+            )
+          }
           <li className={`ml-3 hover:underline sm:inline`}>
             <Link href="/logout">Log Out</Link>
           </li>
