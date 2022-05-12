@@ -281,31 +281,36 @@ const Projects: NextPage = () => {
                 } absolute left-[24px] top-[16px] z-50 flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
               >
                 <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
-              </div>
-              <StudentSidebar setError={setError} setStudentBase={() => null} />
-            </section>
-
-            {/* Holds the projects searchbar + project tiles */}
-            <section
-              ref={elementRef}
-              className={`${
-                showSidebar ? 'hidden' : 'visible'
-              } mt-[30px] w-full md:visible md:block`}
-            >
-              <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
-                {/* button to open sidebar on mobile */}
-                <div
-                  className={`${
-                    showSidebar ? 'visible' : 'hidden'
-                  } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
-                >
-                  {/* button to close sidebar on mobile */}
-                  <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
-                </div>
                 <StudentSidebar
                   setError={setError}
                   setStudentBase={() => null}
                 />
+              </section>
+
+              {/* Holds the projects searchbar + project tiles */}
+              <section
+                ref={elementRef}
+                className={`${
+                  showSidebar ? 'hidden' : 'visible'
+                } mt-[30px] w-full md:visible md:block`}
+              >
+                <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
+                  {/* button to open sidebar on mobile */}
+                  <div
+                    className={`${
+                      showSidebar ? 'visible' : 'hidden'
+                    } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                  >
+                    {/* button to close sidebar on mobile */}
+                    <i onClick={() => setShowSidebar(!showSidebar)}>
+                      {arrow_in}
+                    </i>
+                  </div>
+                  <StudentSidebar
+                    setError={setError}
+                    setStudentBase={() => null}
+                  />
+                </div>
               </section>
 
               {/* Holds the projects searchbar + project tiles */}
