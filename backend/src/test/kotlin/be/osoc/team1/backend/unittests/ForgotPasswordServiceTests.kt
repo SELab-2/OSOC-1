@@ -27,8 +27,14 @@ class ForgotPasswordServiceTests {
     }
 
     @Test
-    fun `sendEmailWithToken does not fail`() {
+    fun `sendEmailWithToken does not fail when email is valid`() {
         val service = ForgotPasswordService(getRepository(), mockk())
+        service.sendEmailWithToken(testEmail)
+    }
+
+    @Test
+    fun `sendEmailWithToken does not fail when email is invalid`() {
+        val service = ForgotPasswordService(getRepository(false), mockk())
         service.sendEmailWithToken(testEmail)
     }
 
@@ -36,7 +42,7 @@ class ForgotPasswordServiceTests {
     fun `changePassword fails when forgotPasswordUUID is invalid`() {
         val invalidUUID = UUID.randomUUID()
         mockkObject(ForgotPasswordUtil)
-        every { ForgotPasswordUtil.getEmailFromUUID(invalidUUID) } throws InvalidForgotPasswordUUIDException()
+        every { ForgotPasswordUtil.getEmailFromUUID(invalidUUID) } returns null
 
         val service = ForgotPasswordService(getRepository(), mockk())
         Assertions.assertThrows(InvalidForgotPasswordUUIDException().javaClass) {
@@ -46,9 +52,7 @@ class ForgotPasswordServiceTests {
 
     @Test
     fun `changePassword fails when email is invalid`() {
-        val validUUID = UUID.randomUUID()
-        mockkObject(ForgotPasswordUtil)
-        every { ForgotPasswordUtil.getEmailFromUUID(validUUID) } returns testEmail
+        val validUUID = ForgotPasswordUtil.newToken(testEmail)
 
         val service = ForgotPasswordService(getRepository(false), mockk())
         Assertions.assertThrows(InvalidForgotPasswordUUIDException().javaClass) {
@@ -58,9 +62,7 @@ class ForgotPasswordServiceTests {
 
     @Test
     fun `changePassword does not fail when valid arguments given`() {
-        val validUUID = UUID.randomUUID()
-        mockkObject(ForgotPasswordUtil)
-        every { ForgotPasswordUtil.getEmailFromUUID(validUUID) } returns testEmail
+        val validUUID = ForgotPasswordUtil.newToken(testEmail)
 
         val passwordEncoder: PasswordEncoder = mockk()
         every { passwordEncoder.encode(any()) } returns "Encoded password"

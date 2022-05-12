@@ -6,10 +6,10 @@ package be.osoc.team1.backend.security
  */
 object ConfigUtil {
     val urlsOpenToAll: Array<String> = arrayOf(
-        "/", "/login", "/logout", "/error", "/users/forgotPassword/*"
+        "/", "/login", "/logout", "/error", "/forgotPassword/*"
     )
     val urlsOpenToAllToPostTo: Array<String> = arrayOf(
-        "/users", "/users/forgotPassword", "/token/refresh", "/*/students"
+        "/users", "/forgotPassword", "/token/refresh", "/*/students"
     )
     val allowedCorsOrigins: List<String> = listOf("http://localhost:3000", "https://sel2-1.ugent.be")
 }
