@@ -1,8 +1,10 @@
 package be.osoc.team1.backend.util
 
 import be.osoc.team1.backend.entities.Answer
+import be.osoc.team1.backend.entities.AnswerRegister
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.StudentRegister
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -12,7 +14,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 /**
  * A deserializer that takes a tally form and extracts the required information to construct a [Student] object.
  */
-class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
+class TallyDeserializer : StdDeserializer<StudentRegister>(StudentRegister::class.java) {
     object TallyKeys {
         const val firstnameQuestion = "question_nroEGL"
         const val lastnameQuestion = "question_w4KjAo"
@@ -24,10 +26,10 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         const val studentCoachYesId = "d2091172-9678-413a-bb3b-0d9cf6d5fa0b"
     }
 
-    override fun deserialize(parser: JsonParser, context: DeserializationContext): Student {
+    override fun deserialize(parser: JsonParser, context: DeserializationContext): StudentRegister {
         val rootNode: JsonNode = parser.codec.readTree(parser)
         val fields = rootNode.get("data").get("fields").toList()
-        val answerMap = mutableMapOf<String, Answer>()
+        val answerMap = mutableMapOf<String, AnswerRegister>()
         for (field in fields) {
             val answer = processQuestionNode(field)
             answerMap[answer.key] = answer
@@ -41,7 +43,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
                 )
             }
 
-            return Student(
+            return StudentRegister(
                 getAnswerForKey(answerMap, TallyKeys.firstnameQuestion, "firstname").answer.first(),
                 getAnswerForKey(answerMap, TallyKeys.lastnameQuestion, "lastname").answer.first(),
                 "",
@@ -57,7 +59,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
         }
     }
 
-    private fun getAnswerForKey(answerMap: Map<String, Answer>, key: String, questionName: String): Answer =
+    private fun getAnswerForKey(answerMap: Map<String, AnswerRegister>, key: String, questionName: String): AnswerRegister =
         answerMap[key] ?: throw FailedOperationException("Could not find $questionName question!")
 
     /**
@@ -73,20 +75,20 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
      * }
      * ```
      */
-    private fun processQuestionNode(node: JsonNode): Answer {
+    private fun processQuestionNode(node: JsonNode): AnswerRegister {
         val key = node.get("key").asText()
         val label = node.get("label").asText()
         val type = node.get("type").asText()
         val valueNode = node.get("value")
 
         if (valueNode.isNull)
-            return Answer(key, label, listOf())
+            return AnswerRegister(key, label, listOf())
 
         return when (type) {
             "MULTIPLE_CHOICE" -> getAnswerMultipleChoice(node, valueNode, key, label)
-            "CHECKBOXES" -> Answer(key, label, getAnswerListCheckboxes(node, valueNode, key))
-            "FILE_UPLOAD" -> Answer(key, label, getAnswerListFileUpload(valueNode))
-            else -> Answer(key, label, listOf(valueNode.asText()))
+            "CHECKBOXES" -> AnswerRegister(key, label, getAnswerListCheckboxes(node, valueNode, key))
+            "FILE_UPLOAD" -> AnswerRegister(key, label, getAnswerListFileUpload(valueNode))
+            else -> AnswerRegister(key, label, listOf(valueNode.asText()))
         }
     }
 
@@ -94,12 +96,12 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
      * Extract the answer and optionId out of a json object called [node] which represents a question.
      * This function assumes the question is of type MULTIPLE_CHOICE.
      */
-    private fun getAnswerMultipleChoice(node: JsonNode, valueNode: JsonNode, key: String, label: String): Answer {
+    private fun getAnswerMultipleChoice(node: JsonNode, valueNode: JsonNode, key: String, label: String): AnswerRegister {
         val optionId = valueNode.asText()
         val options = node.get("options").toSet()
         val optionNode = options.find { it.get("id").asText() == optionId }
             ?: throw FailedOperationException("The specified option '$optionId' in the answer of the question with '$key' was not found in the associated 'options' field")
-        return Answer(key, label, listOf(optionNode.get("text").asText()), optionId)
+        return AnswerRegister(key, label, listOf(optionNode.get("text").asText()), optionId)
     }
 
     /**

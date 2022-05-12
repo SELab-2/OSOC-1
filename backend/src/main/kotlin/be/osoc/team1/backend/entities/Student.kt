@@ -16,6 +16,7 @@ import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.ManyToMany
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.OrderBy
 import javax.validation.constraints.NotBlank
 
@@ -93,7 +94,26 @@ class Answer(
     @ElementCollection
     val answer: Collection<String>,
     @JsonIgnore
-    val optionId: String = ""
+    val optionId: String = "",
+    @JsonIgnore
+    val studentId: UUID
+) {
+    @Id
+    val id: UUID = UUID.randomUUID()
+
+    @JsonIgnore
+    @NotBlank
+    lateinit var edition: String
+}
+
+@Entity
+class AnswerRegister(
+    val key: String,
+    val question: String,
+    @ElementCollection
+    val answer: Collection<String>,
+    @JsonIgnore
+    val optionId: String = "",
 ) {
     @Id
     val id: UUID = UUID.randomUUID()
@@ -114,7 +134,7 @@ class Answer(
  * Finally, each student keeps a [MutableList] of [StatusSuggestion]s.
  */
 @Entity
-@JsonDeserialize(using = TallyDeserializer::class)
+//@JsonDeserialize(using = TallyDeserializer::class)
 class Student(
     val firstName: String,
     val lastName: String,
@@ -128,9 +148,9 @@ class Student(
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
     val possibleStudentCoach: Boolean = false,
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = AnswerListSerializer::class)
-    val answers: List<Answer> = listOf()
+    //@OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    //@JsonSerialize(using = AnswerListSerializer::class)
+    //val answers: List<Answer> = listOf()
 ) {
 
     @Id
@@ -147,6 +167,39 @@ class Student(
     val communications: MutableList<Communication> = mutableListOf()
 }
 
+@Entity
+@JsonDeserialize(using = TallyDeserializer::class)
+class StudentRegister(
+    val firstName: String,
+    val lastName: String,
+
+    @JsonIgnore
+    @NotBlank
+    val edition: String = "",
+
+    @ManyToMany(cascade = [CascadeType.MERGE])
+    @OrderBy
+    val skills: Set<Skill> = sortedSetOf(),
+    val alumn: Boolean = false,
+    val possibleStudentCoach: Boolean = false,
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JsonSerialize(using = AnswerListSerializer::class)
+    val answers: List<AnswerRegister> = listOf()
+) {
+
+    @Id
+    val id: UUID = UUID.randomUUID()
+
+    var status: StatusEnum = StatusEnum.Undecided
+
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JsonSerialize(using = StatusSuggestionListSerializer::class)
+    val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
+
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JsonSerialize(using = CommunicationListSerializer::class)
+    val communications: MutableList<Communication> = mutableListOf()
+}
 /**
  * This function will filter [Student]s based on given [statuses]
  * Only [Student]s who have 1 of the given [statuses] will be kept

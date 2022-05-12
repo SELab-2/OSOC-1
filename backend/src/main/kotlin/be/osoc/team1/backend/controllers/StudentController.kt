@@ -1,8 +1,11 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.Answer
+import be.osoc.team1.backend.entities.AnswerRegister
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.StudentRegister
 import be.osoc.team1.backend.entities.filterByAlumn
 import be.osoc.team1.backend.entities.filterByName
 import be.osoc.team1.backend.entities.filterByNotYetAssigned
@@ -12,6 +15,7 @@ import be.osoc.team1.backend.entities.filterByStudentCoach
 import be.osoc.team1.backend.entities.filterBySuggested
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
+import be.osoc.team1.backend.repositories.AnswerRepository
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
@@ -42,7 +46,8 @@ import java.util.UUID
 class StudentController(
     private val service: StudentService,
     private val userDetailService: OsocUserDetailService,
-    private val assignmentRepository: AssignmentRepository
+    private val assignmentRepository: AssignmentRepository,
+    private val repo: AnswerRepository
 ) {
 
     /**
@@ -122,7 +127,7 @@ class StudentController(
      */
     @PostMapping
     fun addStudent(
-        @RequestBody studentRegistration: Student,
+        @RequestBody studentRegistration: StudentRegister,
         @PathVariable edition: String
     ): ResponseEntity<Student> {
         studentRegistration.answers.forEach { it.edition = edition }
@@ -133,9 +138,15 @@ class StudentController(
             studentRegistration.skills,
             studentRegistration.alumn,
             studentRegistration.possibleStudentCoach,
-            studentRegistration.answers
         )
         val createdStudent = service.addStudent(student)
+        val answerlist = mutableListOf<Answer>()
+        for (answerRegister: AnswerRegister in studentRegistration.answers){
+            val ans = Answer(answerRegister.key, answerRegister.question, answerRegister.answer,answerRegister.optionId,createdStudent.id)
+            repo.save(ans)
+            answerlist.add(ans)
+            //createdStudent.id
+        }
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
 
