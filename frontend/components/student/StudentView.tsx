@@ -113,7 +113,6 @@ function reloadStudent(
 }
 
 // TODO Communication not yet included!!
-// TODO currently a suggestion has a coachId and not a User object, needs to be fixed in backend first
 /**
  * Function to dereference needed student fields
  *
@@ -145,28 +144,15 @@ async function getEntireStudent(
     router
   );
 
-  statusSuggestionBaseList.forEach((suggestion) => {
-    axiosAuthenticated.get(suggestion.suggester).then((response) => {
+  for (const suggestion of statusSuggestionBaseList) {
+    await axiosAuthenticated.get(suggestion.suggester).then((response) => {
       const statusSuggestion = {} as StatusSuggestion;
       statusSuggestion.suggester = response.data as User;
       statusSuggestion.status = suggestion.status;
       statusSuggestion.motivation = suggestion.motivation;
       newStudent.statusSuggestions.push(statusSuggestion);
-    })
-  })
-
-  // TODO temp solution until this gets fixed
-  const coaches = new Map<UUID, string>();
-  await axiosAuthenticated
-    .get<User[]>(Endpoints.USERS, { signal: signal })
-    .then((response) => {
-      (response.data as User[]).forEach((coach) => {
-        coaches.set(coach.id, coach.username);
-      });
-    })
-    .catch((err) => {
-      parseError(err, setError, signal, router);
     });
+  }
 
   return newStudent;
 }
