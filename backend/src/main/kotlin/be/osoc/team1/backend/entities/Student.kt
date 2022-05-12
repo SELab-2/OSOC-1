@@ -2,7 +2,6 @@ package be.osoc.team1.backend.entities
 
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
-import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
@@ -106,7 +105,7 @@ class Answer(
     lateinit var edition: String
 }
 
-@Entity
+//@Entity
 class AnswerRegister(
     val key: String,
     val question: String,
@@ -167,7 +166,7 @@ class Student(
     val communications: MutableList<Communication> = mutableListOf()
 }
 
-@Entity
+//@Entity
 @JsonDeserialize(using = TallyDeserializer::class)
 class StudentRegister(
     val firstName: String,
@@ -182,8 +181,6 @@ class StudentRegister(
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
     val possibleStudentCoach: Boolean = false,
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = AnswerListSerializer::class)
     val answers: List<AnswerRegister> = listOf()
 ) {
 
@@ -192,13 +189,13 @@ class StudentRegister(
 
     var status: StatusEnum = StatusEnum.Undecided
 
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = StatusSuggestionListSerializer::class)
-    val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
+    //@OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    //@JsonSerialize(using = StatusSuggestionListSerializer::class)
+    //val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = CommunicationListSerializer::class)
-    val communications: MutableList<Communication> = mutableListOf()
+    //@OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    //@JsonSerialize(using = CommunicationListSerializer::class)
+    //val communications: MutableList<Communication> = mutableListOf()
 }
 /**
  * This function will filter [Student]s based on given [statuses]

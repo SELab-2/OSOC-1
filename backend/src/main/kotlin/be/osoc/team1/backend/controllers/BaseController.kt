@@ -14,7 +14,6 @@ import be.osoc.team1.backend.services.PositionService
 import be.osoc.team1.backend.services.SkillService
 import be.osoc.team1.backend.services.StatusSuggestionService
 import be.osoc.team1.backend.services.StudentService
-import be.osoc.team1.backend.util.AnswerListSerializer
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -60,20 +59,6 @@ class PositionController(service: PositionService) : BaseController<Position, UU
 @RestController
 @RequestMapping("/statusSuggestions")
 class StatusSuggestionController(service: StatusSuggestionService) : BaseController<StatusSuggestion, UUID>(service)
-
-@RestController
-@RequestMapping("{edition}/answers")
-class AnswerController(val service: AnswerService, val studentService: StudentService) {
-
-    @GetMapping("/{studentId}")
-    fun getAnswers(
-        @PathVariable studentId: UUID,
-        @PathVariable edition: String,
-    ): Iterable<Answer> {
-        val student = studentService.getStudentById(studentId, edition)
-        return service.getAnswersByStudent(student)
-    }
-}
 
 @RestController
 @RequestMapping("/skills")

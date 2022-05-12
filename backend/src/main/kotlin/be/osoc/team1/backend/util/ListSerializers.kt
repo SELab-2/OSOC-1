@@ -33,5 +33,3 @@ class PositionListSerializer : ListSerializer<Position>({ "/positions/${it.id}" 
 class StatusSuggestionListSerializer : ListSerializer<StatusSuggestion>({ "/statusSuggestions/${it.id}" })
 
 class UserListSerializer : ListSerializer<User>({ "/users/${it.id}" })
-
-class AnswerListSerializer : ListSerializer<Answer>({ "/answers/${it.id}" })

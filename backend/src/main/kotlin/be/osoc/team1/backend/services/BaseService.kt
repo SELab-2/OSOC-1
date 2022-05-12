@@ -40,20 +40,4 @@ class PositionService(repository: PositionRepository) : BaseService<Position, UU
 class StatusSuggestionService(repository: StatusSuggestionRepository) : BaseService<StatusSuggestion, UUID>(repository)
 
 @Service
-class AnswerService(override val repository: AnswerRepository) : BaseService<Answer, UUID>(repository) {
-
-    fun getAnswersByStudent(student: Student): Iterable<Answer> {
-        //val answers = repository.findAll()
-        //val resultingAnswers = mutableListOf<Answer>()
-        //for (answer: Answer in answers){
-        //    if (answer.studentId == student.id){
-        //        resultingAnswers.add(answer)
-        //    }
-        //}
-        //return resultingAnswers
-        return repository.findByStudentId(student.id)
-    }
-}
-
-@Service
 class SkillService(repository: SkillRepository) : BaseService<Skill, String>(repository)

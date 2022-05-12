@@ -140,12 +140,9 @@ class StudentController(
             studentRegistration.possibleStudentCoach,
         )
         val createdStudent = service.addStudent(student)
-        val answerlist = mutableListOf<Answer>()
         for (answerRegister: AnswerRegister in studentRegistration.answers){
             val ans = Answer(answerRegister.key, answerRegister.question, answerRegister.answer,answerRegister.optionId,createdStudent.id)
             repo.save(ans)
-            answerlist.add(ans)
-            //createdStudent.id
         }
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
