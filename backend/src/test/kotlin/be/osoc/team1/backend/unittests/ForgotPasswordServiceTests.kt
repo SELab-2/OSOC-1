@@ -8,7 +8,6 @@ import be.osoc.team1.backend.security.ForgotPasswordUtil
 import be.osoc.team1.backend.services.ForgotPasswordService
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -41,29 +40,26 @@ class ForgotPasswordServiceTests {
     @Test
     fun `changePassword fails when forgotPasswordUUID is invalid`() {
         val invalidUUID = UUID.randomUUID()
-        mockkObject(ForgotPasswordUtil)
-        every { ForgotPasswordUtil.getEmailFromUUID(invalidUUID) } returns null
-
         val service = ForgotPasswordService(getRepository(), mockk())
-        Assertions.assertThrows(InvalidForgotPasswordUUIDException().javaClass) {
+        val exception = Assertions.assertThrows(InvalidForgotPasswordUUIDException().javaClass) {
             service.changePassword(invalidUUID, newPassword)
         }
+        Assertions.assertEquals("forgotPasswordUUID is invalid.", exception.message)
     }
 
     @Test
     fun `changePassword fails when email is invalid`() {
         val validUUID = ForgotPasswordUtil.newToken(testEmail)
-
         val service = ForgotPasswordService(getRepository(false), mockk())
-        Assertions.assertThrows(InvalidForgotPasswordUUIDException().javaClass) {
+        val exception = Assertions.assertThrows(InvalidForgotPasswordUUIDException().javaClass) {
             service.changePassword(validUUID, newPassword)
         }
+        Assertions.assertEquals("ForgotPasswordToken contains invalid email.", exception.message)
     }
 
     @Test
     fun `changePassword does not fail when valid arguments given`() {
         val validUUID = ForgotPasswordUtil.newToken(testEmail)
-
         val passwordEncoder: PasswordEncoder = mockk()
         every { passwordEncoder.encode(any()) } returns "Encoded password"
         val service = ForgotPasswordService(getRepository(), passwordEncoder)
