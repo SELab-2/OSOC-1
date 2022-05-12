@@ -381,7 +381,7 @@ const StudentView: React.FC<StudentViewProp> = ({
 };
 
 const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
-  statusSuggestion
+  statusSuggestion,
 }: StatusSuggestionProp) => {
   let myLabel = question_mark;
   let myColor = 'text-check-orange';
