@@ -23,19 +23,17 @@ const ForgotPassword: NextPage = () => {
 
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    console.log('password:' + password);
-    console.log('validPassword:' + validPassword);
 
     if (validPassword) {
       try {
         const response = await axios.patch(
-          Endpoints.RESETPASSWORD + '/' + token,
+          Endpoints.FORGOTPASSWORD + '/' + token,
           validPassword,
           {
             headers: { 'Content-Type': 'text/plain' },
           }
         );
-        // router.push('/');
+
         if (response?.data) {
           toast.success(
             (t) => (
@@ -53,18 +51,6 @@ const ForgotPassword: NextPage = () => {
             { duration: 12000 }
           );
         }
-        toast.success(
-          (t) => (
-            <span>
-              <b>Success</b> <br />
-              Password has been reset <br />
-              <button onClick={() => toast.dismiss(t.id)} className="okButton">
-                OK
-              </button>
-            </span>
-          ),
-          { duration: 12000 }
-        );
       } catch (err) {
         console.log(err);
         toast.error('An error occurred while trying to reset password.');

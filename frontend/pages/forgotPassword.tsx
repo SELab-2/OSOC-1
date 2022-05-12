@@ -24,11 +24,10 @@ const ForgotPassword: NextPage = () => {
 
     if (email) {
       try {
-        const response = await axios.post(Endpoints.RESETPASSWORD, email, {
+        const response = await axios.post(Endpoints.FORGOTPASSWORD, email, {
           headers: { 'Content-Type': 'text/plain' },
         });
-        console.log(response);
-        // router.push('/');
+
         toast.success(
           (t) => (
             <span>

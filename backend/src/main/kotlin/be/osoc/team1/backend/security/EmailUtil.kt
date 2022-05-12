@@ -60,7 +60,6 @@ object EmailUtil {
         email.setText(getForgotPasswordEmailBody(forgotPasswordUUID))
         email.setTo(emailAddressReceiver)
         email.setFrom(emailAddressSender)
-
         getMailSender().send(email)
     }
 }

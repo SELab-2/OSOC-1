@@ -11,7 +11,7 @@ enum Endpoints {
   PROJECTS = '/projects',
   STUDENTS = '/students',
   SKILLS = '/skills',
-  RESETPASSWORD = '/forgotPassword',
+  FORGOTPASSWORD = '/forgotPassword',
 }
 
 export default Endpoints;
