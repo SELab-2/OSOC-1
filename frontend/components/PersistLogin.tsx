@@ -55,7 +55,8 @@ const PersistLogin: FC<PropsWithChildren<unknown>> = ({
 
         await refresh();
       } catch (err) {
-        console.log(err);
+        // currently nothing happens here, but we can choose to
+        // push users to the login page from here if that pleases us
       } finally {
         setLoading(false);
       }
