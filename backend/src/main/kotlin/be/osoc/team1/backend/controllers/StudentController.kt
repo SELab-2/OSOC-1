@@ -140,8 +140,8 @@ class StudentController(
             studentRegistration.possibleStudentCoach,
         )
         val createdStudent = service.addStudent(student)
-        for (answerRegister: AnswerRegister in studentRegistration.answers){
-            val ans = Answer(answerRegister.key, answerRegister.question, answerRegister.answer,answerRegister.optionId,createdStudent.id)
+        for (answerRegister: AnswerRegister in studentRegistration.answers) {
+            val ans = Answer(answerRegister.key, answerRegister.question, answerRegister.answer, answerRegister.optionId, createdStudent.id)
             repo.save(ans)
         }
         return getObjectCreatedResponse(createdStudent.id, createdStudent)

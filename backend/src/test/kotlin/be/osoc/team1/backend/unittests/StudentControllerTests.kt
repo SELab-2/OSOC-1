@@ -327,7 +327,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val node = jsonNodeFromFile("student_test_form.json")
         val slot = slot<Student>()
         every { studentService.addStudent(capture(slot)) } returns testStudent
-        every { answerRepository.save(any()) } returns Answer("","", listOf(),"",UUID.randomUUID())
+        every { answerRepository.save(any()) } returns Answer("", "", listOf(), "", UUID.randomUUID())
         val mvcResult =
             mockMvc.perform(
                 post(editionUrl)

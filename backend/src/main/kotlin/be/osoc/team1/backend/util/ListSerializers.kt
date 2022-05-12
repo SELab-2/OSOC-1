@@ -1,6 +1,5 @@
 package be.osoc.team1.backend.util
 
-import be.osoc.team1.backend.entities.Answer
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.Position

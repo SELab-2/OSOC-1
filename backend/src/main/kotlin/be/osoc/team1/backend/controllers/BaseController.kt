@@ -1,29 +1,18 @@
 package be.osoc.team1.backend.controllers
 
-import be.osoc.team1.backend.entities.Answer
 import be.osoc.team1.backend.entities.Assignment
-import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusSuggestion
-import be.osoc.team1.backend.repositories.AnswerRepository
-import be.osoc.team1.backend.services.AnswerService
 import be.osoc.team1.backend.services.AssignmentService
 import be.osoc.team1.backend.services.BaseService
 import be.osoc.team1.backend.services.PositionService
 import be.osoc.team1.backend.services.SkillService
 import be.osoc.team1.backend.services.StatusSuggestionService
-import be.osoc.team1.backend.services.StudentService
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
