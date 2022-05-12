@@ -23,7 +23,7 @@ const ForgotPassword: NextPage = () => {
 
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    if (!validPassword) { return; }
+    if (!validPassword) return;
 
     try {
       const response = await axios.patch(
@@ -39,10 +39,7 @@ const ForgotPassword: NextPage = () => {
           <span>
             <b>Password reset</b> <br />
             Password has been reset. <br />
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="okButton"
-            >
+            <button onClick={() => toast.dismiss(t.id)} className="okButton">
               OK
             </button>
           </span>
