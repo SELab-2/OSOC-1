@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StudentController
+import be.osoc.team1.backend.entities.Answer
 import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Role
@@ -16,6 +17,7 @@ import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
+import be.osoc.team1.backend.repositories.AnswerRepository
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
@@ -62,6 +64,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @MockkBean
     private lateinit var assignmentRepository: AssignmentRepository
+
+    @MockkBean
+    private lateinit var answerRepository: AnswerRepository
 
     private val studentId = UUID.randomUUID()
     private val testCoach = User("coach", "email", Role.Coach, "password")
@@ -322,6 +327,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val node = jsonNodeFromFile("student_test_form.json")
         val slot = slot<Student>()
         every { studentService.addStudent(capture(slot)) } returns testStudent
+        every { answerRepository.save(any()) } returns Answer("","", listOf(),"",UUID.randomUUID())
         val mvcResult =
             mockMvc.perform(
                 post(editionUrl)
