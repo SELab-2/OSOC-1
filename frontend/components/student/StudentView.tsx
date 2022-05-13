@@ -31,7 +31,6 @@ const x_mark = <FontAwesomeIcon icon={faXmark} />;
 
 type StudentViewProp = {
   studentInput: StudentBase;
-  setRefresh: (refresh: [boolean, boolean]) => void;
   setOriginalStudentBase: (originalStudentBase: StudentBase) => void;
 };
 
@@ -42,7 +41,6 @@ type StatusSuggestionProp = {
 async function setStudentStatus(
   status: { value: string; label: string },
   studentId: UUID,
-  setRefresh: (refresh: [boolean, boolean]) => void,
   myStudent: Student,
   setMyStudent: (myStudent: Student) => void,
   signal: AbortSignal,
@@ -59,7 +57,6 @@ async function setStudentStatus(
       const newStudent = { ...myStudent };
       newStudent.status = status.label;
       setMyStudent(newStudent);
-      setRefresh([true, true]);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -71,7 +68,6 @@ async function setStudentSuggestion(
   studentId: UUID,
   coachId: UUID,
   motivation: string,
-  setRefresh: (refresh: [boolean, boolean]) => void,
   setStudentBase: (studentBase: StudentBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
@@ -169,7 +165,6 @@ async function getEntireStudent(
 
 const StudentView: React.FC<StudentViewProp> = ({
   studentInput,
-  setRefresh,
   setOriginalStudentBase,
 }: StudentViewProp) => {
   const [user] = useUser();
@@ -273,7 +268,6 @@ const StudentView: React.FC<StudentViewProp> = ({
               studentBase.id,
               user.id,
               motivation,
-              setRefresh,
               setStudentBase,
               signal,
               setError,
@@ -330,7 +324,6 @@ const StudentView: React.FC<StudentViewProp> = ({
               setStudentStatus(
                 status,
                 studentBase.id,
-                setRefresh,
                 myStudent,
                 setMyStudent,
                 signal,

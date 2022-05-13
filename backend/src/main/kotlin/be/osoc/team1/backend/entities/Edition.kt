@@ -13,4 +13,6 @@ class Edition(@Id val name: String, var isActive: Boolean) {
     // Needed for tests
     override fun equals(other: Any?): Boolean =
         other is Edition && name == other.name && isActive == other.isActive
+
+    fun accessibleBy(user: User): Boolean = this.isActive || user.role.hasPermissionLevel(Role.Admin)
 }
