@@ -4,7 +4,7 @@ import {
   Position,
   Project,
   ProjectBase,
-  StatusSuggestion, StatusSuggestionBase,
+  StatusSuggestion,
   Student,
   StudentBase,
   User,
