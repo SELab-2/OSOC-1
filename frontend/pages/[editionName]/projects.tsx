@@ -24,9 +24,9 @@ import { parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
-import PersistLogin from '../../components/PersistLogin';
 import usePoll from 'react-use-poll';
 import useOnScreen from '../../hooks/useOnScreen';
+import PersistLogin from '../../components/PersistLogin';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -116,8 +116,8 @@ const Projects: NextPage = () => {
   const [projectForm, setProjectForm] = useState(
     JSON.parse(JSON.stringify({ ...defaultprojectForm }))
   );
-  const elementRef = useRef(null);
-  const isOnScreen = useOnScreen(elementRef);
+  const elementRef1 = useRef<HTMLDivElement>(null);
+  const isOnScreen = useOnScreen(elementRef1);
 
   let controller = new AbortController();
   useAxiosAuth();
@@ -278,39 +278,20 @@ const Projects: NextPage = () => {
               <section
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } absolute left-[24px] top-[16px] z-50 flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
               >
-                <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
+                {/* button to close sidebar on mobile */}
+                <div
+                  className={`${
+                    showSidebar ? 'visible' : 'hidden'
+                  } absolute left-[24px] top-[16px] z-50 flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                >
+                  <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
+                </div>
                 <StudentSidebar
                   setError={setError}
                   setStudentBase={() => null}
                 />
-              </section>
-
-              {/* Holds the projects searchbar + project tiles */}
-              <section
-                ref={elementRef}
-                className={`${
-                  showSidebar ? 'hidden' : 'visible'
-                } mt-[30px] w-full md:visible md:block`}
-              >
-                <div className={`ml-6 mb-3 flex flex-row md:ml-0 md:w-full`}>
-                  {/* button to open sidebar on mobile */}
-                  <div
-                    className={`${
-                      showSidebar ? 'visible' : 'hidden'
-                    } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
-                  >
-                    {/* button to close sidebar on mobile */}
-                    <i onClick={() => setShowSidebar(!showSidebar)}>
-                      {arrow_in}
-                    </i>
-                  </div>
-                  <StudentSidebar
-                    setError={setError}
-                    setStudentBase={() => null}
-                  />
-                </div>
               </section>
 
               {/* Holds the projects searchbar + project tiles */}
@@ -333,6 +314,7 @@ const Projects: NextPage = () => {
 
                   <div
                     className={`flex w-full flex-row justify-center xl:mr-8 xl1920:mr-10`}
+                    ref={elementRef1}
                   >
                     {/* TODO add an easy reset/undo search button */}
                     {/* TODO either move search icon left and add xmark to the right or vice versa */}
@@ -409,22 +391,6 @@ const Projects: NextPage = () => {
                       secondaryColor="rgba(252, 183, 15, 0.4)"
                       className="mx-auto"
                     />
-                    <div
-                      className={`${
-                        state.loading && state.page > 0
-                          ? 'visible block'
-                          : 'hidden'
-                      } text-center`}
-                    >
-                      <p>Loading Projects</p>
-                      <SpinnerCircular
-                        size={100}
-                        thickness={100}
-                        color="#FCB70F"
-                        secondaryColor="rgba(252, 183, 15, 0.4)"
-                        className="mx-auto"
-                      />
-                    </div>
                   </div>
                 </div>
               </section>

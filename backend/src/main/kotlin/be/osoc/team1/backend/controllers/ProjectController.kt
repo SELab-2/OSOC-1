@@ -35,6 +35,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getAllProjects(
         @RequestParam(defaultValue = "") name: String,
         @PathVariable edition: String,
@@ -51,6 +52,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping("/{projectId}")
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getProjectById(@PathVariable projectId: UUID, @PathVariable edition: String): Project =
         service.getProjectById(projectId, edition)
 
@@ -61,6 +63,7 @@ class ProjectController(private val service: ProjectService) {
     @DeleteMapping("/{projectId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun deleteProjectById(@PathVariable projectId: UUID, @PathVariable edition: String) =
         service.deleteProjectById(projectId, edition)
 
@@ -70,6 +73,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @PostMapping
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun postProject(
         @RequestBody projectRegistration: Project,
         @PathVariable edition: String
@@ -104,6 +108,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @PatchMapping("/{projectId}")
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun patchProject(
         @PathVariable projectId: UUID,
         @PathVariable edition: String,
@@ -122,6 +127,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping("/{projectId}/students")
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getStudentsOfProject(@PathVariable projectId: UUID, @PathVariable edition: String): Collection<Student> =
         service.getStudents(projectId, edition)
 
@@ -131,6 +137,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping("/{projectId}/coaches")
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getCoachesOfProject(@PathVariable projectId: UUID, @PathVariable edition: String): Collection<User> =
         service.getProjectById(projectId, edition).coaches
 
@@ -141,6 +148,7 @@ class ProjectController(private val service: ProjectService) {
     @PostMapping("/{projectId}/coaches")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun postCoachToProject(@PathVariable projectId: UUID, @RequestBody coachId: UUID, @PathVariable edition: String) =
         service.addCoachToProject(projectId, coachId, edition)
 
@@ -152,6 +160,7 @@ class ProjectController(private val service: ProjectService) {
     @DeleteMapping("/{projectId}/coaches/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun deleteCoachFromProject(@PathVariable projectId: UUID, @PathVariable coachId: UUID, @PathVariable edition: String) =
         service.removeCoachFromProject(projectId, coachId, edition)
 
@@ -172,6 +181,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @GetMapping("/conflicts")
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getProjectConflicts(@PathVariable edition: String): MutableList<ProjectService.Conflict> =
         service.getConflicts(edition)
 
@@ -190,6 +200,7 @@ class ProjectController(private val service: ProjectService) {
      */
     @PostMapping("/{projectId}/assignments")
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun postAssignment(
         @PathVariable projectId: UUID,
         @RequestBody assignment: ProjectService.AssignmentPost,
@@ -205,6 +216,7 @@ class ProjectController(private val service: ProjectService) {
     @DeleteMapping("/{projectId}/assignments/{assignmentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun deleteAssignment(@PathVariable projectId: UUID, @PathVariable assignmentId: UUID, @PathVariable edition: String) =
         service.deleteAssignment(projectId, assignmentId, edition)
 }

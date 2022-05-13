@@ -38,6 +38,7 @@ class CommunicationController(
     @PostMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun createCommunication(
         @PathVariable studentId: UUID,
         @PathVariable edition: String,
