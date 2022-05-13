@@ -1,8 +1,10 @@
 package be.osoc.team1.backend.util
 
 import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.repositories.UserRepository
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
@@ -28,3 +30,6 @@ open class UrlDeserializer<T>(private val repository: CrudRepository<T, UUID>) :
 
 class AssignmentDeserializer(assignmentRepository: AssignmentRepository) :
     UrlDeserializer<Assignment>(assignmentRepository)
+
+class UserDeserializer(userRepository: UserRepository) :
+    UrlDeserializer<User>(userRepository)

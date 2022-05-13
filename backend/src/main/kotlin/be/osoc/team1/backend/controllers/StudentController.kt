@@ -167,17 +167,15 @@ class StudentController(
         service.setStudentStatus(studentId, status, edition)
 
     /**
-     * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should
-     * be equal to the id of the coach who is making this suggestion, so equal to the id of the
-     * currently authenticated user. If either of these id's do not have a matching record in the
-     * database, a "404: Not Found" message is returned to the caller instead. If the coachId does
-     * not match the id of the currently authenticated user a '401: Unauthorized" is returned. The
+     * Add a [statusSuggestion] to the student with the given [studentId]. The suggester field should
+     * be equal to the coach who is making this suggestion, so equal to the currently authenticated user.
+     * If the suggester does not match the currently authenticated user a '401: Unauthorized" is returned. The
      * [statusSuggestion] should be passed in the request body as a JSON object and should have the
      * following format:
      *
      * ```
      * {
-     *      "coachId": "(INSERT ID)"
+     *      "suggester": "(INSERT url to User)"
      *      "status": "Yes" OR "Maybe" OR "No",
      *      "motivation": "(INSERT MOTIVATION)"
      * }
@@ -198,10 +196,8 @@ class StudentController(
         principal: Principal,
     ) {
         val user = userDetailService.getUserFromPrincipal(principal)
-        if (statusSuggestion.coachId != user.id)
-            throw UnauthorizedOperationException(
-                "The 'coachId' did not equal authenticated user id!"
-            )
+        if (statusSuggestion.suggester != user)
+            throw UnauthorizedOperationException("The 'coachId' did not equal authenticated user id!")
 
         service.addStudentStatusSuggestion(studentId, statusSuggestion, edition)
     }

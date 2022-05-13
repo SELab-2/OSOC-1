@@ -21,7 +21,6 @@ import org.springframework.boot.test.json.JsonContent
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import java.util.UUID
 
 @JsonTest
 class SerializationTests {
@@ -81,7 +80,8 @@ class SerializationTests {
 
     @Test
     fun `Serialization of Student returns the correct result`() {
-        val testStatusSuggestion = StatusSuggestion(UUID.randomUUID(), SuggestionEnum.Yes, "motivation", testEdition)
+        val suggester = User("username", "email", Role.Coach, "password")
+        val testStatusSuggestion = StatusSuggestion(suggester, SuggestionEnum.Yes, "motivation", testEdition)
         val testCommunication = Communication("test", CommunicationTypeEnum.Email, testEdition)
         val testStudent = Student("Jitse", "Willaert", testEdition)
         testStudent.communications.add(testCommunication)
