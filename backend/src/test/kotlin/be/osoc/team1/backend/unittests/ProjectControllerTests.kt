@@ -2,6 +2,7 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.ProjectController
 import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Role
@@ -12,6 +13,8 @@ import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.services.EditionService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.ProjectService
 import be.osoc.team1.backend.util.Serializer
@@ -27,6 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -47,6 +53,18 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var assignmentRepository: AssignmentRepository
 
+    @MockkBean
+    private lateinit var editionService: EditionService
+
+    @MockkBean
+    private lateinit var osocUserDetailService: OsocUserDetailService
+
+    @MockkBean
+    private lateinit var authentication: Authentication
+
+    @MockkBean
+    private lateinit var securityContext: SecurityContext
+
     private val testId = UUID.randomUUID()
     private val testEdition = "testEdition"
     private val editionUrl = "/$testEdition/projects"
@@ -56,6 +74,10 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
     @BeforeEach
     fun beforeEach() {
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest()))
+        SecurityContextHolder.setContext(securityContext)
+        every { securityContext.authentication } returns authentication
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns User("", "", Role.Admin, "")
+        every { editionService.getEdition(any()) } returns Edition("", true)
     }
 
     @Test

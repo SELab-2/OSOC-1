@@ -1,8 +1,10 @@
 package be.osoc.team1.backend.integrationtests
 
+import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
+import be.osoc.team1.backend.repositories.EditionRepository
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.ConfigUtil
@@ -40,6 +42,7 @@ class AuthorizationTests {
         userRepository.save(coachUser)
         userRepository.save(disabledUser)
         studentRepository.save(testStudent)
+        editionRepository.save(testEdition)
     }
 
     @Autowired
@@ -51,7 +54,11 @@ class AuthorizationTests {
     @Autowired
     private lateinit var userRepository: UserRepository
 
+    @Autowired
+    private lateinit var editionRepository: EditionRepository
+
     private val testEditionName = "testEditionName"
+    private val testEdition = Edition(testEditionName, true)
     private val studentBaseUrl = "/$testEditionName/students"
 
     private val adminPassword = "adminPassword"

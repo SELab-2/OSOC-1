@@ -2,6 +2,8 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.SkillController
 import be.osoc.team1.backend.entities.Skill
+import be.osoc.team1.backend.services.EditionService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.SkillService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -16,6 +18,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 class SkillControllerTests(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var skillService: SkillService
+
+    // These MockkBean are necessary because the BaseController uses these under the hood
+    @MockkBean
+    private lateinit var editionService: EditionService
+    @MockkBean
+    private lateinit var osocUserDetailService: OsocUserDetailService
 
     @Test
     fun `getAll succeeds`() {

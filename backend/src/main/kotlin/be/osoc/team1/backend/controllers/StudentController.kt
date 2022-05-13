@@ -57,6 +57,7 @@ class StudentController(
      */
     @GetMapping
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getAllStudents(
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
@@ -98,6 +99,7 @@ class StudentController(
      */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
         service.getStudentById(studentId, edition)
 
@@ -108,6 +110,7 @@ class StudentController(
     @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun deleteStudentById(@PathVariable studentId: UUID, @PathVariable edition: String) =
         service.deleteStudentById(studentId)
 
@@ -121,6 +124,7 @@ class StudentController(
      * verification is the responsibility of the caller.
      */
     @PostMapping
+    @SecuredEdition
     fun addStudent(
         @RequestBody studentRegistration: Student,
         @PathVariable edition: String
@@ -158,6 +162,7 @@ class StudentController(
     @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
         service.setStudentStatus(studentId, status, edition)
 
@@ -185,6 +190,7 @@ class StudentController(
     @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun addStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @RequestBody statusSuggestion: StatusSuggestion,
@@ -211,6 +217,7 @@ class StudentController(
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun deleteStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @PathVariable coachId: UUID,

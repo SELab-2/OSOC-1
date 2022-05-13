@@ -2,6 +2,7 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Skill
@@ -17,6 +18,7 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.StudentService
@@ -38,6 +40,9 @@ import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -63,6 +68,15 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var assignmentRepository: AssignmentRepository
 
+    @MockkBean
+    private lateinit var editionService: EditionService
+
+    @MockkBean
+    private lateinit var authentication: Authentication
+
+    @MockkBean
+    private lateinit var securityContext: SecurityContext
+
     private val studentId = UUID.randomUUID()
     private val testCoach = User("coach", "email", Role.Coach, "password")
     private val coachId = testCoach.id
@@ -77,7 +91,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @BeforeEach
     fun beforeEach() {
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest()))
+        SecurityContextHolder.setContext(securityContext)
+        every { securityContext.authentication } returns authentication
         every { userDetailService.getUserFromPrincipal(any()) } returns testCoach
+        every { editionService.getEdition(any()) } returns Edition("", true)
     }
 
     @Test

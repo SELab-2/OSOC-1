@@ -849,7 +849,7 @@ paths:
                                 student: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
                                 projects: [ "https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
 
-    /communications/{communicationId}:
+    /{edition}/communications/{communicationId}:
         get:
             summary: Get Communications by id
             description: |
@@ -863,6 +863,11 @@ paths:
                     schema:
                         type: string
                         format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
             responses:
                 '200':
                     description: |
@@ -875,7 +880,7 @@ paths:
                 '404':
                     description: |
                         The response if there is no communication in the database with the given id.
-    /communications/{studentId}:
+    /{edition}/communications/{studentId}:
         post:
             summary: Add a new communication with a student
             description: |
@@ -888,6 +893,11 @@ paths:
                     schema:
                         type: string
                         format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
             requestBody:
                 content:
                     application/json:
