@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.controllers
 
 import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Project
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
@@ -78,10 +79,11 @@ class ProjectController(private val service: ProjectService) {
         @RequestBody projectRegistration: Project,
         @PathVariable edition: String
     ): ResponseEntity<Project> {
+        val positions = projectRegistration.positions.map { Position(it.skill, it.amount, edition) }
         val project = Project(
             projectRegistration.name, projectRegistration.description, projectRegistration.clientName,
             edition,
-            projectRegistration.coaches, projectRegistration.positions, projectRegistration.assignments
+            projectRegistration.coaches, positions, projectRegistration.assignments
         )
         val createdProject = service.postProject(project)
         return getObjectCreatedResponse(createdProject.id, createdProject)
