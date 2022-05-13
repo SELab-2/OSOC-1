@@ -129,7 +129,7 @@ export type StatusSuggestion = {
  * This is the exact collection type returned by a get to the StatusSuggestion endpoint
  */
 export type StatusSuggestionBase = {
-  suggester: string;
+  suggester: Url;
   status: StatusSuggestionStatus;
   motivation: string;
 };
