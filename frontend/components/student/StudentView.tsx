@@ -18,7 +18,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { convertStudentBase } from '../../lib/conversionUtils';
-import {getUrlList, getUrlMap, parseError} from '../../lib/requestUtils';
+import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
 import { axiosAuthenticated } from '../../lib/axios';
@@ -143,13 +143,13 @@ async function getEntireStudent(
 
   const suggesterMap = new Map<Url, User>();
   await getUrlMap<User>(
-      statusSuggestionBaseList.map(
-        (suggestionBase) => suggestionBase.suggester
-      ) as Url[],
-      suggesterMap,
-      signal,
-      setError,
-      router
+    statusSuggestionBaseList.map(
+      (suggestionBase) => suggestionBase.suggester
+    ) as Url[],
+    suggesterMap,
+    signal,
+    setError,
+    router
   );
 
   for (const suggestion of statusSuggestionBaseList) {
