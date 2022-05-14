@@ -6,11 +6,12 @@ import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
+import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import java.util.UUID
+import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
@@ -137,11 +138,12 @@ class Student(
     @field:JsonView(StudentView.Full::class)
     val possibleStudentCoach: Boolean = false,
 
+    ) {
+
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = AnswerListSerializer::class)
-    val answers: List<Answer> = listOf()
-) {
+    var answers: List<Answer> = listOf()
 
     @Id
     @field:JsonView(StudentView.Basic::class)
@@ -151,14 +153,18 @@ class Student(
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = StatusSuggestionListSerializer::class)
-    @field:JsonView(StudentView.Basic::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
+
+    @JsonGetter("statusSuggestionsPercentage")
+    fun calculateStatusSuggestionPercentage(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
+    
 }
 
 class StudentView {
@@ -166,9 +172,9 @@ class StudentView {
     open class Full : Basic()
 }
 
- enum class StudentViewEnum {
-     Basic, Full
- }
+enum class StudentViewEnum {
+    Basic, Full
+}
 
 /**
  * This function will filter [Student]s based on given [statuses]
