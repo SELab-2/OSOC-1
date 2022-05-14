@@ -50,7 +50,7 @@ class TallyDeserializer : StdDeserializer<Student>(Student::class.java) {
                 getAnswerForKey(
                     answerMap, TallyKeys.studentCoachQuestion, "studentCoach"
                 ).optionId == TallyKeys.studentCoachYesId,
-                //answerMap.values.toList(),
+                // answerMap.values.toList(),
             )
             s.answers = answerMap.values.toList()
             return s

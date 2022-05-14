@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import java.util.*
+import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
@@ -138,7 +138,7 @@ class Student(
     @field:JsonView(StudentView.Full::class)
     val possibleStudentCoach: Boolean = false,
 
-    ) {
+) {
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @field:JsonView(StudentView.Full::class)
@@ -164,7 +164,6 @@ class Student(
 
     @JsonGetter("statusSuggestionsPercentage")
     fun calculateStatusSuggestionPercentage(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
-    
 }
 
 class StudentView {
