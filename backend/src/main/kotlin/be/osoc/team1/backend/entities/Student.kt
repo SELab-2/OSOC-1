@@ -117,7 +117,9 @@ class Answer(
 @Entity
 @JsonDeserialize(using = TallyDeserializer::class)
 class Student(
+    @field:JsonView(StudentView.Basic::class)
     val firstName: String,
+    @field:JsonView(StudentView.Basic::class)
     val lastName: String,
 
     @JsonIgnore
@@ -126,38 +128,47 @@ class Student(
 
     @ManyToMany(cascade = [CascadeType.MERGE])
     @OrderBy
-    @JsonView(StudentView.Full::class)
+    @field:JsonView(StudentView.Full::class)
     val skills: Set<Skill> = sortedSetOf(),
+
+    @field:JsonView(StudentView.Basic::class)
     val alumn: Boolean = false,
 
-    @JsonView(StudentView.Full::class)
+    @field:JsonView(StudentView.Full::class)
     val possibleStudentCoach: Boolean = false,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = AnswerListSerializer::class)
-    @JsonView(StudentView.Full::class)
     val answers: List<Answer> = listOf()
 ) {
 
     @Id
+    @field:JsonView(StudentView.Basic::class)
     val id: UUID = UUID.randomUUID()
 
+    @field:JsonView(StudentView.Basic::class)
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JsonSerialize(using = StatusSuggestionListSerializer::class)
+    @field:JsonView(StudentView.Basic::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = CommunicationListSerializer::class)
-    @JsonView(StudentView.Full::class)
     val communications: MutableList<Communication> = mutableListOf()
 }
 
 class StudentView {
-    open class Full
-    open class Basic : Full()
+    open class Basic
+    open class Full : Basic()
 }
+
+ enum class StudentViewEnum {
+     Basic, Full
+ }
 
 /**
  * This function will filter [Student]s based on given [statuses]
