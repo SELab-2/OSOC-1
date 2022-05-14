@@ -149,8 +149,9 @@ class StudentController(
             studentRegistration.skills,
             studentRegistration.alumn,
             studentRegistration.possibleStudentCoach,
-            studentRegistration.answers
+            //studentRegistration.answers
         )
+        student.answers= studentRegistration.answers
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
