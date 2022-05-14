@@ -13,8 +13,7 @@ const ForgotPassword: NextPage = () => {
   const router = useRouter();
   const token = router.query.forgotPasswordToken as string;
 
-  /* eslint-disable */
-  const [password, resetPassword, passwordProps] = useInput('');
+  const [password, , passwordProps] = useInput('');
   const [validPassword, setValidPassword] = useState(true);
 
   useEffect(() => {
@@ -26,7 +25,7 @@ const ForgotPassword: NextPage = () => {
     if (!validPassword) return;
 
     try {
-      const response = await axios.patch(
+      await axios.patch(
         Endpoints.FORGOTPASSWORD + '/' + token,
         password,
         {
@@ -47,7 +46,6 @@ const ForgotPassword: NextPage = () => {
         { duration: 12000 }
       );
     } catch (err) {
-      console.log(err);
       toast.error('An error occurred while trying to reset password.');
     }
   };
@@ -69,6 +67,7 @@ const ForgotPassword: NextPage = () => {
               minLength={8}
               maxLength={64}
               {...passwordProps}
+              required
             />
           </label>
           <button
@@ -79,7 +78,7 @@ const ForgotPassword: NextPage = () => {
           </button>
           <Link href="/login">
             <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
-              Got back to login
+              Go back to login
             </p>
           </Link>
         </form>

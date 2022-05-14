@@ -122,7 +122,7 @@ const Login = () => {
           </Link>
           <Link href="/forgotPassword">
             <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
-              password forgotten?
+              Forgot password?
             </p>
           </Link>
           <p className="hr-sect pt-4 pb-2 text-sm font-medium opacity-80 lg:pb-4">

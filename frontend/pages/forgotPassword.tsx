@@ -10,21 +10,18 @@ import usePersistentInput from '../hooks/usePersistentInput';
 const ForgotPassword: NextPage = () => {
   const emailRef = useRef<HTMLInputElement>(null);
 
-  /* eslint-disable */
-  const [email, resetEmail, emailProps] = usePersistentInput('email', '');
+  const [email, , emailProps] = usePersistentInput('email', '');
 
   useEffect(() => {
     emailRef?.current?.focus();
   }, []);
-
-  const router = useRouter();
 
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
     if (email) {
       try {
-        const response = await axios.post(Endpoints.FORGOTPASSWORD, email, {
+        await axios.post(Endpoints.FORGOTPASSWORD, email, {
           headers: { 'Content-Type': 'text/plain' },
         });
 
@@ -33,7 +30,7 @@ const ForgotPassword: NextPage = () => {
             <span>
               <b>Email sent</b> <br />
               An email has been sent to {email} <br />
-              You might want to look in spam. <br />
+              You might want to look in your spam folder. <br />
               <button onClick={() => toast.dismiss(t.id)} className="okButton">
                 OK
               </button>
@@ -42,7 +39,6 @@ const ForgotPassword: NextPage = () => {
           { duration: 12000 }
         );
       } catch (err) {
-        console.log(err);
         toast.error('An error occurred while trying to reset password.');
       }
     }
@@ -60,6 +56,7 @@ const ForgotPassword: NextPage = () => {
               type="email"
               {...emailProps}
               ref={emailRef}
+              required
             />
           </label>
           <button
