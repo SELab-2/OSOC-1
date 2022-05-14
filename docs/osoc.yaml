@@ -1271,6 +1271,9 @@ components:
                 alumn:
                     type: boolean
                     default: false
+                possibleStudentCoach:
+                    type: boolean
+                    default: false
                 answers:
                     type: array
                     items:
