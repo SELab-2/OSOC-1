@@ -7,6 +7,7 @@ import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
@@ -125,11 +126,16 @@ class Student(
 
     @ManyToMany(cascade = [CascadeType.MERGE])
     @OrderBy
+    @JsonView(StudentView.Full::class)
     val skills: Set<Skill> = sortedSetOf(),
     val alumn: Boolean = false,
+
+    @JsonView(StudentView.Full::class)
     val possibleStudentCoach: Boolean = false,
+
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JsonSerialize(using = AnswerListSerializer::class)
+    @JsonView(StudentView.Full::class)
     val answers: List<Answer> = listOf()
 ) {
 
@@ -144,7 +150,13 @@ class Student(
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JsonSerialize(using = CommunicationListSerializer::class)
+    @JsonView(StudentView.Full::class)
     val communications: MutableList<Communication> = mutableListOf()
+}
+
+class StudentView {
+    open class Full
+    open class Basic : Full()
 }
 
 /**

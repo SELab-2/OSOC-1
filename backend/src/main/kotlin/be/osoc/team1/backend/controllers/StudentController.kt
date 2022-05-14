@@ -1,8 +1,10 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.EntityViews
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.StudentView
 import be.osoc.team1.backend.entities.filterByAlumn
 import be.osoc.team1.backend.entities.filterByName
 import be.osoc.team1.backend.entities.filterByNotYetAssigned
@@ -20,6 +22,8 @@ import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.applyIf
 import be.osoc.team1.backend.services.page
 import be.osoc.team1.backend.util.TallyDeserializer
+import com.fasterxml.jackson.annotation.JsonView
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -36,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URLDecoder
 import java.security.Principal
 import java.util.UUID
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/{edition}/students")
@@ -69,9 +74,11 @@ class StudentController(
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
         @RequestParam(defaultValue = "false") studentCoachOnly: Boolean,
         @RequestParam(defaultValue = "false") unassignedOnly: Boolean,
+        @RequestParam(defaultValue = "full") view: String,
         @PathVariable edition: String,
-        principal: Principal
-    ): PagedCollection<Student> {
+        principal: Principal,
+        response: HttpServletResponse
+    ): String? {
         /*
          * A trailing comma in the status filter will create a null value in the status set. This check handles that
          * seemingly impossible scenario and returns status code 400(Bad request).
@@ -82,7 +89,7 @@ class StudentController(
         val decodedName = URLDecoder.decode(name, "UTF-8")
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
-        return service.getAllStudents(Sort.by(sortBy), edition)
+        val test = service.getAllStudents(Sort.by(sortBy), edition)
             .applyIf(studentCoachOnly) { filterByStudentCoach() }
             .applyIf(alumnOnly) { filterByAlumn() }
             .applyIf(name.isNotBlank()) { filterByName(decodedName) }
@@ -91,6 +98,8 @@ class StudentController(
             .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
+        return ObjectMapper().writerWithView(StudentView.Full::class.java).writeValueAsString(test)
+        //ObjectMapper().writerWithView(StudentView.Full::class.java).wri
     }
 
     /**
