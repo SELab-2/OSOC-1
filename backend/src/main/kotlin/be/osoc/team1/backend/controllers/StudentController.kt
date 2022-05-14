@@ -167,10 +167,10 @@ class StudentController(
         service.setStudentStatus(studentId, status, edition)
 
     /**
-     * Add a [statusSuggestion] to the student with the given [studentId]. The suggester field should
+     * Add a [statusSuggestionRegistration] to the student with the given [studentId]. The suggester field should
      * be equal to the coach who is making this suggestion, so equal to the currently authenticated user.
      * If the suggester does not match the currently authenticated user a '401: Unauthorized" is returned. The
-     * [statusSuggestion] should be passed in the request body as a JSON object and should have the
+     * [statusSuggestionRegistration] should be passed in the request body as a JSON object and should have the
      * following format:
      *
      * ```
@@ -191,10 +191,16 @@ class StudentController(
     @SecuredEdition
     fun addStudentStatusSuggestion(
         @PathVariable studentId: UUID,
-        @RequestBody statusSuggestion: StatusSuggestion,
+        @RequestBody statusSuggestionRegistration: StatusSuggestion,
         @PathVariable edition: String,
         principal: Principal,
     ) {
+        val statusSuggestion = StatusSuggestion(
+            statusSuggestionRegistration.suggester,
+            statusSuggestionRegistration.status,
+            statusSuggestionRegistration.motivation,
+            edition
+        )
         val user = userDetailService.getUserFromPrincipal(principal)
         if (statusSuggestion.suggester != user)
             throw UnauthorizedOperationException("The 'coachId' did not equal authenticated user id!")
