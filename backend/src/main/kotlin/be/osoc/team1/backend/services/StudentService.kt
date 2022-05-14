@@ -1,7 +1,6 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.Communication
-import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
@@ -70,12 +69,9 @@ class StudentService(private val repository: StudentRepository, private val user
      * the coach role.
      */
     fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion, edition: String) {
-        val coach = userService.getUserById(statusSuggestion.coachId)
-        if (!coach.role.hasPermissionLevel(Role.Coach)) {
-            throw ForbiddenOperationException("Only coaches and admins can make status suggestions.")
-        }
+        val coach = statusSuggestion.suggester
         val student = getStudentById(studentId, edition)
-        val sameCoachSuggestion = student.statusSuggestions.find { it.coachId == coach.id }
+        val sameCoachSuggestion = student.statusSuggestions.find { it.suggester == coach }
         if (sameCoachSuggestion !== null) {
             throw ForbiddenOperationException("This coach has already made a suggestion for this student.")
         }
@@ -94,7 +90,7 @@ class StudentService(private val repository: StudentRepository, private val user
     fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID, edition: String) {
         val coach = userService.getUserById(coachId)
         val student = getStudentById(studentId, edition)
-        val suggestion = student.statusSuggestions.find { it.coachId == coach.id }
+        val suggestion = student.statusSuggestions.find { it.suggester == coach }
         if (suggestion === null) {
             throw FailedOperationException("This coach hasn't made a suggestion for the given student.")
         }

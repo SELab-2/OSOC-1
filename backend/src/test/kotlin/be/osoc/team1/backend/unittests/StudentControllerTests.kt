@@ -18,14 +18,18 @@ import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.applyIf
 import be.osoc.team1.backend.util.TallyDeserializer
+import be.osoc.team1.backend.util.UserDeserializer
+import be.osoc.team1.backend.util.UserSerializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
@@ -37,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.authentication.TestingAuthenticationToken
@@ -77,6 +82,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var securityContext: SecurityContext
 
+    @MockkBean
+    private lateinit var userRepository: UserRepository
+
     private val studentId = UUID.randomUUID()
     private val testCoach = User("coach", "email", Role.Coach, "password")
     private val coachId = testCoach.id
@@ -86,7 +94,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val editionUrl = "/$testEdition/students"
     private val defaultPrincipal = TestingAuthenticationToken(null, null)
     private val defaultSort = Sort.by("id")
-    private val testSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "test motivation")
+    private val testSuggestion = StatusSuggestion(testCoach, SuggestionEnum.Yes, "test motivation")
 
     @BeforeEach
     fun beforeEach() {
@@ -199,7 +207,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents include filtering works`() {
         val testStudent = Student("Lars", "Van", testEdition)
-        testStudent.statusSuggestions.add(StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "Nice!"))
+        testStudent.statusSuggestions.add(StatusSuggestion(testCoach, SuggestionEnum.Yes, "Nice!"))
         every { studentService.getAllStudents(defaultSort, testEdition) } returns listOf(testStudent)
         mockMvc.perform(get("$editionUrl?includeSuggested=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
@@ -443,9 +451,23 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(status().isNotFound)
     }
 
+    private fun userSerializedObjectMapper(): ObjectMapper {
+        val objectMapper = ObjectMapper()
+        val simpleModule = SimpleModule()
+        simpleModule.addSerializer(User::class.java, UserSerializer())
+        simpleModule.addDeserializer(User::class.java, UserDeserializer(userRepository))
+        objectMapper.registerModule(simpleModule)
+
+        return objectMapper
+    }
+
     @Test
     fun `addStudentStatusSuggestion succeeds when student with given id exists`() {
         every { studentService.addStudentStatusSuggestion(studentId, any(), testEdition) } just Runs
+
+        val objectMapper = userSerializedObjectMapper()
+        every { userRepository.findByIdOrNull(testSuggestion.suggester.id) } returns testSuggestion.suggester
+
         mockMvc.perform(
             post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -459,6 +481,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `addStudentStatusSuggestion returns 404 Not Found if student with given id does not exist`() {
         every { studentService.addStudentStatusSuggestion(studentId, any(), testEdition) }
             .throws(InvalidStudentIdException())
+
+        val objectMapper = userSerializedObjectMapper()
+        every { userRepository.findByIdOrNull(testSuggestion.suggester.id) } returns testSuggestion.suggester
+
         mockMvc.perform(
             post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -472,6 +498,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `addStudentStatusSuggestion returns 403 Forbidden if coach already made suggestion for student`() {
         every { studentService.addStudentStatusSuggestion(studentId, any(), testEdition) }
             .throws(ForbiddenOperationException())
+
+        val objectMapper = userSerializedObjectMapper()
+        every { userRepository.findByIdOrNull(testSuggestion.suggester.id) } returns testSuggestion.suggester
+
         mockMvc.perform(
             post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -485,6 +515,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.addStudentStatusSuggestion(studentId, any(), testEdition) }
             .throws(InvalidUserIdException())
 
+        val objectMapper = userSerializedObjectMapper()
+        every { userRepository.findByIdOrNull(testSuggestion.suggester.id) } returns testSuggestion.suggester
+
         mockMvc.perform(
             post("$editionUrl/$studentId/suggestions")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -497,6 +530,9 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `addStudentStatusSuggestion returns 401 if we try creating a suggestion on behalf of another user`() {
         every { userDetailService.getUserFromPrincipal(any()) } returns
             User("other user", "email", Role.Coach, "password")
+
+        val objectMapper = userSerializedObjectMapper()
+        every { userRepository.findByIdOrNull(testSuggestion.suggester.id) } returns testSuggestion.suggester
 
         mockMvc.perform(
             post("$editionUrl/$studentId/suggestions")

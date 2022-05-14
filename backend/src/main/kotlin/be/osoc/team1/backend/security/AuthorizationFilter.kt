@@ -4,6 +4,7 @@ import be.osoc.team1.backend.security.TokenUtil.authenticateWithAccessToken
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import be.osoc.team1.backend.security.TokenUtil.getAccessTokenFromRequest
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.catalina.connector.ClientAbortException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.filter.OncePerRequestFilter
@@ -39,7 +40,10 @@ class AuthorizationFilter : OncePerRequestFilter() {
             }
             filterChain.doFilter(request, response)
         } catch (exception: Exception) {
-            respondException(response, exception)
+            when (exception) {
+                is ClientAbortException -> {}
+                else -> respondException(response, exception)
+            }
         }
     }
 
