@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.ninjasquad.springmockk.MockkBean
-import io.kotest.assertions.all
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -122,7 +121,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
         every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
         mockMvc.perform(get("$editionUrl?view=Basic").principal(defaultPrincipal)).andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writerWithView(StudentView.Basic::class.java).writeValueAsString(PagedCollection(allStudents,4))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Basic::class.java).writeValueAsString(PagedCollection(allStudents, 4))))
     }
 
     @Test
@@ -134,7 +133,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
         every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
         mockMvc.perform(get("$editionUrl?view=Full").principal(defaultPrincipal)).andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents,4))))
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
     }
 
     @Test
