@@ -9,6 +9,7 @@ import {
   Conflict,
   ProjectBase,
   ProjectData,
+  StudentBase,
   Url,
   UserRole,
   UUID,
@@ -27,7 +28,7 @@ import FlatList from 'flatlist-react';
 import useUser from '../../hooks/useUser';
 import { SpinnerCircular } from 'spinners-react';
 import Error from '../../components/Error';
-import { getUrlList, parseError } from '../../lib/requestUtils';
+import { getUrlMap, parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
@@ -36,6 +37,14 @@ import useOnScreen from '../../hooks/useOnScreen';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
+
+/**
+ * Helper type to avoid having to change this everywhere
+ */
+type conflictMapType = Map<
+  UUID,
+  { student: StudentBase; projectUrls: Set<Url>; amount: number }
+>;
 
 /**
  * function that allows searching projects by name
@@ -105,6 +114,8 @@ function searchProject(
 async function searchConflicts(
   setProjects: (projects: ProjectBase[]) => void,
   setConflictStudents: (conflictStudents: UUID[]) => void,
+  conflictMap: conflictMapType,
+  setConflictMap: (map: conflictMapType) => void,
   setLoading: (loading: boolean) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
@@ -121,26 +132,67 @@ async function searchConflicts(
       }
     );
     const conflicts = conflictsResponse.data;
-    const conflictProjects = [] as ProjectBase[];
-    const projectUrls = conflicts
-      .map((conflict) => {
-        return conflict.projects;
-      })
-      .flat() as Url[];
-    await getUrlList<ProjectBase>(
-      projectUrls,
-      conflictProjects,
+
+    const newConflictMap = {} as conflictMapType;
+    conflictMap.forEach((value, key) => {
+      value.amount = 1;
+      newConflictMap.set(key, JSON.parse(JSON.stringify(value)));
+    });
+
+    const newStudents = conflicts
+      .map((conflict) => conflict.student as Url)
+      .filter((student) =>
+        newConflictMap.has(student.split('/').pop() as UUID)
+      );
+
+    const newConflictStudents = {} as Map<Url, StudentBase>;
+    await getUrlMap<StudentBase>(
+      newStudents,
+      newConflictStudents,
       signal,
       setError,
       router
     );
 
-    setProjects(conflictProjects);
-    setConflictStudents(
-      conflicts.map((conflict) => {
-        return conflict.student.split('/').pop() as UUID;
-      })
-    );
+    for (const conflict of conflicts) {
+      const studId = conflict.student.split('/').pop() as UUID;
+      const value = newConflictMap.get(studId);
+      if (value) {
+        conflict.projects.forEach((item) => value.projectUrls.add(item));
+        value.amount = conflict.projects.length;
+        newConflictMap.set(studId, value);
+      } else {
+        const newValue = {
+          projectUrls: new Set<Url>(conflict.projects),
+          amount: conflict.projects.length,
+          student: newConflictStudents.get(conflict.student) as StudentBase,
+        };
+        newConflictMap.set(studId, newValue);
+      }
+    }
+
+    setConflictMap(newConflictMap);
+
+    // const conflictProjects = [] as ProjectBase[];
+    // const projectUrls = conflicts
+    //   .map((conflict) => {
+    //     return conflict.projects;
+    //   })
+    //   .flat() as Url[];
+    // await getUrlList<ProjectBase>(
+    //   projectUrls,
+    //   conflictProjects,
+    //   signal,
+    //   setError,
+    //   router
+    // );
+    //
+    // setProjects(conflictProjects);
+    // setConflictStudents(
+    //   conflicts.map((conflict) => {
+    //     return conflict.student.split('/').pop() as UUID;
+    //   })
+    // );
   } catch (err) {
     parseError(err, setError, signal, router);
     if (!signal.aborted) {
@@ -164,6 +216,8 @@ const Projects: NextPage = () => {
   const [error, setError] = useState('');
   const [showConflicts, setShowConflicts] = useState(false);
   const [conflictStudents, setConflictStudents] = useState([] as UUID[]);
+  const [conflictMap, setConflictMap] = useState({} as conflictMapType);
+  // const [conflictsLoaded, setConflictsLoaded] = useState(false);
   const [projects, setProjects]: [
     ProjectBase[],
     (projects: ProjectBase[]) => void
@@ -184,6 +238,7 @@ const Projects: NextPage = () => {
 
   useEffect(() => {
     if (!showConflicts) {
+      setConflictMap({} as conflictMapType);
       setConflictStudents([] as UUID[]);
     }
   }, [showConflicts]);
@@ -281,6 +336,8 @@ const Projects: NextPage = () => {
         searchConflicts(
           setProjects,
           setConflictStudents,
+          conflictMap,
+          setConflictMap,
           setLoading,
           signal,
           setError,
