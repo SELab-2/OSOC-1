@@ -12,6 +12,7 @@ import java.util.UUID
 object EmailUtil {
     /**
      * Set email account to send emails with.
+     * The password below is a Gmail app password, so it can't be used to log into the Google account.
      */
     private const val emailAddressSender = "opensummerofcode.info@gmail.com"
     private const val passwordSender = "nharepxthiwygcpj"
@@ -28,7 +29,7 @@ object EmailUtil {
             Use the link below to choose a new password.
             You can only use this link once to reset your password and it is only valid for 20 minutes.
             $url
-            (if this link isn't clickable, you can copy and paste it into search bar)
+            (if this link isn't clickable, you can copy and paste it into the search bar)
             
             If you did not forget your password, please disregard this email.
         """.trimIndent()
@@ -38,11 +39,12 @@ object EmailUtil {
      * Get a [JavaMailSender] object which is correctly configured.
      */
     private fun getMailSender(): JavaMailSender {
-        val mailSender = JavaMailSenderImpl()
-        mailSender.host = "smtp.gmail.com"
-        mailSender.port = 587
-        mailSender.username = emailAddressSender
-        mailSender.password = passwordSender
+        val mailSender = JavaMailSenderImpl().apply {
+            host = "smtp.gmail.com"
+            port = 587
+            username = emailAddressSender
+            password = passwordSender
+        }
         val props: Properties = mailSender.javaMailProperties
         props["mail.transport.protocol"] = "smtp"
         props["mail.smtp.auth"] = "true"
@@ -55,11 +57,12 @@ object EmailUtil {
      * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
     fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID) {
-        val email = SimpleMailMessage()
-        email.setSubject("Reset Password")
-        email.setText(getForgotPasswordEmailBody(forgotPasswordUUID))
-        email.setTo(emailAddressReceiver)
-        email.setFrom(emailAddressSender)
+        val email = SimpleMailMessage().apply {
+            setSubject("Reset Password")
+            setText(getForgotPasswordEmailBody(forgotPasswordUUID))
+            setTo(emailAddressReceiver)
+            setFrom(emailAddressSender)
+        }
         getMailSender().send(email)
     }
 }
