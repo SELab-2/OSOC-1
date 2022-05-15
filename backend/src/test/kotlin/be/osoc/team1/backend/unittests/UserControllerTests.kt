@@ -1,16 +1,20 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.UserController
+import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.security.PasswordEncoderConfig
+import be.osoc.team1.backend.services.EditionService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -32,9 +36,21 @@ class UserControllerTests(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var userService: UserService
 
+    @MockkBean
+    private lateinit var editionService: EditionService
+
+    @MockkBean
+    private lateinit var osocUserDetailService: OsocUserDetailService
+
     private val testUser = User("Test", "test@email.com", Role.Admin, "password")
     private val testId = testUser.id
     private val testUserJsonRepresentation = ObjectMapper().writeValueAsString(testUser)
+
+    @BeforeEach
+    fun beforeEach() {
+        every { osocUserDetailService.getUserFromPrincipal(any()) } returns User("", "", Role.Admin, "")
+        every { editionService.getEdition(any()) } returns Edition("", true)
+    }
 
     @Test
     fun `getAllUsers should not fail`() {

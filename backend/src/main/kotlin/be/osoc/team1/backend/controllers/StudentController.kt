@@ -57,6 +57,7 @@ class StudentController(
      */
     @GetMapping
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getAllStudents(
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
@@ -98,6 +99,7 @@ class StudentController(
      */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
         service.getStudentById(studentId, edition)
 
@@ -108,6 +110,7 @@ class StudentController(
     @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun deleteStudentById(@PathVariable studentId: UUID, @PathVariable edition: String) =
         service.deleteStudentById(studentId)
 
@@ -121,6 +124,7 @@ class StudentController(
      * verification is the responsibility of the caller.
      */
     @PostMapping
+    @SecuredEdition
     fun addStudent(
         @RequestBody studentRegistration: Student,
         @PathVariable edition: String
@@ -158,14 +162,15 @@ class StudentController(
     @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
         service.setStudentStatus(studentId, status, edition)
 
     /**
-     * Add a [statusSuggestion] to the student with the given [studentId]. The suggester field should
+     * Add a [statusSuggestionRegistration] to the student with the given [studentId]. The suggester field should
      * be equal to the coach who is making this suggestion, so equal to the currently authenticated user.
      * If the suggester does not match the currently authenticated user a '401: Unauthorized" is returned. The
-     * [statusSuggestion] should be passed in the request body as a JSON object and should have the
+     * [statusSuggestionRegistration] should be passed in the request body as a JSON object and should have the
      * following format:
      *
      * ```
@@ -183,12 +188,19 @@ class StudentController(
     @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun addStudentStatusSuggestion(
         @PathVariable studentId: UUID,
-        @RequestBody statusSuggestion: StatusSuggestion,
+        @RequestBody statusSuggestionRegistration: StatusSuggestion,
         @PathVariable edition: String,
         principal: Principal,
     ) {
+        val statusSuggestion = StatusSuggestion(
+            statusSuggestionRegistration.suggester,
+            statusSuggestionRegistration.status,
+            statusSuggestionRegistration.motivation,
+            edition
+        )
         val user = userDetailService.getUserFromPrincipal(principal)
         if (statusSuggestion.suggester != user)
             throw UnauthorizedOperationException("The 'coachId' did not equal authenticated user id!")
@@ -207,6 +219,7 @@ class StudentController(
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun deleteStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @PathVariable coachId: UUID,

@@ -455,15 +455,17 @@ const ProjectTile: React.FC<ProjectProp> = ({
 
       {/* assigned students list */}
       <div className="flex flex-col">
-        {myProject.assignments.map((assignment) => (
-          <ProjectAssignmentsList
-            key={assignment.id}
-            assignment={assignment}
-            setOpenUnassignment={setOpenUnassignment}
-            setAssignmentId={setAssignmentId}
-            setRemoveStudentName={setRemoveStudentName}
-          />
-        ))}
+        {myProject.assignments
+          .sort((one, two) => (one > two ? -1 : 1))
+          .map((assignment) => (
+            <ProjectAssignmentsList
+              key={assignment.id}
+              assignment={assignment}
+              setOpenUnassignment={setOpenUnassignment}
+              setAssignmentId={setAssignmentId}
+              setRemoveStudentName={setRemoveStudentName}
+            />
+          ))}
       </div>
 
       {loading && (

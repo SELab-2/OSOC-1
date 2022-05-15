@@ -4,6 +4,7 @@ import {
   StatusSuggestionBase,
   Student,
   StudentBase,
+  Url,
   User,
   UserRole,
   UUID,
@@ -17,7 +18,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { convertStudentBase } from '../../lib/conversionUtils';
-import { getUrlList, parseError } from '../../lib/requestUtils';
+import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
 import { axiosAuthenticated } from '../../lib/axios';
@@ -109,7 +110,6 @@ function reloadStudent(
 }
 
 // TODO Communication not yet included!!
-// TODO currently a suggestion has a coachId and not a User object, needs to be fixed in backend first
 /**
  * Function to dereference needed student fields
  *
@@ -141,28 +141,24 @@ async function getEntireStudent(
     router
   );
 
-  statusSuggestionBaseList.forEach((suggestion) => {
-    axiosAuthenticated.get(suggestion.suggester).then((response) => {
-      const statusSuggestion = {} as StatusSuggestion;
-      statusSuggestion.suggester = response.data as User;
-      statusSuggestion.status = suggestion.status;
-      statusSuggestion.motivation = suggestion.motivation;
-      newStudent.statusSuggestions.push(statusSuggestion);
-    });
-  });
+  const suggesterMap = new Map<Url, User>();
+  await getUrlMap<User>(
+    statusSuggestionBaseList.map(
+      (suggestionBase) => suggestionBase.suggester
+    ) as Url[],
+    suggesterMap,
+    signal,
+    setError,
+    router
+  );
 
-  // TODO temp solution until this gets fixed
-  const coaches = new Map<UUID, string>();
-  await axiosAuthenticated
-    .get<User[]>(Endpoints.USERS, { signal: signal })
-    .then((response) => {
-      (response.data as User[]).forEach((coach) => {
-        coaches.set(coach.id, coach.username);
-      });
-    })
-    .catch((err) => {
-      parseError(err, setError, signal, router);
-    });
+  for (const suggestion of statusSuggestionBaseList) {
+    const statusSuggestion = {} as StatusSuggestion;
+    statusSuggestion.suggester = suggesterMap.get(suggestion.suggester) as User;
+    statusSuggestion.status = suggestion.status;
+    statusSuggestion.motivation = suggestion.motivation;
+    newStudent.statusSuggestions.push(statusSuggestion);
+  }
 
   return newStudent;
 }
@@ -219,7 +215,7 @@ const StudentView: React.FC<StudentViewProp> = ({
   useEffect(() => {
     setMotivation('');
     myStudent.statusSuggestions.forEach((suggestion) => {
-      if (suggestion.suggester === user) {
+      if (suggestion.suggester.id === user.id) {
         setMotivation(suggestion.motivation);
       }
     });
