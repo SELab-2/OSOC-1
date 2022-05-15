@@ -78,6 +78,7 @@ class ProjectController(private val service: ProjectService) {
         @RequestBody projectRegistration: Project,
         @PathVariable edition: String
     ): ResponseEntity<Project> {
+        projectRegistration.positions.forEach { it.edition = edition }
         val project = Project(
             projectRegistration.name, projectRegistration.description, projectRegistration.clientName,
             edition,
@@ -114,6 +115,7 @@ class ProjectController(private val service: ProjectService) {
         @PathVariable edition: String,
         @RequestBody project: Project
     ): ResponseEntity<Project> {
+        project.positions.forEach { it.edition = edition }
         if (projectId != project.id)
             throw FailedOperationException("Request url id=\"$projectId\" did not match request body id=\"${project.id}\"")
 
