@@ -170,7 +170,6 @@ paths:
                     description: Part of a name of a student that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
                 -   in: query
                     name: status
-                    required: true
                     schema:
                         type: array
                         items:
@@ -181,6 +180,11 @@ paths:
                     schema:
                         type: boolean
                     description: Whether or not to include students you have already added a suggestion for (default value is true)
+                -   in: query
+                    name: view
+                    schema:
+                        $ref: '#/components/schemas/StudentView'
+                    description: The view of the student, with different views the students will contain less or more information (default is Full).
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -1579,6 +1583,9 @@ components:
                     example: OSOC 2022
                 isActive:
                     type: boolean
+        StudentView:
+            type: string
+            enum: [ Full, Basic ]
     securitySchemes:
         BasicAuth:
             type: http
