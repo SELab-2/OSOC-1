@@ -1,7 +1,9 @@
 package be.osoc.team1.backend.unittests
 
+import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.SuggestionEnum
+import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.StatusSuggestionRepository
 import be.osoc.team1.backend.services.StatusSuggestionService
@@ -17,8 +19,8 @@ import java.util.UUID
 
 class StatusSuggestionServiceTests {
     private val testId = UUID.randomUUID()
-    private val coachId = UUID.randomUUID()
-    private val testStatusSuggestion = StatusSuggestion(coachId, SuggestionEnum.Yes, "motivation")
+    private val coach = User("username", "email", Role.Coach, "password")
+    private val testStatusSuggestion = StatusSuggestion(coach, SuggestionEnum.Yes, "motivation")
 
     private fun getRepository(statusSuggestionAlreadyExists: Boolean): StatusSuggestionRepository {
         val repository: StatusSuggestionRepository = mockk()

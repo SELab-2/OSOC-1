@@ -3,23 +3,19 @@ on: [push]
 
 jobs:
   commitlint:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: mikxox/maven-test-action:latest
       options: --rm
-    env:
-      GITHUB_WORKSPACE: /home/selab2/actions-runner/workspace
 
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          path: 'temppath'
 
       - name: Validate all commits from PR
         shell: bash
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath
           STATUS="$(git log -1 --pretty=format:"%s" | npx commitlint)"
           echo -E ::notice title=commitmessage::$(git log -1 --pretty=format:"%s" | npx commitlint --verbose | sed 's/%/%25/g' | sed 's/\n/%0A/g' | sed 's/\r/%0D/g')
 
@@ -27,12 +23,4 @@ jobs:
         shell: bash
         if: failure()
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath
           echo -E ::error title=commitmessage::$(git log -1 --pretty=format:"%s" | npx commitlint --verbose | sed 's/%/%25/g' | sed 's/\n/%0A/g' | sed 's/\r/%0D/g')
-
-
-      - name: remove temppath
-        if: always()
-        run: |
-          cd /__w/OSOC-1/OSOC-1/
-          sudo rm -rf temppath

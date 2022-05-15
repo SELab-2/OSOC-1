@@ -27,12 +27,12 @@ import javax.validation.constraints.NotBlank
  */
 @Entity
 class Position(
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(cascade = [CascadeType.MERGE])
     val skill: Skill,
     val amount: Int,
     @JsonIgnore
     @NotBlank
-    val edition: String = ""
+    var edition: String = ""
 ) {
     @Id
     val id: UUID = UUID.randomUUID()

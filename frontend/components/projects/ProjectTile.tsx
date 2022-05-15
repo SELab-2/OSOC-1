@@ -36,7 +36,6 @@ const edit_icon = <Icon icon="akar-icons:edit" />;
 type ProjectProp = {
   projectInput: ProjectBase;
   refreshProjects: () => void;
-  setRefreshStudents: (refreshStudents: [boolean, boolean]) => void;
 };
 
 type UserProp = {
@@ -66,7 +65,6 @@ type AssignmentProp = {
  * @param setMyProjectBase  - callback for reloadProject that is called after this POST completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
- * @param setRefreshStudents - callback to set if students list should refresh
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 // TODO when post is finished, should update the student filter
@@ -79,7 +77,6 @@ function postStudentToProject(
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: [boolean, boolean]) => void,
   router: NextRouter
 ) {
   const edition = router.query.editionName as string;
@@ -95,7 +92,6 @@ function postStudentToProject(
     )
     .then(() => {
       reloadProject(projectId, setMyProjectBase, signal, setError, router);
-      setRefreshStudents([true, false]);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -111,7 +107,6 @@ function postStudentToProject(
  * @param setMyProjectBase    - callback for reloadProject that is called after this DELETE completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
- * @param setRefreshStudents - callback to set if students list should refresh
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function deleteStudentFromProject(
@@ -120,7 +115,6 @@ function deleteStudentFromProject(
   setMyProjectBase: (myProjectBase: ProjectBase) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: [boolean, boolean]) => void,
   router: NextRouter
 ) {
   const edition = router.query.editionName as string;
@@ -136,7 +130,6 @@ function deleteStudentFromProject(
     )
     .then(() => {
       reloadProject(projectId, setMyProjectBase, signal, setError, router);
-      setRefreshStudents([true, false]);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -149,14 +142,12 @@ function deleteStudentFromProject(
  * @param projectId - the UUID of the project to remove
  * @param refreshProjects - callback to update main projects list
  * @param setError - Callback to set error message
- * @param setRefreshStudents - callback to set if students list should refresh
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 function deleteProject(
   projectId: UUID,
   refreshProjects: () => void,
   setError: (error: string) => void,
-  setRefreshStudents: (refreshStudents: [boolean, boolean]) => void,
   router: NextRouter
 ) {
   const edition = router.query.editionName as string;
@@ -164,7 +155,6 @@ function deleteProject(
     .delete('/' + edition + Endpoints.PROJECTS + '/' + projectId)
     .then(() => {
       refreshProjects();
-      setRefreshStudents([true, false]);
     })
     .catch((err) => {
       parseError(err, setError, new AbortController().signal, router);
@@ -290,7 +280,6 @@ async function getEntireProject(
 const ProjectTile: React.FC<ProjectProp> = ({
   projectInput,
   refreshProjects,
-  setRefreshStudents,
 }: ProjectProp) => {
   const router = useRouter();
   const [user] = useUser();
@@ -318,6 +307,48 @@ const ProjectTile: React.FC<ProjectProp> = ({
   const [deletePopup, setDeletePopup] = useState(false);
 
   let controller = new AbortController();
+  let controller2 = new AbortController();
+
+  /**
+   * Since polling is done in parent page projects.tsx, we only watch if
+   * we get passed a different object than we were already showing.
+   * The only thing we can't check based on changed URLs are the positions
+   * so we always get the positions unless we need to reload the entire object.
+   */
+  useEffect(() => {
+    if (JSON.stringify(projectInput) != JSON.stringify(myProjectBase)) {
+      setMyProjectBase(projectInput as ProjectBase);
+    } else {
+      controller2.abort();
+      controller2 = new AbortController();
+      const signal = controller.signal;
+      const newPositions = [] as Position[];
+
+      (async () => {
+        await getUrlList<Position>(
+          projectInput.positions,
+          newPositions,
+          signal,
+          setError,
+          router
+        );
+        // This check does two things, it checks if the positions have changed
+        // But it also checks if the project itself has actually been loaded fully via the second check
+        // If we don't do this second check, it could change myProject before everything is loaded
+        // And rendering will then fail due to undefined errors
+        if (
+          JSON.stringify(newPositions) != JSON.stringify(myProject.positions) &&
+          JSON.stringify(myProject.positions) !=
+            JSON.stringify(myProjectBase.positions)
+        ) {
+          myProject.positions = newPositions;
+        }
+      })();
+      return () => {
+        controller2.abort();
+      };
+    }
+  }, [projectInput]);
 
   /**
    * called when myProjectBase changes, this includes right after
@@ -328,11 +359,17 @@ const ProjectTile: React.FC<ProjectProp> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getEntireProject(myProjectBase, setLoading, signal, setError, router).then(
-      (response) => {
+    (async () => {
+      await getEntireProject(
+        myProjectBase,
+        setLoading,
+        signal,
+        setError,
+        router
+      ).then((response) => {
         setMyProject(response);
-      }
-    );
+      });
+    })();
     return () => {
       controller.abort();
     };
@@ -418,15 +455,17 @@ const ProjectTile: React.FC<ProjectProp> = ({
 
       {/* assigned students list */}
       <div className="flex flex-col">
-        {myProject.assignments.map((assignment) => (
-          <ProjectAssignmentsList
-            key={assignment.id}
-            assignment={assignment}
-            setOpenUnassignment={setOpenUnassignment}
-            setAssignmentId={setAssignmentId}
-            setRemoveStudentName={setRemoveStudentName}
-          />
-        ))}
+        {myProject.assignments
+          .sort((one, two) => (one > two ? -1 : 1))
+          .map((assignment) => (
+            <ProjectAssignmentsList
+              key={assignment.id}
+              assignment={assignment}
+              setOpenUnassignment={setOpenUnassignment}
+              setAssignmentId={setAssignmentId}
+              setRemoveStudentName={setRemoveStudentName}
+            />
+          ))}
       </div>
 
       {loading && (
@@ -485,7 +524,6 @@ const ProjectTile: React.FC<ProjectProp> = ({
                 setMyProjectBase,
                 signal,
                 setError,
-                setRefreshStudents,
                 router
               );
               setOpenAssignment(false);
@@ -591,7 +629,6 @@ const ProjectTile: React.FC<ProjectProp> = ({
                   setMyProjectBase,
                   signal,
                   setError,
-                  setRefreshStudents,
                   router
                 );
                 return () => {
@@ -679,13 +716,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               onClick={() => {
                 setDeletePopup(false);
                 setShowEditProject(false);
-                deleteProject(
-                  myProject.id,
-                  refreshProjects,
-                  setError,
-                  setRefreshStudents,
-                  router
-                );
+                deleteProject(myProject.id, refreshProjects, setError, router);
               }}
             >
               Delete

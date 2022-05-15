@@ -1,12 +1,15 @@
 package be.osoc.team1.backend.unittests;
 
+import be.osoc.team1.backend.controllers.EditionSecurityAspect;
 import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 
@@ -16,6 +19,8 @@ import java.lang.annotation.*;
 // Taken from https://stackoverflow.com/a/65504089/15516306
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@EnableAspectJAutoProxy
+@Import(EditionSecurityAspect.class)
 @WebMvcTest(excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = WebSecurityConfigurer.class)},
         excludeAutoConfiguration = {SecurityAutoConfiguration.class,
                 SecurityFilterAutoConfiguration.class,

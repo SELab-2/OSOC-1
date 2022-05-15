@@ -13,7 +13,7 @@ on:
 jobs:
   container-job:
 
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: mikxox/maven-test-action:latest
       options: --rm
@@ -22,14 +22,13 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-          path: 'temppath'
 
       - name: install yarn and dependencies
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath/frontend
           npm install --global yarn
           npm install --global eslint-formatter-rdjson
           yarn install --frozen-lockfile
+        working-directory: ./frontend
 
       - name: install reviewdog
         run: |
@@ -39,16 +38,15 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath/frontend
-          /__w/OSOC-1/OSOC-1/temppath/frontend/node_modules/.bin/eslint -f=rdjson . | reviewdog -f=rdjson -name="eslint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="true"
+          node_modules/.bin/eslint -f=rdjson . | reviewdog -f=rdjson -name="eslint" -reporter="github-pr-check" -level="error" -filter-mode="nofilter" -fail-on-error="true"
+        working-directory: ./frontend
 
       - name: prettier with reviewdog
         if: always()
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd /__w/OSOC-1/OSOC-1/temppath/frontend
-          /__w/OSOC-1/OSOC-1/temppath/frontend/node_modules/.bin/prettier --check --config /__w/OSOC-1/OSOC-1/temppath/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/temppath/frontend/.prettierignore .  2>&1 | sed --regexp-extended 's/(\[warn\].*)$/\1 File is not properly formatted./' \
+          node_modules/.bin/prettier --check --config /__w/OSOC-1/OSOC-1/frontend/prettier.config.js --ignore-path /__w/OSOC-1/OSOC-1/frontend/.prettierignore .  2>&1 | sed --regexp-extended 's/(\[warn\].*)$/\1 File is not properly formatted./' \
           | reviewdog \
           -efm="%-G[warn] Code style issues found in the above file(s). Forgot to run Prettier%. File is not properly formatted." \
           -efm="[%tarn] %f %m" \
@@ -61,9 +59,4 @@ jobs:
           -filter-mode="nofilter" \
           -fail-on-error="true" \
           -level="error"
-
-      - name: remove temppath
-        if: always()
-        run: |
-          cd /__w/OSOC-1/OSOC-1
-          sudo rm -rf temppath
+        working-directory: ./frontend

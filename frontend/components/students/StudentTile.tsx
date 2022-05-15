@@ -24,9 +24,8 @@ const tilde_mark = <Icon icon="mdi:tilde" />;
  * @See StudentTile for more information
  */
 type StudentProp = {
-  student: StudentBase;
+  studentInput: StudentBase;
   setStudentBase: (studentBase: StudentBase) => void;
-  studentBase: StudentBase;
 };
 
 /**
@@ -84,22 +83,22 @@ async function getEntireStudent(
 /**
  * This creates the tiles show in the StudentSidebar
  * @param student - The student whose information should be shown
- * @param setStudentBase - callback to set studentBase object from dragndrop
- * @param studentBase - object
+ * @param setStudentBase - callback to set studentBase object,
+ *                         this is needed to be able to click on a student
+ *                         and then show it in the select students main screen
  */
 const StudentTile: React.FC<StudentProp> = ({
-  student,
+  studentInput,
   setStudentBase,
-  studentBase,
 }: StudentProp) => {
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
-    useState(convertStudentBase(student) as Student); // using different names to avoid confusion
+    useState(convertStudentBase(studentInput) as Student); // using different names to avoid confusion
 
   const [myStudentBase, setMyStudentBase]: [
     StudentBase,
     (myStudentBase: StudentBase) => void
-  ] = useState(student as StudentBase);
+  ] = useState(studentInput as StudentBase);
 
   // TODO find a place to actually show this error
   const [, setError]: [string, (error: string) => void] = useState('');
@@ -107,11 +106,15 @@ const StudentTile: React.FC<StudentProp> = ({
   useAxiosAuth();
   let controller = new AbortController();
 
+  /**
+   * Since polling is done in parent StudentSidebar.tsx, we only watch if
+   * we get passed a different object than we were already showing.
+   */
   useEffect(() => {
-    if (studentBase.id == student.id) {
-      setMyStudentBase(studentBase);
+    if (JSON.stringify(studentInput) != JSON.stringify(myStudentBase)) {
+      setMyStudentBase(studentInput);
     }
-  }, [studentBase, student]);
+  }, [studentInput]);
 
   useEffect(() => {
     controller.abort();
@@ -152,7 +155,7 @@ const StudentTile: React.FC<StudentProp> = ({
   const [, drag] = useDrag(
     () => ({
       type: ItemTypes.STUDENTTILE,
-      item: student, // This is what will be 'given' to the project this is dropped on
+      item: studentInput, // This is what will be 'given' to the project this is dropped on
       collect: (monitor) => ({
         isDragging: monitor.isDragging(), // TODO add isDragging styling
       }),
@@ -162,7 +165,11 @@ const StudentTile: React.FC<StudentProp> = ({
 
   return (
     // TODO add a chevron dropdown to show possible roles, student coach, ...
-    <div ref={drag} key={student.id} onClick={() => setStudentBase(student)}>
+    <div
+      ref={drag}
+      key={studentInput.id}
+      onClick={() => setStudentBase(studentInput)}
+    >
       <div
         className={`my-4 mx-1 flex flex-row justify-between p-2 opacity-100 shadow-sm shadow-gray-500`}
       >
@@ -170,18 +177,20 @@ const StudentTile: React.FC<StudentProp> = ({
         <div className="flex w-3/4 flex-col justify-center">
           <div
             className={`flex flex-row ${
-              student.alumn ? 'visible' : 'hidden h-0 w-0'
+              studentInput.alumn ? 'visible' : 'hidden h-0 w-0'
             }`}
           >
             <p
               className={`m-0 rounded-xl bg-osoc-bg text-xs ${
-                student.alumn ? 'visible px-1' : 'invisible h-0 px-0'
+                studentInput.alumn ? 'visible px-1' : 'invisible h-0 px-0'
               }`}
             >
               Alumn
             </p>
           </div>
-          <p className="pl-2">{student.firstName + ' ' + student.lastName}</p>
+          <p className="pl-2">
+            {studentInput.firstName + ' ' + studentInput.lastName}
+          </p>
         </div>
 
         {/* TODO add some sort of counter to show total amount of suggestions for this student */}
@@ -209,13 +218,13 @@ const StudentTile: React.FC<StudentProp> = ({
           />
           <i
             className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[28px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${
-              chartHelper[student.status]
-                ? chartHelper[student.status][1]
+              chartHelper[studentInput.status]
+                ? chartHelper[studentInput.status][1]
                 : chartHelper['Default'][1]
             }`}
           >
-            {chartHelper[student.status]
-              ? chartHelper[student.status][0]
+            {chartHelper[studentInput.status]
+              ? chartHelper[studentInput.status][0]
               : chartHelper['Default'][0]}
           </i>
         </div>
