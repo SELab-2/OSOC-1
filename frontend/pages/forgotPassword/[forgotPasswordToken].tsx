@@ -25,13 +25,9 @@ const ForgotPassword: NextPage = () => {
     if (!validPassword) return;
 
     try {
-      await axios.patch(
-        Endpoints.FORGOTPASSWORD + '/' + token,
-        password,
-        {
-          headers: { 'Content-Type': 'text/plain' },
-        }
-      );
+      await axios.patch(Endpoints.FORGOTPASSWORD + '/' + token, password, {
+        headers: { 'Content-Type': 'text/plain' },
+      });
 
       toast.success(
         (t) => (
