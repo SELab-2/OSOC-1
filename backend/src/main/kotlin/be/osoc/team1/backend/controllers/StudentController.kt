@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.net.URLDecoder
 import java.security.Principal
-import java.util.UUID
+import java.util.*
 import javax.servlet.http.HttpServletResponse
 
 @RestController
@@ -57,6 +57,9 @@ class StudentController(
      * by [status] (default value allows all statuses), by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
      * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
+     *
+     * The returned students can also be altered using the [view] query parameter: [Basic] will limit the data the student object contains,
+     * [Full] will return the full object.
      */
     @GetMapping
     @Secured("ROLE_COACH")
@@ -175,7 +178,11 @@ class StudentController(
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     @SecuredEdition
-    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
+    fun setStudentStatus(
+        @PathVariable studentId: UUID,
+        @RequestBody status: StatusEnum,
+        @PathVariable edition: String
+    ) =
         service.setStudentStatus(studentId, status, edition)
 
     /**

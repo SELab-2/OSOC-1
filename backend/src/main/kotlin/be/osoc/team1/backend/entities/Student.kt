@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import be.osoc.team1.backend.util.AnswerListSerializer
@@ -171,11 +172,19 @@ class Student(
     fun calculateStatusSuggestionPercentage(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
 }
 
+/**
+ * This class represents a few views which can be used by entities. A field marked as [Full] will not be displayed
+ * when writerWithView [Basic] is used, If writerWithView [Full] is used both the [Basic] and [Full] fields will be
+ * displayed, this because [Full] inherits [Basic].
+ */
 class StudentView {
     open class Basic
     open class Full : Basic()
 }
 
+/**
+ * Enum to represent the [StudentView]s in the [StudentController]
+ */
 enum class StudentViewEnum {
     Basic, Full
 }
