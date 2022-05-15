@@ -314,7 +314,13 @@ const Projects: NextPage = () => {
                   {/* TODO add an easy reset/undo search button */}
                   {/* TODO either move search icon left and add xmark to the right or vice versa */}
                   {/* This is the projects searchbar */}
-                  <div className="ml-6 mr-4 flex w-full justify-center md:mr-4 md:ml-0 lg:ml-6 lg:mr-4">
+                  <div
+                    className={`${
+                      user.role == UserRole.Admin
+                        ? 'xl:mr-4 xl:flex-row'
+                        : 'md:mr-4 md:flex-row'
+                    } ml-6 mr-8 flex w-full flex-col justify-center md:ml-0 lg:ml-6`}
+                  >
                     <div className="lg:w-[calc(100% - 200px)] relative mx-4 w-full md:mr-0">
                       <input
                         type="text"
@@ -337,17 +343,33 @@ const Projects: NextPage = () => {
                         {magnifying_glass}
                       </i>
                     </div>
-
-                    {/* Button to create new project */}
-                    <button
+                    <div
                       className={`${
-                        user.role == UserRole.Admin ? 'visible' : 'hidden'
-                      } justify - right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
-                      type="submit"
-                      onClick={() => setShowCreateProject(true)}
+                        user.role == UserRole.Admin
+                          ? 'xl:mt-0 xl:h-auto'
+                          : 'md:mt-0 md:h-auto'
+                      } mt-2 flex h-[36px] flex-row justify-center`}
                     >
-                      Create new project
-                    </button>
+                      {/* Button to show conflicts */}
+                      <button
+                        className={`justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                        //type="submit"
+                        //onClick={() => setShowCreateProject(true)}
+                      >
+                        Show Conflicts
+                      </button>
+
+                      {/* Button to create new project */}
+                      <button
+                        className={`${
+                          user.role == UserRole.Admin ? 'visible' : 'hidden'
+                        } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                        //type="submit"
+                        onClick={() => setShowCreateProject(true)}
+                      >
+                        Create new project
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
