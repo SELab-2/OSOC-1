@@ -205,3 +205,11 @@ export type Answer = {
 export const ItemTypes = {
   STUDENTTILE: 'studentTile',
 };
+
+/**
+ * This is one element from the exact collection type returned by a get to the Conflicts endpoint
+ */
+export type Conflict = {
+  student: Url;
+  projects: Url[];
+};

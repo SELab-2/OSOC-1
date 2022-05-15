@@ -5,7 +5,14 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useRef, useState } from 'react';
-import { ProjectBase, ProjectData, UserRole } from '../../lib/types';
+import {
+  Conflict,
+  ProjectBase,
+  ProjectData,
+  Url,
+  UserRole,
+  UUID,
+} from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
@@ -20,7 +27,7 @@ import FlatList from 'flatlist-react';
 import useUser from '../../hooks/useUser';
 import { SpinnerCircular } from 'spinners-react';
 import Error from '../../components/Error';
-import { parseError } from '../../lib/requestUtils';
+import { getUrlList, parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
@@ -95,6 +102,53 @@ function searchProject(
     });
 }
 
+async function searchConflicts(
+  setProjects: (projects: ProjectBase[]) => void,
+  setConflictStudents: (conflictStudents: UUID[]) => void,
+  setLoading: (loading: boolean) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  setLoading(true);
+  const edition = router.query.editionName as string;
+
+  try {
+    const conflictsResponse = await axiosAuthenticated.get<Conflict[]>(
+      '/' + edition + Endpoints.CONFLICTS,
+      {
+        signal: signal,
+      }
+    );
+    const conflicts = conflictsResponse.data;
+    const conflictProjects = [] as ProjectBase[];
+    const projectUrls = conflicts
+      .map((conflict) => {
+        return conflict.projects;
+      })
+      .flat() as Url[];
+    await getUrlList<ProjectBase>(
+      projectUrls,
+      conflictProjects,
+      signal,
+      setError,
+      router
+    );
+
+    setProjects(conflictProjects);
+    setConflictStudents(
+      conflicts.map((conflict) => {
+        return conflict.student.split('/').pop() as UUID;
+      })
+    );
+  } catch (err) {
+    parseError(err, setError, signal, router);
+    if (!signal.aborted) {
+      setLoading(false);
+    }
+  }
+}
+
 /**
  * Projects page for OSOC application
  * @returns Projects page
@@ -108,6 +162,8 @@ const Projects: NextPage = () => {
   const [projectSearch, setProjectSearch] = useState('' as string);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showConflicts, setShowConflicts] = useState(false);
+  const [conflictStudents, setConflictStudents] = useState([] as UUID[]);
   const [projects, setProjects]: [
     ProjectBase[],
     (projects: ProjectBase[]) => void
@@ -125,6 +181,12 @@ const Projects: NextPage = () => {
     state.page = 0;
     return search();
   }, []);
+
+  useEffect(() => {
+    if (!showConflicts) {
+      setConflictStudents([] as UUID[]);
+    }
+  }, [showConflicts]);
 
   /**
    * function to add new project results instead of overwriting old results
@@ -190,7 +252,7 @@ const Projects: NextPage = () => {
    */
   usePoll(
     () => {
-      if (!state.loading && { isOnScreen }.isOnScreen) {
+      if (!state.loading && { isOnScreen }.isOnScreen && !showConflicts) {
         controller.abort();
         controller = new AbortController();
         const signal = controller.signal;
@@ -212,9 +274,24 @@ const Projects: NextPage = () => {
         return () => {
           controller.abort();
         };
+      } else if (!state.loading && { isOnScreen }.isOnScreen && showConflicts) {
+        controller.abort();
+        controller = new AbortController();
+        const signal = controller.signal;
+        searchConflicts(
+          setProjects,
+          setConflictStudents,
+          setLoading,
+          signal,
+          setError,
+          router
+        );
+        return () => {
+          controller.abort();
+        };
       }
     },
-    [state, projectSearch, { isOnScreen }.isOnScreen],
+    [state, projectSearch, { isOnScreen }.isOnScreen, showConflicts],
     {
       interval: 3000,
     }
@@ -324,11 +401,19 @@ const Projects: NextPage = () => {
                     <div className="lg:w-[calc(100% - 200px)] relative mx-4 w-full md:mr-0">
                       <input
                         type="text"
-                        className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+                        className={`${
+                          showConflicts
+                            ? 'bg-gray cursor-not-allowed'
+                            : 'cursor-text bg-white'
+                        } form-control m-0 block w-full rounded border border-solid border-gray-300 bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none`}
                         id="ProjectsSearch"
                         placeholder="Search projects by name"
+                        disabled={showConflicts}
                         onChange={(e) => setProjectSearch(e.target.value)}
                         onKeyPress={(e) => {
+                          if (showConflicts) {
+                            return;
+                          }
                           if (e.key == 'Enter') {
                             return search();
                           }
@@ -337,6 +422,9 @@ const Projects: NextPage = () => {
                       <i
                         className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
                         onClick={() => {
+                          if (showConflicts) {
+                            return;
+                          }
                           return search();
                         }}
                       >
@@ -354,9 +442,9 @@ const Projects: NextPage = () => {
                       <button
                         className={`justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
                         //type="submit"
-                        //onClick={() => setShowCreateProject(true)}
+                        onClick={() => setShowConflicts(!showConflicts)}
                       >
-                        Show Conflicts
+                        {showConflicts ? 'Show All Projects' : 'Show Conflicts'}
                       </button>
 
                       {/* Button to create new project */}
@@ -384,6 +472,7 @@ const Projects: NextPage = () => {
                     <ProjectTile
                       key={project.id}
                       projectInput={project}
+                      conflictStudents={conflictStudents}
                       refreshProjects={refreshProjects}
                     />
                   )}
