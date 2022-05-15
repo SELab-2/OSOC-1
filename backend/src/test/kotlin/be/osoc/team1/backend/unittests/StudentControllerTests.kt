@@ -9,6 +9,7 @@ import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.StudentView
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.entities.filterByName
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.ninjasquad.springmockk.MockkBean
+import io.kotest.assertions.all
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -109,6 +111,30 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getAllStudents should not fail`() {
         every { studentService.getAllStudents(defaultSort, testEdition) } returns emptyList()
         mockMvc.perform(get(editionUrl).principal(defaultPrincipal)).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `getAllStudents Basic view returns a basic form of students`() {
+        val testStudent1 = Student("L1", "VC", testEdition)
+        val testStudent2 = Student("L2", "VC", testEdition)
+        val testStudent3 = Student("L3", "VC", testEdition)
+        val testStudent4 = Student("L4", "VC", testEdition)
+        val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
+        mockMvc.perform(get("$editionUrl?view=Basic").principal(defaultPrincipal)).andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Basic::class.java).writeValueAsString(PagedCollection(allStudents,4))))
+    }
+
+    @Test
+    fun `getAllStudents Full view returns the full form of students`() {
+        val testStudent1 = Student("L1", "VC", testEdition)
+        val testStudent2 = Student("L2", "VC", testEdition)
+        val testStudent3 = Student("L3", "VC", testEdition)
+        val testStudent4 = Student("L4", "VC", testEdition)
+        val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
+        mockMvc.perform(get("$editionUrl?view=Full").principal(defaultPrincipal)).andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents,4))))
     }
 
     @Test
