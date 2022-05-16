@@ -66,14 +66,16 @@ const Login = () => {
           if (user.role === UserRole.Disabled) {
             router.push('/wait');
           } else {
-            // TODO this is a temporary fix
             const response = await axios.get<Edition>(Endpoints.EDITIONACTIVE, {
               headers: { Authorization: `Basic ${accessToken}` },
             });
-            if (response) {
-              setEdition(response.data.name);
+            if (response.data) {
+              const edition = response.data.name;
+              setEdition(edition);
+              router.push(`/${edition}/projects`);
+            } else {
+              router.push('/editions');
             }
-            router.push('/');
           }
         } else {
           toast.error('Something went wrong trying to process the request.');
