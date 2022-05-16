@@ -399,7 +399,7 @@ class AuthorizationTests {
         val firstRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(firstRefreshResponse.statusCodeValue == 200)
         val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
-        assert(secondRefreshResponse.statusCodeValue == 400)
+        assert(secondRefreshResponse.statusCodeValue == 418)
     }
 
     @Test
