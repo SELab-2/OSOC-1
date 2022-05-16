@@ -65,7 +65,7 @@ const StudentTile: React.FC<StudentProp> = ({
     if (JSON.stringify(studentInput) != JSON.stringify(myStudent)) {
       setMyStudent(studentInput as StudentBaseBasic);
     }
-  }, [studentInput, myStudent]);
+  }, [studentInput]);
 
   /**
    * This hook allows dragging the StudentTile
