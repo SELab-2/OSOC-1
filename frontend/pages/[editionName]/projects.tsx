@@ -13,6 +13,7 @@ import {
   Url,
   UserRole,
   UUID,
+  conflictMapType,
 } from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
@@ -35,17 +36,10 @@ import { NextRouter } from 'next/dist/client/router';
 import usePoll from 'react-use-poll';
 import useOnScreen from '../../hooks/useOnScreen';
 import PersistLogin from '../../components/PersistLogin';
+import ProjectConflict from '../../components/projects/ProjectConflict';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
-
-/**
- * Helper type to avoid having to change this everywhere
- */
-type conflictMapType = Map<
-  UUID,
-  { student: StudentBase; projectUrls: Set<Url>; amount: number }
->;
 
 /**
  * function that allows searching projects by name
@@ -132,21 +126,22 @@ async function searchConflicts(
         signal: signal,
       }
     );
-    const conflicts = conflictsResponse.data;
+    const conflicts = conflictsResponse.data as Conflict[];
 
-    const newConflictMap = {} as conflictMapType;
+    const newConflictMap = new Map() as conflictMapType;
     conflictMap.forEach((value, key) => {
-      value.amount = 1;
-      newConflictMap.set(key, JSON.parse(JSON.stringify(value)));
+      const newValue = { ...value };
+      newValue.amount = 1;
+      newConflictMap.set(key, newValue);
     });
 
     const newStudents = conflicts
       .map((conflict) => conflict.student as Url)
-      .filter((student) =>
-        newConflictMap.has(student.split('/').pop() as UUID)
+      .filter(
+        (student) => !newConflictMap.has(student.split('/').pop() as UUID)
       );
 
-    const newConflictStudents = {} as Map<Url, StudentBase>;
+    const newConflictStudents = new Map<Url, StudentBase>();
     await getUrlMap<StudentBase>(
       newStudents,
       newConflictStudents,
@@ -155,11 +150,13 @@ async function searchConflicts(
       router
     );
 
-    for (const conflict of conflicts) {
+    conflicts.forEach((conflict) => {
       const studId = conflict.student.split('/').pop() as UUID;
       const value = newConflictMap.get(studId);
       if (value) {
-        conflict.projects.forEach((item) => value.projectUrls.add(item));
+        conflict.projects.forEach((item) =>
+          (value.projectUrls as Set<Url>).add(item)
+        );
         value.amount = conflict.projects.length;
         newConflictMap.set(studId, value);
       } else {
@@ -170,30 +167,9 @@ async function searchConflicts(
         };
         newConflictMap.set(studId, newValue);
       }
-    }
+    });
 
     setConflictMap(newConflictMap);
-
-    // const conflictProjects = [] as ProjectBase[];
-    // const projectUrls = conflicts
-    //   .map((conflict) => {
-    //     return conflict.projects;
-    //   })
-    //   .flat() as Url[];
-    // await getUrlList<ProjectBase>(
-    //   projectUrls,
-    //   conflictProjects,
-    //   signal,
-    //   setError,
-    //   router
-    // );
-    //
-    // setProjects(conflictProjects);
-    // setConflictStudents(
-    //   conflicts.map((conflict) => {
-    //     return conflict.student.split('/').pop() as UUID;
-    //   })
-    // );
   } catch (err) {
     parseError(err, setError, signal, router);
     if (!signal.aborted) {
@@ -217,7 +193,7 @@ const Projects: NextPage = () => {
   const [error, setError] = useState('');
   const [showConflicts, setShowConflicts] = useState(false);
   const [conflictStudents, setConflictStudents] = useState([] as UUID[]);
-  const [conflictMap, setConflictMap] = useState({} as conflictMapType);
+  const [conflictMap, setConflictMap] = useState(new Map() as conflictMapType);
   // const [conflictsLoaded, setConflictsLoaded] = useState(false);
   const [projects, setProjects]: [
     ProjectBase[],
@@ -239,7 +215,7 @@ const Projects: NextPage = () => {
 
   useEffect(() => {
     if (!showConflicts) {
-      setConflictMap({} as conflictMapType);
+      setConflictMap(new Map() as conflictMapType);
       setConflictStudents([] as UUID[]);
     }
   }, [showConflicts]);
@@ -529,40 +505,43 @@ const Projects: NextPage = () => {
                 {error && <Error error={error} className="mb-4" />}
 
                 {/* This contains the project tiles */}
-                <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
-                  <FlatList
-                    list={projects}
-                    renderItem={(project: ProjectBase) => (
-                      <ProjectTile
-                        key={project.id}
-                        projectInput={project}
-                        conflictStudents={conflictStudents}
-                        refreshProjects={refreshProjects}
-                      />
-                    )}
-                    renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
-                    hasMoreItems={state.hasMoreItems}
-                    loadMoreItems={fetchData}
-                    paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
-                    paginationLoadingIndicatorPosition="center"
-                  />
-                  <div
-                    className={`${
-                      state.loading && state.page > 0
-                        ? 'visible block'
-                        : 'hidden'
-                    } text-center`}
-                  >
-                    <p>Loading Projects</p>
-                    <SpinnerCircular
-                      size={100}
-                      thickness={100}
-                      color="#FCB70F"
-                      secondaryColor="rgba(252, 183, 15, 0.4)"
-                      className="mx-auto"
+                {!showConflicts && (
+                  <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
+                    <FlatList
+                      list={projects}
+                      renderItem={(project: ProjectBase) => (
+                        <ProjectTile
+                          key={project.id}
+                          projectInput={project}
+                          conflictStudents={conflictStudents}
+                          refreshProjects={refreshProjects}
+                        />
+                      )}
+                      renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
+                      hasMoreItems={state.hasMoreItems}
+                      loadMoreItems={fetchData}
+                      paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
+                      paginationLoadingIndicatorPosition="center"
                     />
+                    <div
+                      className={`${
+                        state.loading && state.page > 0
+                          ? 'visible block'
+                          : 'hidden'
+                      } text-center`}
+                    >
+                      <p>Loading Projects</p>
+                      <SpinnerCircular
+                        size={100}
+                        thickness={100}
+                        color="#FCB70F"
+                        secondaryColor="rgba(252, 183, 15, 0.4)"
+                        className="mx-auto"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
+                {showConflicts && <ProjectConflict conflictMap={conflictMap} />}
               </section>
             </main>
           </DndProvider>

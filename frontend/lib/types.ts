@@ -213,3 +213,11 @@ export type Conflict = {
   student: Url;
   projects: Url[];
 };
+
+/**
+ * Helper type to all needed conflicts information
+ */
+export type conflictMapType = Map<
+  UUID,
+  { student: StudentBase; projectUrls: Set<Url>; amount: number }
+>;
