@@ -130,17 +130,6 @@ const Login = () => {
               no account yet? <br /> register here!
             </p>
           </Link>
-          <p className="hr-sect pt-4 pb-2 text-sm font-medium opacity-80 lg:pb-4">
-            Or log in using
-          </p>
-          {/* Github provider. Right now, this doesn't work*/}
-          <button
-            className="bg-[#302727] px-4 py-1 text-white shadow-sm shadow-gray-300"
-            onClick={() => 'click'}
-            disabled={true}
-          >
-            <p className="text-right">Github</p>
-          </button>
         </form>
       </FormContainer>
     </>
