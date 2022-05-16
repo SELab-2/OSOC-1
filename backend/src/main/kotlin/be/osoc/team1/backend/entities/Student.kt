@@ -1,5 +1,6 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import be.osoc.team1.backend.util.AnswerListSerializer
@@ -8,7 +9,9 @@ import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
 import be.osoc.team1.backend.util.UserDeserializer
 import be.osoc.team1.backend.util.UserSerializer
+import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
@@ -121,7 +124,9 @@ class Answer(
 @Entity
 @JsonDeserialize(using = TallyDeserializer::class)
 class Student(
+    @field:JsonView(StudentView.Basic::class)
     val firstName: String,
+    @field:JsonView(StudentView.Basic::class)
     val lastName: String,
 
     @JsonIgnore
@@ -130,26 +135,58 @@ class Student(
 
     @ManyToMany(cascade = [CascadeType.MERGE])
     @OrderBy
+    @field:JsonView(StudentView.Full::class)
     val skills: Set<Skill> = sortedSetOf(),
+
+    @field:JsonView(StudentView.Basic::class)
     val alumn: Boolean = false,
+
+    @field:JsonView(StudentView.Basic::class)
     val possibleStudentCoach: Boolean = false,
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = AnswerListSerializer::class)
-    val answers: List<Answer> = listOf()
+
 ) {
 
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @field:JsonView(StudentView.Full::class)
+    @JsonSerialize(using = AnswerListSerializer::class)
+    var answers: List<Answer> = listOf()
+
     @Id
+    @field:JsonView(StudentView.Basic::class)
     val id: UUID = UUID.randomUUID()
 
+    @field:JsonView(StudentView.Basic::class)
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = StatusSuggestionListSerializer::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
+
+    @JsonGetter("statusSuggestionCount")
+    fun calculateStatusSuggestionCount(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
+}
+
+/**
+ * This class represents a few views which can be used by entities. A field marked as [Full] will not be displayed
+ * when writerWithView [Basic] is used, If writerWithView [Full] is used both the [Basic] and [Full] fields will be
+ * displayed, this because [Full] inherits [Basic].
+ */
+class StudentView {
+    open class Basic
+    open class Full : Basic()
+}
+
+/**
+ * Enum to represent the [StudentView]s in the [StudentController]
+ */
+enum class StudentViewEnum {
+    Basic, Full
 }
 
 /**
