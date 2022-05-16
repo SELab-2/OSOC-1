@@ -11,6 +11,7 @@ import Endpoints from "../../lib/endpoints";
 import { getUrlList, parseError } from "../../lib/requestUtils";
 import CommsCreationPopup from "../../components/communications/CommsCreationPopup";
 import CsvDownloader from "react-csv-downloader";
+import PersistLogin from "../../components/PersistLogin";
 
 const PAGE_SIZE = 50;
 
@@ -151,6 +152,7 @@ const communications = () => {
   }
 
   return (
+    <PersistLogin>
     <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
       <div className="h-screen">
       <Header />
@@ -217,6 +219,7 @@ const communications = () => {
         students={students}
       />
     </RouteProtection>
+    </PersistLogin>
   )
 }
 export default communications;
