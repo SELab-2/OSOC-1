@@ -189,9 +189,9 @@ class ProjectServiceTests {
 
     @Test
     fun `getConflicts returns the correct result`() {
-        val testStudent = Student("Lars", "Van Cauter", "")
-        val testStudent2 = Student("Lars2", "Van Cauter2", "")
-        val testStudent3 = Student("Lars3", "Van Cauter3", "")
+        val testStudent = Student("Lars", "Van Cauter", testEdition)
+        val testStudent2 = Student("Lars2", "Van Cauter2", testEdition)
+        val testStudent3 = Student("Lars3", "Van Cauter3", testEdition)
         val position = Position(Skill("backend"), 2)
         val suggester = User("suggester", "email", Role.Coach, "password")
         val testProjectConflict = Project(
@@ -227,19 +227,19 @@ class ProjectServiceTests {
         val conflictList = service.getConflicts(testEdition)
         assert(
             conflictList[0] == ProjectService.Conflict(
-                "https://example.com/api/students/" + testStudent.id,
+                "https://example.com/api/$testEdition/students/" + testStudent.id,
                 mutableListOf(
-                    "https://example.com/api/projects/" + testProjectConflict.id,
-                    "https://example.com/api/projects/" + testProjectConflict2.id
+                    "https://example.com/api/$testEdition/projects/" + testProjectConflict.id,
+                    "https://example.com/api/$testEdition/projects/" + testProjectConflict2.id
                 )
             )
         )
         assert(
             conflictList[1] == ProjectService.Conflict(
-                "https://example.com/api/students/" + testStudent2.id,
+                "https://example.com/api/$testEdition/students/" + testStudent2.id,
                 mutableListOf(
-                    "https://example.com/api/projects/" + testProjectConflict2.id,
-                    "https://example.com/api/projects/" + testProjectConflict3.id
+                    "https://example.com/api/$testEdition/projects/" + testProjectConflict2.id,
+                    "https://example.com/api/$testEdition/projects/" + testProjectConflict3.id
                 )
             )
         )
