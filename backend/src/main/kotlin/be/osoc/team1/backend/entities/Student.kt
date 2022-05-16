@@ -138,10 +138,10 @@ class Student(
     @field:JsonView(StudentView.Full::class)
     val skills: Set<Skill> = sortedSetOf(),
 
-    @field:JsonView(StudentView.Basic::class)
+    @field:JsonView(StudentView.List::class)
     val alumn: Boolean = false,
 
-    @field:JsonView(StudentView.Basic::class)
+    @field:JsonView(StudentView.List::class)
     val possibleStudentCoach: Boolean = false,
 
 ) {
@@ -155,7 +155,7 @@ class Student(
     @field:JsonView(StudentView.Basic::class)
     val id: UUID = UUID.randomUUID()
 
-    @field:JsonView(StudentView.Basic::class)
+    @field:JsonView(StudentView.List::class)
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
@@ -164,7 +164,7 @@ class Student(
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @field:JsonView(StudentView.Full::class)
+    @field:JsonView(StudentView.Full::class, StudentView.Communication::class)
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
 
@@ -173,20 +173,23 @@ class Student(
 }
 
 /**
- * This class represents a few views which can be used by entities. A field marked as [Full] will not be displayed
- * when writerWithView [Basic] is used, If writerWithView [Full] is used both the [Basic] and [Full] fields will be
- * displayed, this because [Full] inherits [Basic].
+ * This class represents a few views which can be used by entities. For example a field marked as [Full] will not be displayed
+ * when writerWithView [Basic] is used, if writerWithView [Full] is used all the fields will be displayed.
+ * [Communication] is used for the communication page on the frontend,
+ * [List] is used for the student page on the frontend.
  */
 class StudentView {
     open class Basic
-    open class Full : Basic()
+    open class List : Basic()
+    open class Communication : Basic()
+    open class Full : List()
 }
 
 /**
  * Enum to represent the [StudentView]s in the [StudentController]
  */
 enum class StudentViewEnum {
-    Basic, Full
+    Basic, Full, Communication, List
 }
 
 /**
