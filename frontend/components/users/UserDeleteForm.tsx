@@ -29,8 +29,8 @@ type UDFProps = {
 
 /**
  *
- * @param EDPProps - Edition Deletion Popup Props
- * @returns Edition Deletion Popup Component
+ * @param EDPProps - User Deletion Popup Props
+ * @returns User Deletion Popup Component
  */
 const UserDeleteForm: FC<UDFProps> = ({
   userName,
