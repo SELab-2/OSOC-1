@@ -6,6 +6,8 @@ import be.osoc.team1.backend.util.AnswerListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
+import be.osoc.team1.backend.util.UserDeserializer
+import be.osoc.team1.backend.util.UserSerializer
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
@@ -16,6 +18,7 @@ import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.ManyToMany
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.OrderBy
 import javax.validation.constraints.NotBlank
 
@@ -53,10 +56,9 @@ enum class SuggestionEnum {
 
 /**
  * Represents the entry of a [status] suggestion in the database.
- * Every [StatusSuggestion] is made by a coach of type [User]. The [coachId] of the [User] who made the suggestion
- * is included in the object. A coach can make multiple suggestions about different [Student]s, but
- * it wouldn't make any sense for a coach to make multiple suggestions about the same [Student].
- * Therefore the combination of [coachId] and [Student] must be unique.
+ * Every [StatusSuggestion] is made by a [suggester] of type [User]. A coach can make multiple suggestions about
+ * different [Student]s, but it wouldn't make any sense for a coach to make multiple suggestions about the same [Student].
+ * Therefore, the combination of [suggester] and [Student] must be unique.
  * This constraint is checked when adding a new [StatusSuggestion] to a [Student].
  * A [StatusSuggestion] always belongs to one particular [Student] in the database.
  * This [Student] is included in the [StatusSuggestion] to verify the unique constraint,
@@ -67,7 +69,10 @@ enum class SuggestionEnum {
  */
 @Entity
 class StatusSuggestion(
-    val coachId: UUID,
+    @OneToOne
+    @JsonSerialize(using = UserSerializer::class)
+    @JsonDeserialize(using = UserDeserializer::class)
+    val suggester: User,
     val status: SuggestionEnum,
     val motivation: String,
     @JsonIgnore
@@ -166,7 +171,7 @@ fun List<Student>.filterByName(nameQuery: String) =
  * be returned.
  */
 fun List<Student>.filterBySuggested(callee: User) =
-    filter { student: Student -> student.statusSuggestions.none { it.coachId == callee.id } }
+    filter { student: Student -> student.statusSuggestions.none { it.suggester == callee } }
 
 /**
  * This function will filter [Student]s based on a set of [skillNames].

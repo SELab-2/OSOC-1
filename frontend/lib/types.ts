@@ -120,7 +120,16 @@ export type StudentBase = {
  * This is the StatusSuggestion type as defined in osoc.yaml
  */
 export type StatusSuggestion = {
-  coachId: UUID;
+  suggester: User;
+  status: StatusSuggestionStatus;
+  motivation: string;
+};
+
+/**
+ * This is the exact collection type returned by a get to the StatusSuggestion endpoint
+ */
+export type StatusSuggestionBase = {
+  suggester: Url;
   status: StatusSuggestionStatus;
   motivation: string;
 };

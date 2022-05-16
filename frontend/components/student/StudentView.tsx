@@ -1,8 +1,10 @@
 import {
   Answer,
   StatusSuggestion,
+  StatusSuggestionBase,
   Student,
   StudentBase,
+  Url,
   User,
   UserRole,
   UUID,
@@ -16,7 +18,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { convertStudentBase } from '../../lib/conversionUtils';
-import { getUrlList, parseError } from '../../lib/requestUtils';
+import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
 import { axiosAuthenticated } from '../../lib/axios';
@@ -34,7 +36,6 @@ type StudentViewProp = {
 
 type StatusSuggestionProp = {
   statusSuggestion: StatusSuggestion;
-  coachMap: Map<UUID, string>;
 };
 
 async function setStudentStatus(
@@ -77,7 +78,7 @@ async function setStudentSuggestion(
     .post(
       '/' + edition + Endpoints.STUDENTS + '/' + studentId + '/suggestions', // TODO import this url somehow
       {
-        coachId: coachId,
+        suggester: '/' + edition + Endpoints.USERS + '/' + coachId,
         status: status,
         motivation: motivation,
       }
@@ -109,7 +110,6 @@ function reloadStudent(
 }
 
 // TODO Communication not yet included!!
-// TODO currently a suggestion has a coachId and not a User object, needs to be fixed in backend first
 /**
  * Function to dereference needed student fields
  *
@@ -123,11 +123,12 @@ async function getEntireStudent(
   signal: AbortSignal,
   setError: (error: string) => void,
   router: NextRouter
-): Promise<[Student, Map<UUID, string>]> {
+): Promise<Student> {
   const newStudent = convertStudentBase(studentBase);
-  await getUrlList<StatusSuggestion>(
+  const statusSuggestionBaseList: StatusSuggestionBase[] = [];
+  await getUrlList<StatusSuggestionBase>(
     studentBase.statusSuggestions,
-    newStudent.statusSuggestions,
+    statusSuggestionBaseList,
     signal,
     setError,
     router
@@ -140,20 +141,26 @@ async function getEntireStudent(
     router
   );
 
-  // TODO temp solution until this gets fixed
-  const coaches = new Map<UUID, string>();
-  await axiosAuthenticated
-    .get<User[]>(Endpoints.USERS, { signal: signal })
-    .then((response) => {
-      (response.data as User[]).forEach((coach) => {
-        coaches.set(coach.id, coach.username);
-      });
-    })
-    .catch((err) => {
-      parseError(err, setError, router, signal);
-    });
+  const suggesterMap = new Map<Url, User>();
+  await getUrlMap<User>(
+    statusSuggestionBaseList.map(
+      (suggestionBase) => suggestionBase.suggester
+    ) as Url[],
+    suggesterMap,
+    signal,
+    setError,
+    router
+  );
 
-  return [newStudent, coaches];
+  for (const suggestion of statusSuggestionBaseList) {
+    const statusSuggestion = {} as StatusSuggestion;
+    statusSuggestion.suggester = suggesterMap.get(suggestion.suggester) as User;
+    statusSuggestion.status = suggestion.status;
+    statusSuggestion.motivation = suggestion.motivation;
+    newStudent.statusSuggestions.push(statusSuggestion);
+  }
+
+  return newStudent;
 }
 
 const StudentView: React.FC<StudentViewProp> = ({
@@ -167,7 +174,6 @@ const StudentView: React.FC<StudentViewProp> = ({
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
     useState(convertStudentBase(studentBase) as Student);
 
-  const [coachMap, setCoachMap] = useState(new Map<UUID, string>());
   const [status, setStatus] = useState({
     value: '',
     label: studentBase.status,
@@ -197,8 +203,7 @@ const StudentView: React.FC<StudentViewProp> = ({
       });
       getEntireStudent(studentBase, signal, setError, router).then(
         (response) => {
-          setMyStudent(response[0]);
-          setCoachMap(response[1]);
+          setMyStudent(response);
         }
       );
     }
@@ -210,7 +215,7 @@ const StudentView: React.FC<StudentViewProp> = ({
   useEffect(() => {
     setMotivation('');
     myStudent.statusSuggestions.forEach((suggestion) => {
-      if (suggestion.coachId == user.id) {
+      if (suggestion.suggester.id === user.id) {
         setMotivation(suggestion.motivation);
       }
     });
@@ -230,9 +235,8 @@ const StudentView: React.FC<StudentViewProp> = ({
           <h5 className="font-bold">Suggestions</h5>
           {myStudent.statusSuggestions.map((statusSuggestion) => (
             <StudentStatusSuggestion
-              key={statusSuggestion.coachId}
+              key={statusSuggestion.suggester.id}
               statusSuggestion={statusSuggestion}
-              coachMap={coachMap}
             />
           ))}
         </div>
@@ -379,10 +383,8 @@ const StudentView: React.FC<StudentViewProp> = ({
   );
 };
 
-// TODO This should get the coach name somehow
 const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
   statusSuggestion,
-  coachMap,
 }: StatusSuggestionProp) => {
   let myLabel = question_mark;
   let myColor = 'text-check-orange';
@@ -397,7 +399,7 @@ const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
   return (
     <div className="flex flex-row">
       <i className={`${myColor} w-[30px] px-2`}>{myLabel}</i>
-      <p className="">{coachMap.get(statusSuggestion.coachId)}</p>
+      <p className="">{statusSuggestion.suggester.username}</p>
     </div>
   );
 };

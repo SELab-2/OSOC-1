@@ -805,7 +805,7 @@ for coach in coaches:
     coach_token = requests.post('http://localhost:8080/api/login',
                                 data={"email": coach["email"], "password": "suuuuuperseeeeecret"}).json()["accessToken"]
     for studid in studentsids[:total//4]:
-        requests.post(f'http://localhost:8080/api/ed/students/{studid}/suggestions', json={"coachId": coach["id"], "status": random.choice(
+        requests.post(f'http://localhost:8080/api/ed/students/{studid}/suggestions', json={"suggester": f"http://localhost:8080/api/users/{coach['id']}", "status": random.choice(
             ["Yes", "No", "Maybe"]), "motivation": fake.paragraph(nb_sentences=4)}, headers={'Authorization': f'Basic {coach_token}', 'Content-Type': 'application/json'})
 # students to projects
 # coaches to projects
