@@ -110,10 +110,10 @@ class ProjectService(
         }
         val conflicts = mutableListOf<Conflict>()
         val studentSerializer = StudentSerializer()
-        for ((student, projectIds) in studentsMap.entries) {
-            if (projectIds.size > 1) {
+        for ((student, projectUrls) in studentsMap.entries) {
+            if (projectUrls.size > 1) {
                 // this student has a conflict
-                conflicts.add(Conflict(studentSerializer.toUrl(student), projectIds))
+                conflicts.add(Conflict(studentSerializer.toUrl(student), projectUrls))
             }
         }
         return conflicts
