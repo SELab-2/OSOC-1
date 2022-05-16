@@ -141,7 +141,7 @@ class Student(
     @field:JsonView(StudentView.Basic::class)
     val alumn: Boolean = false,
 
-    @field:JsonView(StudentView.Full::class)
+    @field:JsonView(StudentView.Basic::class)
     val possibleStudentCoach: Boolean = false,
 
 ) {
@@ -168,7 +168,7 @@ class Student(
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
 
-    @JsonGetter("statusSuggestionsCount")
+    @JsonGetter("statusSuggestionCount")
     fun calculateStatusSuggestionCount(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
 }
 

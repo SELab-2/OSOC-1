@@ -1289,6 +1289,19 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Skill'
+                statusSuggestionCount:
+                    type: object
+                    properties:
+                      Yes:
+                        type: integer
+                        example: 17
+                      No: 
+                        type: integer
+                        example: 11
+                      Maybe: 
+                        type: integer
+                        example: 02
+ 
         Answer:
             type: object
             properties:
