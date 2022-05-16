@@ -72,18 +72,21 @@ const Login = () => {
           if (user.role === UserRole.Disabled) {
             router.push('/wait');
           } else {
-            // TODO this is a temporary fix
             const response = await axios.get<Edition>(Endpoints.EDITIONACTIVE, {
               headers: { Authorization: `Basic ${accessToken}` },
             });
-            if (response) {
+            if (response.data) {
               const editionName = response.data.name;
               setEdition(editionName);
               if (typeof window !== 'undefined' && editionName) {
                 localStorage.setItem('edition', editionName);
               }
+              router.push(`/${editionName}${Endpoints.PROJECTS}`);
+            } else if (user.role === UserRole.Admin) {
+              router.push(Endpoints.EDITIONS);
+            } else {
+              router.push('/wait');
             }
-            router.push('/');
           }
         } else {
           toast.error('Something went wrong trying to process the request.');
