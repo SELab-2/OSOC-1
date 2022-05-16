@@ -3,7 +3,7 @@ import Header from '../../components/Header';
 import StudentSidebar from '../../components/StudentSidebar';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import { StudentBase, UserRole } from '../../lib/types';
+import { StudentBaseBasic, UserRole } from '../../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
@@ -21,7 +21,7 @@ const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
   // Needed to allow for click select from the sidebar to the main screen
-  const [studentBase, setStudentBase] = useState({} as StudentBase);
+  const [studentBase, setStudentBase] = useState({} as StudentBaseBasic);
   const [error, setError]: [string, (error: string) => void] = useState('');
   useAxiosAuth();
 

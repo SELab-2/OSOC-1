@@ -1,10 +1,10 @@
-import { ItemTypes, Student, StudentBase } from '../../lib/types';
+import { ItemTypes, Student, StudentBaseBasic } from '../../lib/types';
 import { useDrop } from 'react-dnd';
 import StudentView from './StudentView';
 
 type StudentHolderProp = {
-  studentBase: StudentBase;
-  setStudentBase: (studentBase: StudentBase) => void;
+  studentBase: StudentBaseBasic;
+  setStudentBase: (studentBase: StudentBaseBasic) => void;
 };
 
 const StudentHolder: React.FC<StudentHolderProp> = ({
@@ -26,7 +26,7 @@ const StudentHolder: React.FC<StudentHolderProp> = ({
         );
       },
       drop: (item) => {
-        setStudentBase(item as StudentBase);
+        setStudentBase(item as StudentBaseBasic);
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
