@@ -39,7 +39,7 @@ type URTProps = {
   /**
    * setter to update user to delete
    */
-  setDeleteUser: Dispatch<SetStateAction<User|undefined>>;
+  setDeleteUser: Dispatch<SetStateAction<User | undefined>>;
 
   /**
    * Current logged in user id
@@ -58,7 +58,7 @@ const UserTableRow: React.FC<URTProps> = ({
   setGlobalError,
   isAdmin,
   setDeleteUser,
-  loggedInUserId
+  loggedInUserId,
 }: URTProps) => {
   /**
    * individual row error (e.g. when an error occurs trying to update the role)
@@ -115,23 +115,21 @@ const UserTableRow: React.FC<URTProps> = ({
   };
 
   return (
-    <tr 
-      key={user.id} 
+    <tr
+      key={user.id}
       className="border-collapse border-y-2"
       onMouseOver={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      <td className="py-4 flex flex-row">
+      <td className="flex flex-row py-4">
         {user.username}
-        {
-          (hovering && (user.id !== loggedInUserId)) && (
-            <TrashIcon
-            className="h-6 w-6 hover:cursor-pointer pl-1"
+        {hovering && user.id !== loggedInUserId && (
+          <TrashIcon
+            className="h-6 w-6 pl-1 hover:cursor-pointer"
             color="#F14A3B"
             onClick={() => setDeleteUser(user)}
-            />
-          )
-        }
+          />
+        )}
       </td>
       <td className="break-all">{user.email}</td>
       <td className="text-right">

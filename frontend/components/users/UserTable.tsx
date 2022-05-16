@@ -45,7 +45,7 @@ type UserTableProps = {
   /**
    * update the current user to delete
    */
-  setDeleteUser: Dispatch<SetStateAction<User|undefined>>;
+  setDeleteUser: Dispatch<SetStateAction<User | undefined>>;
 
   /**
    * logged in user
@@ -67,7 +67,7 @@ const UserTable: React.FC<UserTableProps> = ({
   nameFilter,
   isAdmin,
   setDeleteUser,
-  loggedInUser
+  loggedInUser,
 }: UserTableProps) => {
   const filterRef = useRef<HTMLInputElement>(null);
 

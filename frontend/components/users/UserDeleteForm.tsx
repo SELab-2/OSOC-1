@@ -24,7 +24,7 @@ type UDFProps = {
   /**
    * state update function that sets whether the deletion confirm should be shown or not
    */
-  setUserDeleteForm: Dispatch<SetStateAction<User|undefined>>;
+  setUserDeleteForm: Dispatch<SetStateAction<User | undefined>>;
 };
 
 /**
