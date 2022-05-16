@@ -100,11 +100,11 @@ class StudentController(
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
 
-        return if (view == StudentViewEnum.Full) {
-            ObjectMapper().writerWithView(StudentView.Full::class.java).writeValueAsString(filteredStudents)
-        } else {
-            ObjectMapper().writerWithView(StudentView.Basic::class.java).writeValueAsString(filteredStudents)
+        val viewType = when (view) {
+            StudentViewEnum.Full -> StudentView.Full::class.java
+            StudentViewEnum.Basic -> StudentView.Basic::class.java
         }
+        return ObjectMapper().writerWithView(viewType).writeValueAsString(filteredStudents)
     }
 
     /**
@@ -151,7 +151,6 @@ class StudentController(
             studentRegistration.skills,
             studentRegistration.alumn,
             studentRegistration.possibleStudentCoach,
-            // studentRegistration.answers
         )
         student.answers = studentRegistration.answers
         val createdStudent = service.addStudent(student)
