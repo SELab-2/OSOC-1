@@ -108,7 +108,6 @@ function searchProject(
 
 async function searchConflicts(
   setProjects: (projects: ProjectBase[]) => void,
-  setConflictStudents: (conflictStudents: UUID[]) => void,
   conflictMap: conflictMapType,
   setConflictMap: (map: conflictMapType) => void,
   setLoading: (loading: boolean) => void,
@@ -192,7 +191,6 @@ const Projects: NextPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showConflicts, setShowConflicts] = useState(false);
-  const [conflictStudents, setConflictStudents] = useState([] as UUID[]);
   const [conflictMap, setConflictMap] = useState(new Map() as conflictMapType);
   // const [conflictsLoaded, setConflictsLoaded] = useState(false);
   const [projects, setProjects]: [
@@ -216,7 +214,6 @@ const Projects: NextPage = () => {
   useEffect(() => {
     if (!showConflicts) {
       setConflictMap(new Map() as conflictMapType);
-      setConflictStudents([] as UUID[]);
     }
   }, [showConflicts]);
 
@@ -312,7 +309,6 @@ const Projects: NextPage = () => {
         const signal = controller.signal;
         searchConflicts(
           setProjects,
-          setConflictStudents,
           conflictMap,
           setConflictMap,
           setLoading,
@@ -513,7 +509,7 @@ const Projects: NextPage = () => {
                         <ProjectTile
                           key={project.id}
                           projectInput={project}
-                          conflictStudents={conflictStudents}
+                          conflictStudents={[] as string[]}
                           refreshProjects={refreshProjects}
                         />
                       )}

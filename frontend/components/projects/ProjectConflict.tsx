@@ -4,12 +4,15 @@ import {
   StudentBase,
   Url,
 } from '../../lib/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getUrlList } from '../../lib/requestUtils';
 import ProjectTile from './ProjectTile';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import Error from '../Error';
+import usePoll from 'react-use-poll';
+import { Icon } from '@iconify/react';
+const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 type ProjectConflictProp = {
   conflictMap: conflictMapType;
@@ -19,6 +22,8 @@ type ProjectConflictStudentProp = {
   student: StudentBase;
   amount: number;
   setCurrentStudent: (currentStudent: StudentBase) => void;
+  currentStudent: StudentBase;
+  removeCurrentStudent: () => void;
 };
 
 async function getProjects(
@@ -47,28 +52,38 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
   const router = useRouter();
   let controller = new AbortController();
 
-  useEffect(() => {
-    if (currentStudent) {
-      controller.abort();
-      controller = new AbortController();
-      const signal = controller.signal;
-      (async () => {
-        setProjects(
-          await getProjects(
-            Array.from(
-              conflictMap.get(currentStudent.id)?.projectUrls || []
-            ) as Url[],
-            signal,
-            setError,
-            router
-          )
-        );
-      })();
-      return () => {
+  const removeCurrentStudent = () => {
+    conflictMap.delete(currentStudent.id);
+  };
+
+  usePoll(
+    () => {
+      if (currentStudent) {
         controller.abort();
-      };
+        controller = new AbortController();
+        const signal = controller.signal;
+        (async () => {
+          setProjects(
+            await getProjects(
+              Array.from(
+                conflictMap.get(currentStudent.id)?.projectUrls || []
+              ) as Url[],
+              signal,
+              setError,
+              router
+            )
+          );
+        })();
+        return () => {
+          controller.abort();
+        };
+      }
+    },
+    [currentStudent],
+    {
+      interval: 3000,
     }
-  }, [currentStudent]);
+  );
 
   return (
     <div className={`mx-4`}>
@@ -95,14 +110,23 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
 
         {/* Conflicts students list */}
         <div className={`mt-4 w-[30%]`}>
-          {Array.from(conflictMap).map(([key, value]) => (
-            <ProjectConflictStudents
-              key={key}
-              student={value.student}
-              amount={value.amount}
-              setCurrentStudent={setCurrentStudent}
-            />
-          ))}
+          {Array.from(conflictMap)
+            .sort(([, a], [, b]) =>
+              a.student.lastName + a.student.firstName >
+              b.student.lastName + b.student.firstName
+                ? 1
+                : -1
+            )
+            .map(([key, value]) => (
+              <ProjectConflictStudents
+                key={key}
+                student={value.student}
+                amount={value.amount}
+                setCurrentStudent={setCurrentStudent}
+                currentStudent={currentStudent}
+                removeCurrentStudent={removeCurrentStudent}
+              />
+            ))}
         </div>
       </div>
     </div>
@@ -113,17 +137,39 @@ const ProjectConflictStudents: React.FC<ProjectConflictStudentProp> = ({
   student,
   amount,
   setCurrentStudent,
+  currentStudent,
+  removeCurrentStudent,
 }: ProjectConflictStudentProp) => {
   return (
     <div
-      className={`mb-2 cursor-pointer rounded bg-osoc-neutral-bg p-1 shadow-sm shadow-gray-500`}
+      className={`${
+        currentStudent && currentStudent.id == student.id
+          ? 'bg-osoc-yellow'
+          : 'bg-osoc-neutral-bg'
+      } 
+      mb-2 flex cursor-pointer flex-row justify-between rounded p-1 shadow-sm shadow-gray-500`}
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
         setCurrentStudent(student);
       }}
     >
-      {student.firstName + ' ' + student.lastName + ' (' + amount + ')'}
+      <div>
+        {student.firstName + ' ' + student.lastName + ' (' + amount + ')'}
+      </div>
+
+      {amount <= 1 && (
+        <div className="flex flex-col justify-center">
+          <i
+            onClick={() => {
+              removeCurrentStudent();
+            }}
+            className="icon-xcircle-gray text-2xl"
+          >
+            {xmark_circle}
+          </i>
+        </div>
+      )}
     </div>
   );
 };

@@ -34,6 +34,10 @@
   stroke: #ef4444;
 }
 
+.icon-xcircle-gray > svg > g {
+  stroke: #9ca3af;
+}
+
 .tooltip .tooltiptext {
   visibility: hidden;
   position: absolute;
