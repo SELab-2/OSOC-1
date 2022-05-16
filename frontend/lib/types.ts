@@ -207,7 +207,7 @@ export const ItemTypes = {
 };
 
 export enum CommunicationType {
-  Email = "Email"
+  Email = 'Email',
 }
 
 export type Communication = {
@@ -219,4 +219,4 @@ export type StudentComm = {
   id: string;
   name: string;
   commMessage: string;
-}
+};

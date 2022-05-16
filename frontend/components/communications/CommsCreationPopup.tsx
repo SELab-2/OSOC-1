@@ -1,5 +1,5 @@
 import { Dispatch, FC, FormEvent, SetStateAction, useState } from 'react';
-import Select from "react-select";
+import Select from 'react-select';
 import Popup from 'reactjs-popup';
 import { SpinnerCircular } from 'spinners-react';
 import { StudentBase } from '../../lib/types';
@@ -20,11 +20,10 @@ const CommsCreationPopup: FC<CCPProps> = ({
   createComms,
   openPopup,
   setOpenPopup,
-  students
+  students,
 }: CCPProps) => {
-
-  const [student, setStudent] = useState<StudentBase|undefined>(undefined);
-  const [message, setMessage] = useState("");
+  const [student, setStudent] = useState<StudentBase | undefined>(undefined);
+  const [message, setMessage] = useState('');
 
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +33,7 @@ const CommsCreationPopup: FC<CCPProps> = ({
 
   const doCreate = async () => {
     setLoading(true);
-    
+
     if (!student || !message) return;
     await createComms(student.id, message);
 
@@ -46,7 +45,7 @@ const CommsCreationPopup: FC<CCPProps> = ({
     e.preventDefault();
 
     await doCreate();
-  } 
+  };
 
   return (
     <Popup
@@ -78,56 +77,58 @@ const CommsCreationPopup: FC<CCPProps> = ({
               className="col-span-2 mx-auto"
             />
           ) : (
-              <form
-                className="grid grid-cols-4 justify-items-center gap-y-2"
-                onSubmit={submit}
-              >
-                <Select
-                  className="col-span-2 w-9/12 pt-8"
-                  isMulti={false}
-                  isSearchable={true}
-                  onChange={(value) => {
-                    const _stud = students.find((s) => {
-                      s.id === value?.value
-                    });
-                    setStudent(_stud);
-                  }}
-                  value={{
-                    label: student ? student.firstName + " " + student.lastName : undefined,
-                    value: student?.id
-                  }}
-                  placeholder="Student"
-                  options={students.map((stud) => {
-                    return {
-                      label: stud.firstName + " " + stud.lastName,
-                      value: stud.id
-                    }
-                  })}
+            <form
+              className="grid grid-cols-4 justify-items-center gap-y-2"
+              onSubmit={submit}
+            >
+              <Select
+                className="col-span-2 w-9/12 pt-8"
+                isMulti={false}
+                isSearchable={true}
+                onChange={(value) => {
+                  const _stud = students.find((s) => {
+                    s.id === value?.value;
+                  });
+                  setStudent(_stud);
+                }}
+                value={{
+                  label: student
+                    ? student.firstName + ' ' + student.lastName
+                    : undefined,
+                  value: student?.id,
+                }}
+                placeholder="Student"
+                options={students.map((stud) => {
+                  return {
+                    label: stud.firstName + ' ' + stud.lastName,
+                    value: stud.id,
+                  };
+                })}
+              />
+
+              <label className="col-span-2 pl-2">
+                Information
+                <textarea
+                  placeholder="Communication Information"
+                  className="mx-2 mt-1 w-9/12 resize-y border-2 px-1"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                 />
-                
-                <label className="pl-2 col-span-2">
-                  Information
-                  <textarea
-                    placeholder="Communication Information"
-                    className="mx-2 mt-1 w-9/12 resize-y border-2 px-1"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                  />
-                </label>                
-                <button
-                  className="col-span-1 col-start-2 col-end-3 bg-gray-500 px-3 py-1"
-                  onClick={closePopup}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="col-span-1 col-start-3 col-end-4 bg-check-green px-3 py-1 disabled:bg-green-200 disabled:text-gray-400"
-                  type="submit"
-                  disabled={!student || !message}
-                  >
-                  Create
-                </button>
-              </form>
+              </label>
+              <button
+                className="col-span-1 col-start-2 col-end-3 bg-gray-500 px-3 py-1"
+                onClick={closePopup}
+              >
+                Cancel
+              </button>
+              <button
+                className="col-span-1 col-start-3 col-end-4 bg-check-green px-3 py-1 disabled:bg-green-200 disabled:text-gray-400"
+                type="submit"
+                disabled={!student || !message}
+              >
+                Create
+              </button>
+            </form>
           )}
         </section>
       </div>

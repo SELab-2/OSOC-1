@@ -10,35 +10,32 @@ type HeaderProps = PropsWithChildren<unknown>;
 type EditionHeaderLinkProps = HeaderLinkProps;
 
 const EditionHeaderLink: FC<EditionHeaderLinkProps> = ({ href, children }) => {
-  
   const [edition] = useEdition();
-  
-  return (
-    <HeaderLink
-      href={`/${edition}${href}`}
-    >{ children }
-    </HeaderLink>
-  )
-}
+
+  return <HeaderLink href={`/${edition}${href}`}>{children}</HeaderLink>;
+};
 
 type HeaderLinkProps = PropsWithChildren<{
   href: string;
-}>
+}>;
 
-const HeaderLink: FC<HeaderLinkProps> = ({ href, children }: HeaderLinkProps) => {
+const HeaderLink: FC<HeaderLinkProps> = ({
+  href,
+  children,
+}: HeaderLinkProps) => {
   const router = useRouter();
   const current_path = router.pathname;
-  
+
   return (
     <li
       className={`ml-3 hover:underline sm:inline ${
         current_path.endsWith(href) ? 'underline' : ''
       }`}
     >
-      <Link href={href}>{ children }</Link>
+      <Link href={href}>{children}</Link>
     </li>
-  )
-}
+  );
+};
 
 const Header: React.FC<HeaderProps> = () => {
   const [user] = useUser();
@@ -58,33 +55,22 @@ const Header: React.FC<HeaderProps> = () => {
       </div>
       <nav className="text-center">
         <ul className="m-0 p-0">
-          {
-            edition && (
-              <>
-              <EditionHeaderLink
-                href='/students'
-              >Select Students</EditionHeaderLink>
-              <EditionHeaderLink
-                href='/projects'
-              >Projects</EditionHeaderLink>
-              <EditionHeaderLink
-                href='/communications'
-              >Communications</EditionHeaderLink>
+          {edition && (
+            <>
+              <EditionHeaderLink href="/students">
+                Select Students
+              </EditionHeaderLink>
+              <EditionHeaderLink href="/projects">Projects</EditionHeaderLink>
+              <EditionHeaderLink href="/communications">
+                Communications
+              </EditionHeaderLink>
             </>
-            )
-          }
-          <HeaderLink
-            href='/users'
-          >Manage Users</HeaderLink>
+          )}
+          <HeaderLink href="/users">Manage Users</HeaderLink>
 
           {[UserRole.Admin].includes(user.role) && (
-            <HeaderLink
-              href='/editions'
-            >
-              Manage Editions
-            </HeaderLink>
-            )
-          }
+            <HeaderLink href="/editions">Manage Editions</HeaderLink>
+          )}
           <li className={`ml-3 hover:underline sm:inline`}>
             <Link href="/logout">Log Out</Link>
           </li>
