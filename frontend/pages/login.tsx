@@ -81,9 +81,11 @@ const Login = () => {
               if (typeof window !== 'undefined' && editionName) {
                 localStorage.setItem('edition', editionName);
               }
-              router.push(`/${editionName}/projects`);
+              router.push(`/${editionName}${Endpoints.PROJECTS}`);
+            } else if (user.role === UserRole.Admin) {
+              router.push(Endpoints.EDITIONS);
             } else {
-              router.push('/editions');
+              router.push('/wait');
             }
           }
         } else {
