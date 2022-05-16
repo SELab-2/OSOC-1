@@ -196,3 +196,18 @@ export type Answer = {
 export const ItemTypes = {
   STUDENTTILE: 'studentTile',
 };
+
+export enum CommunicationType {
+  Email = "Email"
+}
+
+export type Communication = {
+  message: string;
+  type: CommunicationType;
+};
+
+export type StudentComm = {
+  id: string;
+  name: string;
+  commMessage: string;
+}

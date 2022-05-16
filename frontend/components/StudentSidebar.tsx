@@ -111,7 +111,7 @@ async function searchStudent(
       const newState = { ...state };
       newState.loading = false;
       setState(newState);
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
       if (!signal.aborted) {
         setLoading(false);
       }

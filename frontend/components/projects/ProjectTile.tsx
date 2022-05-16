@@ -94,7 +94,7 @@ function postStudentToProject(
       reloadProject(projectId, setMyProjectBase, signal, setError, router);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -132,7 +132,7 @@ function deleteStudentFromProject(
       reloadProject(projectId, setMyProjectBase, signal, setError, router);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -157,7 +157,7 @@ function deleteProject(
       refreshProjects();
     })
     .catch((err) => {
-      parseError(err, setError, new AbortController().signal, router);
+      parseError(err, setError, router, new AbortController().signal);
     });
 }
 
@@ -185,7 +185,7 @@ function reloadProject(
       setMyProjectBase(response.data as ProjectBase);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 

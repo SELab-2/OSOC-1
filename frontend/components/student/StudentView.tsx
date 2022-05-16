@@ -58,7 +58,7 @@ async function setStudentStatus(
       setMyStudent(newStudent);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -86,7 +86,7 @@ async function setStudentSuggestion(
       reloadStudent(studentId, setStudentBase, signal, setError, router);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -104,7 +104,7 @@ function reloadStudent(
       setStudentBase(response.data as StudentBase);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -150,7 +150,7 @@ async function getEntireStudent(
       });
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 
   return [newStudent, coaches];

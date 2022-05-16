@@ -14,10 +14,10 @@ import { NextRouter } from 'next/dist/client/router';
 export function parseError(
   error: unknown,
   setError: (error: string) => void,
-  signal: AbortSignal,
-  router: NextRouter
+  router: NextRouter,
+  signal?: AbortSignal
 ) {
-  if (signal.aborted) {
+  if (signal?.aborted) {
     return;
   }
   if (axios.isAxiosError(error)) {
@@ -59,7 +59,7 @@ export async function getSkills(
       )
     )
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -92,7 +92,7 @@ export async function getCoaches(
       )
     )
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -123,7 +123,7 @@ export async function getUrlList<Type>(
       response.forEach((resp) => resultList.push(resp.data));
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -157,6 +157,6 @@ export async function getUrlMap<Type>(
       );
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
