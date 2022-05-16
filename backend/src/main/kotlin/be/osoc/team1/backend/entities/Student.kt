@@ -168,8 +168,8 @@ class Student(
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
 
-    @JsonGetter("statusSuggestionsPercentage")
-    fun calculateStatusSuggestionPercentage(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
+    @JsonGetter("statusSuggestionsCount")
+    fun calculateStatusSuggestionCount(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
 }
 
 /**
