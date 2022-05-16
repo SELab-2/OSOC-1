@@ -12,6 +12,8 @@ import useUser from '../hooks/useUser';
 import axios, { AxiosError } from 'axios';
 import RouteProtection from '../components/RouteProtection';
 import PersistLogin from '../components/PersistLogin';
+import UserDeleteForm from "../components/users/UserDeleteForm";
+import { parseError } from '../lib/requestUtils';
 
 /**
  *
@@ -47,6 +49,8 @@ const Users: NextPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [userToDelete, setUserToDelete] = useState<User|undefined>(undefined);
+
   const axiosAuth = useAxiosAuth();
   const router = useRouter();
   const [user] = useUser();
@@ -65,6 +69,19 @@ const Users: NextPage = () => {
     });
     setUsers(updatedUsers);
   };
+
+  const deleteUser = async (user: User) => {
+    try {
+      await axiosAuth.delete(`${Endpoints.USERS}/${user.id}`);
+
+      // update client side
+      setUsers((prev) => {
+        return prev.filter((u) => u.id !== user.id);
+      });
+    } catch (err) {
+      parseError(err, setError, new AbortController().signal, router);
+    }
+  }
 
   /**
    * Update the filtered users with the new users/filters
@@ -151,11 +168,23 @@ const Users: NextPage = () => {
                   setFilter={setNameFilter}
                   nameFilter={nameFilter}
                   isAdmin={user.role === UserRole.Admin}
+                  setDeleteUser={setUserToDelete}
+                  loggedInUser={user}
                 />
               </>
             )}
           </div>
         </div>
+        {
+          userToDelete && (
+            <UserDeleteForm
+              userName={userToDelete.username}
+              deleteUser={() => deleteUser(userToDelete)}
+              openDeleteForm={userToDelete !== undefined}
+              setUserDeleteForm={setUserToDelete}
+            />
+          )
+        }
       </RouteProtection>
     </PersistLogin>
   );
