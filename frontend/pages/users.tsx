@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import useUser from '../hooks/useUser';
 import axios, { AxiosError } from 'axios';
 import RouteProtection from '../components/RouteProtection';
+import PersistLogin from '../components/PersistLogin';
 
 /**
  *
@@ -122,39 +123,41 @@ const Users: NextPage = () => {
   }, []);
 
   return (
-    <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
-      <div className="h-screen">
-        <Header />
-        <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
-          {loading ? (
-            <div className="relative top-1/2 translate-y-1/2">
-              <p className="mb-4 text-center text-2xl opacity-75">
-                Fetching Users...
-              </p>
-              <SpinnerCircular
-                size={100}
-                thickness={80}
-                color="#FCB70F"
-                secondaryColor="rgba(252, 183, 15, 0.4)"
-                className="mx-auto"
-              />
-            </div>
-          ) : (
-            <>
-              {error && <Error error={error} className="mb-4" />}
-              <UserTable
-                users={filteredUsers.filter(Boolean)}
-                updateUsersLocal={updateUserLocal}
-                setGlobalError={setError}
-                setFilter={setNameFilter}
-                nameFilter={nameFilter}
-                isAdmin={user.role === UserRole.Admin}
-              />
-            </>
-          )}
+    <PersistLogin>
+      <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
+        <div className="h-screen">
+          <Header />
+          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
+            {loading ? (
+              <div className="relative top-1/2 translate-y-1/2">
+                <p className="mb-4 text-center text-2xl opacity-75">
+                  Fetching Users...
+                </p>
+                <SpinnerCircular
+                  size={100}
+                  thickness={80}
+                  color="#FCB70F"
+                  secondaryColor="rgba(252, 183, 15, 0.4)"
+                  className="mx-auto"
+                />
+              </div>
+            ) : (
+              <>
+                {error && <Error error={error} className="mb-4" />}
+                <UserTable
+                  users={filteredUsers.filter(Boolean)}
+                  updateUsersLocal={updateUserLocal}
+                  setGlobalError={setError}
+                  setFilter={setNameFilter}
+                  nameFilter={nameFilter}
+                  isAdmin={user.role === UserRole.Admin}
+                />
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </RouteProtection>
+      </RouteProtection>
+    </PersistLogin>
   );
 };
 
