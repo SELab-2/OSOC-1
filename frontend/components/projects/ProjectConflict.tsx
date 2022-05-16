@@ -109,7 +109,10 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
         )}
 
         {/* Conflicts students list */}
-        <div className={`mt-4 w-[30%]`}>
+        <div
+          className={`max-h- p-auto m-auto mt-4 h-auto w-[30%] bg-osoc-neutral-bg p-4`}
+        >
+          <h4 className={`mb-4 text-xl`}>Conflict Students</h4>
           {Array.from(conflictMap)
             .sort(([, a], [, b]) =>
               a.student.lastName + a.student.firstName >
