@@ -17,6 +17,7 @@ type ProjectConflictProp = {
 
 type ProjectConflictStudentProp = {
   student: StudentBase;
+  amount: number;
   setCurrentStudent: (currentStudent: StudentBase) => void;
 };
 
@@ -70,27 +71,35 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
   }, [currentStudent]);
 
   return (
-    <div>
+    <div className={`mx-4`}>
       {error && <Error error={error} className="mb-4" />}
       <div className={`flex w-full flex-row content-between justify-between`}>
         {/* Conflicts projects list */}
-        <div className={`tile-reset w-[65%]`}>
-          {projects.map((project) => (
-            <ProjectTile
-              key={project.id}
-              projectInput={project}
-              refreshProjects={() => null}
-              conflictStudents={Array.from(conflictMap.keys())}
-            />
-          ))}
-        </div>
+        {projects.length > 0 && (
+          <div className={`tile-reset w-[65%]`}>
+            {projects.map((project) => (
+              <ProjectTile
+                key={project.id}
+                projectInput={project}
+                refreshProjects={() => null}
+                conflictStudents={Array.from(conflictMap.keys())}
+              />
+            ))}
+          </div>
+        )}
+        {projects.length == 0 && (
+          <p className={`mt-5 ml-6`}>
+            Click a student name to show conflicting projects.
+          </p>
+        )}
 
         {/* Conflicts students list */}
-        <div className={`w-[33%]`}>
+        <div className={`mt-4 w-[30%]`}>
           {Array.from(conflictMap).map(([key, value]) => (
             <ProjectConflictStudents
               key={key}
               student={value.student}
+              amount={value.amount}
               setCurrentStudent={setCurrentStudent}
             />
           ))}
@@ -102,17 +111,19 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
 
 const ProjectConflictStudents: React.FC<ProjectConflictStudentProp> = ({
   student,
+  amount,
   setCurrentStudent,
 }: ProjectConflictStudentProp) => {
   return (
     <div
+      className={`mb-2 cursor-pointer rounded bg-osoc-neutral-bg p-1 shadow-sm shadow-gray-500`}
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
         setCurrentStudent(student);
       }}
     >
-      {student.firstName + ' ' + student.lastName}
+      {student.firstName + ' ' + student.lastName + ' (' + amount + ')'}
     </div>
   );
 };
