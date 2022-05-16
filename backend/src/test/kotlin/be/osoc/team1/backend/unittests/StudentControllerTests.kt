@@ -9,7 +9,6 @@ import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
-import be.osoc.team1.backend.entities.StudentView
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.entities.filterByName
