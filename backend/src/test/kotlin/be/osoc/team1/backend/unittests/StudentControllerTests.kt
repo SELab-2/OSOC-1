@@ -119,9 +119,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testStudent3 = Student("L3", "VC", testEdition)
         val testStudent4 = Student("L4", "VC", testEdition)
         val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
-        every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
+        val test = "{ \"totalLength\": 1, \"collection\": [ { \"id\": \"${testStudent1.id}\", \"firstName\": \"${testStudent1.firstName}\", \"lastName\": \"${testStudent1.lastName}\", \"status\": \"${testStudent1.status}\", \"alumn\": ${testStudent1.alumn}, \"statusSuggestionCount\": {} } ] }"
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns listOf(testStudent1)
         mockMvc.perform(get("$editionUrl?view=Basic").principal(defaultPrincipal)).andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writerWithView(StudentView.Basic::class.java).writeValueAsString(PagedCollection(allStudents, 4))))
+            .andExpect(content().json(test))
     }
 
     @Test
