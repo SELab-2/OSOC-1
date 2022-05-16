@@ -44,6 +44,7 @@ class CommunicationController(
         @PathVariable edition: String,
         @RequestBody communication: Communication
     ): ResponseEntity<Communication> {
+        communication.edition = edition
         val createdCommunication = communicationService.createCommunication(communication)
         studentService.addCommunicationToStudent(studentId, communication, edition)
         return getObjectCreatedResponse(createdCommunication.id, createdCommunication)
