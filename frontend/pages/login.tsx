@@ -63,17 +63,30 @@ const Login = () => {
             refreshToken,
           });
 
+          if (typeof window !== 'undefined') {
+            if (refreshToken)
+              localStorage.setItem('refreshToken', refreshToken);
+            if (user) localStorage.setItem('user', JSON.stringify(user));
+          }
+
           if (user.role === UserRole.Disabled) {
             router.push('/wait');
           } else {
-            // TODO this is a temporary fix
             const response = await axios.get<Edition>(Endpoints.EDITIONACTIVE, {
               headers: { Authorization: `Basic ${accessToken}` },
             });
-            if (response) {
-              setEdition(response.data.name);
+            if (response.data) {
+              const editionName = response.data.name;
+              setEdition(editionName);
+              if (typeof window !== 'undefined' && editionName) {
+                localStorage.setItem('edition', editionName);
+              }
+              router.push(`/${editionName}${Endpoints.PROJECTS}`);
+            } else if (user.role === UserRole.Admin) {
+              router.push(Endpoints.EDITIONS);
+            } else {
+              router.push('/wait');
             }
-            router.push('/');
           }
         } else {
           toast.error('Something went wrong trying to process the request.');
@@ -110,13 +123,13 @@ const Login = () => {
             />
           </label>
           <button
-            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
+            className="m-auto block rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
             type="submit"
           >
             Log in
           </button>
           <Link href="/register">
-            <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+            <p className="mt-2 inline-block text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
               no account yet? <br /> register here!
             </p>
           </Link>
