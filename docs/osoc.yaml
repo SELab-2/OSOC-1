@@ -846,8 +846,9 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Conflict'
                             example:
-                                student: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
-                                projects: [ "https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
+                                student: "https://example.com/api/OSOC2022/students/abb97568-ac54-11ec-b909-0242ac120002"
+                                projects: [ "https://example.com/api/OSOC2022/projects/afc1e1cc-ac54-11ec-b909-0242ac120002",
+                                            "https://example.com/api/OSOC2022/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
 
     /{edition}/communications/{communicationId}:
         get:
