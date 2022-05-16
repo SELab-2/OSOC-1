@@ -184,7 +184,7 @@ paths:
                     name: view
                     schema:
                         $ref: '#/components/schemas/StudentView'
-                    description: The view of the student, with different views the students will contain less or more information (default is Full). The Basic view can be used to get basic information of the student to display it in a listing, this way unnecessary data does not need to be sent.
+                    description: The view of the student, with different views the students will contain less or more information (default is Full). The List view can be used to get basic information of the student to display it in a listing, the Communication view can be used to just get info about the student and his/hers communication and the Basic view can be used to show the bare minimum info of a student. This way unnecessary data does not need to be sent.
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -1599,7 +1599,7 @@ components:
                     type: boolean
         StudentView:
             type: string
-            enum: [ Full, Basic ]
+            enum: [ Full, Basic, List, Communication ]
     securitySchemes:
         BasicAuth:
             type: http
