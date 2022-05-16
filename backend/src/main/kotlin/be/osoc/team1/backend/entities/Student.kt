@@ -141,7 +141,7 @@ class Student(
     @field:JsonView(StudentView.Basic::class)
     val alumn: Boolean = false,
 
-    @field:JsonView(StudentView.Full::class)
+    @field:JsonView(StudentView.Basic::class)
     val possibleStudentCoach: Boolean = false,
 
 ) {
