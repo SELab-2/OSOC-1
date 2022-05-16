@@ -6,7 +6,7 @@ import {
   ProjectBase,
   Skill,
   StatusSuggestion,
-  StatusSuggestionsCountBasic,
+  StatusSuggestionCountBasic,
   Student,
   StudentBase,
   StudentBaseBasic,
@@ -77,7 +77,7 @@ export function convertStudentFullToBasic(
   newStudent.lastName = studentBase.lastName;
   newStudent.alumn = studentBase.alumn;
   newStudent.possibleStudentCoach = studentBase.possibleStudentCoach;
-  newStudent.statusSuggestionsCount = {} as StatusSuggestionsCountBasic;
+  newStudent.statusSuggestionCount = {} as StatusSuggestionCountBasic;
   newStudent.status = studentBase.status;
   return newStudent;
 }

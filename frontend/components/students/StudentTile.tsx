@@ -55,7 +55,7 @@ const StudentTile: React.FC<StudentProp> = ({
   const [myStudent, setMyStudent]: [
     StudentBaseBasic,
     (myStudent: StudentBaseBasic) => void
-  ] = useState(studentInput); // using different names to avoid confusion
+  ] = useState(studentInput as StudentBaseBasic); // using different names to avoid confusion
 
   /**
    * Since polling is done in parent StudentSidebar.tsx, we only watch if
@@ -63,9 +63,9 @@ const StudentTile: React.FC<StudentProp> = ({
    */
   useEffect(() => {
     if (JSON.stringify(studentInput) != JSON.stringify(myStudent)) {
-      setMyStudent(studentInput);
+      setMyStudent(studentInput as StudentBaseBasic);
     }
-  }, [studentInput]);
+  }, [studentInput, myStudent]);
 
   /**
    * This hook allows dragging the StudentTile
@@ -79,7 +79,7 @@ const StudentTile: React.FC<StudentProp> = ({
         isDragging: monitor.isDragging(), // TODO add isDragging styling
       }),
     }),
-    []
+    [myStudent]
   );
 
   return (
@@ -120,22 +120,21 @@ const StudentTile: React.FC<StudentProp> = ({
               {
                 title: 'Yes',
                 value:
-                  myStudent.statusSuggestionsCount[
-                    StatusSuggestionStatus.Yes
-                  ] || 0,
+                  myStudent.statusSuggestionCount[StatusSuggestionStatus.Yes] ||
+                  0,
                 color: '#22c55e', // I can't get tailwind config colors to work here
               },
               {
                 title: 'No',
                 value:
-                  myStudent.statusSuggestionsCount[StatusSuggestionStatus.No] ||
+                  myStudent.statusSuggestionCount[StatusSuggestionStatus.No] ||
                   0,
                 color: '#ef4444',
               },
               {
                 title: 'Maybe',
                 value:
-                  myStudent.statusSuggestionsCount[
+                  myStudent.statusSuggestionCount[
                     StatusSuggestionStatus.Maybe
                   ] || 0,
                 color: '#f97316',

@@ -124,13 +124,13 @@ export type StudentBaseBasic = {
   // statusSuggestions: Url[];
   alumn: boolean;
   possibleStudentCoach: boolean;
-  statusSuggestionsCount: StatusSuggestionsCountBasic;
+  statusSuggestionCount: StatusSuggestionCountBasic;
   // skills: Skill[];
   // communications: Url[];
   // answers: Url[];
 };
 
-export type StatusSuggestionsCountBasic = {
+export type StatusSuggestionCountBasic = {
   Yes: number | null;
   Maybe: number | null;
   No: number | null;
