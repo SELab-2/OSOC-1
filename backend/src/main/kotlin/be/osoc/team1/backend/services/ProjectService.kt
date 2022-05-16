@@ -11,8 +11,9 @@ import be.osoc.team1.backend.exceptions.InvalidPositionIdException
 import be.osoc.team1.backend.exceptions.InvalidProjectIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
 import be.osoc.team1.backend.repositories.ProjectRepository
+import be.osoc.team1.backend.util.ProjectSerializer
+import be.osoc.team1.backend.util.StudentSerializer
 import org.springframework.stereotype.Service
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.UUID
 
 @Service
@@ -98,20 +99,21 @@ class ProjectService(
      * Gets conflicts (a conflict involves a student being assigned to 2 projects at the same time)
      */
     fun getConflicts(edition: String): MutableList<Conflict> {
-        val baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
-        val studentsMap = mutableMapOf<UUID, MutableList<String>>()
+        val studentsMap = mutableMapOf<Student, MutableList<String>>()
+        val projectSerializer = ProjectSerializer()
         for (project in getAllProjects(edition)) {
             for (student in getStudents(project)) {
                 // add project id to map with student as key
-                studentsMap.putIfAbsent(student.id, mutableListOf())
-                studentsMap[student.id]!!.add("$baseUrl/projects/" + project.id)
+                studentsMap.putIfAbsent(student, mutableListOf())
+                studentsMap[student]!!.add(projectSerializer.toUrl(project))
             }
         }
         val conflicts = mutableListOf<Conflict>()
-        for ((studentId, projectIds) in studentsMap.entries) {
+        val studentSerializer = StudentSerializer()
+        for ((student, projectIds) in studentsMap.entries) {
             if (projectIds.size > 1) {
                 // this student has a conflict
-                conflicts.add(Conflict("$baseUrl/students/$studentId", projectIds))
+                conflicts.add(Conflict(studentSerializer.toUrl(student), projectIds))
             }
         }
         return conflicts
