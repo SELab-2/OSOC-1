@@ -120,27 +120,16 @@ const Login = () => {
             />
           </label>
           <button
-            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
+            className="m-auto block rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
             type="submit"
           >
             Log in
           </button>
           <Link href="/register">
-            <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+            <p className="mt-2 inline-block text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
               no account yet? <br /> register here!
             </p>
           </Link>
-          <p className="hr-sect pt-4 pb-2 text-sm font-medium opacity-80 lg:pb-4">
-            Or log in using
-          </p>
-          {/* Github provider. Right now, this doesn't work*/}
-          <button
-            className="bg-[#302727] px-4 py-1 text-white shadow-sm shadow-gray-300"
-            onClick={() => 'click'}
-            disabled={true}
-          >
-            <p className="text-right">Github</p>
-          </button>
         </form>
       </FormContainer>
     </>
