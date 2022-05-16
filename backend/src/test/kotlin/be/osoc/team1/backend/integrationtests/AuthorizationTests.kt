@@ -367,12 +367,12 @@ class AuthorizationTests {
     }
 
     @Test
-    fun `use access token to renew access token returns 400`() {
+    fun `use access token to renew access token returns 418`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(accessToken)
-        assert(refreshResponse.statusCodeValue == 400)
+        assert(refreshResponse.statusCodeValue == 418)
     }
 
     @Test
@@ -392,7 +392,7 @@ class AuthorizationTests {
     }
 
     @Test
-    fun `using same refresh token twice returns 400`() {
+    fun `using same refresh token twice returns 418`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
 
@@ -436,7 +436,7 @@ class AuthorizationTests {
     }
 
     @Test
-    fun `using refresh token after logout returns 400`() {
+    fun `using refresh token after logout returns 418`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken = JSONObject(logInResponse.body).get("accessToken") as String
         val refreshToken = JSONObject(logInResponse.body).get("refreshToken") as String
@@ -446,7 +446,7 @@ class AuthorizationTests {
         assert(logoutResponse.statusCodeValue == 302)
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
-        assert(refreshResponse.statusCodeValue == 400)
+        assert(refreshResponse.statusCodeValue == 418)
     }
 
     // Login first to test GET with protected endpoint
