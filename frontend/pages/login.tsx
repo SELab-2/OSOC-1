@@ -120,13 +120,13 @@ const Login = () => {
             />
           </label>
           <button
-            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
+            className="block m-auto rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
             type="submit"
           >
             Log in
           </button>
           <Link href="/register">
-            <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+            <p className="inline-block mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
               no account yet? <br /> register here!
             </p>
           </Link>
