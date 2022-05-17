@@ -1,5 +1,7 @@
 package be.osoc.team1.backend.controllers
 
+import be.osoc.team1.backend.entities.StudentView
+import be.osoc.team1.backend.entities.StudentViewEnum
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.EditionService
@@ -94,3 +96,12 @@ class EditionSecurityAspect(val editionService: EditionService, val userDetailSe
 @MustBeDocumented
 @Inherited
 annotation class SecuredEdition
+
+fun studentViewEnumToStudentView(viewEnum: StudentViewEnum): Class<out StudentView.Basic> {
+    return when (viewEnum) {
+        StudentViewEnum.Full -> StudentView.Full::class.java
+        StudentViewEnum.Basic -> StudentView.Basic::class.java
+        StudentViewEnum.List -> StudentView.List::class.java
+        StudentViewEnum.Communication -> StudentView.Communication::class.java
+    }
+}

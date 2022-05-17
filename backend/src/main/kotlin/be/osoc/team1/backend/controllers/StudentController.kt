@@ -3,7 +3,6 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
-import be.osoc.team1.backend.entities.StudentView
 import be.osoc.team1.backend.entities.StudentViewEnum
 import be.osoc.team1.backend.entities.filterByAlumn
 import be.osoc.team1.backend.entities.filterByName
@@ -103,13 +102,7 @@ class StudentController(
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
 
-        val viewType = when (view) {
-            StudentViewEnum.Full -> StudentView.Full::class.java
-            StudentViewEnum.Basic -> StudentView.Basic::class.java
-            StudentViewEnum.List -> StudentView.List::class.java
-            StudentViewEnum.Communication -> StudentView.Communication::class.java
-        }
-        return ObjectMapper().writerWithView(viewType).writeValueAsString(filteredStudents)
+        return ObjectMapper().writerWithView(studentViewEnumToStudentView(view)).writeValueAsString(filteredStudents)
     }
 
     /**
@@ -129,15 +122,8 @@ class StudentController(
         @PathVariable studentId: UUID,
         @PathVariable edition: String,
         @RequestParam(defaultValue = "Full") view: StudentViewEnum
-    ): String {
-        val viewType = when (view) {
-            StudentViewEnum.Full -> StudentView.Full::class.java
-            StudentViewEnum.Basic -> StudentView.Basic::class.java
-            StudentViewEnum.List -> StudentView.List::class.java
-            StudentViewEnum.Communication -> StudentView.Communication::class.java
-        }
-        return ObjectMapper().writerWithView(viewType).writeValueAsString(service.getStudentById(studentId, edition))
-    }
+    ): String = ObjectMapper().writerWithView(studentViewEnumToStudentView(view))
+        .writeValueAsString(service.getStudentById(studentId, edition))
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
