@@ -5,7 +5,7 @@ import FormContainer from '../../components/FormContainer';
 import usePersistentInput from '../../hooks/usePersistentInput';
 import axios from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
-import Head from "next/head";
+import Head from 'next/head';
 
 const ForgotPassword: NextPage = () => {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -46,9 +46,7 @@ const ForgotPassword: NextPage = () => {
 
   return (
     <>
-      <Head>
-        Reset Password
-      </Head>
+      <Head>Reset Password</Head>
       <FormContainer pageTitle="Password forgotten">
         <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
