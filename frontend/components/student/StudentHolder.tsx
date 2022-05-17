@@ -46,6 +46,11 @@ const StudentHolder: React.FC<StudentHolderProp> = ({
           setOriginalStudentBase={setStudentBase}
         />
       )}
+      {!studentBase.id && (
+        <h4 className="mt-4 text-center text-lg">
+          Click or drag a student to begin.
+        </h4>
+      )}
     </section>
   );
 };
