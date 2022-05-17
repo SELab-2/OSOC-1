@@ -38,7 +38,7 @@ class CommunicationController(
      * Note that the type can be any of the types defined in [Communication]
      */
     @PostMapping("/{studentId}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @ResponseStatus(value = HttpStatus.CREATED)
     @Secured("ROLE_COACH")
     @SecuredEdition
     fun createCommunication(

@@ -27,6 +27,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -112,6 +113,28 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getStudentById(differentId, testEdition) }.throws(InvalidIdException())
         mockMvc.perform(
             post("$editionUrl/$differentId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `deleteCommunication removes the communication if it exists`() {
+        val differentId = UUID.randomUUID()
+        every { studentService.removeCommunicationFromStudent(differentId, testEdition) } just Runs
+        mockMvc.perform(
+            delete("$editionUrl/$differentId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `deleteCommunication returns 404 Not Found if the communication does not exist`() {
+        val differentId = UUID.randomUUID()
+        every { studentService.removeCommunicationFromStudent(differentId, testEdition) }.throws(InvalidIdException())
+        mockMvc.perform(
+            delete("$editionUrl/$differentId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isNotFound)
