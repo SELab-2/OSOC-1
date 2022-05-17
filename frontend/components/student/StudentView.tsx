@@ -317,13 +317,13 @@ const StudentView: React.FC<StudentViewProp> = ({
           } mt-10 flex flex-row justify-between border-2 p-2`}
           onSubmit={(e) => {
             e.preventDefault();
-            if (status.label != studentBase.status) {
+            if (status.label != myStudent.status) {
               controller.abort();
               controller = new AbortController();
               const signal = controller.signal;
               setStudentStatus(
                 status,
-                studentBase.id,
+                myStudent.id,
                 myStudent,
                 setMyStudent,
                 signal,
