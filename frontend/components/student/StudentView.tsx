@@ -26,9 +26,11 @@ import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import Error from '../Error';
 import axios, { AxiosError } from 'axios';
+import { Icon } from '@iconify/react';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
+const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 
 type StudentViewProp = {
   studentInput: StudentBase;
@@ -64,6 +66,27 @@ async function setStudentStatus(
     });
 }
 
+async function removeStudentSuggestion(
+  studentId: UUID,
+  coachId: UUID,
+  setStudentBase: (studentBase: StudentBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  const edition = router.query.editionName as string;
+  await axiosAuthenticated
+    .delete(
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}/${coachId}`
+    )
+    .then(() => {
+      reloadStudent(studentId, setStudentBase, signal, setError, router);
+    })
+    .catch((err) => {
+      parseError(err, setError, signal, router);
+    });
+}
+
 async function setStudentSuggestion(
   status: string,
   studentId: UUID,
@@ -84,9 +107,7 @@ async function setStudentSuggestion(
       // A 404 student not found or 401 user is not coachId are not an errors we want to ignore
       if (axios.isAxiosError(err)) {
         const _error = err as AxiosError;
-        if (
-          _error.response?.status !== 400
-        ) {
+        if (_error.response?.status !== 400) {
           parseError(err, setError, signal, router);
         }
       } else {
@@ -283,16 +304,27 @@ const StudentView: React.FC<StudentViewProp> = ({
             controller.abort();
             controller = new AbortController();
             const signal = controller.signal;
-            setStudentSuggestion(
-              suggestion,
-              studentBase.id,
-              user.id,
-              motivation,
-              setStudentBase,
-              signal,
-              setError,
-              router
-            );
+            if (suggestion == 'Remove') {
+              removeStudentSuggestion(
+                studentBase.id,
+                user.id,
+                setStudentBase,
+                signal,
+                setError,
+                router
+              );
+            } else {
+              setStudentSuggestion(
+                suggestion,
+                studentBase.id,
+                user.id,
+                motivation,
+                setStudentBase,
+                signal,
+                setError,
+                router
+              );
+            }
             return () => {
               controller.abort();
             };
@@ -328,6 +360,17 @@ const StudentView: React.FC<StudentViewProp> = ({
             value={motivation}
             onChange={(e) => setMotivation(e.target.value || '')}
           />
+          {myStudent.statusSuggestions.filter(
+            (sugg) => sugg.suggester.id === user.id
+          ).length > 0 && (
+            <button
+              className={`w-[100%] bg-check-gray py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              onClick={() => setSuggestion('Remove')}
+              type={`submit`}
+            >
+              Remove Suggestion
+            </button>
+          )}
         </form>
 
         {/* admin status selection form */}
@@ -373,7 +416,7 @@ const StudentView: React.FC<StudentViewProp> = ({
                 isMulti={false}
                 name="Status"
                 placeholder="Select Status"
-                // TODO don't hardcode this
+                // WONTFIX don't hardcode this
                 options={[
                   { value: 'Yes', label: 'Yes' },
                   { value: 'No', label: 'No' },
@@ -420,6 +463,14 @@ const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
     <div className="flex flex-row">
       <i className={`${myColor} w-[30px] px-2`}>{myLabel}</i>
       <p className="">{statusSuggestion.suggester.username}</p>
+      <div className="tooltip pl-2 pt-1">
+        <i className="icon-speech-blue text-xs">{speech_bubble}</i>
+        {/* TODO Make this tooltip look nicer */}
+        {/* TODO this tooltip should have a max width since it can bug the layout atm */}
+        <span className="tooltiptext bg-osoc-neutral-bg">
+          {statusSuggestion.motivation}
+        </span>
+      </div>
     </div>
   );
 };
