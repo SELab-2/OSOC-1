@@ -10,7 +10,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 abstract class BaseSerializer<T>(t: Class<T>?) : StdSerializer<T>(t) {
     constructor() : this(null)
 
-    val baseUrl: String = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+    val scheme = System.getenv("OSOC_SCHEME")?: "http"
+    val baseUrl: String = ServletUriComponentsBuilder.fromCurrentContextPath().scheme(scheme).build().toUriString()
 
     companion object {
         private const val serialVersionUID = 1L
