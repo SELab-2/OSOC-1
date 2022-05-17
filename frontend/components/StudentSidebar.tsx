@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import usePoll from 'react-use-poll';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { StudentBaseBasic, StudentData } from '../lib/types';
+import { StudentBaseList, StudentData } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
@@ -22,7 +22,7 @@ const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
  */
 type StudentsSidebarProps = {
   setError: (error: string) => void;
-  setStudentBase: (studentBase: StudentBaseBasic) => void;
+  setStudentBase: (studentBase: StudentBaseList) => void;
 };
 
 /**
@@ -45,7 +45,7 @@ async function searchStudent(
   studentNameSearch: string,
   skills: Array<{ value: string; label: string }>,
   studentSearchParameters: Record<string, boolean>,
-  setStudents: (students: StudentBaseBasic[]) => void,
+  setStudents: (students: StudentBaseList[]) => void,
   setFilterAmount: (filterAmount: number) => void,
   state: {
     hasMoreItems: boolean;
@@ -73,7 +73,7 @@ async function searchStudent(
     newState.hasMoreItems = false;
     newState.loading = false;
     setState(newState);
-    setStudents([] as StudentBaseBasic[]);
+    setStudents([] as StudentBaseList[]);
     setFilterAmount(0 as number);
     setLoading(false);
     return;
@@ -104,7 +104,7 @@ async function searchStudent(
       newState.loading = false;
       setState(newState);
       // VERY IMPORTANT TO CHANGE STATE FIRST!!!!
-      setStudents(response.data.collection as StudentBaseBasic[]);
+      setStudents(response.data.collection as StudentBaseList[]);
       setFilterAmount(response.data.totalLength as number);
       setLoading(false);
     })
@@ -168,9 +168,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   ] = useState(0);
 
   const [students, setStudents]: [
-    StudentBaseBasic[],
-    (students: StudentBaseBasic[]) => void
-  ] = useState([] as StudentBaseBasic[]);
+    StudentBaseList[],
+    (students: StudentBaseList[]) => void
+  ] = useState([] as StudentBaseList[]);
 
   const [loading, setLoading]: [boolean, (loading: boolean) => void] =
     useState<boolean>(true);
@@ -206,10 +206,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * function to add new student results instead of overwriting old results
    * @param studentsList - list of students to add to all students
    */
-  const updateStudents: (param: StudentBaseBasic[]) => void = (
-    studentsList: StudentBaseBasic[]
+  const updateStudents: (param: StudentBaseList[]) => void = (
+    studentsList: StudentBaseList[]
   ) => {
-    const newStudents = students ? [...students] : ([] as StudentBaseBasic[]);
+    const newStudents = students ? [...students] : ([] as StudentBaseList[]);
     newStudents.push(...studentsList);
     setStudents(newStudents);
   };
@@ -632,7 +632,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
           </div>
           <FlatList
             list={students}
-            renderItem={(student: StudentBaseBasic) => (
+            renderItem={(student: StudentBaseList) => (
               <StudentTile
                 key={student.id}
                 studentInput={student}

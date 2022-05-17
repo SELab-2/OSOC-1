@@ -6,10 +6,10 @@ import {
   ProjectBase,
   Skill,
   StatusSuggestion,
-  StatusSuggestionCountBasic,
+  StatusSuggestionCountList,
   Student,
   StudentBase,
-  StudentBaseBasic,
+  StudentBaseList,
   User,
 } from './types';
 
@@ -31,22 +31,20 @@ export function convertStudentBase(studentBase: StudentBase): Student {
  * This will simply change all Url lists to empty lists of the correct type
  * Use this to avoid rendering errors
  *
- * @param studentBaseBasic - base student object as returned by get request with view Basic
+ * @param studentBaseList - base student object as returned by get request with view List
  */
-export function convertStudentBaseBasic(
-  studentBaseBasic: StudentBaseBasic
+export function convertStudentBaseList(
+  studentBaseList: StudentBaseList
 ): Student {
-  return convertStudentAny(studentBaseBasic) as Student;
+  return convertStudentAny(studentBaseList) as Student;
 }
 
 /**
- * Helper function since conversion difference between view Basic and view Full is only the skills
+ * Helper function since conversion difference between view List and view Full is only the skills
  *
- * @param studentAny - one of StudentBaseBasic or StudentBase
+ * @param studentAny - one of StudentBaseList or StudentBase
  */
-function convertStudentAny(
-  studentAny: StudentBaseBasic | StudentBase
-): Student {
+function convertStudentAny(studentAny: StudentBaseList | StudentBase): Student {
   const newStudent = {} as Student;
   newStudent.id = studentAny.id;
   newStudent.firstName = studentAny.firstName;
@@ -62,22 +60,22 @@ function convertStudentAny(
 }
 
 /**
- * Function to convert a StudentBase object into a StudentBaseBasic object
+ * Function to convert a StudentBase object into a StudentBaseList object
  * Be aware that statusSuggestionsCount of the new object will simply be an empty object
  * This function is only used to avoid typing errors between components StudentView and StudentHolder
  *
- * @param studentBase - object to convert into a StudentBaseBasic object
+ * @param studentBase - object to convert into a StudentBaseList object
  */
-export function convertStudentFullToBasic(
+export function convertStudentFullToList(
   studentBase: StudentBase
-): StudentBaseBasic {
-  const newStudent = {} as StudentBaseBasic;
+): StudentBaseList {
+  const newStudent = {} as StudentBaseList;
   newStudent.id = studentBase.id;
   newStudent.firstName = studentBase.firstName;
   newStudent.lastName = studentBase.lastName;
   newStudent.alumn = studentBase.alumn;
   newStudent.possibleStudentCoach = studentBase.possibleStudentCoach;
-  newStudent.statusSuggestionCount = {} as StatusSuggestionCountBasic;
+  newStudent.statusSuggestionCount = {} as StatusSuggestionCountList;
   newStudent.status = studentBase.status;
   return newStudent;
 }

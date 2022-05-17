@@ -69,7 +69,7 @@ export enum StatusSuggestionStatus {
  * This is the full object returned by a get to the Student endpoint
  */
 export type StudentData = {
-  collection: StudentBaseBasic[];
+  collection: StudentBaseList[];
   totalLength: number;
 };
 
@@ -116,21 +116,17 @@ export type StudentBase = {
   answers: Url[];
 };
 
-export type StudentBaseBasic = {
+export type StudentBaseList = {
   id: UUID;
   firstName: string;
   lastName: string;
   status: string;
-  // statusSuggestions: Url[];
   alumn: boolean;
   possibleStudentCoach: boolean;
-  statusSuggestionCount: StatusSuggestionCountBasic;
-  // skills: Skill[];
-  // communications: Url[];
-  // answers: Url[];
+  statusSuggestionCount: StatusSuggestionCountList;
 };
 
-export type StatusSuggestionCountBasic = {
+export type StatusSuggestionCountList = {
   Yes: number | null;
   Maybe: number | null;
   No: number | null;

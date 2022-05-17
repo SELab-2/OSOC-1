@@ -4,7 +4,7 @@ import {
   StatusSuggestionBase,
   Student,
   StudentBase,
-  StudentBaseBasic,
+  StudentBaseList,
   Url,
   User,
   UserRole,
@@ -20,8 +20,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import {
   convertStudentBase,
-  convertStudentBaseBasic,
-  convertStudentFullToBasic,
+  convertStudentBaseList,
+  convertStudentFullToList,
 } from '../../lib/conversionUtils';
 import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
@@ -35,8 +35,8 @@ const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
 
 type StudentViewProp = {
-  studentInput: StudentBaseBasic;
-  setOriginalStudentBase: (originalStudentBase: StudentBaseBasic) => void;
+  studentInput: StudentBaseList;
+  setOriginalStudentBase: (originalStudentBase: StudentBaseList) => void;
 };
 
 type StatusSuggestionProp = {
@@ -174,13 +174,13 @@ const StudentView: React.FC<StudentViewProp> = ({
 }: StudentViewProp) => {
   const [user] = useUser();
   // Needed to reload student when a suggestion is done or status is changed
-  const [studentBaseBasic, setStudentBaseBasic] = useState(
-    studentInput as StudentBaseBasic
+  const [studentBaseList, setStudentBaseList] = useState(
+    studentInput as StudentBaseList
   );
   // TODO don't reload everything when only status or suggestions are changed, save the rest somewhere
   const [studentBase, setStudentBase] = useState({} as StudentBase);
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
-    useState(convertStudentBaseBasic(studentInput) as Student);
+    useState(convertStudentBaseList(studentInput) as Student);
 
   const [status, setStatus] = useState({
     value: '',
@@ -194,7 +194,7 @@ const StudentView: React.FC<StudentViewProp> = ({
   let controller = new AbortController();
 
   useEffect(() => {
-    setStudentBaseBasic(studentInput);
+    setStudentBaseList(studentInput);
   }, [studentInput]);
 
   useEffect(() => {
@@ -202,24 +202,18 @@ const StudentView: React.FC<StudentViewProp> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    reloadStudent(
-      studentBaseBasic.id,
-      setStudentBase,
-      signal,
-      setError,
-      router
-    );
+    reloadStudent(studentBaseList.id, setStudentBase, signal, setError, router);
     return () => {
       controller.abort();
     };
-  }, [studentBaseBasic]);
+  }, [studentBaseList]);
 
   useEffect(() => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
     if (studentBase.id !== undefined && studentBase.id !== studentInput.id) {
-      setOriginalStudentBase(convertStudentFullToBasic(studentBase));
+      setOriginalStudentBase(convertStudentFullToList(studentBase));
     }
     // This is a safety check, not really needed right now but it avoids accidents
     if (studentBase.id !== undefined) {

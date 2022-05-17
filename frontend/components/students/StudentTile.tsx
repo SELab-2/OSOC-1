@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react';
 import {
   ItemTypes,
   StatusSuggestionStatus,
-  StudentBaseBasic,
+  StudentBaseList,
 } from '../../lib/types';
 import { useDrag } from 'react-dnd';
 import { useEffect, useState } from 'react';
@@ -17,8 +17,8 @@ const tilde_mark = <Icon icon="mdi:tilde" />;
  * @See StudentTile for more information
  */
 type StudentProp = {
-  studentInput: StudentBaseBasic;
-  setStudentBase: (studentBase: StudentBaseBasic) => void;
+  studentInput: StudentBaseList;
+  setStudentBase: (studentBase: StudentBaseList) => void;
 };
 
 /**
@@ -53,9 +53,9 @@ const StudentTile: React.FC<StudentProp> = ({
 }: StudentProp) => {
   // Need to set a project with all keys present to avoid the render code throwing undefined errors
   const [myStudent, setMyStudent]: [
-    StudentBaseBasic,
-    (myStudent: StudentBaseBasic) => void
-  ] = useState(studentInput as StudentBaseBasic); // using different names to avoid confusion
+    StudentBaseList,
+    (myStudent: StudentBaseList) => void
+  ] = useState(studentInput as StudentBaseList); // using different names to avoid confusion
 
   /**
    * Since polling is done in parent StudentSidebar.tsx, we only watch if
@@ -63,7 +63,7 @@ const StudentTile: React.FC<StudentProp> = ({
    */
   useEffect(() => {
     if (JSON.stringify(studentInput) != JSON.stringify(myStudent)) {
-      setMyStudent(studentInput as StudentBaseBasic);
+      setMyStudent(studentInput as StudentBaseList);
     }
   }, [studentInput]);
 
