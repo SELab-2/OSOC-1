@@ -39,7 +39,7 @@ class SerializationTests {
     @BeforeEach
     fun setMockRequest() {
         val mockRequest = MockHttpServletRequest()
-        mockRequest.scheme = "https"
+        mockRequest.scheme = "http"
         mockRequest.serverName = "example.com"
         mockRequest.serverPort = -1
         mockRequest.contextPath = "/api"
@@ -61,11 +61,11 @@ class SerializationTests {
         val json: JsonContent<Project> = projectJacksonTester!!.write(testProject)
 
         assertThat(json).extractingJsonPathValue("$.coaches")
-            .isEqualTo(mutableListOf("https://example.com/api/users/${testUser.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/users/${testUser.id}"))
         assertThat(json).extractingJsonPathValue("$.positions")
-            .isEqualTo(mutableListOf("https://example.com/api/positions/${testPosition.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/positions/${testPosition.id}"))
         assertThat(json).extractingJsonPathValue("$.assignments")
-            .isEqualTo(mutableListOf("https://example.com/api/assignments/${testAssignment.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/assignments/${testAssignment.id}"))
     }
 
     @Test
@@ -89,9 +89,9 @@ class SerializationTests {
         val json: JsonContent<Student> = studentJacksonTester!!.write(testStudent)
 
         assertThat(json).extractingJsonPathValue("$.statusSuggestions")
-            .isEqualTo(mutableListOf("https://example.com/api/statusSuggestions/${testStatusSuggestion.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/statusSuggestions/${testStatusSuggestion.id}"))
         assertThat(json).extractingJsonPathValue("$.communications")
-            .isEqualTo(mutableListOf("https://example.com/api/$testEdition/communications/${testCommunication.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/$testEdition/communications/${testCommunication.id}"))
     }
 
     @Test
@@ -113,10 +113,10 @@ class SerializationTests {
         val json: JsonContent<Assignment> = assignmentJacksonTester!!.write(testAssignment)
 
         assertThat(json).extractingJsonPathValue("$.student")
-            .isEqualTo("https://example.com/api/$testEdition/students/${testStudent.id}")
+            .isEqualTo("http://example.com/api/$testEdition/students/${testStudent.id}")
         assertThat(json).extractingJsonPathValue("$.position")
-            .isEqualTo("https://example.com/api/positions/${testPosition.id}")
+            .isEqualTo("http://example.com/api/positions/${testPosition.id}")
         assertThat(json).extractingJsonPathValue("$.suggester")
-            .isEqualTo("https://example.com/api/users/${testSuggester.id}")
+            .isEqualTo("http://example.com/api/users/${testSuggester.id}")
     }
 }
