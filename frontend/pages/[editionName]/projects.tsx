@@ -460,7 +460,9 @@ const Projects: NextPage = () => {
                           id="ProjectsSearch"
                           placeholder="Search projects by name"
                           disabled={showConflicts}
-                          onChange={(e) => setProjectSearch(e.target.value)}
+                          onChange={(e) =>
+                            setProjectSearch(e.target.value || '')
+                          }
                           onKeyPress={(e) => {
                             if (showConflicts) {
                               return;

@@ -302,7 +302,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
         };
       }
     },
-    [state, studentSearchParameters, skills, { isOnScreen }.isOnScreen],
+    [
+      state,
+      studentNameSearch,
+      studentSearchParameters,
+      skills,
+      { isOnScreen }.isOnScreen,
+    ],
     {
       interval: 3000,
     }
@@ -376,7 +382,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 id="StudentsSearch"
                 placeholder="Search students by name"
                 value={studentNameSearch}
-                onChange={(e) => setStudentNameSearch(e.target.value)}
+                onChange={(e) => setStudentNameSearch(e.target.value || '')}
                 onKeyPress={(e) => {
                   if (e.key == 'Enter') {
                     return search();
