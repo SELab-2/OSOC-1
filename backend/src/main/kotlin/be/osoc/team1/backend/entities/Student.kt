@@ -176,7 +176,7 @@ class Student(
  * This class represents a few views which can be used by entities. For example a field marked as [Full] will not be displayed
  * when writerWithView [Basic] is used, if writerWithView [Full] is used all the fields will be displayed.
  * [Communication] is used for the communication page on the frontend,
- * [List] is used for the student page on the frontend.
+ * [List] is used for the student sidebar on the frontend.
  */
 class StudentView {
     open class Basic
