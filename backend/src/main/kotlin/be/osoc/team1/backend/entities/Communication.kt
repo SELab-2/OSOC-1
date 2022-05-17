@@ -20,7 +20,7 @@ class Communication(
     val type: CommunicationTypeEnum,
     @JsonIgnore
     @NotBlank
-    var edition: String = ""
+    val edition: String = ""
 ) {
     @Id
     var id: UUID = UUID.randomUUID()
