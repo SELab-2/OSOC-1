@@ -88,6 +88,9 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
   return (
     <div className={`mx-4`}>
       {error && <Error error={error} className="mb-4" />}
+      {conflictMap.size == 0 && (
+        <h4 className="mt-4 text-center text-lg">No conflicts found!</h4>
+      )}
       <div className={`flex w-full flex-row content-between justify-between`}>
         {/* Conflicts projects list */}
         {projects.length > 0 && (
