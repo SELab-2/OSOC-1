@@ -74,6 +74,14 @@ export type StudentData = {
 };
 
 /**
+ * This is the Communications view object returned by a get to the Student endpoint
+ */
+export type StudentDataCommunication = {
+  collection: StudentBaseCommunication[];
+  totalLength: number;
+};
+
+/**
  * This is the full object returned by a get to the Project endpoint
  */
 export type ProjectData = {
@@ -84,7 +92,7 @@ export type ProjectData = {
 /**
  * This is the Student type as defined in osoc.yaml
  */
-// TODO fix this once communications is done
+// WONTFIX communications type since it does not get used in this object anyway
 export type Student = {
   id: UUID;
   firstName: string;
@@ -114,6 +122,13 @@ export type StudentBase = {
   skills: Skill[];
   communications: Url[];
   answers: Url[];
+};
+
+export type StudentBaseCommunication = {
+  id: UUID;
+  firstName: string;
+  lastName: string;
+  communications: Url[];
 };
 
 /**

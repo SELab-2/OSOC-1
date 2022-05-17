@@ -3,9 +3,9 @@ import RouteProtection from '../../components/RouteProtection';
 import {
   Communication,
   CommunicationType,
-  StudentBase,
+  StudentBaseCommunication,
   StudentComm,
-  StudentData,
+  StudentDataCommunication,
   UserRole,
 } from '../../lib/types';
 import CommsTable from '../../components/communications/CommsTable';
@@ -26,7 +26,7 @@ const communications = () => {
   const router = useRouter();
   const { editionName: edition } = router.query;
 
-  const [students, setStudents] = useState([] as StudentBase[]);
+  const [students, setStudents] = useState([] as StudentBaseCommunication[]);
   const [communications, setCommunications] = useState([] as StudentComm[]);
 
   const [openPopup, setOpenPopup] = useState(false);
@@ -54,12 +54,13 @@ const communications = () => {
     abortController: AbortController;
   }) => Promise<void> = async ({ page, abortController }) => {
     try {
-      const response = await axiosAuth.get<StudentData>(
+      const response = await axiosAuth.get<StudentDataCommunication>(
         `/${edition}` + Endpoints.STUDENTS,
         {
           params: {
             pageSize: PAGE_SIZE,
             pageNumber: page,
+            view: 'Communication',
           },
           signal: abortController.signal,
         }

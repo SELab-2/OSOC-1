@@ -2,13 +2,13 @@ import { Dispatch, FC, FormEvent, SetStateAction, useState } from 'react';
 import Select from 'react-select';
 import Popup from 'reactjs-popup';
 import { SpinnerCircular } from 'spinners-react';
-import { StudentBase } from '../../lib/types';
+import { StudentBaseCommunication } from '../../lib/types';
 
 type CCPProps = {
   createComms: (studentId: string, message: string) => Promise<void>;
   openPopup: boolean;
   setOpenPopup: Dispatch<SetStateAction<boolean>>;
-  students: StudentBase[];
+  students: StudentBaseCommunication[];
 };
 
 /**
@@ -22,7 +22,9 @@ const CommsCreationPopup: FC<CCPProps> = ({
   setOpenPopup,
   students,
 }: CCPProps) => {
-  const [student, setStudent] = useState<StudentBase | undefined>(undefined);
+  const [student, setStudent] = useState<StudentBaseCommunication | undefined>(
+    undefined
+  );
   const [message, setMessage] = useState('');
 
   const [loading, setLoading] = useState(false);
