@@ -53,7 +53,7 @@ const Editions: NextPage = () => {
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
           const status = err.response?.status;
-          if (status === 400) router.push('/login');
+          if (status === 418) router.push('/login');
           setError(err.message);
         } else {
           setError(err as string);
@@ -71,7 +71,7 @@ const Editions: NextPage = () => {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
-        if (status === 400) router.push('/login');
+        if (status === 418) router.push('/login');
         setError(err.message);
       } else {
         setError(err as string);
@@ -93,7 +93,7 @@ const Editions: NextPage = () => {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
-        if (status === 400) router.push('/login');
+        if (status === 418) router.push('/login');
         setError(err.message);
       } else {
         setError(err as string);
