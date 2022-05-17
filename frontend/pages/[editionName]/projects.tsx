@@ -192,7 +192,6 @@ const Projects: NextPage = () => {
   const [error, setError] = useState('');
   const [showConflicts, setShowConflicts] = useState(false);
   const [conflictMap, setConflictMap] = useState(new Map() as conflictMapType);
-  // const [conflictsLoaded, setConflictsLoaded] = useState(false);
   const [projects, setProjects]: [
     ProjectBase[],
     (projects: ProjectBase[]) => void
@@ -475,7 +474,6 @@ const Projects: NextPage = () => {
                         {/* Button to show conflicts */}
                         <button
                           className={`justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
-                          //type="submit"
                           onClick={() => setShowConflicts(!showConflicts)}
                         >
                           {showConflicts
@@ -488,7 +486,6 @@ const Projects: NextPage = () => {
                           className={`${
                             user.role == UserRole.Admin ? 'visible' : 'hidden'
                           } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
-                          //type="submit"
                           onClick={() => setShowCreateProject(true)}
                         >
                           Create new project
