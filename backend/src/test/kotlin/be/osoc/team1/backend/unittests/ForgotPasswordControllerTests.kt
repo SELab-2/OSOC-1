@@ -3,7 +3,9 @@ package be.osoc.team1.backend.unittests
 import be.osoc.team1.backend.controllers.ForgotPasswordController
 import be.osoc.team1.backend.exceptions.InvalidForgotPasswordUUIDException
 import be.osoc.team1.backend.security.PasswordEncoderConfig
+import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.ForgotPasswordService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
@@ -21,6 +23,10 @@ import java.util.UUID
 class ForgotPasswordControllerTests(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var service: ForgotPasswordService
+    @MockkBean
+    private lateinit var editionService: EditionService
+    @MockkBean
+    private lateinit var osocUserDetailService: OsocUserDetailService
 
     private val validUUID = UUID.randomUUID()
     private val validNewPassword = "valid_new_password"
