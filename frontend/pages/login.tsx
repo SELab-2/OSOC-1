@@ -10,6 +10,7 @@ import axios from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import usePersistentInput from '../hooks/usePersistentInput';
 import useEdition from '../hooks/useEdition';
+import Head from 'next/head';
 
 /**
  * Login page for OSOC application
@@ -100,6 +101,9 @@ const Login = () => {
 
   return (
     <>
+      <Head>
+        <title>Login</title>
+      </Head>
       <FormContainer pageTitle="LOGIN">
         <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
