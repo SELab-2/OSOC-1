@@ -57,6 +57,10 @@ class CommunicationController(
         return getObjectCreatedResponse(communication.id, communication)
     }
 
+    /**
+     * Remove a communication from the database and from the student that we communicated with.
+     * A 404 is returned if a communication with [communicationId] doesn't exist(in this edition that is).
+     */
     @DeleteMapping("/{communicationId}")
     @Secured("ROLE_COACH")
     @SecuredEdition
