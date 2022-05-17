@@ -143,7 +143,6 @@ class StudentController(
      * verification is the responsibility of the caller.
      */
     @PostMapping
-    @SecuredEdition
     fun addStudent(
         @RequestBody studentRegistration: Student,
         @PathVariable edition: String
