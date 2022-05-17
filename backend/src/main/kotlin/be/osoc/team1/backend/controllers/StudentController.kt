@@ -119,8 +119,15 @@ class StudentController(
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
     @SecuredEdition
-    fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
-        service.getStudentById(studentId, edition)
+    fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String, @RequestParam(defaultValue = "Full") view: StudentViewEnum): String {
+        val viewType = when (view) {
+            StudentViewEnum.Full -> StudentView.Full::class.java
+            StudentViewEnum.Basic -> StudentView.Basic::class.java
+            StudentViewEnum.List -> StudentView.List::class.java
+            StudentViewEnum.Communication -> StudentView.Communication::class.java
+        }
+        return ObjectMapper().writerWithView(viewType).writeValueAsString(service.getStudentById(studentId, edition))
+    }
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
