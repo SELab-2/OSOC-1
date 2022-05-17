@@ -11,6 +11,8 @@ import StudentHolder from '../../components/student/StudentHolder';
 import RouteProtection from '../../components/RouteProtection';
 import Error from '../../components/Error';
 import PersistLogin from '../../components/PersistLogin';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -26,10 +28,16 @@ const Students: NextPage = () => {
   const [error, setError]: [string, (error: string) => void] = useState('');
   useAxiosAuth();
 
+  const router = useRouter();
+  const edition = router.query.editionName as string;
+
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="min-w-screen flex min-h-screen flex-col items-center">
+          <Head>
+            <title>{edition}: students</title>
+          </Head>
           <Header />
           <DndProvider backend={HTML5Backend} key={2}>
             <main className="flex w-full flex-row">

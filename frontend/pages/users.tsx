@@ -14,6 +14,7 @@ import RouteProtection from '../components/RouteProtection';
 import PersistLogin from '../components/PersistLogin';
 import UserDeleteForm from '../components/users/UserDeleteForm';
 import { parseError } from '../lib/requestUtils';
+import Head from 'next/head';
 
 /**
  *
@@ -121,7 +122,7 @@ const Users: NextPage = () => {
       } catch (err) {
         if (axios.isAxiosError(err)) {
           const _err = err as AxiosError;
-          if (_err.response?.status === 400) router.push('/login'); // error when trying to refresh refreshtoken
+          if (_err.response?.status === 418) router.push('/login'); // error when trying to refresh refreshtoken
           if (isMounted) {
             setError(_err.response?.statusText || 'An unknown error occurred');
           }
@@ -141,6 +142,9 @@ const Users: NextPage = () => {
 
   return (
     <PersistLogin>
+      <Head>
+        <title>Users</title>
+      </Head>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="h-screen">
           <Header />

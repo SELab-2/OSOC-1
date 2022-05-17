@@ -3,7 +3,6 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
-import be.osoc.team1.backend.entities.StudentView
 import be.osoc.team1.backend.entities.StudentViewEnum
 import be.osoc.team1.backend.entities.filterByAlumn
 import be.osoc.team1.backend.entities.filterByName
@@ -58,7 +57,10 @@ class StudentController(
      * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
      * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
      *
-     * The returned students can also be altered using the [view] query parameter: [Basic] will limit the data the student object contains,
+     * The returned students can also be altered using the [view] query parameter:
+     * [Basic] will limit the data the student object contains,
+     * [Communication] is limited but has the communication field of the student,
+     * [List] is limited but has the required fields for a list view,
      * [Full] will return the full object.
      */
     @GetMapping
@@ -100,22 +102,28 @@ class StudentController(
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
 
-        val viewType = when (view) {
-            StudentViewEnum.Full -> StudentView.Full::class.java
-            StudentViewEnum.Basic -> StudentView.Basic::class.java
-        }
-        return ObjectMapper().writerWithView(viewType).writeValueAsString(filteredStudents)
+        return ObjectMapper().writerWithView(studentViewEnumToStudentView(view)).writeValueAsString(filteredStudents)
     }
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists, returns a
      * "404: Not Found" message instead.
+     *
+     * The returned student can also be altered using the [view] query parameter:
+     * [Basic] will limit the data the student object contains,
+     * [Communication] is limited but has the communication field of the student,
+     * [List] is limited but has the required fields for a list view,
+     * [Full] will return the full object.
      */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
     @SecuredEdition
-    fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
-        service.getStudentById(studentId, edition)
+    fun getStudentById(
+        @PathVariable studentId: UUID,
+        @PathVariable edition: String,
+        @RequestParam(defaultValue = "Full") view: StudentViewEnum
+    ): String = ObjectMapper().writerWithView(studentViewEnumToStudentView(view))
+        .writeValueAsString(service.getStudentById(studentId, edition))
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a

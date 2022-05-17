@@ -7,6 +7,7 @@ import Endpoints from '../lib/endpoints';
 import axios from '../lib/axios';
 import useInput from '../hooks/useInput';
 import { customPasswordRegex, emailRegex, nameRegex } from '../lib/regex';
+import Head from 'next/head';
 
 /**
  * Register page for OSOC application
@@ -82,6 +83,9 @@ const register = () => {
 
   return (
     <>
+      <Head>
+        <title>Register</title>
+      </Head>
       <FormContainer pageTitle="REGISTER">
         <form className="mb-1 w-11/12 max-w-md" onSubmit={registerUser}>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
