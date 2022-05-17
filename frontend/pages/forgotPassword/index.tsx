@@ -1,10 +1,10 @@
 import { NextPage } from 'next';
 import { FormEventHandler, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
-import FormContainer from '../components/FormContainer';
-import axios from '../lib/axios';
-import Endpoints from '../lib/endpoints';
-import usePersistentInput from '../hooks/usePersistentInput';
+import FormContainer from '../../components/FormContainer';
+import usePersistentInput from '../../hooks/usePersistentInput';
+import axios from '../../lib/axios';
+import Endpoints from '../../lib/endpoints';
 
 const ForgotPassword: NextPage = () => {
   const emailRef = useRef<HTMLInputElement>(null);
