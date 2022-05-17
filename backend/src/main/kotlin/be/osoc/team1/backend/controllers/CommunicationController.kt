@@ -45,7 +45,7 @@ class CommunicationController(
         @RequestBody communicationRegister: Communication
     ): ResponseEntity<Communication> {
         val communication =
-            Communication(communicationRegister.message, communicationRegister.type, communicationRegister.edition)
+            Communication(communicationRegister.message, communicationRegister.type, edition)
         val createdCommunication = communicationService.createCommunication(communication)
         studentService.addCommunicationToStudent(studentId, communication, edition)
         return getObjectCreatedResponse(createdCommunication.id, createdCommunication)
