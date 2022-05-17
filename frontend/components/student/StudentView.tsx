@@ -44,6 +44,17 @@ type StatusSuggestionProp = {
   statusSuggestion: StatusSuggestion;
 };
 
+/**
+ * Function to set the status of a student, this is an admin only function
+ * This function does NOT check if the new status is different from the old one
+ * @param status - new status for the student
+ * @param studentId - id for student to change status for
+ * @param myStudent - original student, used to avoid having to reload page
+ * @param setMyStudent - callback to set new student object with changed status
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
 async function setStudentStatus(
   status: { value: string; label: string },
   studentId: UUID,
@@ -69,6 +80,16 @@ async function setStudentStatus(
     });
 }
 
+/**
+ * Function to remove a suggestion from a user, the suggestion is defined by the id of the suggester
+ *
+ * @param studentId - id of student to remove a suggestion from
+ * @param coachId - id of suggester for suggestion to remove
+ * @param setStudentBase - callback to set reloaded student
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
 async function removeStudentSuggestion(
   studentId: UUID,
   coachId: UUID,
@@ -90,6 +111,16 @@ async function removeStudentSuggestion(
     });
 }
 
+/**
+ * Function to remove a student
+ * This function does not perform any authority checks before deleting!
+ *
+ * @param studentId - id of student to remove
+ * @param setOriginalStudentBase - Callback to set student object to null after deletion
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
 async function removeStudent(
   studentId: UUID,
   setOriginalStudentBase: (studentBase: StudentBase) => void,
@@ -108,6 +139,19 @@ async function removeStudent(
     });
 }
 
+/**
+ * Function to set a new suggestion for a student, student will be reloaded afterwards
+ * Note: This function will perform a delete first since suggestions can't be changed
+ *
+ * @param status - status to suggest
+ * @param studentId - id of student to set suggestion for
+ * @param coachId - id of suggester, should be current user
+ * @param motivation - motivation for the suggestion
+ * @param setStudentBase - callback to set new student after reload
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
 async function setStudentSuggestion(
   status: string,
   studentId: UUID,
@@ -153,6 +197,15 @@ async function setStudentSuggestion(
     });
 }
 
+/**
+ * Reload student with given id, the reload URL is hardcoded
+ *
+ * @param studentId - id of student to reload
+ * @param setStudentBase - callback to set the response from the reload
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
 function reloadStudent(
   studentId: UUID,
   setStudentBase: (studentBase: StudentBase) => void,
@@ -393,6 +446,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             value={motivation}
             onChange={(e) => setMotivation(e.target.value || '')}
           />
+          {/* button to remove suggestion, only shows when user has a suggestion */}
           {myStudent.statusSuggestions.filter(
             (sugg) => sugg.suggester.id === user.id
           ).length > 0 && (
@@ -556,7 +610,6 @@ const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
       <div className="tooltip pl-2 pt-1">
         <i className="icon-speech-blue text-xs">{speech_bubble}</i>
         {/* TODO Make this tooltip look nicer */}
-        {/* TODO this tooltip should have a max width since it can bug the layout atm */}
         <span className="tooltiptext bg-osoc-neutral-bg">
           {statusSuggestion.motivation}
         </span>
