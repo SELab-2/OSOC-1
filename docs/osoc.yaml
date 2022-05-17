@@ -888,6 +888,25 @@ paths:
                 '404':
                     description: |
                         The response if there is no communication in the database with the given id.
+        delete:
+            summary: Remove a communication from a student
+            parameters:
+                -   name: communicationId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            responses:
+                '204':
+                    description: Returned if the removal was successful.
+                '404':
+                    description: Returned if the communication does not exist(in this edition).
     /{edition}/communications/{studentId}:
         post:
             summary: Add a new communication with a student
