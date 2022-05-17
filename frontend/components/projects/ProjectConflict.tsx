@@ -26,6 +26,14 @@ type ProjectConflictStudentProp = {
   removeCurrentStudent: () => void;
 };
 
+/**
+ * Function to get all projects from a list of project urls
+ *
+ * @param projectUrls - Urls of projects to get
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for edition parameter & error handling on 400 response
+ */
 async function getProjects(
   projectUrls: Url[],
   signal: AbortSignal,
@@ -43,6 +51,10 @@ async function getProjects(
   return Projects;
 }
 
+/**
+ * Component to show Conflicts, has a sidebar to the right to allow selecting a student with conflicts
+ * After selecting a student, will show the conflicts for that student
+ */
 const ProjectConflict: React.FC<ProjectConflictProp> = ({
   conflictMap,
 }: ProjectConflictProp) => {

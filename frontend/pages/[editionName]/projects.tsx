@@ -107,8 +107,21 @@ function searchProject(
     });
 }
 
+/**
+ * Function to get all conflicts from conflict endpoint
+ * Important notes:
+ * Projects do not get removed from the 'conflicts' list to allow adding a new student to replace the conflict student.
+ * Students also don't get removed from the list even when they do not have a conflict anymore
+ * This is to allow for better productivity flow and should be allowed separatly
+ *
+ * @param conflictMap - original conflict results, needed to not remove old results
+ * @param setConflictMap - callback to set results
+ * @param setLoading - set loading or not, this is not the same as the state loading due to styling bug otherwise
+ * @param signal - AbortSignal for the axios request
+ * @param setError - callback to set error message
+ * @param router - Router object needed for edition parameter & error handling on 400 response
+ */
 async function searchConflicts(
-  setProjects: (projects: ProjectBase[]) => void,
   conflictMap: conflictMapType,
   setConflictMap: (map: conflictMapType) => void,
   setLoading: (loading: boolean) => void,
@@ -310,7 +323,6 @@ const Projects: NextPage = () => {
         controller = new AbortController();
         const signal = controller.signal;
         searchConflicts(
-          setProjects,
           conflictMap,
           setConflictMap,
           setLoading,
