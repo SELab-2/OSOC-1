@@ -68,6 +68,9 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
     conflictMap.delete(currentStudent.id);
   };
 
+  /**
+   * Poll only the currently showing projects
+   */
   usePoll(
     () => {
       if (currentStudent) {
@@ -151,6 +154,9 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
   );
 };
 
+/**
+ * These are the entries from the student conflict sidebar to the right
+ */
 const ProjectConflictStudents: React.FC<ProjectConflictStudentProp> = ({
   student,
   amount,
@@ -176,6 +182,7 @@ const ProjectConflictStudents: React.FC<ProjectConflictStudentProp> = ({
         {student.firstName + ' ' + student.lastName + ' (' + amount + ')'}
       </div>
 
+      {/* If only 1 or 0 assignments are left, allow removing the student from the list */}
       {amount <= 1 && (
         <div className="flex flex-col justify-center">
           <i
