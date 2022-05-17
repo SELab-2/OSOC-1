@@ -339,7 +339,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getStudentById Basic view returns a basic form of students`() {
         val testStudent1 = Student("L1", "VC", testEdition)
         val test = "{ \"id\": \"${testStudent1.id}\", \"firstName\": \"${testStudent1.firstName}\", \"lastName\": \"${testStudent1.lastName}\",  \"statusSuggestionCount\": {} }"
-        every { studentService.getStudentById(any(),any()) } returns testStudent1
+        every { studentService.getStudentById(any(), any()) } returns testStudent1
         mockMvc.perform(get("$editionUrl/${testStudent1.id}?view=Basic").principal(defaultPrincipal)).andExpect(status().isOk)
             .andExpect(content().json(test))
     }
@@ -347,7 +347,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getStudentById List view returns a list form of students`() {
         val testStudent1 = Student("L1", "VC", testEdition)
         val test = "{ \"id\": \"${testStudent1.id}\", \"firstName\": \"${testStudent1.firstName}\", \"lastName\": \"${testStudent1.lastName}\", \"status\": \"${testStudent1.status}\", \"alumn\": ${testStudent1.alumn}, \"statusSuggestionCount\": {}, \"possibleStudentCoach\":  ${testStudent1.possibleStudentCoach} }"
-        every { studentService.getStudentById(any(),any()) } returns testStudent1
+        every { studentService.getStudentById(any(), any()) } returns testStudent1
         mockMvc.perform(get("$editionUrl/${testStudent1.id}?view=List").principal(defaultPrincipal)).andExpect(status().isOk)
             .andExpect(content().json(test))
     }
@@ -356,7 +356,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     fun `getStudentById Communication view returns a communication form of students`() {
         val testStudent1 = Student("L1", "VC", testEdition)
         val test = "{ \"id\": \"${testStudent1.id}\", \"firstName\": \"${testStudent1.firstName}\", \"lastName\": \"${testStudent1.lastName}\", \"statusSuggestionCount\": {}, \"communications\": [] }"
-        every { studentService.getStudentById(any(),any()) } returns testStudent1
+        every { studentService.getStudentById(any(), any()) } returns testStudent1
         mockMvc.perform(get("$editionUrl/${testStudent1.id}?view=Communication").principal(defaultPrincipal)).andExpect(status().isOk)
             .andExpect(content().json(test))
     }

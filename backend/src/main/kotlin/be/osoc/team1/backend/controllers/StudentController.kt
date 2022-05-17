@@ -122,11 +122,14 @@ class StudentController(
      * [List] is limited but has the required fields for a list view,
      * [Full] will return the full object.
      */
-     */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
     @SecuredEdition
-    fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String, @RequestParam(defaultValue = "Full") view: StudentViewEnum): String {
+    fun getStudentById(
+        @PathVariable studentId: UUID,
+        @PathVariable edition: String,
+        @RequestParam(defaultValue = "Full") view: StudentViewEnum
+    ): String {
         val viewType = when (view) {
             StudentViewEnum.Full -> StudentView.Full::class.java
             StudentViewEnum.Basic -> StudentView.Basic::class.java
