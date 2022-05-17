@@ -69,6 +69,14 @@ export enum StatusSuggestionStatus {
  * This is the full object returned by a get to the Student endpoint
  */
 export type StudentData = {
+  collection: StudentBase[];
+  totalLength: number;
+};
+
+/**
+ * This is the full object returned by a get to the Student endpoint with view List
+ */
+export type StudentDataList = {
   collection: StudentBaseList[];
   totalLength: number;
 };

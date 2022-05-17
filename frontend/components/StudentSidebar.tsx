@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import usePoll from 'react-use-poll';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { StudentBaseList, StudentData } from '../lib/types';
+import { StudentBaseList, StudentDataList } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
@@ -81,7 +81,7 @@ async function searchStudent(
 
   const edition = router.query.editionName as string;
   axiosAuthenticated
-    .get<StudentData>('/' + edition + Endpoints.STUDENTS, {
+    .get<StudentDataList>('/' + edition + Endpoints.STUDENTS, {
       params: {
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
