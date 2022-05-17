@@ -36,6 +36,7 @@ const edit_icon = <Icon icon="akar-icons:edit" />;
 type ProjectProp = {
   projectInput: ProjectBase;
   refreshProjects: () => void;
+  conflictStudents: UUID[];
 };
 
 type UserProp = {
@@ -51,6 +52,7 @@ type AssignmentProp = {
   setOpenUnassignment: (openUnAssignment: boolean) => void;
   setAssignmentId: (assignmentId: UUID) => void;
   setRemoveStudentName: (removeStudentName: string) => void;
+  conflictStudents: UUID[];
 };
 
 /**
@@ -280,6 +282,7 @@ async function getEntireProject(
 const ProjectTile: React.FC<ProjectProp> = ({
   projectInput,
   refreshProjects,
+  conflictStudents,
 }: ProjectProp) => {
   const router = useRouter();
   const [user] = useUser();
@@ -464,6 +467,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               setOpenUnassignment={setOpenUnassignment}
               setAssignmentId={setAssignmentId}
               setRemoveStudentName={setRemoveStudentName}
+              conflictStudents={conflictStudents}
             />
           ))}
       </div>
@@ -749,12 +753,19 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
   setAssignmentId,
   setOpenUnassignment,
   setRemoveStudentName,
+  conflictStudents,
 }: AssignmentProp) => {
   return (
     <div className="flex flex-row justify-between pb-4">
       <div>
         <div className="flex flex-row">
-          <p className="">
+          <p
+            className={`${
+              conflictStudents.includes(assignment.student.id)
+                ? 'bg-red-400'
+                : 'bg-inherit'
+            }`}
+          >
             {assignment.student.firstName + ' ' + assignment.student.lastName}
           </p>
           <div className="tooltip pl-2 pt-1">
