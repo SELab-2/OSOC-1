@@ -38,6 +38,10 @@
   fill: #f14a3b;
 }
 
+.icon-xcircle-gray > svg > g {
+  stroke: #9ca3af;
+}
+
 .tooltip .tooltiptext {
   visibility: hidden;
   position: absolute;
@@ -75,4 +79,10 @@
 
 .i-inline > svg {
   display: inline;
+}
+
+.tile-reset > div {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
