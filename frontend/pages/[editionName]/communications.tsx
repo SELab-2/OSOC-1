@@ -135,7 +135,7 @@ const communications = () => {
   const createCommunication = async (studentId: string, message: string) => {
     try {
       await axiosAuth.post(
-        Endpoints.COMMS + `/${studentId}`,
+        `/${edition}` + Endpoints.COMMS + `/${studentId}`,
         JSON.stringify({
           message,
           type: CommunicationType.Email,
@@ -183,7 +183,7 @@ const communications = () => {
                 ]}
               >
                 <button
-                  className="mx-2 my-1 bg-osoc-yellow px-2 py-1 text-white disabled:bg-yellow-300 disabled:text-gray-200"
+                  className="my-1 mr-2 bg-osoc-yellow px-2 py-1 text-white disabled:bg-yellow-300 disabled:text-gray-200"
                   disabled={communications.length === 0}
                 >
                   Download CSV

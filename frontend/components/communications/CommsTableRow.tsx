@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { Student } from '../../lib/types';
 
 type CommsTableRowProps = {
   studentName: string;
@@ -11,7 +10,7 @@ const CommsTableRow: FC<CommsTableRowProps> = ({
   commsMessage,
 }: CommsTableRowProps) => {
   return (
-    <tr>
+    <tr className={`odd:bg-neutral-50 even:bg-neutral-100`}>
       <td>{studentName}</td>
       <td>{commsMessage}</td>
     </tr>

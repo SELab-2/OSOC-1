@@ -86,17 +86,20 @@ const CommsCreationPopup: FC<CCPProps> = ({
                 isMulti={false}
                 isSearchable={true}
                 onChange={(value) => {
-                  const _stud = students.find((s) => {
-                    s.id === value?.value;
-                  });
+                  if (!value) {
+                    return;
+                  }
+                  const _stud = students.find((s) => s.id === value.value);
                   setStudent(_stud);
                 }}
-                value={{
-                  label: student
-                    ? student.firstName + ' ' + student.lastName
-                    : undefined,
-                  value: student?.id,
-                }}
+                value={
+                  {
+                    label: student
+                      ? student.firstName + ' ' + student.lastName
+                      : undefined,
+                    value: student?.id,
+                  } as { value: string; label: string }
+                }
                 placeholder="Student"
                 options={students.map((stud) => {
                   return {
