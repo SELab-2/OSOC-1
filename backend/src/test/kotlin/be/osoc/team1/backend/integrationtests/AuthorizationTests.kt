@@ -411,11 +411,11 @@ class AuthorizationTests {
         assert(firstRefreshResponse.statusCodeValue == 200)
 
         val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
-        assert(secondRefreshResponse.statusCodeValue == 400)
+        assert(secondRefreshResponse.statusCodeValue == 418)
 
         val firstRefreshToken: String = JSONObject(firstRefreshResponse.body).get("refreshToken") as String
         val thirdRefreshResponse: ResponseEntity<String> = requestNewAccessToken(firstRefreshToken)
-        assert(thirdRefreshResponse.statusCodeValue == 400)
+        assert(thirdRefreshResponse.statusCodeValue == 418)
     }
 
     @Test
