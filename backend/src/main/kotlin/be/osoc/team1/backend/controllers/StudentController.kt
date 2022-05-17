@@ -58,7 +58,10 @@ class StudentController(
      * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
      * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
      *
-     * The returned students can also be altered using the [view] query parameter: [Basic] will limit the data the student object contains,
+     * The returned students can also be altered using the [view] query parameter:
+     * [Basic] will limit the data the student object contains,
+     * [Communication] is limited but has the communication field of the student,
+     * [List] is limited but has the required fields for a list view,
      * [Full] will return the full object.
      */
     @GetMapping
@@ -103,6 +106,8 @@ class StudentController(
         val viewType = when (view) {
             StudentViewEnum.Full -> StudentView.Full::class.java
             StudentViewEnum.Basic -> StudentView.Basic::class.java
+            StudentViewEnum.List -> StudentView.List::class.java
+            StudentViewEnum.Communication -> StudentView.Communication::class.java
         }
         return ObjectMapper().writerWithView(viewType).writeValueAsString(filteredStudents)
     }

@@ -14,6 +14,7 @@ import { Edition, UserRole } from '../lib/types';
 import RouteProtection from '../components/RouteProtection';
 import EditionDeletionPopup from '../components/editions/EditionDeletionPopup';
 import PersistLogin from '../components/PersistLogin';
+import Head from 'next/head';
 
 /**
  * Editions page where we list editions, show a form to create new editions and
@@ -105,6 +106,9 @@ const Editions: NextPage = () => {
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin]}>
+        <Head>
+          <title>Editions</title>
+        </Head>
         <div className="h-screen">
           <Header />
 
