@@ -105,7 +105,7 @@ const Users: NextPage = () => {
       } catch (err) {
         if (axios.isAxiosError(err)) {
           const _err = err as AxiosError;
-          if (_err.response?.status === 400) router.push('/login'); // error when trying to refresh refreshtoken
+          if (_err.response?.status === 418) router.push('/login'); // error when trying to refresh refreshtoken
           if (isMounted) {
             setError(_err.response?.statusText || 'An unknown error occurred');
           }

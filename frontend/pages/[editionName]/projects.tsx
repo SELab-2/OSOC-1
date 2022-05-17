@@ -5,7 +5,16 @@ import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useRef, useState } from 'react';
-import { ProjectBase, ProjectData, UserRole } from '../../lib/types';
+import {
+  Conflict,
+  ProjectBase,
+  ProjectData,
+  StudentBase,
+  Url,
+  UserRole,
+  UUID,
+  conflictMapType,
+} from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
@@ -20,7 +29,7 @@ import FlatList from 'flatlist-react';
 import useUser from '../../hooks/useUser';
 import { SpinnerCircular } from 'spinners-react';
 import Error from '../../components/Error';
-import { parseError } from '../../lib/requestUtils';
+import { getUrlMap, parseError } from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
@@ -28,6 +37,7 @@ import usePoll from 'react-use-poll';
 import useOnScreen from '../../hooks/useOnScreen';
 import PersistLogin from '../../components/PersistLogin';
 import Head from 'next/head';
+import ProjectConflict from '../../components/projects/ProjectConflict';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -42,7 +52,7 @@ const arrow_in = <Icon icon="bi:arrow-left-circle" />;
  * @param setLoading - set loading or not, this is not the same as the state loading due to styling bug otherwise
  * @param signal - AbortSignal for the axios request
  * @param setError - callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function searchProject(
   projectSearch: string,
@@ -90,11 +100,95 @@ function searchProject(
       const newState = { ...state };
       newState.loading = false;
       setState(newState);
-      parseError(err, setError, router, signal);
+      parseError(err, setError, signal, router);
       if (!signal.aborted) {
         setLoading(false);
       }
     });
+}
+
+/**
+ * Function to get all conflicts from conflict endpoint
+ * Important notes:
+ * Projects do not get removed from the 'conflicts' list to allow adding a new student to replace the conflict student.
+ * Students also don't get removed from the list even when they do not have a conflict anymore
+ * This is to allow for better productivity flow and should be allowed separatly
+ *
+ * @param conflictMap - original conflict results, needed to not remove old results
+ * @param setConflictMap - callback to set results
+ * @param setLoading - set loading or not, this is not the same as the state loading due to styling bug otherwise
+ * @param signal - AbortSignal for the axios request
+ * @param setError - callback to set error message
+ * @param router - Router object needed for edition parameter & error handling on 400 response
+ */
+async function searchConflicts(
+  conflictMap: conflictMapType,
+  setConflictMap: (map: conflictMapType) => void,
+  setLoading: (loading: boolean) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  setLoading(true);
+  const edition = router.query.editionName as string;
+
+  try {
+    const conflictsResponse = await axiosAuthenticated.get<Conflict[]>(
+      '/' + edition + Endpoints.CONFLICTS,
+      {
+        signal: signal,
+      }
+    );
+    const conflicts = conflictsResponse.data as Conflict[];
+
+    const newConflictMap = new Map() as conflictMapType;
+    conflictMap.forEach((value, key) => {
+      const newValue = { ...value };
+      newValue.amount = 1;
+      newConflictMap.set(key, newValue);
+    });
+
+    const newStudents = conflicts
+      .map((conflict) => conflict.student as Url)
+      .filter(
+        (student) => !newConflictMap.has(student.split('/').pop() as UUID)
+      );
+
+    const newConflictStudents = new Map<Url, StudentBase>();
+    await getUrlMap<StudentBase>(
+      newStudents,
+      newConflictStudents,
+      signal,
+      setError,
+      router
+    );
+
+    conflicts.forEach((conflict) => {
+      const studId = conflict.student.split('/').pop() as UUID;
+      const value = newConflictMap.get(studId);
+      if (value) {
+        conflict.projects.forEach((item) =>
+          (value.projectUrls as Set<Url>).add(item)
+        );
+        value.amount = conflict.projects.length;
+        newConflictMap.set(studId, value);
+      } else {
+        const newValue = {
+          projectUrls: new Set<Url>(conflict.projects),
+          amount: conflict.projects.length,
+          student: newConflictStudents.get(conflict.student) as StudentBase,
+        };
+        newConflictMap.set(studId, newValue);
+      }
+    });
+
+    setConflictMap(newConflictMap);
+  } catch (err) {
+    parseError(err, setError, signal, router);
+    if (!signal.aborted) {
+      setLoading(false);
+    }
+  }
 }
 
 /**
@@ -110,6 +204,8 @@ const Projects: NextPage = () => {
   const [projectSearch, setProjectSearch] = useState('' as string);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showConflicts, setShowConflicts] = useState(false);
+  const [conflictMap, setConflictMap] = useState(new Map() as conflictMapType);
   const [projects, setProjects]: [
     ProjectBase[],
     (projects: ProjectBase[]) => void
@@ -129,6 +225,12 @@ const Projects: NextPage = () => {
     state.page = 0;
     return search();
   }, []);
+
+  useEffect(() => {
+    if (!showConflicts) {
+      setConflictMap(new Map() as conflictMapType);
+    }
+  }, [showConflicts]);
 
   /**
    * function to add new project results instead of overwriting old results
@@ -194,7 +296,7 @@ const Projects: NextPage = () => {
    */
   usePoll(
     () => {
-      if (!state.loading && { isOnScreen }.isOnScreen) {
+      if (!state.loading && { isOnScreen }.isOnScreen && !showConflicts) {
         controller.abort();
         controller = new AbortController();
         const signal = controller.signal;
@@ -216,9 +318,24 @@ const Projects: NextPage = () => {
         return () => {
           controller.abort();
         };
+      } else if (!state.loading && { isOnScreen }.isOnScreen && showConflicts) {
+        controller.abort();
+        controller = new AbortController();
+        const signal = controller.signal;
+        searchConflicts(
+          conflictMap,
+          setConflictMap,
+          setLoading,
+          signal,
+          setError,
+          router
+        );
+        return () => {
+          controller.abort();
+        };
       }
     },
-    [state, projectSearch, { isOnScreen }.isOnScreen],
+    [state, projectSearch, { isOnScreen }.isOnScreen, showConflicts],
     {
       interval: 3000,
     }
@@ -325,15 +442,29 @@ const Projects: NextPage = () => {
                     {/* TODO add an easy reset/undo search button */}
                     {/* TODO either move search icon left and add xmark to the right or vice versa */}
                     {/* This is the projects searchbar */}
-                    <div className="ml-6 mr-4 flex w-full justify-center md:mr-4 md:ml-0 lg:ml-6 lg:mr-4">
+                    <div
+                      className={`${
+                        user.role == UserRole.Admin
+                          ? 'xl:mr-4 xl:flex-row'
+                          : 'md:mr-4 md:flex-row'
+                      } ml-6 mr-8 flex w-full flex-col justify-center md:ml-0 lg:ml-6`}
+                    >
                       <div className="lg:w-[calc(100% - 200px)] relative mx-4 w-full md:mr-0">
                         <input
                           type="text"
-                          className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+                          className={`${
+                            showConflicts
+                              ? 'bg-gray cursor-not-allowed'
+                              : 'cursor-text bg-white'
+                          } form-control m-0 block w-full rounded border border-solid border-gray-300 bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none`}
                           id="ProjectsSearch"
                           placeholder="Search projects by name"
+                          disabled={showConflicts}
                           onChange={(e) => setProjectSearch(e.target.value)}
                           onKeyPress={(e) => {
+                            if (showConflicts) {
+                              return;
+                            }
                             if (e.key == 'Enter') {
                               return search();
                             }
@@ -342,23 +473,42 @@ const Projects: NextPage = () => {
                         <i
                           className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
                           onClick={() => {
+                            if (showConflicts) {
+                              return;
+                            }
                             return search();
                           }}
                         >
                           {magnifying_glass}
                         </i>
                       </div>
-
-                      {/* Button to create new project */}
-                      <button
+                      <div
                         className={`${
-                          user.role == UserRole.Admin ? 'visible' : 'hidden'
-                        } justify - right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
-                        type="submit"
-                        onClick={() => setShowCreateProject(true)}
+                          user.role == UserRole.Admin
+                            ? 'xl:mt-0 xl:h-auto'
+                            : 'md:mt-0 md:h-auto'
+                        } mt-2 flex h-[36px] flex-row justify-center`}
                       >
-                        Create new project
-                      </button>
+                        {/* Button to show conflicts */}
+                        <button
+                          className={`justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                          onClick={() => setShowConflicts(!showConflicts)}
+                        >
+                          {showConflicts
+                            ? 'Show All Projects'
+                            : 'Show Conflicts'}
+                        </button>
+
+                        {/* Button to create new project */}
+                        <button
+                          className={`${
+                            user.role == UserRole.Admin ? 'visible' : 'hidden'
+                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                          onClick={() => setShowCreateProject(true)}
+                        >
+                          Create new project
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -366,39 +516,43 @@ const Projects: NextPage = () => {
                 {error && <Error error={error} className="mb-4" />}
 
                 {/* This contains the project tiles */}
-                <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
-                  <FlatList
-                    list={projects}
-                    renderItem={(project: ProjectBase) => (
-                      <ProjectTile
-                        key={project.id}
-                        projectInput={project}
-                        refreshProjects={refreshProjects}
-                      />
-                    )}
-                    renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
-                    hasMoreItems={state.hasMoreItems}
-                    loadMoreItems={fetchData}
-                    paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
-                    paginationLoadingIndicatorPosition="center"
-                  />
-                  <div
-                    className={`${
-                      state.loading && state.page > 0
-                        ? 'visible block'
-                        : 'hidden'
-                    } text-center`}
-                  >
-                    <p>Loading Projects</p>
-                    <SpinnerCircular
-                      size={100}
-                      thickness={100}
-                      color="#FCB70F"
-                      secondaryColor="rgba(252, 183, 15, 0.4)"
-                      className="mx-auto"
+                {!showConflicts && (
+                  <div className="ml-0 flex flex-row flex-wrap lg:ml-6">
+                    <FlatList
+                      list={projects}
+                      renderItem={(project: ProjectBase) => (
+                        <ProjectTile
+                          key={project.id}
+                          projectInput={project}
+                          conflictStudents={[] as string[]}
+                          refreshProjects={refreshProjects}
+                        />
+                      )}
+                      renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
+                      hasMoreItems={state.hasMoreItems}
+                      loadMoreItems={fetchData}
+                      paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
+                      paginationLoadingIndicatorPosition="center"
                     />
+                    <div
+                      className={`${
+                        state.loading && state.page > 0
+                          ? 'visible block'
+                          : 'hidden'
+                      } text-center`}
+                    >
+                      <p>Loading Projects</p>
+                      <SpinnerCircular
+                        size={100}
+                        thickness={100}
+                        color="#FCB70F"
+                        secondaryColor="rgba(252, 183, 15, 0.4)"
+                        className="mx-auto"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
+                {showConflicts && <ProjectConflict conflictMap={conflictMap} />}
               </section>
             </main>
           </DndProvider>

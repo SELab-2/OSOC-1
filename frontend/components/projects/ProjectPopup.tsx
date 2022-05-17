@@ -111,7 +111,7 @@ export function projectFormFromProject(
  * @param setMyProjectBase - callback function to set result (can be used for reloading)
  * @param signal - AbortSignal for the axios request
  * @param setError - callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function postOrPatchProject(
   projectForm: ProjectForm,

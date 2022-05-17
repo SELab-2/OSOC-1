@@ -61,7 +61,7 @@ const chartHelper = {
  * @param studentBase - base object with fields to dereference
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 async function getEntireStudent(
   studentBase: StudentBase,

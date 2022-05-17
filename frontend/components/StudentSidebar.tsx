@@ -39,7 +39,7 @@ type StudentsSidebarProps = {
  * @param setLoading              - set loading or not, this is not the same as the state loading due to styling bug otherwise
  * @param signal                  - AbortSignal for the axios request
  * @param setError                - callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 async function searchStudent(
   studentNameSearch: string,

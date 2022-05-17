@@ -12,6 +12,7 @@ enum Endpoints {
   STUDENTS = '/students',
   SKILLS = '/skills',
   COMMS = '/communications',
+  CONFLICTS = '/projects/conflicts',
 }
 
 export default Endpoints;
