@@ -1,3 +1,4 @@
+import Head from 'next/head';
 /**
  * Waiting page for OSOC application
  *
@@ -10,6 +11,9 @@
 const WaitPage = () => {
   return (
     <div className="h-screen bg-[url('../public/img/login.png')] bg-center">
+      <Head>
+        <title>Hold on...</title>
+      </Head>
       <div
         className="lg:rounded-5xl relative top-1/2 m-auto flex w-11/12 max-w-md -translate-y-1/2 flex-col items-center
                       rounded-md bg-[#F3F3f3] px-4 py-4 text-center

@@ -42,8 +42,10 @@ class CommunicationController(
     fun createCommunication(
         @PathVariable studentId: UUID,
         @PathVariable edition: String,
-        @RequestBody communication: Communication
+        @RequestBody communicationRegister: Communication
     ): ResponseEntity<Communication> {
+        val communication =
+            Communication(communicationRegister.message, communicationRegister.type, communicationRegister.edition)
         val createdCommunication = communicationService.createCommunication(communication)
         studentService.addCommunicationToStudent(studentId, communication, edition)
         return getObjectCreatedResponse(createdCommunication.id, createdCommunication)
