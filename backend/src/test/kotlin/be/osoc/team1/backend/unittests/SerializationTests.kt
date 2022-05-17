@@ -82,8 +82,8 @@ class SerializationTests {
     fun `Serialization of Student returns the correct result`() {
         val suggester = User("username", "email", Role.Coach, "password")
         val testStatusSuggestion = StatusSuggestion(suggester, SuggestionEnum.Yes, "motivation", testEdition)
-        val testCommunication = Communication("test", CommunicationTypeEnum.Email, testEdition)
         val testStudent = Student("Jitse", "Willaert", testEdition)
+        val testCommunication = Communication("test", CommunicationTypeEnum.Email, testEdition, testStudent)
         testStudent.communications.add(testCommunication)
         testStudent.statusSuggestions.add(testStatusSuggestion)
         val json: JsonContent<Student> = studentJacksonTester!!.write(testStudent)
