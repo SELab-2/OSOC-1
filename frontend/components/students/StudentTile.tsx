@@ -144,13 +144,13 @@ const StudentTile: React.FC<StudentProp> = ({
           />
           <i
             className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[28px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${
-              chartHelper[studentInput.status]
-                ? chartHelper[studentInput.status][1]
+              chartHelper[myStudent.status]
+                ? chartHelper[myStudent.status][1]
                 : chartHelper['Default'][1]
             }`}
           >
-            {chartHelper[studentInput.status]
-              ? chartHelper[studentInput.status][0]
+            {chartHelper[myStudent.status]
+              ? chartHelper[myStudent.status][0]
               : chartHelper['Default'][0]}
           </i>
         </div>

@@ -92,7 +92,7 @@ async function searchStudent(
         unassignedOnly: studentSearchParameters.ExcludeAssigned,
         pageNumber: state.page,
         pageSize: state.pageSize,
-        view: 'Basic',
+        view: 'List',
       },
       signal: signal,
     })
