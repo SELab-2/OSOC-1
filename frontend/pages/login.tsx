@@ -114,6 +114,11 @@ const Login = () => {
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             Password
+            <Link href="/forgotPassword">
+            <p className="inline-block float-right mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+              Forgot password?
+            </p>
+            </Link>
             <input
               className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
               name="password"
@@ -131,11 +136,6 @@ const Login = () => {
           <Link href="/register">
             <p className="mt-2 inline-block text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
               no account yet? <br /> register here!
-            </p>
-          </Link>
-          <Link href="/forgotPassword">
-            <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
-              Forgot password?
             </p>
           </Link>
           <p className="hr-sect pt-4 pb-2 text-sm font-medium opacity-80 lg:pb-4">
