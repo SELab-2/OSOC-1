@@ -19,13 +19,15 @@ const CommsTable: FC<CommsTableProps> = ({ studentComms }: CommsTableProps) => {
       </thead>
       <tbody>
         {studentComms && studentComms.length ? (
-          studentComms.map((comm) => (
-            <CommsTableRow
-              key={comm.id}
-              studentName={comm.name}
-              commsMessage={comm.commMessage}
-            />
-          ))
+          studentComms
+            .sort((a, b) => (a.name >= b.name ? 1 : -1))
+            .map((comm) => (
+              <CommsTableRow
+                key={comm.id}
+                studentName={comm.name}
+                commsMessage={comm.commMessage}
+              />
+            ))
         ) : (
           <tr className="h-16">
             <td colSpan={2}>

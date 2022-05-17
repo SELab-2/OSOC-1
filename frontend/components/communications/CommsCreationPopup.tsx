@@ -122,7 +122,11 @@ const CommsCreationPopup: FC<CCPProps> = ({
               </label>
               <button
                 className="col-span-1 col-start-2 col-end-3 bg-gray-500 px-3 py-1"
-                onClick={closePopup}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  closePopup();
+                }}
               >
                 Cancel
               </button>

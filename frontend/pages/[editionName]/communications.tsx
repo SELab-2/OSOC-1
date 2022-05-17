@@ -61,6 +61,7 @@ const communications = () => {
             pageSize: PAGE_SIZE,
             pageNumber: page,
             view: 'Communication',
+            sortBy: 'firstName',
           },
           signal: abortController.signal,
         }
@@ -146,8 +147,16 @@ const communications = () => {
       // add new communication locally
       const _stud = students.find((stud) => stud.id === studentId);
       const name = _stud ? _stud.firstName + ' ' + _stud.lastName : '';
+      // setCommunications((prev) => {
+      //   return [...prev, { id: studentId, name, commMessage: message }];
+      // });
       setCommunications((prev) => {
-        return [...prev, { id: studentId, name, commMessage: message }];
+        const newComms = [
+          ...prev,
+          { id: studentId, name, commMessage: message } as StudentComm,
+        ];
+        newComms.sort((a, b) => (a.name >= b.name ? 1 : -1));
+        return newComms;
       });
     } catch (err) {
       parseError(err, setError, router);
