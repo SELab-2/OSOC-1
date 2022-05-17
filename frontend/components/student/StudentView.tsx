@@ -51,7 +51,7 @@ async function setStudentStatus(
   const edition = router.query.editionName as string;
   await axiosAuthenticated
     .post(
-      '/' + edition + Endpoints.STUDENTS + '/' + studentId + '/status', // TODO import this url somehow
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.STATUS}`,
       status.label
     )
     .then(() => {
@@ -80,12 +80,11 @@ async function setStudentSuggestion(
       `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}/${coachId}`
     )
     .catch((err) => {
-      // Ignore 404 not found error since we're deleting without knowing if it exists
+      // Ignore 400 bad request error since we're deleting without knowing if it exists
+      // A 404 student not found or 401 user is not coachId are not an errors we want to ignore
       if (axios.isAxiosError(err)) {
         const _error = err as AxiosError;
-        // Documentation says only 404 will be thrown, but it currently throws a 400 if suggestion does not exist
         if (
-          _error.response?.status !== 404 &&
           _error.response?.status !== 400
         ) {
           parseError(err, setError, signal, router);
@@ -97,7 +96,7 @@ async function setStudentSuggestion(
 
   await axiosAuthenticated
     .post(
-      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}`, // TODO import this url somehow
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}`,
       {
         suggester: '/' + edition + Endpoints.USERS + '/' + coachId,
         status: status,
@@ -130,7 +129,7 @@ function reloadStudent(
     });
 }
 
-// TODO Communication not yet included!!
+// WONTFIX Communication not included
 /**
  * Function to dereference needed student fields
  *
@@ -190,7 +189,7 @@ const StudentView: React.FC<StudentViewProp> = ({
 }: StudentViewProp) => {
   const [user] = useUser();
   // Needed to reload student when a suggestion is done or status is changed
-  // TODO don't reload everything when only status or suggestions are changed, save the rest somewhere
+  // WONTFIX don't reload everything when only status or suggestions are changed, save the rest somewhere
   const [studentBase, setStudentBase] = useState(studentInput as StudentBase);
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
     useState(convertStudentBase(studentBase) as Student);

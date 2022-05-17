@@ -331,8 +331,9 @@ paths:
             summary: Delete student status suggestion
             description: |
                 Deletes the statusSuggestion made by the coach identified by the given coachId 
-                from the student with the given studentId. If either the student or the suggestion doesn't exist,
-                the method returns a "404: Not Found" message instead.
+                from the student with the given studentId. If the student doesn't exist,
+                the method returns a "404: Not Found" message. If there is no suggestion by
+                the coach with given Id, a "400: Bad Request" is returned.
             parameters:
                 -   in: path
                     required: true
