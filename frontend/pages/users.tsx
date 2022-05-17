@@ -12,6 +12,7 @@ import useUser from '../hooks/useUser';
 import axios, { AxiosError } from 'axios';
 import RouteProtection from '../components/RouteProtection';
 import PersistLogin from '../components/PersistLogin';
+import Head from 'next/head';
 
 /**
  *
@@ -124,6 +125,9 @@ const Users: NextPage = () => {
 
   return (
     <PersistLogin>
+      <Head>
+        <title>Users</title>
+      </Head>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="h-screen">
           <Header />

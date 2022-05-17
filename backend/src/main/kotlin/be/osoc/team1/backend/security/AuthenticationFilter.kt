@@ -34,7 +34,7 @@ class AuthenticationFilter(authenticationManager: AuthenticationManager?, privat
      * [AuthenticationManager.authenticate].
      */
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
-        val email: String? = request.getParameter("email")
+        val email: String? = request.getParameter("email")?.lowercase()
         val password: String? = request.getParameter("password")
         if (email == null || password == null) {
             throw AuthenticationCredentialsNotFoundException("The \"email\" and \"password\" parameters are required!")

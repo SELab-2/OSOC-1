@@ -36,6 +36,7 @@ import { NextRouter } from 'next/dist/client/router';
 import usePoll from 'react-use-poll';
 import useOnScreen from '../../hooks/useOnScreen';
 import PersistLogin from '../../components/PersistLogin';
+import Head from 'next/head';
 import ProjectConflict from '../../components/projects/ProjectConflict';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
@@ -201,6 +202,8 @@ const Projects: NextPage = () => {
   );
   const elementRef1 = useRef<HTMLDivElement>(null);
   const isOnScreen = useOnScreen(elementRef1);
+
+  const edition = router.query.editionName as string;
 
   let controller = new AbortController();
   useAxiosAuth();
@@ -375,6 +378,9 @@ const Projects: NextPage = () => {
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
+        <Head>
+          <title>{edition}: projects</title>
+        </Head>
         <div className="min-w-screen flex min-h-screen flex-col items-center">
           <Header />
           <DndProvider backend={HTML5Backend} key={1}>
