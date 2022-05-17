@@ -34,8 +34,14 @@ const ForgotPassword: NextPage = () => {
           <span>
             <b>Password reset</b> <br />
             Password has been reset. <br />
-            <button onClick={() => toast.dismiss(t.id)} className="okButton">
-              OK
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                router.push('/login');
+              }}
+              className="okButton"
+            >
+              Return to login.
             </button>
           </span>
         ),
