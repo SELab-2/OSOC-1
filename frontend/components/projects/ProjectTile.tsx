@@ -65,7 +65,7 @@ type AssignmentProp = {
  * @param setMyProjectBase  - callback for reloadProject that is called after this POST completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 // TODO when post is finished, should update the student filter
 function postStudentToProject(
@@ -107,7 +107,7 @@ function postStudentToProject(
  * @param setMyProjectBase    - callback for reloadProject that is called after this DELETE completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function deleteStudentFromProject(
   projectId: UUID,
@@ -142,7 +142,7 @@ function deleteStudentFromProject(
  * @param projectId - the UUID of the project to remove
  * @param refreshProjects - callback to update main projects list
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function deleteProject(
   projectId: UUID,
@@ -169,7 +169,7 @@ function deleteProject(
  * @param setMyProjectBase - a hook to set the reloaded project information
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function reloadProject(
   projectId: UUID,
@@ -195,7 +195,7 @@ function reloadProject(
  * @param setLoading - callback to set when loading is finished
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 async function getEntireProject(
   projectBase: ProjectBase,

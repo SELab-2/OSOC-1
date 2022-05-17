@@ -1,6 +1,6 @@
 package be.osoc.team1.backend.unittests
 
-import be.osoc.team1.backend.exceptions.InvalidTokenException
+import be.osoc.team1.backend.exceptions.InvalidRefreshTokenException
 import be.osoc.team1.backend.security.TokenUtil
 import be.osoc.team1.backend.security.TokenUtil.decodeAndVerifyToken
 import be.osoc.team1.backend.security.TokenUtil.refreshTokenRotation
@@ -24,7 +24,7 @@ class TokenServiceTests {
     fun `renewAccessToken fails if no token given`() {
         val request = MockHttpServletRequest()
         val response = MockHttpServletResponse()
-        val exception = assertThrows<InvalidTokenException> { tokenService.renewAccessToken(request, response) }
+        val exception = assertThrows<InvalidRefreshTokenException> { tokenService.renewAccessToken(request, response) }
         assertEquals("No refresh token found in request body.", exception.message)
     }
 
@@ -35,7 +35,7 @@ class TokenServiceTests {
         val accessToken = TokenUtil.createAccessAndRefreshToken(testEmail, testAuthorities).accessToken
         request.addParameter("refreshToken", accessToken)
 
-        val exception = assertThrows<InvalidTokenException> { tokenService.renewAccessToken(request, response) }
+        val exception = assertThrows<InvalidRefreshTokenException> { tokenService.renewAccessToken(request, response) }
         assertEquals("Expected a refresh token, got an access token.", exception.message)
     }
 

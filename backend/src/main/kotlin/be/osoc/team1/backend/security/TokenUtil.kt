@@ -151,7 +151,7 @@ object TokenUtil {
             newTokenResponse.addDataToHttpResponse(response)
         } else {
             invalidateRefreshToken(email)
-            response.status = HttpServletResponse.SC_BAD_REQUEST
+            response.status = 418
         }
     }
 
