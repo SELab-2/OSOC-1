@@ -251,4 +251,3 @@ export type conflictMapType = Map<
   UUID,
   { student: StudentBase; projectUrls: Set<Url>; amount: number }
 >;
-
