@@ -27,10 +27,13 @@ import useUser from '../../hooks/useUser';
 import Error from '../Error';
 import axios, { AxiosError } from 'axios';
 import { Icon } from '@iconify/react';
+import Popup from 'reactjs-popup';
+
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
 const speech_bubble = <Icon icon="simple-line-icons:speech" />;
+const trash_can = <Icon icon="fa-solid:trash-alt" />;
 
 type StudentViewProp = {
   studentInput: StudentBase;
@@ -81,6 +84,24 @@ async function removeStudentSuggestion(
     )
     .then(() => {
       reloadStudent(studentId, setStudentBase, signal, setError, router);
+    })
+    .catch((err) => {
+      parseError(err, setError, signal, router);
+    });
+}
+
+async function removeStudent(
+  studentId: UUID,
+  setOriginalStudentBase: (studentBase: StudentBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  const edition = router.query.editionName as string;
+  await axiosAuthenticated
+    .delete(`/${edition}${Endpoints.STUDENTS}/${studentId}`)
+    .then(() => {
+      setOriginalStudentBase({} as StudentBase);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -221,7 +242,7 @@ const StudentView: React.FC<StudentViewProp> = ({
   } as { value: string; label: string });
   const [suggestion, setSuggestion] = useState('');
   const [motivation, setMotivation] = useState('');
-
+  const [deletePopup, setDeletePopup] = useState(false);
   const [error, setError]: [string, (error: string) => void] = useState('');
   const router = useRouter();
   let controller = new AbortController();
@@ -267,10 +288,22 @@ const StudentView: React.FC<StudentViewProp> = ({
       {error && <Error error={error} className="mb-4" />}
       {/* hold the student information */}
       <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
-        <div>
+        <div className="flex flex-row">
           <h4 className="font-bold">
             {myStudent.firstName + ' ' + myStudent.lastName}
           </h4>
+          {user.role == UserRole.Admin && (
+            <div className="ml-2 flex flex-col justify-center">
+              <i
+                onClick={() => {
+                  setDeletePopup(true);
+                }}
+                className="icon-trashcan-red cursor-pointer"
+              >
+                {trash_can}
+              </i>
+            </div>
+          )}
         </div>
         <div className="flex flex-col">
           <h5 className="font-bold">Suggestions</h5>
@@ -442,6 +475,63 @@ const StudentView: React.FC<StudentViewProp> = ({
           </button>
         </form>
       </div>
+      {/* This is the popup to confirm deleting a student */}
+      <Popup
+        open={deletePopup}
+        onClose={() => setDeletePopup(false)}
+        data-backdrop="static"
+        data-keyboard="false"
+        closeOnDocumentClick={false}
+        lockScroll={true}
+      >
+        <div className="modal chart-label max-w-screen absolute left-1/2 top-1/2 flex max-h-[85vh] min-w-[450px] flex-col bg-osoc-neutral-bg py-5">
+          <a
+            className="close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeletePopup(false);
+            }}
+          >
+            &times;
+          </a>
+          <h3 className="px-5 text-lg">
+            Are you sure you wish to permanently delete{' '}
+            <i>{studentBase.firstName + ' ' + studentBase.lastName}</i>?
+          </h3>
+          <div className="mt-3 flex flex-row justify-between px-5">
+            <button
+              onClick={() => setDeletePopup(false)}
+              className={`min-w-[120px] border-2 bg-white`}
+            >
+              Cancel
+            </button>
+
+            <button
+              className={`min-w-[120px] border-2 bg-check-red py-1`}
+              onClick={() => {
+                setDeletePopup(false);
+                if (user.role == UserRole.Admin) {
+                  controller.abort();
+                  controller = new AbortController();
+                  const signal = controller.signal;
+                  removeStudent(
+                    myStudent.id,
+                    setOriginalStudentBase,
+                    signal,
+                    setError,
+                    router
+                  );
+                  return () => {
+                    controller.abort();
+                  };
+                }
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Popup>
     </div>
   );
 };

@@ -34,6 +34,10 @@
   stroke: #ef4444;
 }
 
+.icon-trashcan-red > svg > path {
+  fill: #f14a3b;
+}
+
 .tooltip .tooltiptext {
   visibility: hidden;
   position: absolute;
