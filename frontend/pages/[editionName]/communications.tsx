@@ -147,9 +147,6 @@ const communications = () => {
       // add new communication locally
       const _stud = students.find((stud) => stud.id === studentId);
       const name = _stud ? _stud.firstName + ' ' + _stud.lastName : '';
-      // setCommunications((prev) => {
-      //   return [...prev, { id: studentId, name, commMessage: message }];
-      // });
       setCommunications((prev) => {
         const newComms = [
           ...prev,
