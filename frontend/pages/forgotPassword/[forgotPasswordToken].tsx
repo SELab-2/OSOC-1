@@ -8,6 +8,8 @@ import useInput from '../../hooks/useInput';
 import axios from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import { customPasswordRegex } from '../../lib/regex';
+import Head from "next/head";
+
 
 const ForgotPassword: NextPage = () => {
   const router = useRouter();
@@ -54,6 +56,9 @@ const ForgotPassword: NextPage = () => {
 
   return (
     <>
+      <Head>
+        Reset Password
+      </Head>
       <FormContainer pageTitle="Reset Password">
         <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
