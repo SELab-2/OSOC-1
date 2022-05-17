@@ -25,6 +25,7 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import Error from '../Error';
+import axios, { AxiosError } from 'axios';
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
@@ -75,8 +76,28 @@ async function setStudentSuggestion(
 ) {
   const edition = router.query.editionName as string;
   await axiosAuthenticated
+    .delete(
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}/${coachId}`
+    )
+    .catch((err) => {
+      // Ignore 404 not found error since we're deleting without knowing if it exists
+      if (axios.isAxiosError(err)) {
+        const _error = err as AxiosError;
+        // Documentation says only 404 will be thrown, but it currently throws a 400 if suggestion does not exist
+        if (
+          _error.response?.status !== 404 &&
+          _error.response?.status !== 400
+        ) {
+          parseError(err, setError, signal, router);
+        }
+      } else {
+        parseError(err, setError, signal, router);
+      }
+    });
+
+  await axiosAuthenticated
     .post(
-      '/' + edition + Endpoints.STUDENTS + '/' + studentId + '/suggestions', // TODO import this url somehow
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}`, // TODO import this url somehow
       {
         suggester: '/' + edition + Endpoints.USERS + '/' + coachId,
         status: status,
