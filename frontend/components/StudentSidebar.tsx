@@ -372,13 +372,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     >
       <div className="flex max-h-[calc(100vh-32px)] flex-col">
         <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
-          {/* TODO add an easy reset/undo search button */}
           {/* The students searchbar */}
           <div className="justify-left md:w-[calc(100% - 200px)] mb-3 flex w-[80%] md:ml-0 lg:mb-0 ">
             <div className="relative w-full">
               <input
-                type="text"
-                className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+                type="search"
+                className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding py-1.5 pl-8 pr-3 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
                 id="StudentsSearch"
                 placeholder="Search students by name"
                 value={studentNameSearch}
@@ -390,7 +389,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 }}
               />
               <i
-                className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                className="absolute bottom-1 left-2 z-10 h-[24px] w-[16px] opacity-20"
                 onClick={() => {
                   return search();
                 }}

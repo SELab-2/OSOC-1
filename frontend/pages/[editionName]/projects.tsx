@@ -439,8 +439,6 @@ const Projects: NextPage = () => {
                     className={`flex w-full flex-row justify-center xl:mr-8 xl1920:mr-10`}
                     ref={elementRef1}
                   >
-                    {/* TODO add an easy reset/undo search button */}
-                    {/* TODO either move search icon left and add xmark to the right or vice versa */}
                     {/* This is the projects searchbar */}
                     <div
                       className={`${
@@ -451,12 +449,12 @@ const Projects: NextPage = () => {
                     >
                       <div className="lg:w-[calc(100% - 200px)] relative mx-4 w-full md:mr-0">
                         <input
-                          type="text"
+                          type="search"
                           className={`${
                             showConflicts
                               ? 'bg-gray cursor-not-allowed'
                               : 'cursor-text bg-white'
-                          } form-control m-0 block w-full rounded border border-solid border-gray-300 bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none`}
+                          } form-control m-0 block w-full rounded border border-solid border-gray-300 bg-clip-padding py-1.5 pl-8 pr-3 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none`}
                           id="ProjectsSearch"
                           placeholder="Search projects by name"
                           disabled={showConflicts}
@@ -473,7 +471,7 @@ const Projects: NextPage = () => {
                           }}
                         />
                         <i
-                          className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                          className="absolute bottom-1 left-2 z-10 h-[24px] w-[16px] opacity-20"
                           onClick={() => {
                             if (showConflicts) {
                               return;
