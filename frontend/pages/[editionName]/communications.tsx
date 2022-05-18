@@ -183,7 +183,7 @@ const communications = () => {
         return prev.filter((comm) => comm.id !== communicationId);
       });
     } catch (err) {
-      parseError(err, setError, router, new AbortController().signal);
+      parseError(err, setError, router);
     }
   };
 
