@@ -51,10 +51,10 @@ const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
   const logout = async () => {
     try {
       // remove information stored in localStorage
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("email");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('email');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
       }
       // log out on backend
       await axiosAuth.post(Endpoints.LOGOUT);
@@ -68,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
         setError(err as string);
       }
     }
-  }
+  };
 
   return (
     <header className="flex h-fit w-full flex-col items-center justify-between px-4 shadow-lg sm:h-12 sm:flex-row">
@@ -100,8 +100,8 @@ const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
           {[UserRole.Admin].includes(user.role) && (
             <HeaderLink href="/editions">Manage Editions</HeaderLink>
           )}
-          <li 
-            className="ml-3 hover:underline sm:inline hover:cursor-pointer"
+          <li
+            className="ml-3 hover:cursor-pointer hover:underline sm:inline"
             onClick={logout}
           >
             Log Out

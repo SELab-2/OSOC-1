@@ -38,9 +38,7 @@ const Students: NextPage = () => {
           <Head>
             <title>{edition}: students</title>
           </Head>
-          <Header
-            setError={setError}
-          />
+          <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={2}>
             <main className="flex w-full flex-row">
               {/* Holds the sidebar with search, filter and student results */}
