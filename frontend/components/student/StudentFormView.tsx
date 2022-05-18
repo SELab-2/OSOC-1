@@ -21,6 +21,11 @@ const englishLevelKey = "meaEKo";
 const emailKey = "wa2GKy";
 const phoneNumberKey = "nW80DQ";
 const favoredRoleKey = "3X4q1V";
+const otherFavoredRoleKey = "w8Ze6o";
+const bestSkillKey = "n0ePZQ";
+const linkMotivationKey = "wkNZKj";
+const uploadMotivationKey = "mBxBAY";
+const writeMotivationKey = "wvP2E8";
 
 
 type StudentFormViewProp = {
@@ -31,11 +36,18 @@ const StudentFormView: React.FC<StudentFormViewProp> = ({answers}: StudentFormVi
     const getAnswerByKey = (key: string) => answers.find(a => a.key == `question_${key}`)?.answer[0];
     const answerIsYes = (key: string) => getAnswerByKey(key)?.toLowerCase().startsWith("yes") || false;
     const canParticipate = [livesInBelgiumKey, ableToWork128HoursKey, canWorkDuringJulyKey].map(answerIsYes).every(Boolean)
-    const list: [boolean, string][] = [
+    const practicalBulletPoints: [boolean, string][] = [
         [canParticipate, "Can work during the month of July, Monday through Tuesday"],
         [answerIsYes(hasParticipatedBeforeKey), "Has participated before"],
         [answerIsYes(wantsToBeStudentCoachKey), "Would like to be a student coach"]
     ]
+    const getMotivation = () => {
+        const link = getAnswerByKey(linkMotivationKey) || getAnswerByKey(uploadMotivationKey)
+        if (link != undefined) {
+            return <a href={link} className="font-bold underline">link</a>
+        }
+        return <p>{getAnswerByKey(writeMotivationKey)}</p>
+    }
     return (
         <div>
             <h3 className="text-2xl pt-8">Academia</h3>
@@ -48,6 +60,7 @@ const StudentFormView: React.FC<StudentFormViewProp> = ({answers}: StudentFormVi
 
             <h3 className="text-2xl pt-12">Experience</h3>
             <ul className="list-inside list-disc">
+                <li>Best skill: <b>{getAnswerByKey(bestSkillKey)}</b></li>
                 <li><a href={getAnswerByKey(linkCvKey) || getAnswerByKey(uploadCvKey)}
                        className="font-bold underline">CV</a></li>
                 <li><a href={getAnswerByKey(linkPortfolioKey) || getAnswerByKey(uploadPortfolioKey)}
@@ -56,10 +69,10 @@ const StudentFormView: React.FC<StudentFormViewProp> = ({answers}: StudentFormVi
 
             <h3 className="text-2xl pt-12">Practical</h3>
             <h4 className="pt-4">The student:</h4>
-            {list.map(([isCheckmark, label]) =>
+            {practicalBulletPoints.map(([isCheckmark, label]) =>
                 <CheckmarkList isCheckmark={isCheckmark} label={label}/>
             )}
-            <h4 className="pt-4">Applying for: <b>{getAnswerByKey(favoredRoleKey)}</b></h4>
+            <h4 className="pt-4">Applying for: <b>{getAnswerByKey(favoredRoleKey) || getAnswerByKey(otherFavoredRoleKey)}</b></h4>
             <h4 className="pt-4">Languages:</h4>
             <ul className="list-inside list-disc">
                 <li>First language: <b>{getAnswerByKey(preferredLanguageKey)}</b></li>
@@ -70,6 +83,9 @@ const StudentFormView: React.FC<StudentFormViewProp> = ({answers}: StudentFormVi
                 <li>Email address: <b>{getAnswerByKey(emailKey)}</b></li>
                 <li>Phone number: <b>{getAnswerByKey(phoneNumberKey)}</b></li>
             </ul>
+
+            <h3 className="text-2xl pt-12">Motivation</h3>
+            {getMotivation()}
         </div>
     )
 };

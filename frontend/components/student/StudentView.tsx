@@ -227,13 +227,13 @@ const StudentView: React.FC<StudentViewProp> = ({
       {error && <Error error={error} className="mb-4" />}
       {/* hold the student information */}
       <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
-        <div>
-          <h4 className="font-bold">
+        <div className="pt-2">
+          <h1 className="font-bold text-4xl">
             {myStudent.firstName + ' ' + myStudent.lastName}
-          </h4>
+          </h1>
         </div>
         <div className="flex flex-col">
-          <h5 className="font-bold">Suggestions</h5>
+          <h3 className="text-2xl pt-12">Suggestions</h3>
           {myStudent.statusSuggestions.map((statusSuggestion) => (
             <StudentStatusSuggestion
               key={statusSuggestion.suggester.id}
