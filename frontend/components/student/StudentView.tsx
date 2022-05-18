@@ -25,6 +25,7 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import Error from '../Error';
+import StudentFormView from "./StudentFormView";
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
@@ -240,16 +241,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             />
           ))}
         </div>
-        <div className="mt-4 flex flex-col">
-          <h5 className="font-bold">Answers:</h5>
-          {myStudent.answers.map((answer) => (
-            <div key={answer.id}>
-              <p>{answer.question}</p>
-              <p>{answer.answer}</p>
-              <br />
-            </div>
-          ))}
-        </div>
+        <StudentFormView answers={myStudent.answers} />
       </div>
 
       {/* holds suggestion controls */}
