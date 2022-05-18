@@ -1,12 +1,22 @@
-import { FC } from 'react';
+import { Dispatch, FC, SetStateAction } from 'react';
 import { StudentComm } from '../../lib/types';
 import CommsTableRow from './CommsTableRow';
 
 type CommsTableProps = {
   studentComms: StudentComm[];
+
+  /**
+   * set the communication id to delete
+   */
+  setCommsToDelete: Dispatch<SetStateAction<string>>;
+
+  /**
+   * Set whether or not to show the deletion popup
+   */
+  setShowDeleteForm: Dispatch<SetStateAction<boolean>>;
 };
 
-const CommsTable: FC<CommsTableProps> = ({ studentComms }: CommsTableProps) => {
+const CommsTable: FC<CommsTableProps> = ({ studentComms, setCommsToDelete, setShowDeleteForm }: CommsTableProps) => {
   return (
     <table className="w-full table-fixed">
       <thead className="sticky top-0 bg-white">
@@ -24,8 +34,11 @@ const CommsTable: FC<CommsTableProps> = ({ studentComms }: CommsTableProps) => {
             .map((comm) => (
               <CommsTableRow
                 key={comm.id}
+                commsId={comm.id}
                 studentName={comm.name}
                 commsMessage={comm.commMessage}
+                setCommsToDelete={setCommsToDelete}
+                setShowDeleteForm={setShowDeleteForm}
               />
             ))
         ) : (

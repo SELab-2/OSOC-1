@@ -78,6 +78,7 @@ export type StudentData = {
  */
 export type StudentDataCommunication = {
   collection: StudentBaseCommunication[];
+  totalLength: number;
 }
 
 /**

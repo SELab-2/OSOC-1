@@ -19,6 +19,7 @@ import { getUrlList, parseError } from '../../lib/requestUtils';
 import CommsCreationPopup from '../../components/communications/CommsCreationPopup';
 import CsvDownloader from 'react-csv-downloader';
 import PersistLogin from '../../components/PersistLogin';
+import CommsDeletePopup from '../../components/communications/CommsDeletePopup';
 
 const PAGE_SIZE = 50;
 
@@ -32,6 +33,9 @@ const communications = () => {
   const [openPopup, setOpenPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [openDeletionPopup, setOpenDeletionPopup] = useState(false);
+  const [commsToDelete, setCommsToDelete] = useState("");
 
   const [loadState, setLoadState] = useState({
     page: 0,
@@ -160,6 +164,19 @@ const communications = () => {
     }
   };
 
+  const deleteCommunication = async (communicationId: string) => {
+    if (!communicationId) return;
+
+    try {
+      await axiosAuth.delete(`/${edition}${Endpoints.COMMS}/${communicationId}`);
+      setCommunications(prev => {
+        return prev.filter((comm) => comm.id !== communicationId);
+      });
+    } catch (err) {
+      parseError(err, setError, router, new AbortController().signal);
+    }
+  }
+
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
@@ -203,7 +220,11 @@ const communications = () => {
                 Add New
               </button>
             </div>
-            <CommsTable studentComms={communications} />
+            <CommsTable 
+              studentComms={communications}
+              setCommsToDelete={setCommsToDelete}
+              setShowDeleteForm={setOpenDeletionPopup}
+            />
             {loading && communications.length && (
               <div className="">
                 <SpinnerCircular
@@ -222,6 +243,12 @@ const communications = () => {
           openPopup={openPopup}
           setOpenPopup={setOpenPopup}
           students={students}
+        />
+        <CommsDeletePopup
+          deleteComms={() => deleteCommunication(commsToDelete)}
+          openDeleteForm={openDeletionPopup}
+          setOpenDeleteForm={setOpenDeletionPopup}
+          setCommsToDelete={setCommsToDelete}
         />
       </RouteProtection>
     </PersistLogin>
