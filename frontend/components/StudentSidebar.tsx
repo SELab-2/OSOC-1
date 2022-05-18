@@ -37,6 +37,7 @@ type StudentsSidebarProps = {
  * @param setStudents             - callback to set the results
  * @param setFilterAmount         - callback to set total amount of filtered results
  * @param state                   - holds page, loading, hasMoreItems, pageSize
+ * @param nextPage                - next page to set state page to, this is needed for polling
  * @param setState                - set the state variable
  * @param setLoading              - set loading or not, this is not the same as the state loading due to styling bug otherwise
  * @param signal                  - AbortSignal for the axios request
@@ -55,6 +56,7 @@ async function searchStudent(
     page: number;
     pageSize: number;
   },
+  nextPage: number,
   setState: (state: {
     hasMoreItems: boolean;
     loading: boolean;
@@ -99,9 +101,9 @@ async function searchStudent(
     })
     .then((response) => {
       const newState = { ...state };
-      newState.page = state.page + 1;
+      newState.page = nextPage;
       newState.hasMoreItems =
-        response.data.totalLength > state.page * state.pageSize;
+        response.data.totalLength > (state.page + 1) * state.pageSize;
       newState.loading = false;
       setState(newState);
       // VERY IMPORTANT TO CHANGE STATE FIRST!!!!
@@ -248,6 +250,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       setStudents,
       setFilterAmount,
       state,
+      state.page + 1,
       setState,
       setLoading,
       signal,
@@ -294,7 +297,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
               page: 0,
               pageSize: Math.max(state.page, 1) * state.pageSize,
             },
-            () => null,
+            state.page,
+            setState,
             () => null,
             signal,
             setError,
@@ -308,6 +312,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     },
     [
       state,
+      filterAmount,
       studentNameSearch,
       studentSearchParameters,
       skills,
@@ -343,7 +348,11 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    if (state.loading || !{ isOnScreen }.isOnScreen) {
+    if (
+      state.loading ||
+      !{ isOnScreen }.isOnScreen ||
+      (state.page + 1) * state.pageSize >= filterAmount
+    ) {
       return;
     }
     controller.abort();
@@ -357,6 +366,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       updateStudents,
       setFilterAmount,
       state,
+      state.page + 1,
       setState,
       setLoading,
       signal,
