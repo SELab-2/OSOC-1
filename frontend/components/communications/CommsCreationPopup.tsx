@@ -83,33 +83,38 @@ const CommsCreationPopup: FC<CCPProps> = ({
               className="grid grid-cols-4 justify-items-center gap-y-2"
               onSubmit={submit}
             >
-              <Select
-                className="col-span-2 w-9/12 pt-8"
-                isMulti={false}
-                isSearchable={true}
-                onChange={(value) => {
-                  if (!value) {
-                    return;
+              <label
+                className='col-span-2 pl-2 w-9/12'
+              >
+                Student
+                <Select
+                  className="mt-1"
+                  isMulti={false}
+                  isSearchable={true}
+                  onChange={(value) => {
+                    if (!value) {
+                      return;
+                    }
+                    const _stud = students.find((s) => s.id === value.value);
+                    setStudent(_stud);
+                  }}
+                  value={
+                    {
+                      label: student
+                        ? student.firstName + ' ' + student.lastName
+                        : undefined,
+                      value: student?.id,
+                    } as { value: string; label: string }
                   }
-                  const _stud = students.find((s) => s.id === value.value);
-                  setStudent(_stud);
-                }}
-                value={
-                  {
-                    label: student
-                      ? student.firstName + ' ' + student.lastName
-                      : undefined,
-                    value: student?.id,
-                  } as { value: string; label: string }
-                }
-                placeholder="Student"
-                options={students.map((stud) => {
-                  return {
-                    label: stud.firstName + ' ' + stud.lastName,
-                    value: stud.id,
-                  };
-                })}
-              />
+                  placeholder="Student"
+                  options={students.map((stud) => {
+                    return {
+                      label: stud.firstName + ' ' + stud.lastName,
+                      value: stud.id,
+                    };
+                  })}
+                />
+              </label>
 
               <label className="col-span-2 pl-2">
                 Information
