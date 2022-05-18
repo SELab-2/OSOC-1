@@ -7,15 +7,21 @@ import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidCommunicationIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
+import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class StudentService(private val repository: StudentRepository, private val userService: UserService) {
+class StudentService(
+    private val repository: StudentRepository,
+    private val userService: UserService,
+    private val communicationRepository: CommunicationRepository
+) {
 
     /**
      * Get all students sorted using [sortBy].
@@ -99,11 +105,22 @@ class StudentService(private val repository: StudentRepository, private val user
     }
 
     /**
-     * Adds a communication to student based on [studentId], if [studentId] is not in [repository] throw [InvalidStudentIdException]
+     * Adds a communication to the student that is referenced in the [communication] student field
      */
-    fun addCommunicationToStudent(studentId: UUID, communication: Communication, edition: String) {
-        val student = getStudentById(studentId, edition)
+    fun addCommunicationToStudent(communication: Communication, edition: String) {
+        val student = communication.student
         student.communications.add(communication)
+        repository.save(student)
+    }
+
+    /**
+     * Removes a communication from the student that is referenced in the communication with [communicationId]
+     */
+    fun removeCommunicationFromStudent(communicationId: UUID, edition: String) {
+        val communication = communicationRepository.findByIdAndEdition(communicationId, edition)
+            ?: throw InvalidCommunicationIdException()
+        val student = communication.student
+        student.communications.remove(communication)
         repository.save(student)
     }
 }

@@ -2,6 +2,7 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.CommunicationTypeEnum
+import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.services.CommunicationService
@@ -9,17 +10,16 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import java.util.UUID
 
 class CommunicationServiceTests {
-    private val testId = UUID.randomUUID()
-    private val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
-    private val savedCommunication = Communication("a saved communication", CommunicationTypeEnum.Email)
+    private val testStudent = Student("firstname", "lastname")
+    private val testId = testStudent.id
+    private val testCommunication = Communication("test message", CommunicationTypeEnum.Email, "", testStudent)
+    private val savedCommunication = Communication("a saved communication", CommunicationTypeEnum.Email, "", testStudent)
 
     private fun getRepository(communicationAlreadyExists: Boolean): CommunicationRepository {
         val repository: CommunicationRepository = mockk()
@@ -40,13 +40,5 @@ class CommunicationServiceTests {
     fun `getCommunicationById fails when no communication with that id exists`() {
         val service = CommunicationService(getRepository(false))
         assertThrows<InvalidIdException> { service.getById(testId) }
-    }
-
-    @Test
-    fun `createCommunication saves communication`() {
-        val repository = getRepository(false)
-        val service = CommunicationService(repository)
-        service.createCommunication(testCommunication)
-        verify { repository.save(testCommunication) }
     }
 }

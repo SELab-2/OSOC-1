@@ -2,12 +2,14 @@ package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.Answer
 import be.osoc.team1.backend.entities.Assignment
+import be.osoc.team1.backend.entities.Communication
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.repositories.AnswerRepository
 import be.osoc.team1.backend.repositories.AssignmentRepository
+import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.repositories.PositionRepository
 import be.osoc.team1.backend.repositories.SkillRepository
 import be.osoc.team1.backend.repositories.StatusSuggestionRepository
@@ -43,3 +45,6 @@ class AnswerService(repository: AnswerRepository) : BaseService<Answer, UUID>(re
 
 @Service
 class SkillService(repository: SkillRepository) : BaseService<Skill, String>(repository)
+
+@Service
+class CommunicationService(repository: CommunicationRepository) : BaseService<Communication, UUID>(repository)
