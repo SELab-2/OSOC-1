@@ -15,6 +15,7 @@ enum Endpoints {
   SUGGESTIONS = '/suggestions',
   STATUS = '/status',
   CONFLICTS = '/projects/conflicts',
+  LOGOUT = '/logout'
 }
 
 export default Endpoints;
