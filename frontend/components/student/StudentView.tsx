@@ -81,7 +81,7 @@ async function setStudentStatus(
       setMyStudent(newStudent);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -112,7 +112,7 @@ async function removeStudentSuggestion(
       reloadStudent(studentId, setStudentBase, signal, setError, router);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -140,7 +140,7 @@ async function removeStudent(
       setOriginalStudentBase({} as StudentBaseList);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -178,10 +178,10 @@ async function setStudentSuggestion(
       if (axios.isAxiosError(err)) {
         const _error = err as AxiosError;
         if (_error.response?.status !== 400) {
-          parseError(err, setError, signal, router);
+          parseError(err, setError, router, signal);
         }
       } else {
-        parseError(err, setError, signal, router);
+        parseError(err, setError, router, signal);
       }
     });
 
@@ -198,7 +198,7 @@ async function setStudentSuggestion(
       reloadStudent(studentId, setStudentBase, signal, setError, router);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -225,7 +225,7 @@ function reloadStudent(
       setStudentBase(response.data as StudentBase);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
