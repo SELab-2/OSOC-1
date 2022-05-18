@@ -181,6 +181,30 @@ paths:
                         type: boolean
                     description: Whether or not to include students you have already added a suggestion for (default value is true)
                 -   in: query
+                    name: skills
+                    schema:
+                        type: array
+                        items:
+                            type: string
+                    description: |
+                        Filter by skill, students that have atleast one of the skills listed are included. The skills
+                        should be provided with quotes around each of their names.
+                -   in: query
+                    name: alumnOnly
+                    schema:
+                        type: boolean
+                    description: Only return alumni students
+                -   in: query
+                    name: studentCoachOnly
+                    schema:
+                        type: boolean
+                    description: Only returns student coach volunteers
+                -   in: query
+                    name: unassignedOnly
+                    schema:
+                        type: boolean
+                    description: Only return unassigned students
+                -   in: query
                     name: view
                     schema:
                         $ref: '#/components/schemas/StudentView'
@@ -204,6 +228,10 @@ paths:
                                                 type: array
                                                 items:
                                                     $ref: '#/components/schemas/Student'
+                '400':
+                    description: |
+                        A syntax error was made in one of the filter options, this could be a trailing comma in the
+                        status filter or skills not having the required quotes around them.
         post:
             parameters:
                 -   in: path
@@ -440,28 +468,6 @@ paths:
                     schema:
                         type: integer
                     description: The page size for pagination. For example, if you pass 50 as value, there will be 50 projects on one page
-                -   in: query
-                    name: skills
-                    schema:
-                        type: array
-                        items:
-                            type: string
-                    description: Filter by skill, students that have atleast one of the skills listed are included
-                -   in: query
-                    name: alumnOnly
-                    schema:
-                        type: boolean
-                    description: Only return alumni students
-                -   in: query
-                    name: onlyStudentCoach
-                    schema:
-                        type: boolean
-                    description: Only returns student coach volunteers
-                -   in: query
-                    name: onlyNotAssigned
-                    schema:
-                        type: boolean
-                    description: Only return unassigned students
             responses:
                 '200':
                     description: successful operation
