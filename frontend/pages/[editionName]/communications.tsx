@@ -189,7 +189,9 @@ const communications = () => {
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="h-screen">
-          <Header />
+          <Header 
+            setError={setError}
+          />
           <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
             {error && <Error error={error} className="mb-4" />}
             <div>

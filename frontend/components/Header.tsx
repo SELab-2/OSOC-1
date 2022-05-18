@@ -1,13 +1,12 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FC, PropsWithChildren } from 'react';
+import { Dispatch, FC, PropsWithChildren, SetStateAction } from 'react';
 import useUser from '../hooks/useUser';
 import { UserRole } from '../lib/types';
 import useEdition from '../hooks/useEdition';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import Endpoints from '../lib/endpoints';
-
-type HeaderProps = PropsWithChildren<unknown>;
+import axios from 'axios';
 
 type EditionHeaderLinkProps = HeaderLinkProps;
 
@@ -39,7 +38,11 @@ const HeaderLink: FC<HeaderLinkProps> = ({
   );
 };
 
-const Header: React.FC<HeaderProps> = () => {
+type HeaderProps = PropsWithChildren<{
+  setError: Dispatch<SetStateAction<string>>;
+}>;
+
+const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
   const [user] = useUser();
   const [edition] = useEdition();
   const router = useRouter();
@@ -55,9 +58,15 @@ const Header: React.FC<HeaderProps> = () => {
       }
       // log out on backend
       await axiosAuth.post(Endpoints.LOGOUT);
-    } finally {
-      // reroute back to login
-      router.push("/login");
+
+      // push back to login
+      router.push('/login');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.message);
+      } else {
+        setError(err as string);
+      }
     }
   }
 

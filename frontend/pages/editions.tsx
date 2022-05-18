@@ -110,7 +110,9 @@ const Editions: NextPage = () => {
           <title>Editions</title>
         </Head>
         <div className="h-screen">
-          <Header />
+          <Header 
+            setError={setError}
+          />
 
           {error && <Error error={error} className="mt-4 w-3/5" />}
 
