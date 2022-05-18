@@ -106,12 +106,9 @@ const UserTableRow: React.FC<URTProps> = ({
         const err = _error as AxiosError;
         if (err.response?.status === 400) router.push('/login'); // error when trying to refresh refreshtoken
         if (err.response?.status === 403) {
-          // @ts-ignore
-          const message = err.response?.data.message;
+          const message = (err.response?.data as { message: string }).message;
           message && setGlobalError(message);
         } else {
-          // not an Axios error
-          console.error(_error);
           setError(
             'Something went wrong trying to update the role of the user'
           );
