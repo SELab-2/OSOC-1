@@ -86,7 +86,7 @@ async function searchStudent(
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
         status: getStatusFilterList(studentSearchParameters),
-        skills: skills.map((skill) => skill.label).join(','),
+        skills: skills.map((skill) => `"${skill.label}"`).join(','),
         alumnOnly: studentSearchParameters.OnlyAlumni,
         studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
         unassignedOnly: studentSearchParameters.ExcludeAssigned,
@@ -224,7 +224,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    */
   useEffect(() => {
     if ({ isOnScreen }.isOnScreen) {
-      return search(true);
+      return search(false);
     }
   }, [studentSearchParameters, skills, { isOnScreen }.isOnScreen]);
 
@@ -236,7 +236,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    refreshSkills ? getSkills(setSkillOptions, signal, setError, router) : null;
+    if (refreshSkills || skillOptions.length == 0) {
+      getSkills(setSkillOptions, signal, setError, router);
+    }
     searchStudent(
       studentNameSearch,
       skills,

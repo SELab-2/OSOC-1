@@ -147,7 +147,9 @@ function postOrPatchProject(
         },
         amount: position.amount,
       } as { [key: string]: unknown };
-      position.skill.value ? (newPos.id = position.skill.value) : null;
+      position.skill.value && position.skill.value !== position.skill.label
+        ? (newPos.id = position.skill.value)
+        : null;
       return newPos;
     });
   }
@@ -301,7 +303,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
    */
   const addSkillOption = (option: string) => {
     const newSkillOptions = [...skillOptions];
-    newSkillOptions.push({ value: '', label: option });
+    newSkillOptions.push({ value: option, label: option });
     setSkillOptions(newSkillOptions);
   };
 
@@ -310,6 +312,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     controller = new AbortController();
     const signal = controller.signal;
     getSkills(setSkillOptions, signal, setError, router);
+    // TODO set skillOption values to position id's
     getCoaches(setCoachOptions, signal, setError, router);
     return () => {
       controller.abort();
@@ -409,6 +412,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
       >
         <Fragment>
           {(projectForm.positions as positionForm[]).map((position, index) => {
+            console.log(skillOptions);
             return (
               <div
                 className={`flex flex-row justify-between px-5 ${
@@ -435,18 +439,19 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                         .includes(option.label)
                     }
                     placeholder="Position"
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      console.log(e);
                       setPositionDropdownValue(
                         index,
                         e ? e : ({} as { value: string; label: string })
-                      )
-                    }
+                      );
+                    }}
                     onCreateOption={(e) => {
                       addSkillOption(e);
                       setPositionDropdownValue(
                         index,
                         e
-                          ? { value: '', label: e }
+                          ? { value: ' ', label: e }
                           : ({} as { value: string; label: string })
                       );
                     }}
