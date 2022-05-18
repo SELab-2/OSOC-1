@@ -73,7 +73,7 @@ const UserTable: React.FC<UserTableProps> = ({
   isAdmin,
   setDeleteUser,
   loggedInUser,
-  setShowDeleteForm
+  setShowDeleteForm,
 }: UserTableProps) => {
   const filterRef = useRef<HTMLInputElement>(null);
 

@@ -141,7 +141,6 @@ const Users: NextPage = () => {
     };
   }, []);
 
-
   return (
     <PersistLogin>
       <Head>
