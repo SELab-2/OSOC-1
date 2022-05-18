@@ -9,20 +9,20 @@ import { NextRouter } from 'next/dist/client/router';
  * @param error - The error thrown
  * @param setError - Callback to set error message
  * @param signal - AbortSignal for the original request
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export function parseError(
   error: unknown,
   setError: (error: string) => void,
-  signal: AbortSignal,
-  router: NextRouter
+  router: NextRouter,
+  signal?: AbortSignal
 ) {
-  if (signal.aborted) {
+  if (signal?.aborted) {
     return;
   }
   if (axios.isAxiosError(error)) {
     const _error = error as AxiosError;
-    if (_error.response?.status === 400) {
+    if (_error.response?.status === 418) {
       router.push('/login');
       return;
     }
@@ -39,7 +39,7 @@ export function parseError(
  * @param setSkillOptions - setter for the resulting options list
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export async function getSkills(
   setSkillOptions: (
@@ -59,7 +59,7 @@ export async function getSkills(
       )
     )
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -70,7 +70,7 @@ export async function getSkills(
  * @param setCoachOptions - Setter for the resulting options list
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export async function getCoaches(
   setCoachOptions: (
@@ -92,7 +92,7 @@ export async function getCoaches(
       )
     )
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -103,7 +103,7 @@ export async function getCoaches(
  * @param resultList - List to push results unto
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export async function getUrlList<Type>(
   urls: Url[],
@@ -123,7 +123,7 @@ export async function getUrlList<Type>(
       response.forEach((resp) => resultList.push(resp.data));
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -135,7 +135,7 @@ export async function getUrlList<Type>(
  * @param resultMap - Map to set the results in
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export async function getUrlMap<Type>(
   urls: Url[],
@@ -157,6 +157,6 @@ export async function getUrlMap<Type>(
       );
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
