@@ -481,7 +481,9 @@ def make_student():
                     "label": "What kind of diploma are you currently going for?",
                     "type": "CHECKBOXES",
                     "value": [
-                        "8ab95749-ef8f-465b-a1f8-3152da88cf91"
+                        random.choice(["8ab95749-ef8f-465b-a1f8-3152da88cf91",  "1d23a375-3645-40f6-b141-c00ad54625d3", "ef50be02-cee7-40d0-9378-f137ec0cb976",
+                                      "1dd53b7e-6bcc-406c-9e97-a458fae9636f", "ffbbcf42-0489-4494-a75f-7701460ab7cd", "77ad76ce-20aa-43f4-8eac-07b1f5baf07c",
+                                       "46da24d6-4b82-44be-91fd-5672d68a22de"])
                     ],
                     "options": [
                         {
@@ -572,13 +574,13 @@ def make_student():
                     "key": "question_wg94YK",
                     "label": "Which year of your degree are you in?",
                     "type": "INPUT_TEXT",
-                    "value": "3"
+                    "value": str(random.randint(0, 5))
                 },
                 {
                     "key": "question_3yJDjW",
                     "label": "What is the name of your college or university?",
                     "type": "INPUT_TEXT",
-                    "value": "UGent"
+                    "value": random.choice(["UGent", "VUB", "KULeuven", "Hogent"])
                 },
                 {
                     "key": "question_3X4q1V",
