@@ -42,7 +42,7 @@ const UserDeleteForm: FC<UDFProps> = ({
   deleteUser,
   openDeleteForm,
   setUserDeleteForm,
-  setOpenDeleteForm
+  setOpenDeleteForm,
 }: UDFProps) => {
   const [loading, setLoading] = useState(false);
 
