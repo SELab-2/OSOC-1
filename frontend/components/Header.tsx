@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
       // push back to login
       router.push({
         pathname: '/login',
-        query: { message: 'Succesfully logged out!' }
+        query: { message: 'Succesfully logged out!' },
       });
     } catch (err) {
       if (axios.isAxiosError(err)) {
