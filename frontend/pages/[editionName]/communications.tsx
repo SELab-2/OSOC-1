@@ -43,6 +43,8 @@ const communications = () => {
   });
 
   const axiosAuth = useAxiosAuth();
+  const [retry, setRetry] = useState(true);
+  let controller = new AbortController();
 
   /**
    * Fetches students and their communications and updates the state of the application accordingly.
@@ -52,11 +54,11 @@ const communications = () => {
    */
   const getStudentsAndComms: ({
     page,
-    abortController,
+    signal: AbortSignal,
   }: {
     page: number;
-    abortController: AbortController;
-  }) => Promise<void> = async ({ page, abortController }) => {
+    signal: AbortSignal;
+  }) => Promise<void> = async ({ page, signal }) => {
     try {
       const response = await axiosAuth.get<StudentDataCommunication>(
         `/${edition}` + Endpoints.STUDENTS,
@@ -67,11 +69,11 @@ const communications = () => {
             view: 'Communication',
             sortBy: 'firstName',
           },
-          signal: abortController.signal,
+          signal: signal,
         }
       );
 
-      if (abortController.signal.aborted) return Promise.reject();
+      if (signal.aborted) return Promise.reject();
 
       const _students = response.data.collection;
       const studentComms = [] as StudentComm[];
@@ -80,13 +82,7 @@ const communications = () => {
         const _comms = student.communications;
         if (_comms.length > 0) {
           const curStudentComms = [] as Communication[];
-          await getUrlList(
-            _comms,
-            curStudentComms,
-            new AbortController().signal,
-            setError,
-            router
-          );
+          await getUrlList(_comms, curStudentComms, signal, setError, router);
           curStudentComms.forEach((csc) => {
             studentComms.push({
               studentId: student.id,
@@ -106,8 +102,18 @@ const communications = () => {
           hasMore: response.data.totalLength > prev.page * PAGE_SIZE,
         };
       });
+      setRetry(true);
     } catch (err) {
-      parseError(err, setError, router, abortController.signal);
+      parseError(err, setError, router, signal);
+      if (retry) {
+        setRetry(false);
+        setLoadState((prev) => {
+          return {
+            page: prev.page,
+            hasMore: true,
+          };
+        });
+      }
     }
   };
 
@@ -118,15 +124,20 @@ const communications = () => {
     if (!router.isReady) {
       return;
     }
-    const abortController = new AbortController();
+
     if (!loadState.hasMore) {
       setLoading(false);
       return;
     }
-    getStudentsAndComms({ page: loadState.page, abortController });
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
 
+    (async () => {
+      await getStudentsAndComms({ page: loadState.page, signal });
+    })();
     return () => {
-      abortController.abort();
+      controller.abort();
     };
   }, [loadState, router.isReady]);
 
