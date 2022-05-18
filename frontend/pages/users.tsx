@@ -141,9 +141,6 @@ const Users: NextPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    setShowDeleteForm(userToDelete !== undefined);
-  }, [userToDelete]);
 
   return (
     <PersistLogin>
@@ -179,6 +176,7 @@ const Users: NextPage = () => {
                   isAdmin={user.role === UserRole.Admin}
                   setDeleteUser={setUserToDelete}
                   loggedInUser={user}
+                  setShowDeleteForm={setShowDeleteForm}
                 />
               </>
             )}
@@ -187,7 +185,7 @@ const Users: NextPage = () => {
         {userToDelete && (
           <UserDeleteForm
             userName={userToDelete.username}
-            deleteUser={() => deleteUser(userToDelete)}
+            deleteUser={async () => deleteUser(userToDelete)}
             openDeleteForm={showDeleteForm}
             setUserDeleteForm={setUserToDelete}
             setOpenDeleteForm={setShowDeleteForm}

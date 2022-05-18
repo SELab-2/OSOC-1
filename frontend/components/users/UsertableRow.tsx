@@ -45,6 +45,11 @@ type URTProps = {
    * Current logged in user id
    */
   loggedInUserId: string;
+
+  /**
+   * state update function that sets wether the user delete form needs to be shown
+   */
+  setShowDeleteForm: Dispatch<SetStateAction<boolean>>;  
 };
 
 /**
@@ -59,6 +64,7 @@ const UserTableRow: React.FC<URTProps> = ({
   isAdmin,
   setDeleteUser,
   loggedInUserId,
+  setShowDeleteForm
 }: URTProps) => {
   /**
    * individual row error (e.g. when an error occurs trying to update the role)
@@ -127,7 +133,11 @@ const UserTableRow: React.FC<URTProps> = ({
           <TrashIcon
             className="h-6 w-6 pl-1 hover:cursor-pointer"
             color="#F14A3B"
-            onClick={() => setDeleteUser(user)}
+            onClick={() => {
+                setDeleteUser(user);
+                setShowDeleteForm(true);
+              }
+            }
           />
         )}
       </td>

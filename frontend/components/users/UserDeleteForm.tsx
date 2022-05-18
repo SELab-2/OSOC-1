@@ -65,7 +65,6 @@ const UserDeleteForm: FC<UDFProps> = ({
       data-backdrop="static"
       data-keyboard="false"
       closeOnDocumentClick={false}
-      lockScroll={true}
       position="center center"
     >
       <div className="modal max-w-screen flex max-h-[85vh] min-w-[600px] flex-col bg-osoc-neutral-bg py-5">
