@@ -86,7 +86,7 @@ async function searchStudent(
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
         status: getStatusFilterList(studentSearchParameters),
-        skills: skills.map((skill) => skill.label).join(','),
+        skills: skills.map((skill) => '"' + skill.label + '"').join(','),
         alumnOnly: studentSearchParameters.OnlyAlumni,
         studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
         unassignedOnly: studentSearchParameters.ExcludeAssigned,
