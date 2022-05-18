@@ -4,6 +4,7 @@ import {
   StatusSuggestionBase,
   Student,
   StudentBase,
+  StudentBaseList,
   Url,
   User,
   UserRole,
@@ -17,7 +18,11 @@ import {
   faQuestion,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
-import { convertStudentBase } from '../../lib/conversionUtils';
+import {
+  convertStudentBase,
+  convertStudentBaseList,
+  convertStudentFullToList,
+} from '../../lib/conversionUtils';
 import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
@@ -30,8 +35,8 @@ const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
 
 type StudentViewProp = {
-  studentInput: StudentBase;
-  setOriginalStudentBase: (originalStudentBase: StudentBase) => void;
+  studentInput: StudentBaseList;
+  setOriginalStudentBase: (originalStudentBase: StudentBaseList) => void;
 };
 
 type StatusSuggestionProp = {
@@ -169,10 +174,13 @@ const StudentView: React.FC<StudentViewProp> = ({
 }: StudentViewProp) => {
   const [user] = useUser();
   // Needed to reload student when a suggestion is done or status is changed
+  const [studentBaseList, setStudentBaseList] = useState(
+    studentInput as StudentBaseList
+  );
   // TODO don't reload everything when only status or suggestions are changed, save the rest somewhere
-  const [studentBase, setStudentBase] = useState(studentInput as StudentBase);
+  const [studentBase, setStudentBase] = useState({} as StudentBase);
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
-    useState(convertStudentBase(studentBase) as Student);
+    useState(convertStudentBaseList(studentInput) as Student);
 
   const [status, setStatus] = useState({
     value: '',
@@ -186,17 +194,29 @@ const StudentView: React.FC<StudentViewProp> = ({
   let controller = new AbortController();
 
   useEffect(() => {
-    setMotivation('');
-    setStudentBase(studentInput);
+    setStudentBaseList(studentInput);
   }, [studentInput]);
+
+  useEffect(() => {
+    setMotivation('');
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    reloadStudent(studentBaseList.id, setStudentBase, signal, setError, router);
+    return () => {
+      controller.abort();
+    };
+  }, [studentBaseList]);
 
   useEffect(() => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
+    if (studentBase.id !== undefined && studentBase.id !== studentInput.id) {
+      setOriginalStudentBase(convertStudentFullToList(studentBase));
+    }
     // This is a safety check, not really needed right now but it avoids accidents
     if (studentBase.id !== undefined) {
-      setOriginalStudentBase(studentBase);
       setStatus({ value: '', label: studentBase.status } as {
         value: string;
         label: string;
@@ -222,110 +242,54 @@ const StudentView: React.FC<StudentViewProp> = ({
   }, [myStudent]);
 
   return (
-    <div className={`flex flex-col-reverse justify-between xl:flex-row`}>
+    <div>
       {error && <Error error={error} className="mb-4" />}
-      {/* hold the student information */}
-      <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
-        <div>
-          <h4 className="font-bold">
-            {myStudent.firstName + ' ' + myStudent.lastName}
-          </h4>
-        </div>
-        <div className="flex flex-col">
-          <h5 className="font-bold">Suggestions</h5>
-          {myStudent.statusSuggestions.map((statusSuggestion) => (
-            <StudentStatusSuggestion
-              key={statusSuggestion.suggester.id}
-              statusSuggestion={statusSuggestion}
-            />
-          ))}
-        </div>
-        <div className="mt-4 flex flex-col">
-          <h5 className="font-bold">Answers:</h5>
-          {myStudent.answers.map((answer) => (
-            <div key={answer.id}>
-              <p>{answer.question}</p>
-              <p>{answer.answer}</p>
-              <br />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* holds suggestion controls */}
-      <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
-        {/* regular coach status suggestion form */}
-        <form
-          className={`border-2 p-2`}
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            controller.abort();
-            controller = new AbortController();
-            const signal = controller.signal;
-            setStudentSuggestion(
-              suggestion,
-              studentBase.id,
-              user.id,
-              motivation,
-              setStudentBase,
-              signal,
-              setError,
-              router
-            );
-            return () => {
-              controller.abort();
-            };
-          }}
-        >
-          <div className={`flex w-[380px] flex-row justify-between`}>
-            <button
-              className={`w-[30%] bg-check-green py-[2px] text-sm text-white shadow-md shadow-gray-400`}
-              onClick={() => setSuggestion('Yes')}
-              type={`submit`}
-            >
-              Suggest Yes
-            </button>
-            <button
-              className={`w-[30%] bg-check-orange py-[2px] text-sm text-white shadow-md shadow-gray-400`}
-              onClick={() => setSuggestion('Maybe')}
-              type={`submit`}
-            >
-              Suggest Maybe
-            </button>
-            <button
-              className={`w-[30%] bg-check-red py-[2px] text-sm text-white shadow-md shadow-gray-400`}
-              onClick={() => setSuggestion('No')}
-              type={`submit`}
-            >
-              Suggest No
-            </button>
+      <div className={`flex flex-col-reverse justify-between xl:flex-row`}>
+        {/* hold the student information */}
+        <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
+          <div>
+            <h4 className="font-bold">
+              {myStudent.firstName + ' ' + myStudent.lastName}
+            </h4>
           </div>
-          <textarea
-            placeholder="Motivation"
-            className="mt-3 w-full resize-y border-2 border-check-gray"
-            required
-            value={motivation}
-            onChange={(e) => setMotivation(e.target.value || '')}
-          />
-        </form>
+          <div className="flex flex-col">
+            <h5 className="font-bold">Suggestions</h5>
+            {myStudent.statusSuggestions.map((statusSuggestion) => (
+              <StudentStatusSuggestion
+                key={statusSuggestion.suggester.id}
+                statusSuggestion={statusSuggestion}
+              />
+            ))}
+          </div>
+          <div className="mt-4 flex flex-col">
+            <h5 className="font-bold">Answers:</h5>
+            {myStudent.answers.map((answer) => (
+              <div key={answer.id}>
+                <p>{answer.question}</p>
+                <p>{answer.answer}</p>
+                <br />
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* admin status selection form */}
-        <form
-          className={`${
-            user.role == UserRole.Admin ? 'visible' : 'hidden'
-          } mt-10 flex flex-row justify-between border-2 p-2`}
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (status.label != studentBase.status) {
+        {/* holds suggestion controls */}
+        <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
+          {/* regular coach status suggestion form */}
+          <form
+            className={`border-2 p-2`}
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               controller.abort();
               controller = new AbortController();
               const signal = controller.signal;
-              setStudentStatus(
-                status,
+              setStudentSuggestion(
+                suggestion,
                 studentBase.id,
-                myStudent,
-                setMyStudent,
+                user.id,
+                motivation,
+                setStudentBase,
                 signal,
                 setError,
                 router
@@ -333,51 +297,109 @@ const StudentView: React.FC<StudentViewProp> = ({
               return () => {
                 controller.abort();
               };
-            }
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
+            }}
           >
-            <Fragment>
-              {/* TODO fix this becoming wider when something is selected */}
-              <Select
-                className="basic-single"
-                classNamePrefix="select"
-                isDisabled={false}
-                isLoading={false}
-                isClearable={true}
-                isRtl={false}
-                isSearchable={false}
-                isMulti={false}
-                name="Status"
-                placeholder="Select Status"
-                // TODO don't hardcode this
-                options={[
-                  { value: '', label: 'Yes' },
-                  { value: '', label: 'No' },
-                  { value: '', label: 'Maybe' },
-                  { value: '', label: 'Undecided' },
-                ]}
-                value={status}
-                onChange={(e) => {
-                  e
-                    ? setStatus(e)
-                    : setStatus({} as { value: string; label: string });
-                }}
-              />
-            </Fragment>
-          </div>
+            <div className={`flex w-[380px] flex-row justify-between`}>
+              <button
+                className={`w-[30%] bg-check-green py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+                onClick={() => setSuggestion('Yes')}
+                type={`submit`}
+              >
+                Suggest Yes
+              </button>
+              <button
+                className={`w-[30%] bg-check-orange py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+                onClick={() => setSuggestion('Maybe')}
+                type={`submit`}
+              >
+                Suggest Maybe
+              </button>
+              <button
+                className={`w-[30%] bg-check-red py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+                onClick={() => setSuggestion('No')}
+                type={`submit`}
+              >
+                Suggest No
+              </button>
+            </div>
+            <textarea
+              placeholder="Motivation"
+              className="mt-3 w-full resize-y border-2 border-check-gray"
+              required
+              value={motivation}
+              onChange={(e) => setMotivation(e.target.value || '')}
+            />
+          </form>
 
-          {/* button to submit the admin status choice */}
-          <button
-            className={`bg-check-gray px-2 py-[2px] text-sm shadow-md shadow-gray-400`}
-            type={`submit`}
+          {/* admin status selection form */}
+          <form
+            className={`${
+              user.role == UserRole.Admin ? 'visible' : 'hidden'
+            } mt-10 flex flex-row justify-between border-2 p-2`}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (status.label != studentBase.status) {
+                controller.abort();
+                controller = new AbortController();
+                const signal = controller.signal;
+                setStudentStatus(
+                  status,
+                  studentBase.id,
+                  myStudent,
+                  setMyStudent,
+                  signal,
+                  setError,
+                  router
+                );
+                return () => {
+                  controller.abort();
+                };
+              }
+            }}
           >
-            Submit
-          </button>
-        </form>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <Fragment>
+                {/* TODO fix this becoming wider when something is selected */}
+                <Select
+                  className="basic-single"
+                  classNamePrefix="select"
+                  isDisabled={false}
+                  isLoading={false}
+                  isClearable={true}
+                  isRtl={false}
+                  isSearchable={false}
+                  isMulti={false}
+                  name="Status"
+                  placeholder="Select Status"
+                  // TODO don't hardcode this
+                  options={[
+                    { value: '', label: 'Yes' },
+                    { value: '', label: 'No' },
+                    { value: '', label: 'Maybe' },
+                    { value: '', label: 'Undecided' },
+                  ]}
+                  value={status}
+                  onChange={(e) => {
+                    e
+                      ? setStatus(e)
+                      : setStatus({} as { value: string; label: string });
+                  }}
+                />
+              </Fragment>
+            </div>
+
+            {/* button to submit the admin status choice */}
+            <button
+              className={`bg-check-gray px-2 py-[2px] text-sm shadow-md shadow-gray-400`}
+              type={`submit`}
+            >
+              Submit
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
