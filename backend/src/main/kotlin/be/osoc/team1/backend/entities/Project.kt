@@ -44,7 +44,7 @@ class Position(
  */
 @Entity
 class Assignment(
-    @OneToOne
+    @ManyToOne
     @JsonSerialize(using = StudentSerializer::class)
     val student: Student,
 

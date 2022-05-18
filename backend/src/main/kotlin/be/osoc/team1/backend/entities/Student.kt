@@ -168,6 +168,10 @@ class Student(
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
 
+    @OneToMany(mappedBy="student", cascade = [CascadeType.DETACH], orphanRemoval = true)
+    @JsonIgnore
+    val assignments: MutableList<Assignment> = mutableListOf()
+
     @JsonGetter("statusSuggestionCount")
     fun calculateStatusSuggestionCount(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
 }
