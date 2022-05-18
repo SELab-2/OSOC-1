@@ -51,6 +51,7 @@ const Users: NextPage = () => {
   const [loading, setLoading] = useState(true);
 
   const [userToDelete, setUserToDelete] = useState<User | undefined>(undefined);
+  const [showDeleteForm, setShowDeleteForm] = useState(false);
 
   const axiosAuth = useAxiosAuth();
   const router = useRouter();
@@ -140,6 +141,10 @@ const Users: NextPage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setShowDeleteForm(userToDelete !== undefined);
+  }, [userToDelete]);
+
   return (
     <PersistLogin>
       <Head>
@@ -183,8 +188,9 @@ const Users: NextPage = () => {
           <UserDeleteForm
             userName={userToDelete.username}
             deleteUser={() => deleteUser(userToDelete)}
-            openDeleteForm={userToDelete !== undefined}
+            openDeleteForm={showDeleteForm}
             setUserDeleteForm={setUserToDelete}
+            setOpenDeleteForm={setShowDeleteForm}
           />
         )}
       </RouteProtection>

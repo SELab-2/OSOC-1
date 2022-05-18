@@ -22,7 +22,12 @@ type UDFProps = {
   openDeleteForm: boolean;
 
   /**
-   * state update function that sets whether the deletion confirm should be shown or not
+   * state update function that sets wether the user delete form needs to be shown
+   */
+  setOpenDeleteForm: Dispatch<SetStateAction<boolean>>;
+
+  /**
+   * state update function that sets the user to be deleted
    */
   setUserDeleteForm: Dispatch<SetStateAction<User | undefined>>;
 };
@@ -37,11 +42,13 @@ const UserDeleteForm: FC<UDFProps> = ({
   deleteUser,
   openDeleteForm,
   setUserDeleteForm,
+  setOpenDeleteForm
 }: UDFProps) => {
   const [loading, setLoading] = useState(false);
 
   const closePopup = () => {
     setUserDeleteForm(undefined);
+    setOpenDeleteForm(false);
   };
 
   const doDelete = async () => {
