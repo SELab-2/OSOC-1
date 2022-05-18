@@ -270,6 +270,8 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(get("$editionUrl?skills=\"Backend\",\"Frontend\"").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+        mockMvc.perform(get("$editionUrl?skills=Backend").principal(defaultPrincipal))
+            .andExpect(status().isBadRequest)
     }
 
     @Test
