@@ -261,13 +261,13 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val frontendStudent = Student("firstname", "lastname", skills = setOf(Skill("Frontend")))
         val studentList = listOf(backendStudent, frontendStudent)
         every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
-        mockMvc.perform(get("$editionUrl?skills=otherSkill").principal(defaultPrincipal))
+        mockMvc.perform(get("$editionUrl?skills=\"otherSkill\"").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf<Student>(), 0))))
-        mockMvc.perform(get("$editionUrl?skills=Backend").principal(defaultPrincipal))
+        mockMvc.perform(get("$editionUrl?skills=\"Backend\"").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(backendStudent), 1))))
-        mockMvc.perform(get("$editionUrl?skills=Backend,Frontend").principal(defaultPrincipal))
+        mockMvc.perform(get("$editionUrl?skills=\"Backend\",\"Frontend\"").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
     }
