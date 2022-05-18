@@ -35,7 +35,7 @@ const communications = () => {
   const [error, setError] = useState('');
 
   const [openDeletionPopup, setOpenDeletionPopup] = useState(false);
-  const [commsToDelete, setCommsToDelete] = useState("");
+  const [commsToDelete, setCommsToDelete] = useState('');
 
   const [loadState, setLoadState] = useState({
     page: 0,
@@ -168,14 +168,16 @@ const communications = () => {
     if (!communicationId) return;
 
     try {
-      await axiosAuth.delete(`/${edition}${Endpoints.COMMS}/${communicationId}`);
-      setCommunications(prev => {
+      await axiosAuth.delete(
+        `/${edition}${Endpoints.COMMS}/${communicationId}`
+      );
+      setCommunications((prev) => {
         return prev.filter((comm) => comm.id !== communicationId);
       });
     } catch (err) {
       parseError(err, setError, router, new AbortController().signal);
     }
-  }
+  };
 
   return (
     <PersistLogin>
@@ -220,7 +222,7 @@ const communications = () => {
                 Add New
               </button>
             </div>
-            <CommsTable 
+            <CommsTable
               studentComms={communications}
               setCommsToDelete={setCommsToDelete}
               setShowDeleteForm={setOpenDeletionPopup}

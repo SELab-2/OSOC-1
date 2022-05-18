@@ -13,7 +13,7 @@ type CommsTableRowProps = {
   /**
    * Set whether or not to show the deletion popup
    */
-  setShowDeleteForm: Dispatch<SetStateAction<boolean>>;  
+  setShowDeleteForm: Dispatch<SetStateAction<boolean>>;
 };
 
 const CommsTableRow: FC<CommsTableRowProps> = ({
@@ -21,16 +21,15 @@ const CommsTableRow: FC<CommsTableRowProps> = ({
   commsMessage,
   commsId,
   setCommsToDelete,
-  setShowDeleteForm
+  setShowDeleteForm,
 }: CommsTableRowProps) => {
-
   const [hovering, setHovering] = useState(false);
 
   return (
-    <tr 
+    <tr
       className={`odd:bg-neutral-50 even:bg-neutral-100`}
       onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}  
+      onMouseLeave={() => setHovering(false)}
     >
       <td className="flex flex-row py-4">
         {studentName}

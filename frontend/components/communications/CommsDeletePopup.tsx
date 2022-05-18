@@ -5,7 +5,7 @@ import { SpinnerCircular } from 'spinners-react';
 type UDFProps = {
   /**
    * function that deletes the communication
-   * 
+   *
    * @see {@link USERS_PAGE}
    */
   deleteComms: () => Promise<void>;
@@ -40,7 +40,7 @@ const CommsDeletePopup: FC<UDFProps> = ({
   const [loading, setLoading] = useState(false);
 
   const closePopup = () => {
-    setCommsToDelete("");
+    setCommsToDelete('');
     setOpenDeleteForm(false);
   };
 

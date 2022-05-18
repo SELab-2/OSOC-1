@@ -16,7 +16,11 @@ type CommsTableProps = {
   setShowDeleteForm: Dispatch<SetStateAction<boolean>>;
 };
 
-const CommsTable: FC<CommsTableProps> = ({ studentComms, setCommsToDelete, setShowDeleteForm }: CommsTableProps) => {
+const CommsTable: FC<CommsTableProps> = ({
+  studentComms,
+  setCommsToDelete,
+  setShowDeleteForm,
+}: CommsTableProps) => {
   return (
     <table className="w-full table-fixed">
       <thead className="sticky top-0 bg-white">
