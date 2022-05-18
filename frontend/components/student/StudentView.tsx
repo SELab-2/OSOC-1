@@ -4,6 +4,7 @@ import {
   StatusSuggestionBase,
   Student,
   StudentBase,
+  StudentBaseList,
   Url,
   User,
   UserRole,
@@ -17,7 +18,11 @@ import {
   faQuestion,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
-import { convertStudentBase } from '../../lib/conversionUtils';
+import {
+  convertStudentBase,
+  convertStudentBaseList,
+  convertStudentFullToList,
+} from '../../lib/conversionUtils';
 import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
@@ -36,8 +41,8 @@ const speech_bubble = <Icon icon="simple-line-icons:speech" />;
 const trash_can = <Icon icon="fa-solid:trash-alt" />;
 
 type StudentViewProp = {
-  studentInput: StudentBase;
-  setOriginalStudentBase: (originalStudentBase: StudentBase) => void;
+  studentInput: StudentBaseList;
+  setOriginalStudentBase: (originalStudentBase: StudentBaseList) => void;
 };
 
 type StatusSuggestionProp = {
@@ -123,7 +128,7 @@ async function removeStudentSuggestion(
  */
 async function removeStudent(
   studentId: UUID,
-  setOriginalStudentBase: (studentBase: StudentBase) => void,
+  setOriginalStudentBase: (studentBaseList: StudentBaseList) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
   router: NextRouter
@@ -132,7 +137,7 @@ async function removeStudent(
   await axiosAuthenticated
     .delete(`/${edition}${Endpoints.STUDENTS}/${studentId}`)
     .then(() => {
-      setOriginalStudentBase({} as StudentBase);
+      setOriginalStudentBase({} as StudentBaseList);
     })
     .catch((err) => {
       parseError(err, setError, signal, router);
@@ -284,10 +289,13 @@ const StudentView: React.FC<StudentViewProp> = ({
 }: StudentViewProp) => {
   const [user] = useUser();
   // Needed to reload student when a suggestion is done or status is changed
+  const [studentBaseList, setStudentBaseList] = useState(
+    studentInput as StudentBaseList
+  );
   // WONTFIX don't reload everything when only status or suggestions are changed, save the rest somewhere
-  const [studentBase, setStudentBase] = useState(studentInput as StudentBase);
+  const [studentBase, setStudentBase] = useState({} as StudentBase);
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
-    useState(convertStudentBase(studentBase) as Student);
+    useState(convertStudentBaseList(studentInput) as Student);
 
   const [status, setStatus] = useState({
     value: '',
@@ -301,17 +309,29 @@ const StudentView: React.FC<StudentViewProp> = ({
   let controller = new AbortController();
 
   useEffect(() => {
-    setMotivation('');
-    setStudentBase(studentInput);
+    setStudentBaseList(studentInput);
   }, [studentInput]);
+
+  useEffect(() => {
+    setMotivation('');
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    reloadStudent(studentBaseList.id, setStudentBase, signal, setError, router);
+    return () => {
+      controller.abort();
+    };
+  }, [studentBaseList]);
 
   useEffect(() => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
+    if (studentBase.id !== undefined && studentBase.id !== studentInput.id) {
+      setOriginalStudentBase(convertStudentFullToList(studentBase));
+    }
     // This is a safety check, not really needed right now but it avoids accidents
     if (studentBase.id !== undefined) {
-      setOriginalStudentBase(studentBase);
       setStatus({ value: '', label: studentBase.status } as {
         value: string;
         label: string;
