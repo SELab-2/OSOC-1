@@ -14,18 +14,16 @@ import javax.servlet.http.HttpServletResponse
 class TokenLogoutHandler : LogoutHandler {
     /**
      * Extract email from access token from [request], then invalidate the refresh token associated with this email.
-     * Don't throw an error when logout is called but no user is logged in. It is still useful to invalidate the http
-     * session and redirect to '/login?logout'.
      */
     override fun logout(request: HttpServletRequest?, response: HttpServletResponse?, authentication: Authentication?) {
         try {
             val accessToken = getAccessTokenFromRequest(request!!)
-
             val decodedToken = decodeAndVerifyToken(accessToken!!)
             val email: String = decodedToken.subject
             invalidateRefreshToken(email)
+            response?.status = HttpServletResponse.SC_OK
         } catch (_: Exception) {
-            // no user is logged in.
+            response?.status = HttpServletResponse.SC_UNAUTHORIZED
         }
     }
 }
