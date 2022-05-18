@@ -15,7 +15,9 @@ import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import { useRef } from 'react';
 import useOnScreen from '../hooks/useOnScreen';
+import { Icon } from '@iconify/react';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
+const x_mark = <Icon icon="bx:x" />;
 
 /**
  * This is what StudentsSidebar expects as its argument
@@ -378,7 +380,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
           <div className="justify-left md:w-[calc(100% - 200px)] mb-3 flex w-[80%] md:ml-0 lg:mb-0 ">
             <div className="relative w-full">
               <input
-                type="search"
+                type="text"
                 className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding py-1.5 pl-8 pr-3 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
                 id="StudentsSearch"
                 placeholder="Search students by name"
@@ -398,6 +400,16 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
               >
                 {magnifying_glass}
               </i>
+              {studentNameSearch && studentNameSearch.length > 0 && (
+                <i
+                  className="absolute bottom-1 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                  onClick={() => {
+                    setStudentNameSearch('');
+                  }}
+                >
+                  {x_mark}
+                </i>
+              )}
             </div>
           </div>
 

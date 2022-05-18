@@ -41,6 +41,7 @@ import ProjectConflict from '../../components/projects/ProjectConflict';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
+const x_mark = <Icon icon="bx:x" />;
 
 /**
  * function that allows searching projects by name
@@ -449,7 +450,7 @@ const Projects: NextPage = () => {
                     >
                       <div className="lg:w-[calc(100% - 200px)] relative mx-4 w-full md:mr-0">
                         <input
-                          type="search"
+                          type="text"
                           className={`${
                             showConflicts
                               ? 'bg-gray cursor-not-allowed'
@@ -458,6 +459,7 @@ const Projects: NextPage = () => {
                           id="ProjectsSearch"
                           placeholder="Search projects by name"
                           disabled={showConflicts}
+                          value={projectSearch}
                           onChange={(e) =>
                             setProjectSearch(e.target.value || '')
                           }
@@ -481,6 +483,19 @@ const Projects: NextPage = () => {
                         >
                           {magnifying_glass}
                         </i>
+                        {projectSearch && projectSearch.length > 0 && (
+                          <i
+                            className="absolute bottom-1 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                            onClick={() => {
+                              if (showConflicts) {
+                                return;
+                              }
+                              setProjectSearch('');
+                            }}
+                          >
+                            {x_mark}
+                          </i>
+                        )}
                       </div>
                       <div
                         className={`${
