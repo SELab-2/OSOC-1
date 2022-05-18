@@ -22,12 +22,12 @@ const Index = () => {
           router.push('/users');
           break;
 
-        default:
+        case UserRole.Disabled:
           router.push('/wait');
           break;
       }
     }
-  }, []);
+  }, [user]);
 
   return <></>;
 };
