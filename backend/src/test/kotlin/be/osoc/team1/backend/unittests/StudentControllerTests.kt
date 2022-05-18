@@ -270,7 +270,15 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(get("$editionUrl?skills=\"Backend\",\"Frontend\"").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+
+        // Test if skills without the required quotes return a 400 bad request
         mockMvc.perform(get("$editionUrl?skills=Backend").principal(defaultPrincipal))
+            .andExpect(status().isBadRequest)
+        mockMvc.perform(get("$editionUrl?skills=\"Backend").principal(defaultPrincipal))
+            .andExpect(status().isBadRequest)
+        mockMvc.perform(get("$editionUrl?skills=Backend\"").principal(defaultPrincipal))
+            .andExpect(status().isBadRequest)
+        mockMvc.perform(get("$editionUrl?skills=_").principal(defaultPrincipal))
             .andExpect(status().isBadRequest)
     }
 
