@@ -252,7 +252,9 @@ def make_student():
                     "key": "question_meaEKo",
                     "label": "How would you rate your English?",
                     "type": "MULTIPLE_CHOICE",
-                    "value": "847b9bb9-6df8-4021-9ecf-e73ba7417929",
+                    "value": random.choice(["847b9bb9-6df8-4021-9ecf-e73ba7417929", "e2e0ca25-9540-4a9c-a7f7-ffcd0f4aa431",
+                                            "ef5e1910-80af-4811-b493-813222ae4953", "f60a56c8-b04e-4841-9216-465617d27836",
+                                            "847b9bb9-6df8-4021-9ecf-e73ba7417929"]),
                     "options": [
                         {
                             "id": "e2e0ca25-9540-4a9c-a7f7-ffcd0f4aa431",
@@ -280,13 +282,13 @@ def make_student():
                     "key": "question_nW80DQ",
                     "label": "Phone number",
                     "type": "INPUT_PHONE_NUMBER",
-                    "value": "65465465465465"
+                    "value": fake.phone_number()
                 },
                 {
                     "key": "question_wa2GKy",
                     "label": "Your email address\n",
                     "type": "INPUT_EMAIL",
-                    "value": "lfjqlksdjmfksdjkl@gmail.com"
+                    "value": fake.ascii_company_email()
                 },
                 {
                     "key": "question_m6ZxA5",
@@ -358,7 +360,7 @@ def make_student():
                     "key": "question_mKV0vK",
                     "label": "Add a fun fact about yourself",
                     "type": "TEXTAREA",
-                    "value": "flsdqflkjsdlkfjklqsdjflkjsdqlkfjqlskdjflkjqsdlkfjksljmk"
+                    "value": fake.paragraph()
                 },
                 {
                     "key": "question_wLP0v2",
