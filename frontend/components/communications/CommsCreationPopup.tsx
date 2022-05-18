@@ -83,9 +83,7 @@ const CommsCreationPopup: FC<CCPProps> = ({
               className="grid grid-cols-4 justify-items-center gap-y-2"
               onSubmit={submit}
             >
-              <label
-                className='col-span-2 pl-2 w-9/12'
-              >
+              <label className="col-span-2 w-9/12 pl-2">
                 Student
                 <Select
                   className="mt-1"
