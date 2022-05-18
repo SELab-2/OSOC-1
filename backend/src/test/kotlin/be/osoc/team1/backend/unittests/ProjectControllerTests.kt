@@ -278,10 +278,10 @@ class ProjectControllerTests(@Autowired private val mockMvc: MockMvc) {
         val testProjectConflict2 = Project("Test", "Client", "a test project", testEdition)
         val result = mutableListOf(
             ProjectService.Conflict(
-                "https://example.com/api/students/" + testStudent.id,
+                "http://example.com/api/students/" + testStudent.id,
                 mutableListOf(
-                    "https://example.com/api/projects/" + testProjectConflict.id,
-                    "https://example.com/api/projects/" + testProjectConflict2.id
+                    "http://example.com/api/projects/" + testProjectConflict.id,
+                    "http://example.com/api/projects/" + testProjectConflict2.id
                 )
             )
         )

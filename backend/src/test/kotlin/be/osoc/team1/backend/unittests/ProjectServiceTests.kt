@@ -219,7 +219,7 @@ class ProjectServiceTests {
         val service = ProjectService(repository, mockk(), getUserService())
 
         val mockRequest = MockHttpServletRequest()
-        mockRequest.scheme = "https"
+        mockRequest.scheme = "http"
         mockRequest.serverName = "example.com"
         mockRequest.serverPort = -1
         mockRequest.contextPath = "/api"
@@ -227,19 +227,19 @@ class ProjectServiceTests {
         val conflictList = service.getConflicts(testEdition)
         assert(
             conflictList[0] == ProjectService.Conflict(
-                "https://example.com/api/$testEdition/students/" + testStudent.id,
+                "http://example.com/api/$testEdition/students/" + testStudent.id,
                 mutableListOf(
-                    "https://example.com/api/$testEdition/projects/" + testProjectConflict.id,
-                    "https://example.com/api/$testEdition/projects/" + testProjectConflict2.id
+                    "http://example.com/api/$testEdition/projects/" + testProjectConflict.id,
+                    "http://example.com/api/$testEdition/projects/" + testProjectConflict2.id
                 )
             )
         )
         assert(
             conflictList[1] == ProjectService.Conflict(
-                "https://example.com/api/$testEdition/students/" + testStudent2.id,
+                "http://example.com/api/$testEdition/students/" + testStudent2.id,
                 mutableListOf(
-                    "https://example.com/api/$testEdition/projects/" + testProjectConflict2.id,
-                    "https://example.com/api/$testEdition/projects/" + testProjectConflict3.id
+                    "http://example.com/api/$testEdition/projects/" + testProjectConflict2.id,
+                    "http://example.com/api/$testEdition/projects/" + testProjectConflict3.id
                 )
             )
         )
@@ -248,8 +248,8 @@ class ProjectServiceTests {
 
     @Test
     fun `Conflicts dataclass one argument constructor test`() {
-        val conflict = ProjectService.Conflict("https://example.com/api/students/" + testStudent.id)
-        assert(conflict.student == "https://example.com/api/students/" + testStudent.id)
+        val conflict = ProjectService.Conflict("http://example.com/api/students/" + testStudent.id)
+        assert(conflict.student == "http://example.com/api/students/" + testStudent.id)
         assert(conflict.projects == mutableListOf<String>())
     }
 

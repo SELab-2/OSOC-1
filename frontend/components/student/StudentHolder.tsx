@@ -1,10 +1,10 @@
-import { ItemTypes, Student, StudentBase } from '../../lib/types';
+import { ItemTypes, Student, StudentBaseList } from '../../lib/types';
 import { useDrop } from 'react-dnd';
 import StudentView from './StudentView';
 
 type StudentHolderProp = {
-  studentBase: StudentBase;
-  setStudentBase: (studentBase: StudentBase) => void;
+  studentBase: StudentBaseList;
+  setStudentBase: (studentBase: StudentBaseList) => void;
 };
 
 const StudentHolder: React.FC<StudentHolderProp> = ({
@@ -26,7 +26,7 @@ const StudentHolder: React.FC<StudentHolderProp> = ({
         );
       },
       drop: (item) => {
-        setStudentBase(item as StudentBase);
+        setStudentBase(item as StudentBaseList);
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
@@ -45,6 +45,11 @@ const StudentHolder: React.FC<StudentHolderProp> = ({
           studentInput={studentBase}
           setOriginalStudentBase={setStudentBase}
         />
+      )}
+      {!studentBase.id && (
+        <h4 className="mt-4 text-center text-lg">
+          Click or drag a student to begin.
+        </h4>
       )}
     </section>
   );

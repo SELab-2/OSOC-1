@@ -4,6 +4,7 @@ import {
   StatusSuggestionBase,
   Student,
   StudentBase,
+  StudentBaseList,
   Url,
   User,
   UserRole,
@@ -17,7 +18,11 @@ import {
   faQuestion,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
-import { convertStudentBase } from '../../lib/conversionUtils';
+import {
+  convertStudentBase,
+  convertStudentBaseList,
+  convertStudentFullToList,
+} from '../../lib/conversionUtils';
 import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
@@ -25,19 +30,36 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import Error from '../Error';
+import axios, { AxiosError } from 'axios';
+import { Icon } from '@iconify/react';
+import Popup from 'reactjs-popup';
+
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
 const x_mark = <FontAwesomeIcon icon={faXmark} />;
+const speech_bubble = <Icon icon="simple-line-icons:speech" />;
+const trash_can = <Icon icon="fa-solid:trash-alt" />;
 
 type StudentViewProp = {
-  studentInput: StudentBase;
-  setOriginalStudentBase: (originalStudentBase: StudentBase) => void;
+  studentInput: StudentBaseList;
+  setOriginalStudentBase: (originalStudentBase: StudentBaseList) => void;
 };
 
 type StatusSuggestionProp = {
   statusSuggestion: StatusSuggestion;
 };
 
+/**
+ * Function to set the status of a student, this is an admin only function
+ * This function does NOT check if the new status is different from the old one
+ * @param status - new status for the student
+ * @param studentId - id for student to change status for
+ * @param myStudent - original student, used to avoid having to reload page
+ * @param setMyStudent - callback to set new student object with changed status
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
 async function setStudentStatus(
   status: { value: string; label: string },
   studentId: UUID,
@@ -50,7 +72,7 @@ async function setStudentStatus(
   const edition = router.query.editionName as string;
   await axiosAuthenticated
     .post(
-      '/' + edition + Endpoints.STUDENTS + '/' + studentId + '/status', // TODO import this url somehow
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.STATUS}`,
       status.label
     )
     .then(() => {
@@ -63,6 +85,78 @@ async function setStudentStatus(
     });
 }
 
+/**
+ * Function to remove a suggestion from a user, the suggestion is defined by the id of the suggester
+ *
+ * @param studentId - id of student to remove a suggestion from
+ * @param coachId - id of suggester for suggestion to remove
+ * @param setStudentBase - callback to set reloaded student
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
+async function removeStudentSuggestion(
+  studentId: UUID,
+  coachId: UUID,
+  setStudentBase: (studentBase: StudentBase) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  const edition = router.query.editionName as string;
+  await axiosAuthenticated
+    .delete(
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}/${coachId}`
+    )
+    .then(() => {
+      reloadStudent(studentId, setStudentBase, signal, setError, router);
+    })
+    .catch((err) => {
+      parseError(err, setError, signal, router);
+    });
+}
+
+/**
+ * Function to remove a student
+ * This function does not perform any authority checks before deleting!
+ *
+ * @param studentId - id of student to remove
+ * @param setOriginalStudentBase - Callback to set student object to null after deletion
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
+async function removeStudent(
+  studentId: UUID,
+  setOriginalStudentBase: (studentBaseList: StudentBaseList) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  const edition = router.query.editionName as string;
+  await axiosAuthenticated
+    .delete(`/${edition}${Endpoints.STUDENTS}/${studentId}`)
+    .then(() => {
+      setOriginalStudentBase({} as StudentBaseList);
+    })
+    .catch((err) => {
+      parseError(err, setError, signal, router);
+    });
+}
+
+/**
+ * Function to set a new suggestion for a student, student will be reloaded afterwards
+ * Note: This function will perform a delete first since suggestions can't be changed
+ *
+ * @param status - status to suggest
+ * @param studentId - id of student to set suggestion for
+ * @param coachId - id of suggester, should be current user
+ * @param motivation - motivation for the suggestion
+ * @param setStudentBase - callback to set new student after reload
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
 async function setStudentSuggestion(
   status: string,
   studentId: UUID,
@@ -75,8 +169,25 @@ async function setStudentSuggestion(
 ) {
   const edition = router.query.editionName as string;
   await axiosAuthenticated
+    .delete(
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}/${coachId}`
+    )
+    .catch((err) => {
+      // Ignore 400 bad request error since we're deleting without knowing if it exists
+      // A 404 student not found or 401 user is not coachId are not an errors we want to ignore
+      if (axios.isAxiosError(err)) {
+        const _error = err as AxiosError;
+        if (_error.response?.status !== 400) {
+          parseError(err, setError, signal, router);
+        }
+      } else {
+        parseError(err, setError, signal, router);
+      }
+    });
+
+  await axiosAuthenticated
     .post(
-      '/' + edition + Endpoints.STUDENTS + '/' + studentId + '/suggestions', // TODO import this url somehow
+      `/${edition}${Endpoints.STUDENTS}/${studentId}${Endpoints.SUGGESTIONS}`,
       {
         suggester: '/' + edition + Endpoints.USERS + '/' + coachId,
         status: status,
@@ -91,6 +202,15 @@ async function setStudentSuggestion(
     });
 }
 
+/**
+ * Reload student with given id, the reload URL is hardcoded
+ *
+ * @param studentId - id of student to reload
+ * @param setStudentBase - callback to set the response from the reload
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 400 response
+ */
 function reloadStudent(
   studentId: UUID,
   setStudentBase: (studentBase: StudentBase) => void,
@@ -109,7 +229,7 @@ function reloadStudent(
     });
 }
 
-// TODO Communication not yet included!!
+// WONTFIX Communication not included
 /**
  * Function to dereference needed student fields
  *
@@ -169,10 +289,13 @@ const StudentView: React.FC<StudentViewProp> = ({
 }: StudentViewProp) => {
   const [user] = useUser();
   // Needed to reload student when a suggestion is done or status is changed
-  // TODO don't reload everything when only status or suggestions are changed, save the rest somewhere
-  const [studentBase, setStudentBase] = useState(studentInput as StudentBase);
+  const [studentBaseList, setStudentBaseList] = useState(
+    studentInput as StudentBaseList
+  );
+  // WONTFIX don't reload everything when only status or suggestions are changed, save the rest somewhere
+  const [studentBase, setStudentBase] = useState({} as StudentBase);
   const [myStudent, setMyStudent]: [Student, (myStudent: Student) => void] =
-    useState(convertStudentBase(studentBase) as Student);
+    useState(convertStudentBaseList(studentInput) as Student);
 
   const [status, setStatus] = useState({
     value: '',
@@ -180,23 +303,35 @@ const StudentView: React.FC<StudentViewProp> = ({
   } as { value: string; label: string });
   const [suggestion, setSuggestion] = useState('');
   const [motivation, setMotivation] = useState('');
-
+  const [deletePopup, setDeletePopup] = useState(false);
   const [error, setError]: [string, (error: string) => void] = useState('');
   const router = useRouter();
   let controller = new AbortController();
 
   useEffect(() => {
-    setMotivation('');
-    setStudentBase(studentInput);
+    setStudentBaseList(studentInput);
   }, [studentInput]);
+
+  useEffect(() => {
+    setMotivation('');
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    reloadStudent(studentBaseList.id, setStudentBase, signal, setError, router);
+    return () => {
+      controller.abort();
+    };
+  }, [studentBaseList]);
 
   useEffect(() => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
+    if (studentBase.id !== undefined && studentBase.id !== studentInput.id) {
+      setOriginalStudentBase(convertStudentFullToList(studentBase));
+    }
     // This is a safety check, not really needed right now but it avoids accidents
     if (studentBase.id !== undefined) {
-      setOriginalStudentBase(studentBase);
       setStatus({ value: '', label: studentBase.status } as {
         value: string;
         label: string;
@@ -226,10 +361,22 @@ const StudentView: React.FC<StudentViewProp> = ({
       {error && <Error error={error} className="mb-4" />}
       {/* hold the student information */}
       <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
-        <div>
+        <div className="flex flex-row">
           <h4 className="font-bold">
             {myStudent.firstName + ' ' + myStudent.lastName}
           </h4>
+          {user.role == UserRole.Admin && (
+            <div className="ml-2 flex flex-col justify-center">
+              <i
+                onClick={() => {
+                  setDeletePopup(true);
+                }}
+                className="icon-trashcan-red cursor-pointer"
+              >
+                {trash_can}
+              </i>
+            </div>
+          )}
         </div>
         <div className="flex flex-col">
           <h5 className="font-bold">Suggestions</h5>
@@ -263,16 +410,27 @@ const StudentView: React.FC<StudentViewProp> = ({
             controller.abort();
             controller = new AbortController();
             const signal = controller.signal;
-            setStudentSuggestion(
-              suggestion,
-              studentBase.id,
-              user.id,
-              motivation,
-              setStudentBase,
-              signal,
-              setError,
-              router
-            );
+            if (suggestion == 'Remove') {
+              removeStudentSuggestion(
+                studentBase.id,
+                user.id,
+                setStudentBase,
+                signal,
+                setError,
+                router
+              );
+            } else {
+              setStudentSuggestion(
+                suggestion,
+                studentBase.id,
+                user.id,
+                motivation,
+                setStudentBase,
+                signal,
+                setError,
+                router
+              );
+            }
             return () => {
               controller.abort();
             };
@@ -308,6 +466,18 @@ const StudentView: React.FC<StudentViewProp> = ({
             value={motivation}
             onChange={(e) => setMotivation(e.target.value || '')}
           />
+          {/* button to remove suggestion, only shows when user has a suggestion */}
+          {myStudent.statusSuggestions.filter(
+            (sugg) => sugg.suggester.id === user.id
+          ).length > 0 && (
+            <button
+              className={`w-[100%] bg-check-gray py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              onClick={() => setSuggestion('Remove')}
+              type={`submit`}
+            >
+              Remove Suggestion
+            </button>
+          )}
         </form>
 
         {/* admin status selection form */}
@@ -317,13 +487,13 @@ const StudentView: React.FC<StudentViewProp> = ({
           } mt-10 flex flex-row justify-between border-2 p-2`}
           onSubmit={(e) => {
             e.preventDefault();
-            if (status.label != studentBase.status) {
+            if (status.label != myStudent.status) {
               controller.abort();
               controller = new AbortController();
               const signal = controller.signal;
               setStudentStatus(
                 status,
-                studentBase.id,
+                myStudent.id,
                 myStudent,
                 setMyStudent,
                 signal,
@@ -347,18 +517,18 @@ const StudentView: React.FC<StudentViewProp> = ({
                 classNamePrefix="select"
                 isDisabled={false}
                 isLoading={false}
-                isClearable={true}
+                isClearable={false}
                 isRtl={false}
                 isSearchable={false}
                 isMulti={false}
                 name="Status"
                 placeholder="Select Status"
-                // TODO don't hardcode this
+                // WONTFIX don't hardcode this
                 options={[
-                  { value: '', label: 'Yes' },
-                  { value: '', label: 'No' },
-                  { value: '', label: 'Maybe' },
-                  { value: '', label: 'Undecided' },
+                  { value: 'Yes', label: 'Yes' },
+                  { value: 'No', label: 'No' },
+                  { value: 'Maybe', label: 'Maybe' },
+                  { value: 'Undecided', label: 'Undecided' },
                 ]}
                 value={status}
                 onChange={(e) => {
@@ -379,6 +549,63 @@ const StudentView: React.FC<StudentViewProp> = ({
           </button>
         </form>
       </div>
+      {/* This is the popup to confirm deleting a student */}
+      <Popup
+        open={deletePopup}
+        onClose={() => setDeletePopup(false)}
+        data-backdrop="static"
+        data-keyboard="false"
+        closeOnDocumentClick={false}
+        lockScroll={true}
+      >
+        <div className="modal chart-label max-w-screen absolute left-1/2 top-1/2 flex max-h-[85vh] min-w-[450px] flex-col bg-osoc-neutral-bg py-5">
+          <a
+            className="close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeletePopup(false);
+            }}
+          >
+            &times;
+          </a>
+          <h3 className="px-5 text-lg">
+            Are you sure you wish to permanently delete{' '}
+            <i>{studentBase.firstName + ' ' + studentBase.lastName}</i>?
+          </h3>
+          <div className="mt-3 flex flex-row justify-between px-5">
+            <button
+              onClick={() => setDeletePopup(false)}
+              className={`min-w-[120px] border-2 bg-white`}
+            >
+              Cancel
+            </button>
+
+            <button
+              className={`min-w-[120px] border-2 bg-check-red py-1`}
+              onClick={() => {
+                setDeletePopup(false);
+                if (user.role == UserRole.Admin) {
+                  controller.abort();
+                  controller = new AbortController();
+                  const signal = controller.signal;
+                  removeStudent(
+                    myStudent.id,
+                    setOriginalStudentBase,
+                    signal,
+                    setError,
+                    router
+                  );
+                  return () => {
+                    controller.abort();
+                  };
+                }
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Popup>
     </div>
   );
 };
@@ -400,6 +627,13 @@ const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
     <div className="flex flex-row">
       <i className={`${myColor} w-[30px] px-2`}>{myLabel}</i>
       <p className="">{statusSuggestion.suggester.username}</p>
+      <div className="tooltip pl-2 pt-1">
+        <i className="icon-speech-blue text-xs">{speech_bubble}</i>
+        {/* TODO Make this tooltip look nicer */}
+        <span className="tooltiptext bg-osoc-neutral-bg">
+          {statusSuggestion.motivation}
+        </span>
+      </div>
     </div>
   );
 };

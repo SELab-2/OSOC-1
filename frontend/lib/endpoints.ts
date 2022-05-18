@@ -12,6 +12,8 @@ enum Endpoints {
   STUDENTS = '/students',
   SKILLS = '/skills',
   FORGOTPASSWORD = '/forgotPassword',
+  SUGGESTIONS = '/suggestions',
+  STATUS = '/status',
   CONFLICTS = '/projects/conflicts',
 }
 
