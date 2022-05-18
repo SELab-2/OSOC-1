@@ -10,13 +10,12 @@ const Index = () => {
   const [user] = useUser();
 
   useEffect(() => {
-    
     if (edition) {
       router.push(`/${edition}/projects`);
     } else {
       switch (user.role) {
         case UserRole.Admin:
-          router.push("/editions");
+          router.push('/editions');
           break;
 
         case UserRole.Coach:
@@ -28,7 +27,7 @@ const Index = () => {
           break;
       }
     }
-  });
+  }, []);
 
   return <></>;
 };
