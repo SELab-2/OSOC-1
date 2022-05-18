@@ -32,6 +32,9 @@ type StudentFormViewProp = {
   answers: Answer[];
 };
 
+/**
+ * Displays the answers the student gave in the tally form in a condensed fashion.
+ */
 const StudentFormView: React.FC<StudentFormViewProp> = ({answers}: StudentFormViewProp) => {
   const getAnswerByKey = (key: string) => answers.find(a => a.key == `question_${key}`)?.answer[0];
   const answerIsYes = (key: string) => getAnswerByKey(key)?.toLowerCase().startsWith("yes") || false;
@@ -100,6 +103,10 @@ type CheckmarkListProp = {
   label: string
 };
 
+/**
+ * Displays either a checkmark or an x mark depending on the value of isCheckmark.
+ * Next to this symbol, the given label is rendered as a paragraph.
+ */
 const CheckmarkList: React.FC<CheckmarkListProp> = ({isCheckmark, label}: CheckmarkListProp) => {
   const symbol = isCheckmark ? check_mark : x_mark;
   const color = isCheckmark ? "text-check-green" : "text-check-red";
