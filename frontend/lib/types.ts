@@ -252,12 +252,14 @@ export enum CommunicationType {
 export type Communication = {
   message: string;
   type: CommunicationType;
+  id: UUID;
 };
 
 export type StudentComm = {
-  id: string;
+  studentId: UUID;
   name: string;
   commMessage: string;
+  id: UUID;
 };
 
 /**

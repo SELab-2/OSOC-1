@@ -89,9 +89,10 @@ const communications = () => {
           );
           curStudentComms.forEach((csc) => {
             studentComms.push({
-              id: student.id,
+              studentId: student.id,
               name: student.firstName + ' ' + student.lastName,
               commMessage: csc.message,
+              id: csc.id,
             });
           });
         }
@@ -140,7 +141,7 @@ const communications = () => {
 
   const createCommunication = async (studentId: string, message: string) => {
     try {
-      await axiosAuth.post(
+      const response = await axiosAuth.post<Communication>(
         `/${edition}` + Endpoints.COMMS + `/${studentId}`,
         JSON.stringify({
           message,
@@ -154,7 +155,12 @@ const communications = () => {
       setCommunications((prev) => {
         const newComms = [
           ...prev,
-          { id: studentId, name, commMessage: message } as StudentComm,
+          {
+            studentId: studentId,
+            name,
+            commMessage: message,
+            id: response.data.id,
+          } as StudentComm,
         ];
         newComms.sort((a, b) => (a.name >= b.name ? 1 : -1));
         return newComms;
