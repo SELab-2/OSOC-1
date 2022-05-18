@@ -223,8 +223,10 @@ const Projects: NextPage = () => {
 
   useEffect(() => {
     state.page = 0;
-    return search();
-  }, []);
+    if (router.isReady) {
+      return search();
+    }
+  }, [router.isReady]);
 
   useEffect(() => {
     if (!showConflicts) {
@@ -296,6 +298,9 @@ const Projects: NextPage = () => {
    */
   usePoll(
     () => {
+      if (!router.isReady) {
+        return;
+      }
       if (!state.loading && { isOnScreen }.isOnScreen && !showConflicts) {
         controller.abort();
         controller = new AbortController();
@@ -335,7 +340,13 @@ const Projects: NextPage = () => {
         };
       }
     },
-    [state, projectSearch, { isOnScreen }.isOnScreen, showConflicts],
+    [
+      state,
+      projectSearch,
+      { isOnScreen }.isOnScreen,
+      showConflicts,
+      router.isReady,
+    ],
     {
       interval: 3000,
     }

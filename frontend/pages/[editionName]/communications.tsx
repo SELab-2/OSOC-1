@@ -112,21 +112,12 @@ const communications = () => {
   };
 
   /**
-   * Fetch first batch of data on load
-   */
-  useEffect(() => {
-    const abortController = new AbortController();
-    getStudentsAndComms({ page: 0, abortController });
-
-    return () => {
-      abortController.abort();
-    };
-  }, []);
-
-  /**
    * Keep loading new data as long as the loadState states that there is more data to be fetched
    */
   useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
     const abortController = new AbortController();
     if (!loadState.hasMore) {
       setLoading(false);
@@ -137,7 +128,7 @@ const communications = () => {
     return () => {
       abortController.abort();
     };
-  }, [loadState]);
+  }, [loadState, router.isReady]);
 
   const createCommunication = async (studentId: string, message: string) => {
     try {

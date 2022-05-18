@@ -222,10 +222,15 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * This will also get called on first render
    */
   useEffect(() => {
-    if ({ isOnScreen }.isOnScreen) {
+    if ({ isOnScreen }.isOnScreen && router.isReady) {
       return search(true);
     }
-  }, [studentSearchParameters, skills, { isOnScreen }.isOnScreen]);
+  }, [
+    studentSearchParameters,
+    skills,
+    { isOnScreen }.isOnScreen,
+    router.isReady,
+  ]);
 
   /**
    * Call to refresh students list from page 0 with current filters applied
@@ -272,6 +277,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    */
   usePoll(
     () => {
+      if (!router.isReady) {
+        return;
+      }
       if (!state.loading && { isOnScreen }.isOnScreen) {
         controller.abort();
         controller = new AbortController();
@@ -301,7 +309,13 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
         };
       }
     },
-    [state, studentSearchParameters, skills, { isOnScreen }.isOnScreen],
+    [
+      state,
+      studentSearchParameters,
+      skills,
+      { isOnScreen }.isOnScreen,
+      router.isReady,
+    ],
     {
       interval: 3000,
     }

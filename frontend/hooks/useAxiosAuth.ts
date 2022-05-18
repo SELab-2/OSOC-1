@@ -2,6 +2,7 @@ import { axiosAuthenticated } from '../lib/axios';
 import useTokens from './useTokens';
 import useRefreshToken from './useRefreshToken';
 import { useEffect } from 'react';
+import { useMutex } from 'react-context-mutex';
 
 const UNAUTHORIZED_STATUSES = [401, 403];
 
@@ -22,6 +23,8 @@ const UNAUTHORIZED_STATUSES = [401, 403];
 const useAxiosAuth = () => {
   const refresh = useRefreshToken();
   const [tokens] = useTokens();
+  const MutexRunner = useMutex();
+  const mutex = new MutexRunner('myUniqueKey1');
 
   useEffect(() => {
     const requestIntercept = axiosAuthenticated.interceptors.request.use(
@@ -53,24 +56,32 @@ const useAxiosAuth = () => {
           UNAUTHORIZED_STATUSES.includes(error?.response?.status) &&
           !prevRequest?.sent
         ) {
-          try {
-            prevRequest.sent = true;
+          mutex.run(async () => {
+            try {
+              mutex.lock();
+              prevRequest.sent = true;
 
-            // check for an existing in-progress request
-            if (refreshTokenPromise === null) {
-              refreshTokenPromise = refresh().then((token) => {
-                refreshTokenPromise = null; // clear state
-                return token; // resolve with the new token
+              // check for an existing in-progress request
+              if (refreshTokenPromise === null) {
+                refreshTokenPromise = refresh().then((token) => {
+                  refreshTokenPromise = null; // clear state
+                  mutex.unlock();
+                  return token; // resolve with the new token
+                });
+              }
+
+              return refreshTokenPromise.then((newAccessToken) => {
+                prevRequest.headers[
+                  'Authorization'
+                ] = `Basic ${newAccessToken}`;
+                mutex.unlock();
+                return axiosAuthenticated(prevRequest);
               });
+            } catch (err: unknown) {
+              mutex.unlock();
+              return Promise.reject(err);
             }
-
-            return refreshTokenPromise.then((newAccessToken) => {
-              prevRequest.headers['Authorization'] = `Basic ${newAccessToken}`;
-              return axiosAuthenticated(prevRequest);
-            });
-          } catch (err: unknown) {
-            return Promise.reject(err);
-          }
+          });
         }
         return Promise.reject(error);
       }

@@ -26,7 +26,9 @@ export function parseError(
       router.push('/login');
       return;
     }
-    setError(_error.response?.statusText || 'An unknown error occurred');
+    if (_error.response?.status !== 401) {
+      setError(_error.response?.statusText || 'An unknown error occurred');
+    }
   } else {
     setError('An unknown error occurred');
   }
