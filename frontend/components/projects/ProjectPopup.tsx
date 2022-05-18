@@ -296,6 +296,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
   );
 
   const [formError, setFormError] = useState('');
+  const [skillsLoaded, setSkillsLoaded] = useState(false);
 
   /**
    * When a new skill is created by the user, add it to the options
@@ -312,12 +313,37 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     controller = new AbortController();
     const signal = controller.signal;
     getSkills(setSkillOptions, signal, setError, router);
-    // TODO set skillOption values to position id's
     getCoaches(setCoachOptions, signal, setError, router);
+    setSkillsLoaded(true);
     return () => {
       controller.abort();
     };
   }, []);
+
+  /**
+   * This is needed to set the id's of the original positions
+   * otherwise all positions would be deleted and then remade with a new id,
+   * this would destroy the link between assignments and positions
+   */
+  useEffect(() => {
+    if (skillsLoaded && skillOptions.length > 0) {
+      const projectPositions = projectForm.positions.map(
+        (position) => position.skill
+      );
+      const newSkillOptions = [] as { value: string; label: string }[];
+      skillOptions.forEach((option) => {
+        for (const projectPosition of projectPositions) {
+          if (projectPosition.label === option.label) {
+            option.value = projectPosition.value;
+            break;
+          }
+        }
+        newSkillOptions.push(option);
+      });
+      setSkillOptions(newSkillOptions);
+      setSkillsLoaded(false);
+    }
+  }, [skillsLoaded, skillOptions]);
 
   return (
     <form
@@ -412,7 +438,6 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
       >
         <Fragment>
           {(projectForm.positions as positionForm[]).map((position, index) => {
-            console.log(skillOptions);
             return (
               <div
                 className={`flex flex-row justify-between px-5 ${
@@ -440,7 +465,6 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                     }
                     placeholder="Position"
                     onChange={(e) => {
-                      console.log(e);
                       setPositionDropdownValue(
                         index,
                         e ? e : ({} as { value: string; label: string })
@@ -475,7 +499,6 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                   <div className="ml-4 flex flex-col justify-center">
                     <i
                       onClick={() => {
-                        console.log(index);
                         removePositionDropdown(index);
                       }}
                       className="icon-xcircle-red text-[36px]"
@@ -515,7 +538,11 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
 
       <div className="mt-3 flex flex-row justify-between px-5">
         <button
-          onClick={() => setShowPopup(false)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowPopup(false);
+          }}
           className={`min-w-[120px] border-2 bg-white`}
         >
           Cancel
