@@ -3,6 +3,7 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.StudentViewEnum
 import be.osoc.team1.backend.entities.filterByAlumn
 import be.osoc.team1.backend.entities.filterByName
 import be.osoc.team1.backend.entities.filterByNotYetAssigned
@@ -14,12 +15,12 @@ import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.OsocUserDetailService
-import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.applyIf
 import be.osoc.team1.backend.services.page
 import be.osoc.team1.backend.util.TallyDeserializer
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URLDecoder
 import java.security.Principal
 import java.util.UUID
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/{edition}/students")
@@ -54,6 +56,12 @@ class StudentController(
      * by [status] (default value allows all statuses), by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
      * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
+     *
+     * The returned students can also be altered using the [view] query parameter:
+     * [Basic] will limit the data the student object contains,
+     * [Communication] is limited but has the communication field of the student,
+     * [List] is limited but has the required fields for a list view,
+     * [Full] will return the full object.
      */
     @GetMapping
     @Secured("ROLE_COACH")
@@ -69,9 +77,11 @@ class StudentController(
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
         @RequestParam(defaultValue = "false") studentCoachOnly: Boolean,
         @RequestParam(defaultValue = "false") unassignedOnly: Boolean,
+        @RequestParam(defaultValue = "Full") view: StudentViewEnum,
         @PathVariable edition: String,
-        principal: Principal
-    ): PagedCollection<Student> {
+        principal: Principal,
+        response: HttpServletResponse
+    ): String? {
         /*
          * A trailing comma in the status filter will create a null value in the status set. This check handles that
          * seemingly impossible scenario and returns status code 400(Bad request).
@@ -82,7 +92,7 @@ class StudentController(
         val decodedName = URLDecoder.decode(name, "UTF-8")
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
-        return service.getAllStudents(Sort.by(sortBy), edition)
+        val filteredStudents = service.getAllStudents(Sort.by(sortBy), edition)
             .applyIf(studentCoachOnly) { filterByStudentCoach() }
             .applyIf(alumnOnly) { filterByAlumn() }
             .applyIf(name.isNotBlank()) { filterByName(decodedName) }
@@ -91,17 +101,29 @@ class StudentController(
             .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
+
+        return ObjectMapper().writerWithView(studentViewEnumToStudentView(view)).writeValueAsString(filteredStudents)
     }
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists, returns a
      * "404: Not Found" message instead.
+     *
+     * The returned student can also be altered using the [view] query parameter:
+     * [Basic] will limit the data the student object contains,
+     * [Communication] is limited but has the communication field of the student,
+     * [List] is limited but has the required fields for a list view,
+     * [Full] will return the full object.
      */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
     @SecuredEdition
-    fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
-        service.getStudentById(studentId, edition)
+    fun getStudentById(
+        @PathVariable studentId: UUID,
+        @PathVariable edition: String,
+        @RequestParam(defaultValue = "Full") view: StudentViewEnum
+    ): String = ObjectMapper().writerWithView(studentViewEnumToStudentView(view))
+        .writeValueAsString(service.getStudentById(studentId, edition))
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
@@ -124,7 +146,6 @@ class StudentController(
      * verification is the responsibility of the caller.
      */
     @PostMapping
-    @SecuredEdition
     fun addStudent(
         @RequestBody studentRegistration: Student,
         @PathVariable edition: String
@@ -137,8 +158,8 @@ class StudentController(
             studentRegistration.skills,
             studentRegistration.alumn,
             studentRegistration.possibleStudentCoach,
-            studentRegistration.answers
         )
+        student.answers = studentRegistration.answers
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
@@ -163,7 +184,11 @@ class StudentController(
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
     @SecuredEdition
-    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
+    fun setStudentStatus(
+        @PathVariable studentId: UUID,
+        @RequestBody status: StatusEnum,
+        @PathVariable edition: String
+    ) =
         service.setStudentStatus(studentId, status, edition)
 
     /**

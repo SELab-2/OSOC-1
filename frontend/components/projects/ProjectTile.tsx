@@ -36,6 +36,7 @@ const edit_icon = <Icon icon="akar-icons:edit" />;
 type ProjectProp = {
   projectInput: ProjectBase;
   refreshProjects: () => void;
+  conflictStudents: UUID[];
 };
 
 type UserProp = {
@@ -51,6 +52,7 @@ type AssignmentProp = {
   setOpenUnassignment: (openUnAssignment: boolean) => void;
   setAssignmentId: (assignmentId: UUID) => void;
   setRemoveStudentName: (removeStudentName: string) => void;
+  conflictStudents: UUID[];
 };
 
 /**
@@ -65,7 +67,7 @@ type AssignmentProp = {
  * @param setMyProjectBase  - callback for reloadProject that is called after this POST completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 // TODO when post is finished, should update the student filter
 function postStudentToProject(
@@ -107,7 +109,7 @@ function postStudentToProject(
  * @param setMyProjectBase    - callback for reloadProject that is called after this DELETE completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function deleteStudentFromProject(
   projectId: UUID,
@@ -142,7 +144,7 @@ function deleteStudentFromProject(
  * @param projectId - the UUID of the project to remove
  * @param refreshProjects - callback to update main projects list
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function deleteProject(
   projectId: UUID,
@@ -169,7 +171,7 @@ function deleteProject(
  * @param setMyProjectBase - a hook to set the reloaded project information
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function reloadProject(
   projectId: UUID,
@@ -195,7 +197,7 @@ function reloadProject(
  * @param setLoading - callback to set when loading is finished
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 async function getEntireProject(
   projectBase: ProjectBase,
@@ -280,6 +282,7 @@ async function getEntireProject(
 const ProjectTile: React.FC<ProjectProp> = ({
   projectInput,
   refreshProjects,
+  conflictStudents,
 }: ProjectProp) => {
   const router = useRouter();
   const [user] = useUser();
@@ -464,6 +467,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               setOpenUnassignment={setOpenUnassignment}
               setAssignmentId={setAssignmentId}
               setRemoveStudentName={setRemoveStudentName}
+              conflictStudents={conflictStudents}
             />
           ))}
       </div>
@@ -749,12 +753,19 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
   setAssignmentId,
   setOpenUnassignment,
   setRemoveStudentName,
+  conflictStudents,
 }: AssignmentProp) => {
   return (
     <div className="flex flex-row justify-between pb-4">
       <div>
         <div className="flex flex-row">
-          <p className="">
+          <p
+            className={`${
+              conflictStudents.includes(assignment.student.id)
+                ? 'bg-red-400'
+                : 'bg-inherit'
+            }`}
+          >
             {assignment.student.firstName + ' ' + assignment.student.lastName}
           </p>
           <div className="tooltip pl-2 pt-1">

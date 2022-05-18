@@ -3,7 +3,7 @@ import Header from '../../components/Header';
 import StudentSidebar from '../../components/StudentSidebar';
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
-import { StudentBase, UserRole } from '../../lib/types';
+import { StudentBaseList, UserRole } from '../../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
@@ -11,6 +11,8 @@ import StudentHolder from '../../components/student/StudentHolder';
 import RouteProtection from '../../components/RouteProtection';
 import Error from '../../components/Error';
 import PersistLogin from '../../components/PersistLogin';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
 
@@ -22,14 +24,20 @@ const Students: NextPage = () => {
   // Used to hide / show the students sidebar on screen width below 768px
   const [showSidebar, setShowSidebar] = useState(false);
   // Needed to allow for click select from the sidebar to the main screen
-  const [studentBase, setStudentBase] = useState({} as StudentBase);
+  const [studentBase, setStudentBase] = useState({} as StudentBaseList);
   const [error, setError]: [string, (error: string) => void] = useState('');
   useAxiosAuth();
+
+  const router = useRouter();
+  const edition = router.query.editionName as string;
 
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="min-w-screen flex min-h-screen flex-col items-center">
+          <Head>
+            <title>{edition}: students</title>
+          </Head>
           <Header />
           <DndProvider backend={HTML5Backend} key={2}>
             <main className="flex w-full flex-row">

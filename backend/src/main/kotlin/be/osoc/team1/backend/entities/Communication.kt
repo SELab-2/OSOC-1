@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.OneToOne
 import javax.validation.constraints.NotBlank
 
 enum class CommunicationTypeEnum {
@@ -20,8 +21,13 @@ class Communication(
     val type: CommunicationTypeEnum,
     @JsonIgnore
     @NotBlank
-    val edition: String = ""
+    val edition: String = "",
+    @JsonIgnore
+    @OneToOne
+    val student: Student
 ) {
     @Id
     var id: UUID = UUID.randomUUID()
 }
+
+data class CommunicationDTO(val message: String, val type: CommunicationTypeEnum)

@@ -10,6 +10,7 @@ import axios from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import usePersistentInput from '../hooks/usePersistentInput';
 import useEdition from '../hooks/useEdition';
+import Head from 'next/head';
 
 /**
  * Login page for OSOC application
@@ -85,7 +86,7 @@ const Login = () => {
             } else if (user.role === UserRole.Admin) {
               router.push(Endpoints.EDITIONS);
             } else {
-              router.push('/wait');
+              router.push('/users');
             }
           }
         } else {
@@ -100,6 +101,9 @@ const Login = () => {
 
   return (
     <>
+      <Head>
+        <title>Login</title>
+      </Head>
       <FormContainer pageTitle="LOGIN">
         <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
@@ -123,27 +127,16 @@ const Login = () => {
             />
           </label>
           <button
-            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
+            className="m-auto block rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
             type="submit"
           >
             Log in
           </button>
           <Link href="/register">
-            <p className="mt-2 text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+            <p className="mt-2 inline-block text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
               no account yet? <br /> register here!
             </p>
           </Link>
-          <p className="hr-sect pt-4 pb-2 text-sm font-medium opacity-80 lg:pb-4">
-            Or log in using
-          </p>
-          {/* Github provider. Right now, this doesn't work*/}
-          <button
-            className="bg-[#302727] px-4 py-1 text-white shadow-sm shadow-gray-300"
-            onClick={() => 'click'}
-            disabled={true}
-          >
-            <p className="text-right">Github</p>
-          </button>
         </form>
       </FormContainer>
     </>

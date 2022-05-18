@@ -12,6 +12,9 @@ import useUser from '../hooks/useUser';
 import axios, { AxiosError } from 'axios';
 import RouteProtection from '../components/RouteProtection';
 import PersistLogin from '../components/PersistLogin';
+import UserDeleteForm from '../components/users/UserDeleteForm';
+import { parseError } from '../lib/requestUtils';
+import Head from 'next/head';
 
 /**
  *
@@ -47,6 +50,9 @@ const Users: NextPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [userToDelete, setUserToDelete] = useState<User | undefined>(undefined);
+  const [showDeleteForm, setShowDeleteForm] = useState(false);
+
   const axiosAuth = useAxiosAuth();
   const router = useRouter();
   const [user] = useUser();
@@ -64,6 +70,19 @@ const Users: NextPage = () => {
       return val;
     });
     setUsers(updatedUsers);
+  };
+
+  const deleteUser = async (user: User) => {
+    try {
+      await axiosAuth.delete(`${Endpoints.USERS}/${user.id}`);
+
+      // update client side
+      setUsers((prev) => {
+        return prev.filter((u) => u.id !== user.id);
+      });
+    } catch (err) {
+      parseError(err, setError, new AbortController().signal, router);
+    }
   };
 
   /**
@@ -104,7 +123,7 @@ const Users: NextPage = () => {
       } catch (err) {
         if (axios.isAxiosError(err)) {
           const _err = err as AxiosError;
-          if (_err.response?.status === 400) router.push('/login'); // error when trying to refresh refreshtoken
+          if (_err.response?.status === 418) router.push('/login'); // error when trying to refresh refreshtoken
           if (isMounted) {
             setError(_err.response?.statusText || 'An unknown error occurred');
           }
@@ -124,6 +143,9 @@ const Users: NextPage = () => {
 
   return (
     <PersistLogin>
+      <Head>
+        <title>Users</title>
+      </Head>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="h-screen">
           <Header />
@@ -151,11 +173,23 @@ const Users: NextPage = () => {
                   setFilter={setNameFilter}
                   nameFilter={nameFilter}
                   isAdmin={user.role === UserRole.Admin}
+                  setDeleteUser={setUserToDelete}
+                  loggedInUser={user}
+                  setShowDeleteForm={setShowDeleteForm}
                 />
               </>
             )}
           </div>
         </div>
+        {userToDelete && (
+          <UserDeleteForm
+            userName={userToDelete.username}
+            deleteUser={async () => deleteUser(userToDelete)}
+            openDeleteForm={showDeleteForm}
+            setUserDeleteForm={setUserToDelete}
+            setOpenDeleteForm={setShowDeleteForm}
+          />
+        )}
       </RouteProtection>
     </PersistLogin>
   );

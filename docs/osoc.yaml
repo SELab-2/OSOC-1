@@ -170,7 +170,6 @@ paths:
                     description: Part of a name of a student that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
                 -   in: query
                     name: status
-                    required: true
                     schema:
                         type: array
                         items:
@@ -181,6 +180,14 @@ paths:
                     schema:
                         type: boolean
                     description: Whether or not to include students you have already added a suggestion for (default value is true)
+                -   in: query
+                    name: view
+                    schema:
+                        $ref: '#/components/schemas/StudentView'
+                    description: The view of the student, with different views the students will contain less or more information (default is Full). 
+                                The List view can be used to get basic information of the student to display it in a listing,
+                                the Communication view can be used to just get info about the student and his/hers communication
+                                and the Basic view can be used to show the bare minimum info of a student (just name and id). This way unnecessary data does not need to be sent.
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -246,6 +253,14 @@ paths:
                     schema:
                         type: string
                         format: uuid
+                -   in: query
+                    name: view
+                    schema:
+                        $ref: '#/components/schemas/StudentView'
+                    description: The view of the student, with different views the students will contain less or more information (default is Full). 
+                                The List view can be used to get basic information of the student to display it in a listing,
+                                the Communication view can be used to just get info about the student and his/hers communication
+                                and the Basic view can be used to show the bare minimum info of a student (just name and id). This way unnecessary data does not need to be sent.
             responses:
                 '200':
                     description: |
@@ -324,8 +339,9 @@ paths:
             summary: Delete student status suggestion
             description: |
                 Deletes the statusSuggestion made by the coach identified by the given coachId 
-                from the student with the given studentId. If either the student or the suggestion doesn't exist,
-                the method returns a "404: Not Found" message instead.
+                from the student with the given studentId. If the student doesn't exist,
+                the method returns a "404: Not Found" message. If there is no suggestion by
+                the coach with given Id, a "400: Bad Request" is returned.
             parameters:
                 -   in: path
                     required: true
@@ -846,8 +862,9 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Conflict'
                             example:
-                                student: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
-                                projects: [ "https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
+                                student: "https://example.com/api/OSOC2022/students/abb97568-ac54-11ec-b909-0242ac120002"
+                                projects: [ "https://example.com/api/OSOC2022/projects/afc1e1cc-ac54-11ec-b909-0242ac120002",
+                                            "https://example.com/api/OSOC2022/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
 
     /{edition}/communications/{communicationId}:
         get:
@@ -880,6 +897,25 @@ paths:
                 '404':
                     description: |
                         The response if there is no communication in the database with the given id.
+        delete:
+            summary: Remove a communication from a student
+            parameters:
+                -   name: communicationId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            responses:
+                '204':
+                    description: Returned if the removal was successful.
+                '404':
+                    description: Returned if the communication does not exist (in this edition).
     /{edition}/communications/{studentId}:
         post:
             summary: Add a new communication with a student
@@ -1271,6 +1307,9 @@ components:
                 alumn:
                     type: boolean
                     default: false
+                possibleStudentCoach:
+                    type: boolean
+                    default: false
                 answers:
                     type: array
                     items:
@@ -1281,6 +1320,19 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Skill'
+                statusSuggestionCount:
+                    type: object
+                    properties:
+                      Yes:
+                        type: integer
+                        example: 17
+                      No: 
+                        type: integer
+                        example: 11
+                      Maybe: 
+                        type: integer
+                        example: 02
+ 
         Answer:
             type: object
             properties:
@@ -1576,6 +1628,9 @@ components:
                     example: OSOC 2022
                 isActive:
                     type: boolean
+        StudentView:
+            type: string
+            enum: [ Full, Basic, List, Communication ]
     securitySchemes:
         BasicAuth:
             type: http

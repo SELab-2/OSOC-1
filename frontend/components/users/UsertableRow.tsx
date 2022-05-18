@@ -6,6 +6,7 @@ import Endpoints from '../../lib/endpoints';
 import { User, UserRole, UUID } from '../../lib/types';
 import { ExclamationCircleIcon, RefreshIcon } from '@heroicons/react/solid';
 import useUser from '../../hooks/useUser';
+import { TrashIcon } from '@heroicons/react/outline';
 
 /**
  * Properties for User Table Row component
@@ -34,6 +35,21 @@ type URTProps = {
    * if the logged in user is an admin
    */
   isAdmin: boolean;
+
+  /**
+   * setter to update user to delete
+   */
+  setDeleteUser: Dispatch<SetStateAction<User | undefined>>;
+
+  /**
+   * Current logged in user id
+   */
+  loggedInUserId: string;
+
+  /**
+   * state update function that sets wether the user delete form needs to be shown
+   */
+  setShowDeleteForm: Dispatch<SetStateAction<boolean>>;
 };
 
 /**
@@ -46,12 +62,17 @@ const UserTableRow: React.FC<URTProps> = ({
   updateUsersLocal,
   setGlobalError,
   isAdmin,
+  setDeleteUser,
+  loggedInUserId,
+  setShowDeleteForm,
 }: URTProps) => {
   /**
    * individual row error (e.g. when an error occurs trying to update the role)
    */
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
+
+  const [hovering, setHovering] = useState(false);
 
   const axiosAuth = useAxiosAuth();
   const router = useRouter();
@@ -85,11 +106,9 @@ const UserTableRow: React.FC<URTProps> = ({
         const err = _error as AxiosError;
         if (err.response?.status === 400) router.push('/login'); // error when trying to refresh refreshtoken
         if (err.response?.status === 403) {
-          const message = err.response?.data.message;
+          const message = (err.response?.data as { message: string }).message;
           message && setGlobalError(message);
         } else {
-          // not an Axios error
-          console.error(_error);
           setError(
             'Something went wrong trying to update the role of the user'
           );
@@ -99,8 +118,25 @@ const UserTableRow: React.FC<URTProps> = ({
   };
 
   return (
-    <tr key={user.id} className="border-collapse border-y-2">
-      <td className="py-4">{user.username}</td>
+    <tr
+      key={user.id}
+      className="border-collapse border-y-2"
+      onMouseOver={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+    >
+      <td className="flex flex-row py-4">
+        {user.username}
+        {hovering && user.id !== loggedInUserId && (
+          <TrashIcon
+            className="h-6 w-6 pl-1 hover:cursor-pointer"
+            color="#F14A3B"
+            onClick={() => {
+              setDeleteUser(user);
+              setShowDeleteForm(true);
+            }}
+          />
+        )}
+      </td>
       <td className="break-all">{user.email}</td>
       <td className="text-right">
         <div className="flex flex-row justify-end align-middle">

@@ -74,6 +74,14 @@ export type StudentData = {
 };
 
 /**
+ * This is the full object returned by a get to the Student endpoint with view List
+ */
+export type StudentDataList = {
+  collection: StudentBaseList[];
+  totalLength: number;
+};
+
+/**
  * This is the full object returned by a get to the Project endpoint
  */
 export type ProjectData = {
@@ -114,6 +122,22 @@ export type StudentBase = {
   skills: Skill[];
   communications: Url[];
   answers: Url[];
+};
+
+export type StudentBaseList = {
+  id: UUID;
+  firstName: string;
+  lastName: string;
+  status: string;
+  alumn: boolean;
+  possibleStudentCoach: boolean;
+  statusSuggestionCount: StatusSuggestionCountList;
+};
+
+export type StatusSuggestionCountList = {
+  Yes: number | null;
+  Maybe: number | null;
+  No: number | null;
 };
 
 /**
@@ -205,3 +229,19 @@ export type Answer = {
 export const ItemTypes = {
   STUDENTTILE: 'studentTile',
 };
+
+/**
+ * This is one element from the exact collection type returned by a get to the Conflicts endpoint
+ */
+export type Conflict = {
+  student: Url;
+  projects: Url[];
+};
+
+/**
+ * Helper type to all needed conflicts information
+ */
+export type conflictMapType = Map<
+  UUID,
+  { student: StudentBase; projectUrls: Set<Url>; amount: number }
+>;
