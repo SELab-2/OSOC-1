@@ -165,7 +165,7 @@ function postOrPatchProject(
       setMyProjectBase(response.data as ProjectBase);
     })
     .catch((err) => {
-      parseError(err, setError, new AbortController().signal, router);
+      parseError(err, setError, router);
     });
 }
 
