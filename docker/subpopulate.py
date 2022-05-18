@@ -252,7 +252,9 @@ def make_student():
                     "key": "question_meaEKo",
                     "label": "How would you rate your English?",
                     "type": "MULTIPLE_CHOICE",
-                    "value": "847b9bb9-6df8-4021-9ecf-e73ba7417929",
+                    "value": random.choice(["847b9bb9-6df8-4021-9ecf-e73ba7417929", "e2e0ca25-9540-4a9c-a7f7-ffcd0f4aa431",
+                                            "ef5e1910-80af-4811-b493-813222ae4953", "f60a56c8-b04e-4841-9216-465617d27836",
+                                            "847b9bb9-6df8-4021-9ecf-e73ba7417929"]),
                     "options": [
                         {
                             "id": "e2e0ca25-9540-4a9c-a7f7-ffcd0f4aa431",
@@ -280,13 +282,13 @@ def make_student():
                     "key": "question_nW80DQ",
                     "label": "Phone number",
                     "type": "INPUT_PHONE_NUMBER",
-                    "value": "65465465465465"
+                    "value": fake.phone_number()
                 },
                 {
                     "key": "question_wa2GKy",
                     "label": "Your email address\n",
                     "type": "INPUT_EMAIL",
-                    "value": "lfjqlksdjmfksdjkl@gmail.com"
+                    "value": fake.ascii_company_email()
                 },
                 {
                     "key": "question_m6ZxA5",
@@ -358,7 +360,7 @@ def make_student():
                     "key": "question_mKV0vK",
                     "label": "Add a fun fact about yourself",
                     "type": "TEXTAREA",
-                    "value": "flsdqflkjsdlkfjklqsdjflkjsdqlkfjqlskdjflkjqsdlkfjksljmk"
+                    "value": fake.paragraph()
                 },
                 {
                     "key": "question_wLP0v2",
@@ -481,7 +483,9 @@ def make_student():
                     "label": "What kind of diploma are you currently going for?",
                     "type": "CHECKBOXES",
                     "value": [
-                        "8ab95749-ef8f-465b-a1f8-3152da88cf91"
+                        random.choice(["8ab95749-ef8f-465b-a1f8-3152da88cf91",  "1d23a375-3645-40f6-b141-c00ad54625d3", "ef50be02-cee7-40d0-9378-f137ec0cb976",
+                                      "1dd53b7e-6bcc-406c-9e97-a458fae9636f", "ffbbcf42-0489-4494-a75f-7701460ab7cd", "77ad76ce-20aa-43f4-8eac-07b1f5baf07c",
+                                       "46da24d6-4b82-44be-91fd-5672d68a22de"])
                     ],
                     "options": [
                         {
@@ -572,20 +576,24 @@ def make_student():
                     "key": "question_wg94YK",
                     "label": "Which year of your degree are you in?",
                     "type": "INPUT_TEXT",
-                    "value": "3"
+                    "value": str(random.randint(0, 5))
                 },
                 {
                     "key": "question_3yJDjW",
                     "label": "What is the name of your college or university?",
                     "type": "INPUT_TEXT",
-                    "value": "UGent"
+                    "value": random.choice(["UGent", "VUB", "KULeuven", "Hogent"])
                 },
                 {
                     "key": "question_3X4q1V",
                     "label": "Which role are you applying for?",
                     "type": "CHECKBOXES",
                     "value": [
-                        "19b68be9-6c2b-41f8-95f6-439cfb20f792"
+                        random.choice(["19b68be9-6c2b-41f8-95f6-439cfb20f792", "2fd881eb-68de-4012-988d-7957de663c4f",
+                                      "d27de5b9-3370-44e6-b114-60ddc243a4d8", "eb4b0022-4673-4f96-9c15-c01d870a253f",
+                                       "f812f2d5-b438-49f4-9d95-0b415add300f", "3f34960d-1248-49ca-b6c7-fed702c73979",
+                                       "5df0feb4-87ce-4767-bf99-092c27bc9b24",  "ee956527-6f34-479e-89a8-feb5e73d8979",
+                                       "aa26de30-7ec2-4255-a949-0e5388dd58be"])
                     ],
                     "options": [
                         {
@@ -716,7 +724,7 @@ def make_student():
                     "key": "question_wz7eGE",
                     "label": "Have you participated in osoc before?",
                     "type": "MULTIPLE_CHOICE",
-                    "value": "689451da-305b-451a-8039-c748ff06ec82",
+                    "value": random.choice(["689451da-305b-451a-8039-c748ff06ec82", "41576a04-8f7a-4276-93b4-0dcc0c75bf0b"]),
                     "options": [
                         {
                             "id": "41576a04-8f7a-4276-93b4-0dcc0c75bf0b",
@@ -732,7 +740,7 @@ def make_student():
                     "key": "question_w5Z2eb",
                     "label": "Would you like to be a student coach this year?",
                     "type": "MULTIPLE_CHOICE",
-                    "value": None,
+                    "value": random.choice(["d2091172-9678-413a-bb3b-0d9cf6d5fa0b", "67613eae-b7fa-41f3-920d-3ccc1e58ea87"]),
                     "options": [
                         {
                             "id": "67613eae-b7fa-41f3-920d-3ccc1e58ea87",
