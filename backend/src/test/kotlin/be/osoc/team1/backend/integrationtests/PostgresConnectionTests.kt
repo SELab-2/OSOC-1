@@ -20,8 +20,8 @@ class PostgresConnectionTests {
     }
 
     @Test
-    fun `when database is connected then it should be Postgres version 14`() {
+    fun `when database is connected then it should be a Postgres instance running`() {
         val actualDatabaseVersion = jdbcTemplate.queryForObject("SELECT version()", String::class.java)
-        actualDatabaseVersion shouldContain "PostgreSQL 14.2"
+        actualDatabaseVersion shouldContain "PostgreSQL"
     }
 }
