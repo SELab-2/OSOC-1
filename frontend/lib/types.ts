@@ -78,7 +78,8 @@ export type StudentData = {
  */
 export type StudentDataCommunication = {
   collection: StudentBaseCommunication[];
-}
+  totalLength: number;
+};
 
 /**
  * This is the full object returned by a get to the Student endpoint with view List
@@ -136,7 +137,7 @@ export type StudentBaseCommunication = {
   firstName: string;
   lastName: string;
   communications: Url[];
-}
+};
 
 export type StudentBaseList = {
   id: UUID;

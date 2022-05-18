@@ -159,7 +159,7 @@ function deleteProject(
       refreshProjects();
     })
     .catch((err) => {
-      parseError(err, setError, router, new AbortController().signal);
+      parseError(err, setError, router);
     });
 }
 
