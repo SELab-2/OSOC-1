@@ -60,7 +60,10 @@ const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
       await axiosAuth.post(Endpoints.LOGOUT);
 
       // push back to login
-      router.push('/login');
+      router.push({
+        pathname: '/login',
+        query: { message: 'Succesfully logged out!' }
+      });
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.message);

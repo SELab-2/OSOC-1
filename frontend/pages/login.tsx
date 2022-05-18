@@ -11,6 +11,7 @@ import Endpoints from '../lib/endpoints';
 import usePersistentInput from '../hooks/usePersistentInput';
 import useEdition from '../hooks/useEdition';
 import Head from 'next/head';
+import Info from '../components/Info';
 
 /**
  * Login page for OSOC application
@@ -33,6 +34,7 @@ const Login = () => {
   const [, setEdition] = useEdition();
 
   const router = useRouter();
+  const message = router.query.message as string || '';
 
   useEffect(() => {
     emailRef?.current?.focus();
@@ -104,6 +106,13 @@ const Login = () => {
       <Head>
         <title>Login</title>
       </Head>
+      {
+        message && 
+        (<Info
+          info={message}
+          className="absolute top-64 left-1/2 -translate-x-1/2 w-1/2"
+        />)
+      }
       <FormContainer pageTitle="LOGIN">
         <form className="mb-1 w-11/12 max-w-md" onSubmit={doSubmit}>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
