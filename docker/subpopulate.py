@@ -585,7 +585,11 @@ def make_student():
                     "label": "Which role are you applying for?",
                     "type": "CHECKBOXES",
                     "value": [
-                        "19b68be9-6c2b-41f8-95f6-439cfb20f792"
+                        random.choice(["19b68be9-6c2b-41f8-95f6-439cfb20f792", "2fd881eb-68de-4012-988d-7957de663c4f",
+                                      "d27de5b9-3370-44e6-b114-60ddc243a4d8", "eb4b0022-4673-4f96-9c15-c01d870a253f",
+                                       "f812f2d5-b438-49f4-9d95-0b415add300f", "3f34960d-1248-49ca-b6c7-fed702c73979",
+                                       "5df0feb4-87ce-4767-bf99-092c27bc9b24",  "ee956527-6f34-479e-89a8-feb5e73d8979",
+                                       "aa26de30-7ec2-4255-a949-0e5388dd58be"])
                     ],
                     "options": [
                         {
@@ -716,7 +720,7 @@ def make_student():
                     "key": "question_wz7eGE",
                     "label": "Have you participated in osoc before?",
                     "type": "MULTIPLE_CHOICE",
-                    "value": "689451da-305b-451a-8039-c748ff06ec82",
+                    "value": random.choice(["689451da-305b-451a-8039-c748ff06ec82", "41576a04-8f7a-4276-93b4-0dcc0c75bf0b"]),
                     "options": [
                         {
                             "id": "41576a04-8f7a-4276-93b4-0dcc0c75bf0b",
@@ -732,7 +736,7 @@ def make_student():
                     "key": "question_w5Z2eb",
                     "label": "Would you like to be a student coach this year?",
                     "type": "MULTIPLE_CHOICE",
-                    "value": None,
+                    "value": random.choice(["d2091172-9678-413a-bb3b-0d9cf6d5fa0b", "67613eae-b7fa-41f3-920d-3ccc1e58ea87"]),
                     "options": [
                         {
                             "id": "67613eae-b7fa-41f3-920d-3ccc1e58ea87",
