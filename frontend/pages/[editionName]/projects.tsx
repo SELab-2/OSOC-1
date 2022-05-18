@@ -101,7 +101,7 @@ function searchProject(
       const newState = { ...state };
       newState.loading = false;
       setState(newState);
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
       if (!signal.aborted) {
         setLoading(false);
       }
@@ -185,7 +185,7 @@ async function searchConflicts(
 
     setConflictMap(newConflictMap);
   } catch (err) {
-    parseError(err, setError, signal, router);
+    parseError(err, setError, router, signal);
     if (!signal.aborted) {
       setLoading(false);
     }

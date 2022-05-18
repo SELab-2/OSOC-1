@@ -41,6 +41,21 @@ type UserTableProps = {
    * if the logged in user is an admin
    */
   isAdmin: boolean;
+
+  /**
+   * update the current user to delete
+   */
+  setDeleteUser: Dispatch<SetStateAction<User | undefined>>;
+
+  /**
+   * logged in user
+   */
+  loggedInUser: User;
+
+  /**
+   * state update function that sets wether the user delete form needs to be shown
+   */
+  setShowDeleteForm: Dispatch<SetStateAction<boolean>>;
 };
 
 /**
@@ -56,6 +71,9 @@ const UserTable: React.FC<UserTableProps> = ({
   setFilter,
   nameFilter,
   isAdmin,
+  setDeleteUser,
+  loggedInUser,
+  setShowDeleteForm,
 }: UserTableProps) => {
   const filterRef = useRef<HTMLInputElement>(null);
 
@@ -100,13 +118,16 @@ const UserTable: React.FC<UserTableProps> = ({
       </thead>
       <tbody>
         {users && users.length ? (
-          users.map((user) => (
+          users.map((_user) => (
             <UserTableRow
-              key={user.id}
-              user={user}
+              key={_user.id}
+              user={_user}
               updateUsersLocal={updateUsersLocal}
               setGlobalError={setGlobalError}
               isAdmin={isAdmin}
+              setDeleteUser={setDeleteUser}
+              loggedInUserId={loggedInUser.id}
+              setShowDeleteForm={setShowDeleteForm}
             />
           ))
         ) : (

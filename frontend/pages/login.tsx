@@ -86,7 +86,7 @@ const Login = () => {
             } else if (user.role === UserRole.Admin) {
               router.push(Endpoints.EDITIONS);
             } else {
-              router.push('/wait');
+              router.push('/users');
             }
           }
         } else {

@@ -2,9 +2,11 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.CommunicationController
 import be.osoc.team1.backend.entities.Communication
+import be.osoc.team1.backend.entities.CommunicationDTO
 import be.osoc.team1.backend.entities.CommunicationTypeEnum
 import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Role
+import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidIdException
 import be.osoc.team1.backend.services.CommunicationService
@@ -25,9 +27,11 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
@@ -53,12 +57,14 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     private lateinit var securityContext: SecurityContext
 
-    private val testId = UUID.randomUUID()
+    private val testStudent = Student("firstname", "lastname")
+    private val testId = testStudent.id
     private val testEdition = "testEdition"
     private val editionUrl = "/$testEdition/communications"
-    private val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
+    private val testCommunication = Communication("test message", CommunicationTypeEnum.Email, testEdition, testStudent)
     private val objectMapper = ObjectMapper()
     private val jsonRepresentation = objectMapper.writeValueAsString(testCommunication)
+    private val jsonRepresentationDTO = objectMapper.writeValueAsString(CommunicationDTO("test message", CommunicationTypeEnum.Email))
 
     private val authenticatedAdmin = User("name", "email", Role.Admin, "password")
     private val activeEdition = Edition("activeEdition", true)
@@ -90,22 +96,45 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `createCommunication succeeds if student with given id exists`() {
-        every { communicationService.createCommunication(any()) } returns testCommunication
-        every { studentService.addCommunicationToStudent(testId, any(), testEdition) } just Runs
+        every { studentService.getStudentById(any(), testEdition) } returns testStudent
+        every { studentService.addCommunicationToStudent(any(), testEdition) } just Runs
         mockMvc.perform(
             post("$editionUrl/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRepresentation)
-        ).andExpect(status().isCreated).andExpect(content().string(jsonRepresentation))
+                .content(jsonRepresentationDTO)
+        ).andExpect(status().isCreated)
+            .andExpect(jsonPath("message").value("test message"))
+            .andExpect(jsonPath("type").value("Email"))
     }
 
     @Test
     fun `createCommunication returns 404 Not Found if student with given id does not exist`() {
-        every { communicationService.createCommunication(any()) } returns testCommunication
         val differentId = UUID.randomUUID()
-        every { studentService.addCommunicationToStudent(differentId, any(), testEdition) }.throws(InvalidIdException())
+        every { studentService.getStudentById(differentId, testEdition) }.throws(InvalidIdException())
         mockMvc.perform(
             post("$editionUrl/$differentId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `deleteCommunication removes the communication if it exists`() {
+        val differentId = UUID.randomUUID()
+        every { studentService.removeCommunicationFromStudent(differentId, testEdition) } just Runs
+        mockMvc.perform(
+            delete("$editionUrl/$differentId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRepresentation)
+        ).andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `deleteCommunication returns 404 Not Found if the communication does not exist`() {
+        val differentId = UUID.randomUUID()
+        every { studentService.removeCommunicationFromStudent(differentId, testEdition) }.throws(InvalidIdException())
+        mockMvc.perform(
+            delete("$editionUrl/$differentId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRepresentation)
         ).andExpect(status().isNotFound)
@@ -142,9 +171,8 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `Gets and deletes are the only allowed HTTP methods on inactive editions`() {
         every { communicationService.getById(testId) } returns testCommunication
-        every { communicationService.createCommunication(any()) } returns testCommunication
         every { editionService.getEdition(any()) } returns Edition(testEdition, false)
-        every { studentService.addCommunicationToStudent(testId, any(), testEdition) } just Runs
+        every { studentService.addCommunicationToStudent(any(), testEdition) } just Runs
         every { osocUserDetailService.getUserFromPrincipal(any()) } returns User(
             "name",
             "email",
