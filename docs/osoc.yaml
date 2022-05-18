@@ -906,7 +906,7 @@ paths:
                 '204':
                     description: Returned if the removal was successful.
                 '404':
-                    description: Returned if the communication does not exist(in this edition).
+                    description: Returned if the communication does not exist (in this edition).
     /{edition}/communications/{studentId}:
         post:
             summary: Add a new communication with a student
