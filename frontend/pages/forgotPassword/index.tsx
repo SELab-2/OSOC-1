@@ -7,15 +7,34 @@ import axios from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import Head from 'next/head';
 
+/**
+ * When a user has forgotten its password, it can enter its email address in this page.
+ * The user will then receive an email with a link to reset its password. This link will lead to {@link RESET_PASSWORD_PAGE}.
+ *
+ * @returns ForgotPassword page
+ */
 const ForgotPassword: NextPage = () => {
+  /**
+   * Find first input field.
+   * */
   const emailRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Value of email input field.
+   */
   const [email, , emailProps] = usePersistentInput('email', '');
 
+  /**
+   * Focus on first input field.
+   */
   useEffect(() => {
     emailRef?.current?.focus();
   }, []);
 
+  /**
+   * Post entered email address to backend.
+   * For security reasons, this page always shows a success toast, no matter if the given email address is valid or not.
+   */
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 

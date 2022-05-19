@@ -10,17 +10,38 @@ import Endpoints from '../../lib/endpoints';
 import { customPasswordRegex } from '../../lib/regex';
 import Head from 'next/head';
 
+/**
+ * This page asks the user for its new password.
+ *
+ * {@label ENTER_PASSWORD_PAGE}
+ *
+ * @returns ForgotPassword page
+ */
 const ForgotPassword: NextPage = () => {
+  /**
+   * Get forgotPasswordToken from url.
+   */
   const router = useRouter();
   const token = router.query.forgotPasswordToken as string;
 
+  /**
+   * Value of password input field.
+   */
   const [password, , passwordProps] = useInput('');
   const [validPassword, setValidPassword] = useState(true);
 
+  /**
+   * Check if entered password is secure enough.
+   */
   useEffect(() => {
     setValidPassword(customPasswordRegex.test(password));
   }, [password]);
 
+  /**
+   * Post entered password to backend if it is secure enough.
+   *
+   * @param e - event
+   */
   const doSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (!validPassword) return;
