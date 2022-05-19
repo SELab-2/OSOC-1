@@ -13,6 +13,7 @@ import io.mockk.just
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.mail.SimpleMailMessage
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.UUID
 
@@ -30,9 +31,10 @@ class ForgotPasswordServiceTests {
 
     @Test
     fun `sendEmailWithToken does not fail when email is valid`() {
-        val emailService: EmailService = mockk()
+        val emailService = EmailService()
         val forgotPasswordService = ForgotPasswordService(getRepository(), mockk(), emailService)
-        every { emailService.sendEmail(testEmail, any()) } just Runs
+        emailService.mailSender = mockk()
+        every { emailService.mailSender.send(ofType(SimpleMailMessage::class)) } just Runs
         forgotPasswordService.sendEmailWithToken(testEmail)
     }
 

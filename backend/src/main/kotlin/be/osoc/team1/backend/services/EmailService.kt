@@ -3,7 +3,6 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.exceptions.InvalidGmailCredentialsException
 import org.springframework.mail.MailAuthenticationException
 import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -19,6 +18,11 @@ class EmailService {
      */
     private var emailAddressSender: String? = System.getenv("OSOC_GMAIL_ADDRESS")
     private var passwordSender: String? = System.getenv("OSOC_GMAIL_APP_PASSWORD")
+    lateinit var mailSender: JavaMailSenderImpl
+
+    init {
+        initMailSender()
+    }
 
     /**
      * Set credentials of account to send mails with. This function is used for testing.
@@ -26,6 +30,7 @@ class EmailService {
     fun setSenderEmailCredentials(email: String?, password: String?) {
         emailAddressSender = email
         passwordSender = password
+        initMailSender()
     }
 
     /**
@@ -47,10 +52,10 @@ class EmailService {
     }
 
     /**
-     * Get a [JavaMailSender] object which is correctly configured.
+     * Initialise [mailSender].
      */
-    private fun getMailSender(): JavaMailSender {
-        val mailSender = JavaMailSenderImpl().apply {
+    private final fun initMailSender() {
+        mailSender = JavaMailSenderImpl().apply {
             host = "smtp.gmail.com"
             port = 587
             username = emailAddressSender
@@ -61,7 +66,18 @@ class EmailService {
         props["mail.smtp.auth"] = "true"
         props["mail.smtp.starttls.enable"] = "true"
         props["mail.debug"] = "true"
-        return mailSender
+    }
+
+    /**
+     * Set content, title, sender and receiver of email.
+     */
+    private fun getEmailMessage(emailAddressReceiver: String, forgotPasswordUUID: UUID): SimpleMailMessage {
+        return SimpleMailMessage().apply {
+            setSubject("Reset Password")
+            setText(getForgotPasswordEmailBody(forgotPasswordUUID))
+            setTo(emailAddressReceiver)
+            setFrom(emailAddressSender!!)
+        }
     }
 
     /**
@@ -71,14 +87,9 @@ class EmailService {
         if (emailAddressSender == null || passwordSender == null) {
             throw InvalidGmailCredentialsException("No 'OSOC_GMAIL_ADDRESS' or 'OSOC_GMAIL_APP_PASSWORD' found in environment variables.")
         }
-        val email = SimpleMailMessage().apply {
-            setSubject("Reset Password")
-            setText(getForgotPasswordEmailBody(forgotPasswordUUID))
-            setTo(emailAddressReceiver)
-            setFrom(emailAddressSender!!)
-        }
+        val emailMessage = getEmailMessage(emailAddressReceiver, forgotPasswordUUID)
         try {
-            getMailSender().send(email)
+            mailSender.send(emailMessage)
         } catch (_: MailAuthenticationException) {
             throw InvalidGmailCredentialsException(
                 "Make sure 'OSOC_GMAIL_ADDRESS' and 'OSOC_GMAIL_APP_PASSWORD' are correctly configured in environment" +
