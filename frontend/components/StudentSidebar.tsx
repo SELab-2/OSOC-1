@@ -557,21 +557,21 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
             <div className="flex w-full flex-row flex-wrap">
               <div className="relative mr-2 inline-block w-10 select-none transition duration-200 ease-in">
                 <input
-                    type="checkbox"
-                    name="toggleUnassigned"
-                    id="toggleUnassigned"
-                    className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
-                    checked={studentSearchParameters.ExcludeUnassigned}
-                    onChange={() =>
-                        handleSearchChange(
-                            'ExcludeUnassigned',
-                            !studentSearchParameters.ExcludeUnassigned
-                        )
-                    }
+                  type="checkbox"
+                  name="toggleUnassigned"
+                  id="toggleUnassigned"
+                  className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
+                  checked={studentSearchParameters.ExcludeUnassigned}
+                  onChange={() =>
+                    handleSearchChange(
+                      'ExcludeUnassigned',
+                      !studentSearchParameters.ExcludeUnassigned
+                    )
+                  }
                 />
                 <label
-                    htmlFor="toggleUnassigned"
-                    className="toggle-label block h-5 cursor-pointer overflow-hidden rounded-full border-2 border-gray-300 bg-white"
+                  htmlFor="toggleUnassigned"
+                  className="toggle-label block h-5 cursor-pointer overflow-hidden rounded-full border-2 border-gray-300 bg-white"
                 />
               </div>
               <label htmlFor="toggleAssigned" className="text-sm">
