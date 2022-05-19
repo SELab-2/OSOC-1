@@ -32,6 +32,7 @@ class ForgotPasswordServiceTests {
     @Test
     fun `sendEmailWithToken does not fail when email is valid`() {
         val emailService = EmailService()
+        emailService.setSenderEmailCredentials("valid@gmail.com", "correct_password")
         val forgotPasswordService = ForgotPasswordService(getRepository(), mockk(), emailService)
         emailService.mailSender = mockk()
         every { emailService.mailSender.send(ofType(SimpleMailMessage::class)) } just Runs
