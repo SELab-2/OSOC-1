@@ -11,6 +11,8 @@ type InfiniteListProps<Type> = {
   loadMoreItems: () => void;
 };
 
+// I don't know how to fix these any types to follow the template type
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 const InfiniteList: React.FC<InfiniteListProps<any>> = ({
   list,
   renderItem,
