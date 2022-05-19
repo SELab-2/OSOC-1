@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.StudentViewEnum
 import be.osoc.team1.backend.entities.filterByAlumn
+import be.osoc.team1.backend.entities.filterByAssigned
 import be.osoc.team1.backend.entities.filterByName
 import be.osoc.team1.backend.entities.filterByNotYetAssigned
 import be.osoc.team1.backend.entities.filterBySkills
@@ -77,6 +78,7 @@ class StudentController(
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
         @RequestParam(defaultValue = "false") studentCoachOnly: Boolean,
         @RequestParam(defaultValue = "false") unassignedOnly: Boolean,
+        @RequestParam(defaultValue = "false") assignedOnly: Boolean,
         @RequestParam(defaultValue = "Full") view: StudentViewEnum,
         @PathVariable edition: String,
         principal: Principal,
@@ -104,6 +106,7 @@ class StudentController(
             .applyIf(status != StatusEnum.values().toSet()) { filterByStatus(status) }
             .applyIf(skillNames.isNotEmpty()) { filterBySkills(skillNames) }
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
+            .applyIf(assignedOnly) { filterByAssigned(assignmentRepository) }
             .page(pager)
 
         return ObjectMapper().writerWithView(studentViewEnumToStudentView(view)).writeValueAsString(filteredStudents)
