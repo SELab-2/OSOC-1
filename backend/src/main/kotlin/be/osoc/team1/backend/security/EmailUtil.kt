@@ -11,11 +11,10 @@ import java.util.UUID
  */
 object EmailUtil {
     /**
-     * Set email account to send emails with.
-     * The password below is a Gmail app password, so it can't be used to log into the Google account.
+     * Credentials of gmail account to send emails with.
      */
-    private const val emailAddressSender = "opensummerofcode.info@gmail.com"
-    private const val passwordSender = "nharepxthiwygcpj"
+    private val emailAddressSender: String? = System.getenv("OSOC_GMAIL_ADDRESS")
+    private val passwordSender: String? = System.getenv("OSOC_GMAIL_APP_PASSWORD")
 
     /**
      * Make the body of the email users receive when they request a password change.
@@ -57,6 +56,9 @@ object EmailUtil {
      * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
     fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID) {
+        if (emailAddressSender == null || passwordSender == null) {
+            throw java.lang.Exception("No email address or app password found in environment variables.")
+        }
         val email = SimpleMailMessage().apply {
             setSubject("Reset Password")
             setText(getForgotPasswordEmailBody(forgotPasswordUUID))

@@ -4,13 +4,9 @@ import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidForgotPasswordUUIDException
 import be.osoc.team1.backend.repositories.UserRepository
-import be.osoc.team1.backend.security.EmailUtil
 import be.osoc.team1.backend.services.ForgotPasswordService
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.security.crypto.password.PasswordEncoder
