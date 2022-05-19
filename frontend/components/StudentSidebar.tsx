@@ -7,16 +7,14 @@ import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import Select from 'react-select';
-import FlatList from 'flatlist-react';
 import { getSkills, parseError } from '../lib/requestUtils';
 import StudentTile from './students/StudentTile';
-import { SpinnerCircular } from 'spinners-react';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import { useRef } from 'react';
 import useOnScreen from '../hooks/useOnScreen';
 import { Icon } from '@iconify/react';
-import InfiniteList from "./InfiniteList";
+import InfiniteList from './InfiniteList';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const x_mark = <Icon icon="bx:x" />;
 
@@ -39,8 +37,7 @@ type StudentsSidebarProps = {
  * @param setFilterAmount         - callback to set total amount of filtered results
  * @param state                   - holds page, loading, hasMoreItems, pageSize
  * @param setState                - set the state variable
- * @param setHasMoreItems
- * @param setLoading              - set loading or not, this is not the same as the state loading due to styling bug otherwise
+ * @param setHasMoreItems         - set if has more items to load after this
  * @param signal                  - AbortSignal for the axios request
  * @param setError                - callback to set error message
  * @param router - Router object needed for edition parameter & error handling on 418 response
@@ -52,38 +49,29 @@ async function searchStudent(
   setStudents: (students: StudentBaseList[]) => void,
   setFilterAmount: (filterAmount: number) => void,
   state: {
-    // hasMoreItems: boolean;
     loading: boolean;
     page: number;
     pageSize: number;
   },
-  // nextPage: number,
   setState: (state: {
-    // hasMoreItems: boolean;
     loading: boolean;
     page: number;
     pageSize: number;
   }) => void,
   setHasMoreItems: (hasMoreItems: boolean) => void,
-  setLoading: (loading: boolean) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
   router: NextRouter
 ) {
-  setLoading(true);
-
   // Fallback for no status selected
   if (!getStatusFilterList(studentSearchParameters)) {
     const newState = { ...state };
     newState.page = 0;
-    // newState.hasMoreItems = false;
     newState.loading = false;
-    setState({...newState});
-    console.log("setting new state page: " + newState.page);
+    setState({ ...newState });
     setHasMoreItems(false);
     setStudents([] as StudentBaseList[]);
     setFilterAmount(0 as number);
-    setLoading(false);
     return;
   }
 
@@ -107,24 +95,21 @@ async function searchStudent(
     .then((response) => {
       const newState = { ...state };
       newState.page += 1;
-      // newState.hasMoreItems =
       newState.loading = false;
-      setState({...newState});
-      console.log("setting new state page: " + newState.page);
-      setHasMoreItems(response.data.totalLength > (newState.page + 1) * state.pageSize);
+      setState({ ...newState });
+      setHasMoreItems(
+        response.data.totalLength > (state.page + 1) * state.pageSize
+      );
       // VERY IMPORTANT TO CHANGE STATE FIRST!!!!
       setStudents(response.data.collection as StudentBaseList[]);
       setFilterAmount(response.data.totalLength as number);
-      setLoading(false);
     })
     .catch((err) => {
       parseError(err, setError, router, signal);
       if (!signal.aborted) {
-        setLoading(false);
         const newState = { ...state };
         newState.loading = false;
-        setState({...newState});
-        console.log("setting new state page error: " + newState.page);
+        setState({ ...newState });
       }
     });
 }
@@ -162,7 +147,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   const isOnScreen = useOnScreen(elementRef);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [hasMoreItems, setHasMoreItems] = useState(true);
-  const [fetching, setFetching] = useState(false);
+  let fetching = false;
 
   const [skills, setSkills] = useState(
     [] as Array<{ value: string; label: string }>
@@ -190,9 +175,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     StudentBaseList[],
     (students: StudentBaseList[]) => void
   ] = useState([] as StudentBaseList[]);
-
-  const [loading, setLoading]: [boolean, (loading: boolean) => void] =
-    useState<boolean>(true);
 
   const defaultStudentSearchParameters = {
     StatusYes: true,
@@ -231,7 +213,6 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     const newStudents = students ? [...students] : ([] as StudentBaseList[]);
     newStudents.push(...studentsList);
     setStudents(newStudents);
-    console.log("updating done");
   };
 
   useAxiosAuth();
@@ -249,18 +230,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     }
   }, [studentSearchParameters, skills, { isOnScreen }.isOnScreen]);
 
-  useEffect(() => {
-    console.log(state.page);
-  }, [state])
-
   /**
    * Call to refresh students list from page 0 with current filters applied
    */
   const search = (refreshSkills = false) => {
-    // state.page = 0;
-    setFetching(true);
-    console.log("searching");
-    setLoading(true);
+    state.page = 0;
+    fetching = true;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
@@ -273,22 +248,18 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       studentSearchParameters,
       setStudents,
       setFilterAmount,
-      // state,
-        {
-          page: 0,
-          pageSize: state.pageSize,
-          loading: state.loading
-        },
-      // state.page + 1,
+      {
+        page: 0,
+        pageSize: state.pageSize,
+        loading: state.loading,
+      },
       setState,
       setHasMoreItems,
-      setLoading,
       signal,
       setError,
       router
     );
-    setLoading(false);
-    setFetching(false);
+    fetching = false;
     return () => {
       controller.abort();
     };
@@ -302,160 +273,73 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   usePoll(
     () => {
       if (!fetching && !state.loading && { isOnScreen }.isOnScreen) {
-      // if ({ isOnScreen }.isOnScreen) {
-        console.log("polling");
-        controller.abort();
-        controller = new AbortController();
-        const signal = controller.signal;
-        (async () => {
-          await searchStudent(
-            studentNameSearch,
-            skills,
-            studentSearchParameters,
-            setStudents,
-            setFilterAmount,
-            {
-              // hasMoreItems: state.hasMoreItems,
-              loading: state.loading,
-              page: 0,
-              pageSize: Math.max(state.page, 1) * state.pageSize,
-            },
-            // state.page,
-            // setState,
-            () => null,
-            setHasMoreItems,
-            // () => null,
-              setLoading,
-            signal,
-            setError,
-            router
-          );
-          // if (!state.hasMoreItems && Math.max(state.page, 1) * state.pageSize < filterAmount){
-          //   console.log("upping state again" + (Math.max(state.page, 1) * state.pageSize) + " " + filterAmount);
-          //   const newState = {...state};
-          //   newState.hasMoreItems = true;
-          //   setState(newState);
-          // } else if (state.hasMoreItems && Math.max(state.page, 1) * state.pageSize >= filterAmount) {
-          //   console.log("downing state again" + (Math.max(state.page, 1) * state.pageSize) + " " + filterAmount);
-          //   const newState = {...state};
-          //   newState.hasMoreItems = false;
-          //   setState(newState);
-          // }
-        })();
-        return () => {
-          controller.abort();
-        };
+        doPoll();
       }
     },
-    [
-        fetching,
-      state,
-      filterAmount,
-      studentNameSearch,
-      studentSearchParameters,
-      skills,
-      { isOnScreen }.isOnScreen,
-    ],
+    [fetching, state, { isOnScreen }.isOnScreen],
     {
       interval: 3000,
     }
   );
-  //
-  // useEffect(() => {
-  //   console.log("poll");
-  //   (async () => {
-  //     if (!state.loading && { isOnScreen }.isOnScreen) {
-  //       controller.abort();
-  //       controller = new AbortController();
-  //       const signal = controller.signal;
-  //       await searchStudent(
-  //           studentNameSearch,
-  //           skills,
-  //           studentSearchParameters,
-  //           setStudents,
-  //           setFilterAmount,
-  //           {
-  //             loading: state.loading,
-  //             page: 0,
-  //             pageSize: Math.max(state.page, 1) * state.pageSize,
-  //           },
-  //           () => null,
-  //           setHasMoreItems,
-  //           setLoading,
-  //           // () => null,
-  //           signal,
-  //           setError,
-  //           router
-  //       );
-  //     }
-  //     await new Promise(f => setTimeout(f, 3000));
-  //   })();
-  // }, [
-  //   state,
-  //     loading,
-  //   filterAmount,
-  //   studentNameSearch,
-  //   studentSearchParameters,
-  //   skills,
-  //   { isOnScreen }.isOnScreen,
-  // ])
 
-  /**
-   * What to show when the students list is empty
-   */
-  const showBlank = () => {
-    if (loading) {
-      return (
-        <div className="text-center">
-          <p>Loading Students</p>
-          <SpinnerCircular
-            size={30}
-            thickness={100}
-            color="#FCB70F"
-            secondaryColor="rgba(252, 183, 15, 0.4)"
-            className="mx-auto"
-          />
-        </div>
-      );
+  const doPoll = () => {
+    if (fetching) {
+      return;
     }
-    return <div className="text-center">No students found.</div>;
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await searchStudent(
+        studentNameSearch,
+        skills,
+        studentSearchParameters,
+        setStudents,
+        setFilterAmount,
+        {
+          loading: state.loading,
+          page: 0,
+          pageSize: Math.max(state.page, 1) * state.pageSize,
+        },
+        () => null,
+        setHasMoreItems,
+        signal,
+        setError,
+        router
+      );
+    })();
+    return () => {
+      controller.abort();
+    };
   };
 
   /**
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    console.log("inside fetch: " + !state.loading + ' ' + hasMoreItems + ' ' + { isOnScreen }.isOnScreen);
-    if (
-      state.loading ||
-      !{ isOnScreen }.isOnScreen ||
-        !hasMoreItems
-      // (state.page + 1) * state.pageSize >= filterAmount
-    ) {
+    if (state.loading || !{ isOnScreen }.isOnScreen || !hasMoreItems) {
       return;
     }
-    console.log("fetching data w: " + JSON.stringify(state));
+    fetching = true;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    // state.loading = true;
     (async () => {
       await searchStudent(
-          studentNameSearch,
-          skills,
-          studentSearchParameters,
-          updateStudents,
-          setFilterAmount,
-          state,
-          // state.page + 1,
-          setState,
-          setHasMoreItems,
-          setLoading,
-          signal,
-          setError,
-          router
+        studentNameSearch,
+        skills,
+        studentSearchParameters,
+        updateStudents,
+        setFilterAmount,
+        state,
+        setState,
+        setHasMoreItems,
+        signal,
+        setError,
+        router
       );
     })();
+    fetching = false;
     return () => {
       controller.abort();
     };
@@ -744,35 +628,21 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
             {filterAmount + ' total results'}
           </div>
           <InfiniteList
-              list={students}
-              renderItem={(student: StudentBaseList) => (
-                  <StudentTile
-                      key={student.id}
-                      studentInput={student}
-                      setStudentBase={setStudentBase}
-                  />
-              )}
-              renderWhenEmpty={"Loading Students"}
-              hasMoreItems={hasMoreItems}
-              loading={state.loading}
-              loadMoreItems={() => {
-                fetchData();
-              }}
+            list={students}
+            renderItem={(student: StudentBaseList) => (
+              <StudentTile
+                key={student.id}
+                studentInput={student}
+                setStudentBase={setStudentBase}
               />
-          {/*<div*/}
-          {/*  className={`${*/}
-          {/*    state.loading && state.page > 0 ? 'visible block' : 'hidden'*/}
-          {/*  } text-center`}*/}
-          {/*>*/}
-          {/*  <p>Loading Students</p>*/}
-          {/*  <SpinnerCircular*/}
-          {/*    size={30}*/}
-          {/*    thickness={100}*/}
-          {/*    color="#FCB70F"*/}
-          {/*    secondaryColor="rgba(252, 183, 15, 0.4)"*/}
-          {/*    className="mx-auto"*/}
-          {/*  />*/}
-          {/*</div>*/}
+            )}
+            loadingText={'Loading Students'}
+            hasMoreItems={hasMoreItems}
+            loading={state.loading}
+            loadMoreItems={() => {
+              fetchData();
+            }}
+          />
         </div>
       </div>
     </div>
