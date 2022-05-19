@@ -22,7 +22,7 @@ import java.util.UUID
 @UnsecuredWebMvcTest(ForgotPasswordController::class, PasswordEncoderConfig::class)
 class ForgotPasswordControllerTests(@Autowired val mockMvc: MockMvc) {
     @MockkBean
-    private lateinit var service: ForgotPasswordService
+    private lateinit var forgotPasswordService: ForgotPasswordService
     @MockkBean
     private lateinit var editionService: EditionService
     @MockkBean
@@ -33,7 +33,7 @@ class ForgotPasswordControllerTests(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `postEmail should not fail`() {
-        every { service.sendEmailWithToken(any()) } just Runs
+        every { forgotPasswordService.sendEmailWithToken(any()) } just Runs
         mockMvc.perform(
             MockMvcRequestBuilders.post("/forgotPassword")
                 .contentType(MediaType.TEXT_PLAIN)
@@ -43,7 +43,7 @@ class ForgotPasswordControllerTests(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `changePassword should not fail when valid uuid given`() {
-        every { service.changePassword(validUUID, validNewPassword) } just Runs
+        every { forgotPasswordService.changePassword(validUUID, validNewPassword) } just Runs
         mockMvc.perform(
             MockMvcRequestBuilders.patch("/forgotPassword/$validUUID")
                 .contentType(MediaType.TEXT_PLAIN)
@@ -54,7 +54,7 @@ class ForgotPasswordControllerTests(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `changePassword should fail when invalid uuid given`() {
         val invalidUUID = UUID.randomUUID()
-        every { service.changePassword(invalidUUID, validNewPassword) } throws InvalidForgotPasswordUUIDException()
+        every { forgotPasswordService.changePassword(invalidUUID, validNewPassword) } throws InvalidForgotPasswordUUIDException()
         mockMvc.perform(
             MockMvcRequestBuilders.patch("/forgotPassword/$invalidUUID")
                 .contentType(MediaType.TEXT_PLAIN)

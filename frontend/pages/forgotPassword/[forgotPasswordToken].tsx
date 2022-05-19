@@ -42,7 +42,7 @@ const ForgotPassword: NextPage = () => {
               }}
               className="okButton"
             >
-              Return to login.
+              OK
             </button>
           </span>
         ),

@@ -13,7 +13,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/forgotPassword")
-class ForgotPasswordController(private val service: ForgotPasswordService) {
+class ForgotPasswordController(private val forgotPasswordService: ForgotPasswordService) {
     /**
      * Request to reset the password of the user with given [emailAddress]. The link to actually reset the password is
      * sent in an email to [emailAddress].
@@ -22,12 +22,12 @@ class ForgotPasswordController(private val service: ForgotPasswordService) {
      */
     @PostMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    fun postEmail(@RequestBody emailAddress: String) = service.sendEmailWithToken(emailAddress)
+    fun postEmail(@RequestBody emailAddress: String) = forgotPasswordService.sendEmailWithToken(emailAddress)
 
     /**
      * Reset password using [forgotPasswordUUID].
      */
     @PatchMapping("/{forgotPasswordUUID}")
     fun patchPassword(@PathVariable forgotPasswordUUID: UUID, @RequestBody newPassword: String) =
-        service.changePassword(forgotPasswordUUID, newPassword)
+        forgotPasswordService.changePassword(forgotPasswordUUID, newPassword)
 }
