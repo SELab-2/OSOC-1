@@ -54,7 +54,7 @@ class ForgotPasswordService(private val userRepository: UserRepository, private 
     /**
      * Remove token linked to [forgotPasswordUUID] from [forgotPasswordTokens].
      */
-    fun removeToken(forgotPasswordUUID: UUID) {
+    private fun removeToken(forgotPasswordUUID: UUID) {
         forgotPasswordTokens.remove(hash(forgotPasswordUUID))
     }
 
@@ -68,7 +68,7 @@ class ForgotPasswordService(private val userRepository: UserRepository, private 
     /**
      * Get which email address requested given [forgotPasswordUUID].
      */
-    fun getEmailFromUUID(forgotPasswordUUID: UUID): String? {
+    private fun getEmailFromUUID(forgotPasswordUUID: UUID): String? {
         val hashedUUID = hash(forgotPasswordUUID)
         if (isTokenValid(hashedUUID)) {
             return forgotPasswordTokens[hashedUUID]!!.emailAddress
