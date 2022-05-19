@@ -79,7 +79,6 @@ class UserService(private val repository: UserRepository, private val passwordEn
         if (oldUser.password != updatedUser.password) {
             throw ForbiddenOperationException("Not allowed to update password field of users")
         }
-
         return repository.save(updatedUser)
     }
 }
