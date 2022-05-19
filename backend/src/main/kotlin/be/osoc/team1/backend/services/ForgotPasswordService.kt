@@ -8,7 +8,8 @@ import be.osoc.team1.backend.security.ForgotPasswordToken
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
-import java.util.*
+import java.util.SortedMap
+import java.util.UUID
 
 @Service
 class ForgotPasswordService(private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder) {
