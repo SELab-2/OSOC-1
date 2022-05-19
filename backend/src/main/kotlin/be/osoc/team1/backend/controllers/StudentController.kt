@@ -73,7 +73,7 @@ class StudentController(
         @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: Set<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
-        @RequestParam(defaultValue = "") skills: Set<String>,
+        @RequestParam(defaultValue = "\"\"") skills: String,
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
         @RequestParam(defaultValue = "false") studentCoachOnly: Boolean,
         @RequestParam(defaultValue = "false") unassignedOnly: Boolean,
@@ -89,6 +89,10 @@ class StudentController(
         if (status.filterNotNull().size != status.size)
             throw FailedOperationException("Status filter cannot contain null values! This might be caused by a trailing comma.")
 
+        if (skills.length < 2 || skills[0] != '"' || skills[skills.length - 1] != '"')
+            throw FailedOperationException("Skill-names in the skills field should have quotes around them.")
+
+        val skillNames = skills.substring(1, skills.length - 1).split("\",\"").filter { it.isNotEmpty() }.toSet()
         val decodedName = URLDecoder.decode(name, "UTF-8")
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
@@ -98,7 +102,7 @@ class StudentController(
             .applyIf(name.isNotBlank()) { filterByName(decodedName) }
             .applyIf(!includeSuggested) { filterBySuggested(callee) }
             .applyIf(status != StatusEnum.values().toSet()) { filterByStatus(status) }
-            .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
+            .applyIf(skillNames.isNotEmpty()) { filterBySkills(skillNames) }
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
             .page(pager)
 
