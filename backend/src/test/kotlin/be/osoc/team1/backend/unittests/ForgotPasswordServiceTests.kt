@@ -3,6 +3,7 @@ package be.osoc.team1.backend.unittests
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidForgotPasswordUUIDException
+import be.osoc.team1.backend.exceptions.InvalidGmailCredentialsException
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.EmailUtil
 import be.osoc.team1.backend.services.ForgotPasswordService
@@ -11,6 +12,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -31,13 +33,38 @@ class ForgotPasswordServiceTests {
     @Test
     fun `sendEmailWithToken does not fail when email is valid`() {
         val forgotPasswordService = ForgotPasswordService(getRepository(), mockk())
+        mockkObject(EmailUtil)
+        every { EmailUtil.sendEmail(testEmail, any()) } just Runs
         forgotPasswordService.sendEmailWithToken(testEmail)
+        unmockkObject(EmailUtil)
     }
 
     @Test
     fun `sendEmailWithToken does not fail when email is invalid`() {
         val forgotPasswordService = ForgotPasswordService(getRepository(false), mockk())
         forgotPasswordService.sendEmailWithToken(testEmail)
+    }
+
+    @Test
+    fun `sendEmailWithToken fails when environment variables aren't set`() {
+        val forgotPasswordService = ForgotPasswordService(getRepository(), mockk())
+        EmailUtil.emailAddressSender = null
+        EmailUtil.passwordSender = null
+        val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
+            forgotPasswordService.sendEmailWithToken(testEmail)
+        }
+        Assertions.assertTrue(exception.message?.startsWith("No 'OSOC_GMAIL_ADDRESS' or") ?: false)
+    }
+
+    @Test
+    fun `sendEmailWithToken fails when environment variables aren't set correctly`() {
+        val forgotPasswordService = ForgotPasswordService(getRepository(), mockk())
+        EmailUtil.emailAddressSender = "invalid_email@gmail.com"
+        EmailUtil.passwordSender = UUID.randomUUID().toString()
+        val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
+            forgotPasswordService.sendEmailWithToken(testEmail)
+        }
+        Assertions.assertTrue(exception.message?.startsWith("Make sure 'OSOC_GMAIL_ADDRESS' and") ?: false)
     }
 
     @Test

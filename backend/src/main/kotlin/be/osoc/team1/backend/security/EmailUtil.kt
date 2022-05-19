@@ -1,5 +1,7 @@
 package be.osoc.team1.backend.security
 
+import be.osoc.team1.backend.exceptions.InvalidGmailCredentialsException
+import org.springframework.mail.MailAuthenticationException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
@@ -13,8 +15,8 @@ object EmailUtil {
     /**
      * Credentials of gmail account to send emails with.
      */
-    private val emailAddressSender: String = System.getenv("OSOC_GMAIL_ADDRESS")
-    private val passwordSender: String = System.getenv("OSOC_GMAIL_APP_PASSWORD")
+    var emailAddressSender: String? = System.getenv("OSOC_GMAIL_ADDRESS")
+    var passwordSender: String? = System.getenv("OSOC_GMAIL_APP_PASSWORD")
 
     /**
      * Make the body of the email users receive when they request a password change.
@@ -56,12 +58,24 @@ object EmailUtil {
      * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
     fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID) {
+        println(emailAddressSender)
+        if (emailAddressSender == null || passwordSender == null) {
+            throw InvalidGmailCredentialsException("No 'OSOC_GMAIL_ADDRESS' or 'OSOC_GMAIL_APP_PASSWORD' found in environment variables.")
+        }
         val email = SimpleMailMessage().apply {
             setSubject("Reset Password")
             setText(getForgotPasswordEmailBody(forgotPasswordUUID))
             setTo(emailAddressReceiver)
-            setFrom(emailAddressSender)
+            setFrom(emailAddressSender!!)
         }
-        getMailSender().send(email)
+        try {
+            println("hunk")
+            getMailSender().send(email)
+        } catch (_: MailAuthenticationException) {
+            throw InvalidGmailCredentialsException(
+                "Make sure 'OSOC_GMAIL_ADDRESS' and 'OSOC_GMAIL_APP_PASSWORD' are correctly configured in environment" +
+                    "variables. 'OSOC_GMAIL_APP_PASSWORD' should be set to a gmail app password, a normal password won't work here."
+            )
+        }
     }
 }
