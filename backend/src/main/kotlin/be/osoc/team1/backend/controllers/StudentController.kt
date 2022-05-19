@@ -56,7 +56,8 @@ class StudentController(
      * The results can also be filtered by [name] (default value is empty so no student is excluded),
      * by [status] (default value allows all statuses), by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
-     * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
+     * volunteers([studentCoachOnly]), by only unassigned students ([unassignedOnly]) students and by only assigned
+     * students ([assignedOnly]).
      *
      * The returned students can also be altered using the [view] query parameter:
      * [Basic] will limit the data the student object contains,
