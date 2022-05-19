@@ -34,6 +34,7 @@ import StudentFormView from "./StudentFormView";
 import axios, { AxiosError } from 'axios';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
+import {getAnswerStrings} from "../../lib/tallyForm";
 
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
@@ -357,6 +358,8 @@ const StudentView: React.FC<StudentViewProp> = ({
     });
   }, [myStudent]);
 
+  const answers = getAnswerStrings(myStudent.answers)
+  const pronouns = answers.commonPronouns || answers.otherPronouns
   return (
     <div className={`flex flex-col-reverse justify-between xl:flex-row`}>
       {error && <Error error={error} className="mb-4" />}
@@ -366,6 +369,7 @@ const StudentView: React.FC<StudentViewProp> = ({
           <h1 className="font-bold text-4xl">
             {myStudent.firstName + ' ' + myStudent.lastName}
           </h1>
+          {pronouns != undefined && <p className="pt-2 pl-2">{pronouns}</p>}
           {user.role == UserRole.Admin && (
             <div className="ml-2 flex flex-col justify-center">
               <i
@@ -388,7 +392,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             />
           ))}
         </div>
-        <StudentFormView answers={myStudent.answers} />
+        <StudentFormView answers={answers} />
       </div>
 
       {/* holds suggestion controls */}
