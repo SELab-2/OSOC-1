@@ -3,7 +3,6 @@ package be.osoc.team1.backend.services
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.InvalidForgotPasswordUUIDException
 import be.osoc.team1.backend.repositories.UserRepository
-import be.osoc.team1.backend.security.EmailUtil
 import be.osoc.team1.backend.security.ForgotPasswordToken
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -12,7 +11,11 @@ import java.util.SortedMap
 import java.util.UUID
 
 @Service
-class ForgotPasswordService(private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder) {
+class ForgotPasswordService(
+    private val userRepository: UserRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val emailService: EmailService
+) {
     /**
      * When a user requests to change its password, a random [UUID] gets generated and a new entry gets added to
      * [forgotPasswordTokens]. The key of the entry is the hashed uuid, the value consists of a [ForgotPasswordToken] containing
@@ -83,7 +86,7 @@ class ForgotPasswordService(private val userRepository: UserRepository, private 
     fun sendEmailWithToken(emailAddress: String) {
         if (userRepository.findByEmail(emailAddress) != null) {
             val forgotPasswordUUID: UUID = newToken(emailAddress)
-            EmailUtil.sendEmail(emailAddress, forgotPasswordUUID)
+            emailService.sendEmail(emailAddress, forgotPasswordUUID)
         }
     }
 

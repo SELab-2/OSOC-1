@@ -1,22 +1,32 @@
-package be.osoc.team1.backend.security
+package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.exceptions.InvalidGmailCredentialsException
 import org.springframework.mail.MailAuthenticationException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.stereotype.Service
 import java.util.Properties
 import java.util.UUID
 
 /**
- * This object contains every function needed to make and send emails.
+ * This class contains every function needed to make and send emails.
  */
-object EmailUtil {
+@Service
+class EmailService {
     /**
      * Credentials of gmail account to send emails with.
      */
-    var emailAddressSender: String? = System.getenv("OSOC_GMAIL_ADDRESS")
-    var passwordSender: String? = System.getenv("OSOC_GMAIL_APP_PASSWORD")
+    private var emailAddressSender: String? = System.getenv("OSOC_GMAIL_ADDRESS")
+    private var passwordSender: String? = System.getenv("OSOC_GMAIL_APP_PASSWORD")
+
+    /**
+     * Set credentials of account to send mails with. This function is used for testing.
+     */
+    fun setSenderEmailCredentials(email: String?, password: String?) {
+        emailAddressSender = email
+        passwordSender = password
+    }
 
     /**
      * Make the body of the email users receive when they request a password change.
@@ -58,7 +68,6 @@ object EmailUtil {
      * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
     fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID) {
-        println(emailAddressSender)
         if (emailAddressSender == null || passwordSender == null) {
             throw InvalidGmailCredentialsException("No 'OSOC_GMAIL_ADDRESS' or 'OSOC_GMAIL_APP_PASSWORD' found in environment variables.")
         }
@@ -69,7 +78,6 @@ object EmailUtil {
             setFrom(emailAddressSender!!)
         }
         try {
-            println("hunk")
             getMailSender().send(email)
         } catch (_: MailAuthenticationException) {
             throw InvalidGmailCredentialsException(
