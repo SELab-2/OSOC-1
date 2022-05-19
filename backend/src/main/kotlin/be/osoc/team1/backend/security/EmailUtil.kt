@@ -56,8 +56,9 @@ object EmailUtil {
      * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
     fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID) {
+        val mailSender = getMailSender()
         if (emailAddressSender == null || passwordSender == null) {
-            throw java.lang.Exception("No email address or app password found in environment variables.")
+            return
         }
         val email = SimpleMailMessage().apply {
             setSubject("Reset Password")
@@ -65,6 +66,6 @@ object EmailUtil {
             setTo(emailAddressReceiver)
             setFrom(emailAddressSender)
         }
-        getMailSender().send(email)
+        mailSender.send(email)
     }
 }
