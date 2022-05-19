@@ -316,13 +316,42 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         val student2 = Student("firstname", "lastname")
         val studentList = listOf(student1, student2)
         every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
-        every { assignmentRepository.findAll() } returns setOf(Assignment(student1, Position(Skill("Backend"), 1), User("username", "email", Role.Coach, "password"), "reason"))
+        every { assignmentRepository.findAll() } returns setOf(
+            Assignment(
+                student1,
+                Position(Skill("Backend"), 1),
+                User("username", "email", Role.Coach, "password"),
+                "reason"
+            )
+        )
         mockMvc.perform(get("$editionUrl?unassignedOnly=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
         mockMvc.perform(get("$editionUrl?unassignedOnly=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student2), 1))))
+    }
+
+    @Test
+    fun `getAllStudents filtering by assigned only returns assigned students`() {
+        val student1 = Student("firstname", "lastname")
+        val student2 = Student("firstname", "lastname")
+        val studentList = listOf(student1, student2)
+        every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
+        every { assignmentRepository.findAll() } returns setOf(
+            Assignment(
+                student1,
+                Position(Skill("Backend"), 1),
+                User("username", "email", Role.Coach, "password"),
+                "reason"
+            )
+        )
+        mockMvc.perform(get("$editionUrl?assignedOnly=false").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+        mockMvc.perform(get("$editionUrl?assignedOnly=true").principal(defaultPrincipal))
+            .andExpect(status().isOk)
+            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student1), 1))))
     }
 
     @Test
