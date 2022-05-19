@@ -13,8 +13,8 @@ object EmailUtil {
     /**
      * Credentials of gmail account to send emails with.
      */
-    private val emailAddressSender: String? = System.getenv("OSOC_GMAIL_ADDRESS")
-    private val passwordSender: String? = System.getenv("OSOC_GMAIL_APP_PASSWORD")
+    private val emailAddressSender: String = System.getenv("OSOC_GMAIL_ADDRESS")
+    private val passwordSender: String = System.getenv("OSOC_GMAIL_APP_PASSWORD")
 
     /**
      * Make the body of the email users receive when they request a password change.
@@ -56,16 +56,12 @@ object EmailUtil {
      * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
     fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID) {
-        val mailSender = getMailSender()
-        if (emailAddressSender == null || passwordSender == null) {
-            return
-        }
         val email = SimpleMailMessage().apply {
             setSubject("Reset Password")
             setText(getForgotPasswordEmailBody(forgotPasswordUUID))
             setTo(emailAddressReceiver)
             setFrom(emailAddressSender)
         }
-        mailSender.send(email)
+        getMailSender().send(email)
     }
 }
