@@ -114,7 +114,9 @@ const Users: NextPage = () => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getUsers(signal);
+    (async () => {
+      await getUsers(signal);
+    })();
     return () => {
       controller.abort();
     };
@@ -131,7 +133,9 @@ const Users: NextPage = () => {
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    getUsers(signal);
+    (async () => {
+      await getUsers(signal);
+    })();
     return () => {
       controller.abort();
     };
