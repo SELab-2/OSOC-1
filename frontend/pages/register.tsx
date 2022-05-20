@@ -152,7 +152,7 @@ const register = () => {
               } p-1 text-sm`}
               name="password"
               type="password"
-              placeholder="placeholder"
+              placeholder="password"
               minLength={8}
               maxLength={64}
               {...passwordProps}
@@ -175,7 +175,7 @@ const register = () => {
               } p-1 text-sm`}
               name="repeatPassword"
               type="password"
-              placeholder="placeholder"
+              placeholder="password"
               minLength={8}
               maxLength={64}
               {...matchProps}
