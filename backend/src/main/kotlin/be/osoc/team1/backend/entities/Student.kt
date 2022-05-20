@@ -84,14 +84,14 @@ class StatusSuggestion(
     @NotBlank
     val edition: String = ""
 ) {
-    //@ManyToOne(cascade = [CascadeType.DETACH])
-    //@JsonIgnore
-    //@JoinTable(name = "student_status_suggestions",
-    //    joinColumns = [JoinColumn(name = "status_suggestions_id")],
-    //    inverseJoinColumns = [JoinColumn(name = "student_id")]
-    //)
-    //lateinit var student: Student
-    //    private set
+    @ManyToOne(cascade = [CascadeType.DETACH])
+    @JsonIgnore
+    @JoinTable(name = "student_status_suggestions",
+        joinColumns = [JoinColumn(name = "status_suggestions_id")],
+        inverseJoinColumns = [JoinColumn(name = "student_id")]
+    )
+    lateinit var student: Student
+        private set
 
     @Id
     val id: UUID = UUID.randomUUID()
@@ -169,6 +169,10 @@ class Student(
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinTable(name = "student_status_suggestions",
+        joinColumns = [JoinColumn(name = "student_id")],
+        inverseJoinColumns = [JoinColumn(name = "status_suggestions_id")]
+    )
     @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = StatusSuggestionListSerializer::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
