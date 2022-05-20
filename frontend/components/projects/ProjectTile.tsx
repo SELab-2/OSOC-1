@@ -459,7 +459,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
       {/* assigned students list */}
       <div className="flex flex-col">
         {myProject.assignments
-          .sort((one, two) => (one > two ? -1 : 1))
+          .sort((one, two) => (one.id > two.id ? -1 : 1))
           .map((assignment) => (
             <ProjectAssignmentsList
               key={assignment.id}
