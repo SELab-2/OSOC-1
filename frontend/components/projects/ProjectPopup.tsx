@@ -147,7 +147,9 @@ function postOrPatchProject(
         },
         amount: position.amount,
       } as { [key: string]: unknown };
-      position.skill.value ? (newPos.id = position.skill.value) : null;
+      position.skill.value && position.skill.value !== position.skill.label
+        ? (newPos.id = position.skill.value)
+        : null;
       return newPos;
     });
   }
@@ -294,6 +296,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
   );
 
   const [formError, setFormError] = useState('');
+  const [skillsLoaded, setSkillsLoaded] = useState(false);
 
   /**
    * When a new skill is created by the user, add it to the options
@@ -301,7 +304,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
    */
   const addSkillOption = (option: string) => {
     const newSkillOptions = [...skillOptions];
-    newSkillOptions.push({ value: '', label: option });
+    newSkillOptions.push({ value: option, label: option });
     setSkillOptions(newSkillOptions);
   };
 
@@ -311,10 +314,36 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
     const signal = controller.signal;
     getSkills(setSkillOptions, signal, setError, router);
     getCoaches(setCoachOptions, signal, setError, router);
+    setSkillsLoaded(true);
     return () => {
       controller.abort();
     };
   }, []);
+
+  /**
+   * This is needed to set the id's of the original positions
+   * otherwise all positions would be deleted and then remade with a new id,
+   * this would destroy the link between assignments and positions
+   */
+  useEffect(() => {
+    if (skillsLoaded && skillOptions.length > 0) {
+      const projectPositions = projectForm.positions.map(
+        (position) => position.skill
+      );
+      const newSkillOptions = [] as { value: string; label: string }[];
+      skillOptions.forEach((option) => {
+        for (const projectPosition of projectPositions) {
+          if (projectPosition.label === option.label) {
+            option.value = projectPosition.value;
+            break;
+          }
+        }
+        newSkillOptions.push(option);
+      });
+      setSkillOptions(newSkillOptions);
+      setSkillsLoaded(false);
+    }
+  }, [skillsLoaded, skillOptions]);
 
   return (
     <form
@@ -435,18 +464,18 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                         .includes(option.label)
                     }
                     placeholder="Position"
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setPositionDropdownValue(
                         index,
                         e ? e : ({} as { value: string; label: string })
-                      )
-                    }
+                      );
+                    }}
                     onCreateOption={(e) => {
                       addSkillOption(e);
                       setPositionDropdownValue(
                         index,
                         e
-                          ? { value: '', label: e }
+                          ? { value: e, label: e }
                           : ({} as { value: string; label: string })
                       );
                     }}
@@ -470,7 +499,6 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                   <div className="ml-4 flex flex-col justify-center">
                     <i
                       onClick={() => {
-                        console.log(index);
                         removePositionDropdown(index);
                       }}
                       className="icon-xcircle-red text-[36px]"
@@ -510,7 +538,11 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
 
       <div className="mt-3 flex flex-row justify-between px-5">
         <button
-          onClick={() => setShowPopup(false)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowPopup(false);
+          }}
           className={`min-w-[120px] border-2 bg-white`}
         >
           Cancel

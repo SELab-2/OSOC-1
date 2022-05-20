@@ -44,7 +44,7 @@ class User(
     var role: Role = Role.Disabled,
 
     @field:JsonView(EntityViews.Hidden::class)
-    val password: String,
+    var password: String,
 ) {
     @Id
     @field:JsonView(EntityViews.Public::class)

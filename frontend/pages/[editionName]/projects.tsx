@@ -41,6 +41,7 @@ import ProjectConflict from '../../components/projects/ProjectConflict';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
+const x_mark = <Icon icon="bx:x" />;
 
 /**
  * function that allows searching projects by name
@@ -439,8 +440,6 @@ const Projects: NextPage = () => {
                     className={`flex w-full flex-row justify-center xl:mr-8 xl1920:mr-10`}
                     ref={elementRef1}
                   >
-                    {/* TODO add an easy reset/undo search button */}
-                    {/* TODO either move search icon left and add xmark to the right or vice versa */}
                     {/* This is the projects searchbar */}
                     <div
                       className={`${
@@ -456,11 +455,14 @@ const Projects: NextPage = () => {
                             showConflicts
                               ? 'bg-gray cursor-not-allowed'
                               : 'cursor-text bg-white'
-                          } form-control m-0 block w-full rounded border border-solid border-gray-300 bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none`}
+                          } form-control m-0 block w-full rounded border border-solid border-gray-300 bg-clip-padding py-1.5 pl-8 pr-3 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none`}
                           id="ProjectsSearch"
                           placeholder="Search projects by name"
                           disabled={showConflicts}
-                          onChange={(e) => setProjectSearch(e.target.value)}
+                          value={projectSearch}
+                          onChange={(e) =>
+                            setProjectSearch(e.target.value || '')
+                          }
                           onKeyPress={(e) => {
                             if (showConflicts) {
                               return;
@@ -471,7 +473,7 @@ const Projects: NextPage = () => {
                           }}
                         />
                         <i
-                          className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                          className="absolute bottom-1 left-2 z-10 h-[24px] w-[16px] opacity-20"
                           onClick={() => {
                             if (showConflicts) {
                               return;
@@ -481,6 +483,19 @@ const Projects: NextPage = () => {
                         >
                           {magnifying_glass}
                         </i>
+                        {projectSearch && projectSearch.length > 0 && (
+                          <i
+                            className="absolute bottom-1 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                            onClick={() => {
+                              if (showConflicts) {
+                                return;
+                              }
+                              setProjectSearch('');
+                            }}
+                          >
+                            {x_mark}
+                          </i>
+                        )}
                       </div>
                       <div
                         className={`${

@@ -496,21 +496,21 @@ paths:
                         schema:
                             $ref: '#/components/schemas/Project'
                         example:
-                            {
-                                "name": "Project name",
-                                "clientName": "Client name",
-                                "description": "Description",
-                                "positions": [
-                                    {
-                                        "skill": { "skillName": "Backend" },
-                                        "amount": "2"
-                                    },
-                                    {
-                                        "skill": { "skillName": "Frontend" },
-                                        "amount": "1"
-                                    }
-                                ]
-                            }
+                          {
+                              "name": "Project name",
+                              "clientName": "Client name",
+                              "description": "Description",
+                              "positions": [
+                                  {
+                                      "skill": { "skillName": "Backend" },
+                                      "amount": "2"
+                                  },
+                                  {
+                                      "skill": { "skillName": "Frontend" },
+                                      "amount": "1"
+                                  }
+                              ]
+                          }
             responses:
                 '201':
                     description: |
@@ -571,28 +571,28 @@ paths:
                         schema:
                             $ref: '#/components/schemas/Project'
                         example:
-                              {
-                                  "name": "Project name",
-                                  "clientName": "Client name",
-                                  "description": "Description",
-                                  "edition": "testEdition",
-                                  "positions": [
-                                      {
-                                          "skill": { "skillName": "Backend" },
-                                          "amount": "2",
-                                          "id": "6adf6cb3-6638-4771-a281-403c0bf3427a"
-                                      },
-                                      {
-                                          "skill": { "skillName": "Frontend" },
-                                          "amount": "1",
-                                          "id": "41e25173-f7cb-4c4b-b4e7-d12f30e5fbe3"
-                                      }
-                                  ],
-                                  "assignments": [
-                                      "http://localhost:8080/api/assignments/f9fefa13-80a3-439a-bf59-3cdacd60e2fc"
-                                  ],
-                                  "id": "68afaeef-48f4-4bf1-9ac7-a6a2c1bcf6d7"
-                              }
+                          {
+                              "name": "Project name",
+                              "clientName": "Client name",
+                              "description": "Description",
+                              "edition": "testEdition",
+                              "positions": [
+                                  {
+                                      "skill": { "skillName": "Backend" },
+                                      "amount": "2",
+                                      "id": "6adf6cb3-6638-4771-a281-403c0bf3427a"
+                                  },
+                                  {
+                                      "skill": { "skillName": "Frontend" },
+                                      "amount": "1",
+                                      "id": "41e25173-f7cb-4c4b-b4e7-d12f30e5fbe3"
+                                  }
+                              ],
+                              "assignments": [
+                                  "http://localhost:8080/api/assignments/f9fefa13-80a3-439a-bf59-3cdacd60e2fc"
+                              ],
+                              "id": "68afaeef-48f4-4bf1-9ac7-a6a2c1bcf6d7"
+                          }
             responses:
                 '200':
                     description: successful operation
@@ -818,7 +818,7 @@ paths:
                             $ref: '#/components/schemas/Assignment'
             responses:
                 '200':
-                    description: succesful operation
+                    description: successful operation
                 '404':
                     description: Not Found. No such projectId.
                 '400':
@@ -846,7 +846,7 @@ paths:
                         format: uuid
             responses:
                 '204':
-                    description: succesful operation
+                    description: successful operation
                 '404':
                     description: Not Found. No such projectId or assignmentId.
     /{edition}/projects/conflicts:
@@ -966,7 +966,7 @@ paths:
             summary: Get list containing all users
             responses:
                 '200':
-                    description: succesful operation
+                    description: successful operation
                     content:
                         application/json:
                             schema:
@@ -982,7 +982,7 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '201':
-                    description: succesful operation
+                    description: successful operation
                     content:
                         application/json:
                             schema:
@@ -1005,7 +1005,7 @@ paths:
                         format: uuid
             responses:
                 '200':
-                    description: succesful operation.
+                    description: successful operation.
                     content:
                         application/json:
                             schema:
@@ -1028,7 +1028,7 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '200':
-                    description: succesful operation
+                    description: successful operation
                     content:
                         application/json:
                             schema:
@@ -1055,7 +1055,7 @@ paths:
                         format: uuid
             responses:
                 '204':
-                    description: succesful operation
+                    description: successful operation
                 '404':
                     description: Not Found. No such userId.
     /users/{userId}/role:
@@ -1076,13 +1076,41 @@ paths:
                             enum: [ Disabled, Coach, Admin ]
             responses:
                 '200':
-                    description: succesful operation
+                    description: successful operation
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/User'
                 '404':
                     description: NOT FOUND
+                '400':
+                    description: Bad Request.
+    /forgotPassword:
+        post:
+            summary: request to change password of given email
+            requestBody:
+                content:
+                    text/plain:
+                        schema:
+                            type: string
+            responses:
+                '200':
+                    description: successful operation
+                '400':
+                    description: Bad Request.
+    /forgotPassword/{forgotPasswordUUID}/:
+        patch:
+            summary: reset password of user linked to forgotPasswordUUID
+            parameters:
+                -   name: forgotPasswordUUID
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+            responses:
+                '200':
+                    description: successful operation
                 '400':
                     description: Bad Request.
     /assignments/{assignmentId}:
