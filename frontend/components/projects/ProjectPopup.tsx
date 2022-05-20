@@ -475,7 +475,7 @@ const ProjectPopup: React.FC<ProjectPopupProp> = ({
                       setPositionDropdownValue(
                         index,
                         e
-                          ? { value: ' ', label: e }
+                          ? { value: e, label: e }
                           : ({} as { value: string; label: string })
                       );
                     }}

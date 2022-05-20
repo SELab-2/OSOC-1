@@ -23,7 +23,7 @@ export default function useOnScreen(ref: RefObject<HTMLElement>) {
         observerRef.current?.disconnect();
       };
     }
-  }, [ref.current]);
+  }, [ref, ref.current]);
 
   return isOnScreen;
 }
