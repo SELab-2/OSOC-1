@@ -1,10 +1,16 @@
 package be.osoc.team1.backend.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonView
 import java.util.UUID
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
+import javax.persistence.ManyToMany
+import javax.persistence.OneToMany
 import javax.persistence.Table
 
 /**
@@ -46,6 +52,18 @@ class User(
     @field:JsonView(EntityViews.Hidden::class)
     var password: String,
 ) {
+    @ManyToMany(cascade = [CascadeType.DETACH])
+    @JsonIgnore
+    @JoinTable(name = "project_coaches",
+        joinColumns = [JoinColumn(name = "coaches_id")],
+        inverseJoinColumns = [JoinColumn(name = "project_id")]
+    )
+    val projects: MutableList<Project> = mutableListOf()
+
+    @OneToMany(mappedBy="suggester", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JsonIgnore
+    val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
+
     @Id
     @field:JsonView(EntityViews.Public::class)
     val id: UUID = UUID.randomUUID()
