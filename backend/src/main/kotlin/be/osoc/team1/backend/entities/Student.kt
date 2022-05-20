@@ -86,7 +86,8 @@ class StatusSuggestion(
 ) {
     @ManyToOne(cascade = [CascadeType.DETACH])
     @JsonIgnore
-    @JoinTable(name = "student_status_suggestions",
+    @JoinTable(
+        name = "student_status_suggestions",
         joinColumns = [JoinColumn(name = "status_suggestions_id")],
         inverseJoinColumns = [JoinColumn(name = "student_id")]
     )
@@ -169,7 +170,8 @@ class Student(
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JoinTable(name = "student_status_suggestions",
+    @JoinTable(
+        name = "student_status_suggestions",
         joinColumns = [JoinColumn(name = "student_id")],
         inverseJoinColumns = [JoinColumn(name = "status_suggestions_id")]
     )
@@ -182,7 +184,7 @@ class Student(
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
 
-    @OneToMany(mappedBy="student", cascade = [CascadeType.DETACH], orphanRemoval = true)
+    @OneToMany(mappedBy = "student", cascade = [CascadeType.DETACH], orphanRemoval = true)
     @JsonIgnore
     val assignments: MutableList<Assignment> = mutableListOf()
 

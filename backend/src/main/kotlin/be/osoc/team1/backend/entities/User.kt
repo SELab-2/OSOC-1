@@ -54,13 +54,14 @@ class User(
 ) {
     @ManyToMany(cascade = [CascadeType.DETACH])
     @JsonIgnore
-    @JoinTable(name = "project_coaches",
+    @JoinTable(
+        name = "project_coaches",
         joinColumns = [JoinColumn(name = "coaches_id")],
         inverseJoinColumns = [JoinColumn(name = "project_id")]
     )
     val projects: MutableList<Project> = mutableListOf()
 
-    @OneToMany(mappedBy="suggester", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "suggester", cascade = [CascadeType.ALL], orphanRemoval = true)
     @JsonIgnore
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 

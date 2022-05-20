@@ -36,7 +36,7 @@ class Position(
     @NotBlank
     var edition: String = ""
 ) {
-    @OneToMany(mappedBy="position", orphanRemoval = true)
+    @OneToMany(mappedBy = "position", orphanRemoval = true)
     @JsonIgnore
     val assignments: MutableCollection<Assignment> = mutableListOf()
 
@@ -70,7 +70,8 @@ class Assignment(
 ) {
     @ManyToOne(cascade = [CascadeType.DETACH])
     @JsonIgnore
-    @JoinTable(name = "project_assignments",
+    @JoinTable(
+        name = "project_assignments",
         joinColumns = [JoinColumn(name = "assignments_id")],
         inverseJoinColumns = [JoinColumn(name = "project_id")]
     )
