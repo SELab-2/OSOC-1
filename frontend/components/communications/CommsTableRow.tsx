@@ -46,8 +46,8 @@ const CommsTableRow: FC<CommsTableRowProps> = ({
           />
         )}
       </td>
-      <td>{commsMessage}</td>
-      <td className="pr-3 text-right">
+      <td className="py-4 ">{commsMessage}</td>
+      <td className="py-4 pr-3 text-right">
         {new Date(registrationTime).toLocaleString()}
       </td>
     </tr>
