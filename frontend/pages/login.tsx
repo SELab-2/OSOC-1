@@ -109,7 +109,7 @@ const Login = () => {
       {message && (
         <Info
           info={message}
-          className="absolute top-64 left-1/2 w-1/2 -translate-x-1/2"
+          className="absolute top-8 left-1/2 -translate-x-1/2 w-fit px-6"
         />
       )}
       <FormContainer pageTitle="LOGIN">
