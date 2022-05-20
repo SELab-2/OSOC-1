@@ -13,8 +13,12 @@ import io.mockk.just
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.core.env.Environment
 import org.springframework.mail.SimpleMailMessage
+import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.security.crypto.password.PasswordEncoder
+import java.util.Properties
 import java.util.UUID
 
 class ForgotPasswordServiceTests {
@@ -29,13 +33,27 @@ class ForgotPasswordServiceTests {
         return userRepository
     }
 
+    private fun getEnvironment(set: Boolean = true, frontendUrlSet: Boolean = true): Environment {
+        val environment: Environment = mockk()
+        every { environment.getProperty("OSOC_GMAIL_ADDRESS") } returns if (set) "email@gmail.com" else null
+        every { environment.getProperty("OSOC_GMAIL_APP_PASSWORD") } returns if (set) "app_password" else null
+        every { environment.getProperty("OSOC_SCHEME") } returns if (frontendUrlSet) "https" else null
+        every { environment.getProperty("OSOC_URL") } returns if (frontendUrlSet) "sel2-1.ugent.be" else null
+        return environment
+    }
+
     @Test
     fun `sendEmailWithToken does not fail when email is valid`() {
-        val emailService = EmailService()
-        emailService.setSenderEmailCredentials("valid@gmail.com", "correct_password")
+        val mailSender: JavaMailSenderImpl = mockk()
+        every { mailSender.host = any() } just Runs
+        every { mailSender.port = any() } just Runs
+        every { mailSender.username = any() } just Runs
+        every { mailSender.password = any() } just Runs
+        every { mailSender.javaMailProperties } returns Properties()
+        every { mailSender.send(ofType(SimpleMailMessage::class)) } just Runs
+
+        val emailService = EmailService(getEnvironment(), mailSender)
         val forgotPasswordService = ForgotPasswordService(getRepository(), mockk(), emailService)
-        emailService.mailSender = mockk()
-        every { emailService.mailSender.send(ofType(SimpleMailMessage::class)) } just Runs
         forgotPasswordService.sendEmailWithToken(testEmail)
     }
 
@@ -49,9 +67,8 @@ class ForgotPasswordServiceTests {
 
     @Test
     fun `sendEmailWithToken fails when environment variables aren't set`() {
-        val emailService = EmailService()
+        val emailService = EmailService(getEnvironment(false), JavaMailSenderImpl())
         val forgotPasswordService = ForgotPasswordService(getRepository(), mockk(), emailService)
-        emailService.setSenderEmailCredentials(null, null)
         val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
             forgotPasswordService.sendEmailWithToken(testEmail)
         }
@@ -60,10 +77,9 @@ class ForgotPasswordServiceTests {
 
     @Test
     fun `sendEmailWithToken fails when environment variables aren't set correctly`() {
-        val emailService = EmailService()
+        val emailService = EmailService(getEnvironment(), JavaMailSenderImpl())
         val forgotPasswordService = ForgotPasswordService(getRepository(), mockk(), emailService)
-        emailService.setSenderEmailCredentials("invalid@gmail.com", "wrong_password")
-        val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
+        val exception = assertThrows<InvalidGmailCredentialsException> {
             forgotPasswordService.sendEmailWithToken(testEmail)
         }
         Assertions.assertTrue(exception.message?.startsWith("Make sure 'OSOC_GMAIL_ADDRESS' and") ?: false)

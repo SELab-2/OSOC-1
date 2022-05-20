@@ -1,47 +1,63 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.exceptions.InvalidGmailCredentialsException
-import be.osoc.team1.backend.util.EnvUtil.osocEmailAddressSender
-import be.osoc.team1.backend.util.EnvUtil.osocPasswordSender
-import be.osoc.team1.backend.util.EnvUtil.osocScheme
-import be.osoc.team1.backend.util.EnvUtil.osocUrl
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
+import org.springframework.core.env.get
 import org.springframework.mail.MailAuthenticationException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Service
 import java.util.Properties
 import java.util.UUID
+import kotlin.collections.set
+
+@Configuration
+class MailSenderConfig {
+    @Bean
+    fun getMailSender(): JavaMailSenderImpl {
+        return JavaMailSenderImpl()
+    }
+}
 
 /**
  * This class contains every function needed to make and send emails.
  */
 @Service
-class EmailService {
+class EmailService(environment: Environment, private val mailSender: JavaMailSenderImpl) {
     /**
      * Credentials of gmail account to send emails with.
      */
-    private var emailAddressSender: String? = osocEmailAddressSender
-    private var passwordSender: String? = osocPasswordSender
-    lateinit var mailSender: JavaMailSenderImpl
-
-    init {
-        initMailSender()
-    }
+    private var emailAddressSender: String? = environment["OSOC_GMAIL_ADDRESS"]
+    private var passwordSender: String? = environment["OSOC_GMAIL_APP_PASSWORD"]
+    private final val osocScheme = environment["OSOC_SCHEME"] ?: "http"
+    private final val osocUrl = environment["OSOC_URL"] ?: "localhost:3000"
+    private final val baseUrl = "$osocScheme://$osocUrl"
 
     /**
-     * Set credentials of account to send mails with. This function is used for testing.
+     * Initialise the [mailSender].
      */
-    fun setSenderEmailCredentials(email: String?, password: String?) {
-        emailAddressSender = email
-        passwordSender = password
-        initMailSender()
+    init {
+        mailSender.apply {
+            host = "smtp.gmail.com"
+            port = 587
+            username = emailAddressSender
+            password = passwordSender
+        }
+
+        val props: Properties = mailSender.javaMailProperties
+        props["mail.transport.protocol"] = "smtp"
+        props["mail.smtp.auth"] = "true"
+        props["mail.smtp.starttls.enable"] = "true"
+        props["mail.debug"] = "true"
     }
 
     /**
      * Make the body of the email users receive when they request a password change.
      */
     private fun getForgotPasswordEmailBody(forgotPasswordUUID: UUID): String {
-        val url = "$osocScheme://$osocUrl/forgotPassword/$forgotPasswordUUID"
+        val url = "$baseUrl/forgotPassword/$forgotPasswordUUID"
         return """
             Hi,
             
@@ -53,23 +69,6 @@ class EmailService {
             
             If you did not forget your password, please disregard this email.
         """.trimIndent()
-    }
-
-    /**
-     * Initialise [mailSender].
-     */
-    private final fun initMailSender() {
-        mailSender = JavaMailSenderImpl().apply {
-            host = "smtp.gmail.com"
-            port = 587
-            username = emailAddressSender
-            password = passwordSender
-        }
-        val props: Properties = mailSender.javaMailProperties
-        props["mail.transport.protocol"] = "smtp"
-        props["mail.smtp.auth"] = "true"
-        props["mail.smtp.starttls.enable"] = "true"
-        props["mail.debug"] = "true"
     }
 
     /**
