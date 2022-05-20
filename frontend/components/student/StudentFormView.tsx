@@ -32,7 +32,7 @@ const StudentFormView: React.FC<StudentFormViewProp> = ({answers}: StudentFormVi
       <ul className="list-inside list-disc">
         <li>Enrolled at <b>{answers.collegeOrUniversity}</b></li>
         <li>Studies: <b>{answers.studies}</b></li>
-        <li>Type of degree: <b>{answers.degreeType}</b></li>
+        <li>Type of degree: <b>{answers.otherDegreeType || answers.degreeType}</b></li>
         <li>Year into degree: <b>{answers.degreeYear}</b></li>
       </ul>
 

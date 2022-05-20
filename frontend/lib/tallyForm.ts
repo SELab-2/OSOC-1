@@ -10,6 +10,7 @@ export const keys = {
   collegeOrUniversity: "3yJDjW",  // What is the name of your college or university?
   studies: "wLP0v2",  // What do/did you study?
   degreeType: "319EDL",  // What kind of diploma are you currently going for?
+  otherDegreeType: "wME5v0", // if the student answers 'Other' to the question above.
   degreeYear: "wg94YK",  // Which year of your degree are you in?
   linkCv: "w7NZ1z",  // Or link to your CV
   uploadCv: "m6ZxA5",  // Upload your CV – size limit 10MB
