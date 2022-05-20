@@ -81,6 +81,13 @@
   display: inline;
 }
 
+.okButton {
+  border: solid 2px #efefff;
+  border-radius: 0.4em;
+  width: 2.4em;
+  cursor: pointer;
+}
+
 .tile-reset > div {
   width: 100%;
   margin-left: 0;
