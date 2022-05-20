@@ -24,8 +24,7 @@ import Head from 'next/head';
 const Login = () => {
   const emailRef = useRef<HTMLInputElement>(null);
 
-  /* eslint-disable */
-  const [email, resetEmail, emailProps] = usePersistentInput('email', '');
+  const [email, , emailProps] = usePersistentInput('email', '');
   const [password, setPassword] = useState('');
 
   const [, setUser] = useUser();
@@ -118,6 +117,11 @@ const Login = () => {
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             Password
+            <Link href="/forgotPassword">
+              <p className="float-right mt-2 inline-block text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+                Forgot password?
+              </p>
+            </Link>
             <input
               className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
               name="password"

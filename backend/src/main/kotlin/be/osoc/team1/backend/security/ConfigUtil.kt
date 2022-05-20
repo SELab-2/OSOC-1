@@ -5,7 +5,11 @@ package be.osoc.team1.backend.security
  * in [SecurityConfig].
  */
 object ConfigUtil {
-    val urlsOpenToAll: Array<String> = arrayOf("/", "/login", "/logout", "/error")
-    val urlsOpenToAllToPostTo: Array<String> = arrayOf("/users", "/token/refresh", "/*/students")
+    val urlsOpenToAll: Array<String> = arrayOf(
+        "/", "/login", "/logout", "/error", "/forgotPassword/*"
+    )
+    val urlsOpenToAllToPostTo: Array<String> = arrayOf(
+        "/users", "/forgotPassword", "/token/refresh", "/*/students"
+    )
     val allowedCorsOrigins: List<String> = listOf("http://localhost:3000", "https://sel2-1.ugent.be")
 }
