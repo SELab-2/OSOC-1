@@ -37,7 +37,9 @@ class EmailService {
      * Make the body of the email users receive when they request a password change.
      */
     private fun getForgotPasswordEmailBody(forgotPasswordUUID: UUID): String {
-        val url = "https://sel2-1.ugent.be/forgotPassword/$forgotPasswordUUID"
+        val osocScheme = System.getenv("OSOC_SCHEME") ?: "https"
+        val osocUrl = System.getenv("OSOC_URL") ?: "sel2-1.ugent.be"
+        val url = "$osocScheme://$osocUrl/forgotPassword/$forgotPasswordUUID"
         return """
             Hi,
             
