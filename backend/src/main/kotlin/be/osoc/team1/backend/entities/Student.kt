@@ -249,3 +249,9 @@ fun List<Student>.filterByStudentCoach() = filter { it.possibleStudentCoach }
  */
 fun List<Student>.filterByNotYetAssigned(assignmentRepository: AssignmentRepository) =
     this.toSet().subtract(assignmentRepository.findAll().map { it.student }.toSet()).toList()
+
+/**
+ * This function will filter a list of [Student]s to only return students who have already been assigned to a [Project].
+ */
+fun List<Student>.filterByAssigned(assignmentRepository: AssignmentRepository) =
+    this.toSet().intersect(assignmentRepository.findAll().map { it.student }.toSet()).toList()

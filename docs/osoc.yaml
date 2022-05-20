@@ -203,7 +203,11 @@ paths:
                     name: unassignedOnly
                     schema:
                         type: boolean
-                    description: Only return unassigned students
+                -   in: query
+                    name: assignedOnly
+                    schema:
+                        type: boolean
+                    description: Only return assigned students
                 -   in: query
                     name: view
                     schema:
