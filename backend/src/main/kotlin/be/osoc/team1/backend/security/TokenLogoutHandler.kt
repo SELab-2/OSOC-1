@@ -17,7 +17,7 @@ class TokenLogoutHandler : LogoutSuccessHandler {
      */
     override fun onLogoutSuccess(
         request: HttpServletRequest?,
-        response: HttpServletResponse?,
+        response: HttpServletResponse,
         authentication: Authentication?
     ) {
         try {
@@ -25,9 +25,9 @@ class TokenLogoutHandler : LogoutSuccessHandler {
             val decodedToken = decodeAndVerifyToken(accessToken!!)
             val email: String = decodedToken.subject
             invalidateRefreshToken(email)
-            response?.status = HttpServletResponse.SC_OK
+            response.status = HttpServletResponse.SC_OK
         } catch (_: Exception) {
-            response?.status = HttpServletResponse.SC_UNAUTHORIZED
+            response.status = HttpServletResponse.SC_UNAUTHORIZED
         }
     }
 }
