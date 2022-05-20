@@ -11,7 +11,5 @@ object ConfigUtil {
     val urlsOpenToAllToPostTo: Array<String> = arrayOf(
         "/users", "/forgotPassword", "/token/refresh", "/*/students"
     )
-    val osocScheme = System.getenv("OSOC_SCHEME") ?: "http"
-    private val osocUrl = System.getenv("OSOC_URL") ?: "localhost:3000"
-    val allowedCorsOrigins: List<String> = listOf("$osocScheme://$osocUrl")
+    val allowedCorsOrigins: List<String> = listOf(System.getenv("OSOC_FRONTEND_URL") ?: "http://localhost:3000")
 }

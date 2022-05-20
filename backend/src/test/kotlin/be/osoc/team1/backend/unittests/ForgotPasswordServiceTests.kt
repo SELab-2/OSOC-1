@@ -37,8 +37,7 @@ class ForgotPasswordServiceTests {
         val environment: Environment = mockk()
         every { environment.getProperty("OSOC_GMAIL_ADDRESS") } returns if (set) "email@gmail.com" else null
         every { environment.getProperty("OSOC_GMAIL_APP_PASSWORD") } returns if (set) "app_password" else null
-        every { environment.getProperty("OSOC_SCHEME") } returns if (frontendUrlSet) "https" else null
-        every { environment.getProperty("OSOC_URL") } returns if (frontendUrlSet) "sel2-1.ugent.be" else null
+        every { environment.getProperty("OSOC_FRONTEND_URL") } returns if (frontendUrlSet) "https://sel2-1.ugent.be" else null
         return environment
     }
 

@@ -1,6 +1,5 @@
 package be.osoc.team1.backend.util
 
-import be.osoc.team1.backend.security.ConfigUtil.osocScheme
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
@@ -11,7 +10,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 abstract class BaseSerializer<T>(t: Class<T>?) : StdSerializer<T>(t) {
     constructor() : this(null)
 
-    val baseUrl: String = ServletUriComponentsBuilder.fromCurrentContextPath().scheme(osocScheme).build().toUriString()
+    val scheme = System.getenv("OSOC_SCHEME") ?: "http"
+    val baseUrl: String = ServletUriComponentsBuilder.fromCurrentContextPath().scheme(scheme).build().toUriString()
 
     companion object {
         private const val serialVersionUID = 1L

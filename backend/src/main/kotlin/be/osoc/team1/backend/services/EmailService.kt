@@ -31,9 +31,7 @@ class EmailService(environment: Environment, private val mailSender: JavaMailSen
      */
     private var emailAddressSender: String? = environment["OSOC_GMAIL_ADDRESS"]
     private var passwordSender: String? = environment["OSOC_GMAIL_APP_PASSWORD"]
-    private final val osocScheme = environment["OSOC_SCHEME"] ?: "http"
-    private final val osocUrl = environment["OSOC_URL"] ?: "localhost:3000"
-    private final val baseUrl = "$osocScheme://$osocUrl"
+    private final val baseUrl = environment["OSOC_FRONTEND_URL"] ?: "http://localhost:3000"
 
     /**
      * Initialise the [mailSender].
