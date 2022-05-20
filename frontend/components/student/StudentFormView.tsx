@@ -48,7 +48,7 @@ const StudentFormView: React.FC<StudentFormViewProp> = ({answers}: StudentFormVi
       <h3 className="text-2xl pt-12">Practical</h3>
       <h4 className="pt-4">The student:</h4>
       {practicalBulletPoints.map(([isCheckmark, label]) =>
-        <CheckmarkList isCheckmark={isCheckmark} label={label}/>
+        <CheckmarkList isCheckmark={isCheckmark} label={label} key={label}/>
       )}
       {answers.otherResponsibilities &&
           <p>The student could be hindered by these other responsibilities:
