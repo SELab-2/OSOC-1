@@ -65,14 +65,6 @@ class ForgotPasswordServiceTests {
     }
 
     @Test
-    fun `sendEmailWithToken also does not fail when OSOC_FRONTEND_URL is set`() {
-        val emailService: EmailService = mockk()
-        val forgotPasswordService = ForgotPasswordService(getRepository(false), mockk(), emailService)
-        every { emailService.sendEmail(testEmail, any()) } just Runs
-        forgotPasswordService.sendEmailWithToken(testEmail)
-    }
-
-    @Test
     fun `sendEmailWithToken fails when environment variables aren't set`() {
         val emailService = EmailService(getEnvironment(false), JavaMailSenderImpl())
         val forgotPasswordService = ForgotPasswordService(getRepository(), mockk(), emailService)
