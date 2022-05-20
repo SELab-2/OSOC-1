@@ -709,7 +709,11 @@ const ProjectTile: React.FC<ProjectProp> = ({
           </h3>
           <div className="mt-3 flex flex-row justify-between px-5">
             <button
-              onClick={() => setDeletePopup(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setDeletePopup(false);
+              }}
               className={`min-w-[120px] border-2 bg-white`}
             >
               Cancel
@@ -717,7 +721,9 @@ const ProjectTile: React.FC<ProjectProp> = ({
 
             <button
               className={`min-w-[120px] border-2 bg-check-red py-1`}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 setDeletePopup(false);
                 setShowEditProject(false);
                 deleteProject(myProject.id, refreshProjects, setError, router);
@@ -786,7 +792,9 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
       </div>
       <div className="flex flex-col justify-center">
         <i
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
             setAssignmentId(assignment.id);
             setRemoveStudentName(
               assignment.student.firstName + ' ' + assignment.student.lastName
