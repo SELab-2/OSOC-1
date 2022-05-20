@@ -16,6 +16,13 @@ type CommsTableProps = {
   setShowDeleteForm: Dispatch<SetStateAction<boolean>>;
 };
 
+function compareStudentComm(a: StudentComm, b: StudentComm): number {
+  if (a.name !== b.name)
+      return a.name >= b.name ? 1 : -1
+
+  return a.registrationTime <= b.registrationTime ? 1 : -1;
+}
+
 const CommsTable: FC<CommsTableProps> = ({
   studentComms,
   setCommsToDelete,
@@ -37,7 +44,7 @@ const CommsTable: FC<CommsTableProps> = ({
       <tbody>
         {studentComms && studentComms.length ? (
           studentComms
-            .sort((a, b) => (a.name >= b.name ? 1 : -1))
+            .sort((a, b) => compareStudentComm(a, b))
             .map((comm) => (
               <CommsTableRow
                 key={comm.id}
