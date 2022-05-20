@@ -69,7 +69,6 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
   const [projects, setProjects] = useState([] as ProjectBase[]);
   const [error, setError] = useState('');
   const router = useRouter();
-  // const conflictsKeep: conflictMapType = new Map() as conflictMapType;
   let controller = new AbortController();
   let busy = false;
 

@@ -340,22 +340,6 @@ const Projects: NextPage = () => {
           controller.abort();
         };
       }
-      // else if (!state.loading && { isOnScreen }.isOnScreen && showConflicts) {
-      //   controller.abort();
-      //   controller = new AbortController();
-      //   const signal = controller.signal;
-      //   searchConflicts(
-      //     conflictMap,
-      //     setConflictMap,
-      //     setLoading,
-      //     signal,
-      //     setError,
-      //     router
-      //   );
-      //   return () => {
-      //     controller.abort();
-      //   };
-      // }
     },
     [state, projectSearch, { isOnScreen }.isOnScreen, showConflicts],
     {
