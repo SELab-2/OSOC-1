@@ -71,16 +71,17 @@ const ForgotPassword: NextPage = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             Email Address
             <input
-              className="mt-1 box-border block h-8 w-full border-2 border-[#C4C4C4] p-1 text-sm"
+              className="mt-1 block h-8 w-full rounded border border-[#C4C4C4] p-1 text-sm"
               name="email"
               type="email"
+              placeholder="you@example.com"
               {...emailProps}
               ref={emailRef}
               required
             />
           </label>
           <button
-            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4"
+            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 hover:brightness-95 lg:mb-4"
             type="submit"
           >
             Change password
