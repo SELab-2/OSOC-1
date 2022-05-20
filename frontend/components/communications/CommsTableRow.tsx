@@ -4,6 +4,7 @@ import { Dispatch, FC, SetStateAction, useState } from 'react';
 type CommsTableRowProps = {
   studentName: string;
   commsMessage: string;
+  registrationTime: number[];
   commsId: string;
   /**
    * set the communication id to delete
@@ -19,6 +20,7 @@ type CommsTableRowProps = {
 const CommsTableRow: FC<CommsTableRowProps> = ({
   studentName,
   commsMessage,
+  registrationTime,
   commsId,
   setCommsToDelete,
   setShowDeleteForm,
@@ -31,7 +33,7 @@ const CommsTableRow: FC<CommsTableRowProps> = ({
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      <td className="flex flex-row py-4">
+      <td className="flex flex-row py-4 pl-3">
         {studentName}
         {hovering && (
           <TrashIcon
@@ -45,6 +47,9 @@ const CommsTableRow: FC<CommsTableRowProps> = ({
         )}
       </td>
       <td>{commsMessage}</td>
+      <td className="pr-3 text-right">
+        {new Date(registrationTime[0], registrationTime[1]-1, registrationTime[2], registrationTime[3], registrationTime[4], registrationTime[5]).toLocaleString()}
+      </td>
     </tr>
   );
 };

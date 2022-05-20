@@ -26,8 +26,11 @@ const CommsTable: FC<CommsTableProps> = ({
       <thead className="sticky top-0 bg-white">
         <tr>
           <th className="w-1/4 py-4 text-left text-lg">Student Name</th>
+          <th className="w-1/4 text-left text-lg">
+            Information
+          </th>
           <th className="w-1/4 text-right text-lg">
-            Communication Information
+            Time
           </th>
         </tr>
       </thead>
@@ -41,6 +44,7 @@ const CommsTable: FC<CommsTableProps> = ({
                 commsId={comm.id}
                 studentName={comm.name}
                 commsMessage={comm.commMessage}
+                registrationTime={comm.registrationTime}
                 setCommsToDelete={setCommsToDelete}
                 setShowDeleteForm={setShowDeleteForm}
               />

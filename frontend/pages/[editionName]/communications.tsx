@@ -92,6 +92,7 @@ const communications = () => {
               studentId: student.id,
               name: student.firstName + ' ' + student.lastName,
               commMessage: csc.message,
+              registrationTime: csc.registrationTime,
               id: csc.id,
             });
           });
@@ -149,6 +150,8 @@ const communications = () => {
         })
       );
 
+      console.log(response);
+
       // add new communication locally
       const _stud = students.find((stud) => stud.id === studentId);
       const name = _stud ? _stud.firstName + ' ' + _stud.lastName : '';
@@ -159,6 +162,7 @@ const communications = () => {
             studentId: studentId,
             name,
             commMessage: message,
+            registrationTime: response.data.registrationTime,
             id: response.data.id,
           } as StudentComm,
         ];
@@ -193,6 +197,12 @@ const communications = () => {
           <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
             {error && <Error error={error} className="mb-4" />}
             <div>
+              <button
+                className="mx-2 my-1 bg-osoc-btn-primary px-2 py-1 text-white rounded-sm"
+                onClick={() => setOpenPopup(true)}
+              >
+                Add New
+              </button>
               <CsvDownloader
                 datas={communications}
                 filename="communications"
@@ -212,21 +222,19 @@ const communications = () => {
                     id: 'commMessage',
                     displayName: 'message',
                   },
+                  {
+                    id: 'registrationTime',
+                    displayName: 'timestamp',
+                  },
                 ]}
               >
                 <button
-                  className="my-1 mr-2 bg-osoc-yellow px-2 py-1 text-white disabled:bg-yellow-300 disabled:text-gray-200"
+                  className="my-1 mr-2 bg-osoc-yellow px-2 py-1 text-white disabled:bg-yellow-300 disabled:text-gray-200 rounded-sm"
                   disabled={communications.length === 0}
                 >
                   Download CSV
                 </button>
               </CsvDownloader>
-              <button
-                className="mx-2 my-1 bg-osoc-btn-primary px-2 py-1 text-white"
-                onClick={() => setOpenPopup(true)}
-              >
-                Add New
-              </button>
             </div>
             <CommsTable
               studentComms={communications}
