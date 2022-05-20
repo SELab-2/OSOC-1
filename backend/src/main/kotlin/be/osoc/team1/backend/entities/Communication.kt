@@ -1,6 +1,7 @@
 package be.osoc.team1.backend.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -24,7 +25,8 @@ class Communication(
     val edition: String = "",
     @JsonIgnore
     @OneToOne
-    val student: Student
+    val student: Student,
+    val registrationTime: LocalDateTime = LocalDateTime.now()
 ) {
     @Id
     var id: UUID = UUID.randomUUID()

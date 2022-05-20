@@ -14,6 +14,7 @@ import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.StudentService
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -62,7 +63,7 @@ class CommunicationControllerTests(@Autowired private val mockMvc: MockMvc) {
     private val testEdition = "testEdition"
     private val editionUrl = "/$testEdition/communications"
     private val testCommunication = Communication("test message", CommunicationTypeEnum.Email, testEdition, testStudent)
-    private val objectMapper = ObjectMapper()
+    private val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
     private val jsonRepresentation = objectMapper.writeValueAsString(testCommunication)
     private val jsonRepresentationDTO = objectMapper.writeValueAsString(CommunicationDTO("test message", CommunicationTypeEnum.Email))
 
