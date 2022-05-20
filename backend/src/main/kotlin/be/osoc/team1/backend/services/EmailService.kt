@@ -109,7 +109,7 @@ class EmailService(environment: Environment, private val mailSender: JavaMailSen
     /**
      * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
-    fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID?) {
+    fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID? = null) {
         if (emailAddressSender == null || passwordSender == null) {
             throw InvalidGmailCredentialsException("No 'OSOC_GMAIL_ADDRESS' or 'OSOC_GMAIL_APP_PASSWORD' found in environment variables.")
         }
