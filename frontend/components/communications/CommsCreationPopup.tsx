@@ -118,13 +118,13 @@ const CommsCreationPopup: FC<CCPProps> = ({
                 Information
                 <textarea
                   placeholder="Communication Information"
-                  className="mx-2 mt-1 w-full ml-0 resize-y rounded border px-1 min-h-[150px]"
+                  className="mx-2 mt-1 ml-0 min-h-[150px] w-full resize-y rounded border px-1"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </label>
               <button
-                className="col-span-1 col-start-2 col-end-3 bg-gray-500 px-3 py-1 rounded-sm hover:brightness-95"
+                className="col-span-1 col-start-2 col-end-3 rounded-sm bg-gray-500 px-3 py-1 hover:brightness-95"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -134,7 +134,7 @@ const CommsCreationPopup: FC<CCPProps> = ({
                 Cancel
               </button>
               <button
-                className="col-span-1 col-start-3 col-end-4 bg-check-green px-3 py-1 disabled:bg-green-200 disabled:text-gray-400 rounded-sm hover:brightness-95 disabled:brightness-100 disabled:cursor-not-allowed"
+                className="col-span-1 col-start-3 col-end-4 rounded-sm bg-check-green px-3 py-1 hover:brightness-95 disabled:cursor-not-allowed disabled:bg-green-200 disabled:text-gray-400 disabled:brightness-100"
                 type="submit"
                 disabled={!student || !message}
               >

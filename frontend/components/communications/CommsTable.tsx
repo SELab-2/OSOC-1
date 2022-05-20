@@ -17,9 +17,7 @@ type CommsTableProps = {
 };
 
 function compareStudentComm(a: StudentComm, b: StudentComm): number {
-  if (a.name !== b.name)
-      return a.name >= b.name ? 1 : -1
-
+  if (a.name !== b.name) return a.name >= b.name ? 1 : -1;
   return a.registrationTime <= b.registrationTime ? 1 : -1;
 }
 
@@ -33,12 +31,8 @@ const CommsTable: FC<CommsTableProps> = ({
       <thead className="sticky top-0 bg-white">
         <tr>
           <th className="w-1/4 py-4 text-left text-lg">Student Name</th>
-          <th className="w-1/4 text-left text-lg">
-            Information
-          </th>
-          <th className="w-1/4 text-right text-lg">
-            Time
-          </th>
+          <th className="w-1/4 text-left text-lg">Information</th>
+          <th className="w-1/4 text-right text-lg">Time</th>
         </tr>
       </thead>
       <tbody>
