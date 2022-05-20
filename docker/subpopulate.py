@@ -96,7 +96,7 @@ def make_student():
                     "key": "question_3Ex0vL",
                     "label": "Are there any responsibilities you might have which could hinder you during the day?",
                     "type": "TEXTAREA",
-                    "value": None
+                    "value": fake.paragraph()
                 },
                 {
                     "key": "question_nroEGL",
@@ -160,7 +160,7 @@ def make_student():
                     "key": "question_mZ2Jvv",
                     "label": "Would you like to add your pronouns?",
                     "type": "MULTIPLE_CHOICE",
-                    "value": "c8f418b9-bafb-43fc-bf67-c4a357bb2e7d",
+                    "value": "787c763d-6cbb-46f8-a7e7-a0220445f443",
                     "options": [
                         {
                             "id": "787c763d-6cbb-46f8-a7e7-a0220445f443",
@@ -176,7 +176,7 @@ def make_student():
                     "key": "question_3N70Mb",
                     "label": "Which pronouns do you prefer?",
                     "type": "MULTIPLE_CHOICE",
-                    "value": None,
+                    "value": "5c4717f1-1c8d-40be-8cd4-ec38c516b52a",
                     "options": [
                         {
                             "id": "2cf8cab1-5365-47c8-a069-4e5a0ffa77fa",
@@ -484,8 +484,7 @@ def make_student():
                     "type": "CHECKBOXES",
                     "value": [
                         random.choice(["8ab95749-ef8f-465b-a1f8-3152da88cf91",  "1d23a375-3645-40f6-b141-c00ad54625d3", "ef50be02-cee7-40d0-9378-f137ec0cb976",
-                                      "1dd53b7e-6bcc-406c-9e97-a458fae9636f", "ffbbcf42-0489-4494-a75f-7701460ab7cd", "77ad76ce-20aa-43f4-8eac-07b1f5baf07c",
-                                       "46da24d6-4b82-44be-91fd-5672d68a22de"])
+                                      "1dd53b7e-6bcc-406c-9e97-a458fae9636f", "ffbbcf42-0489-4494-a75f-7701460ab7cd", "77ad76ce-20aa-43f4-8eac-07b1f5baf07c"])
                     ],
                     "options": [
                         {
