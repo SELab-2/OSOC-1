@@ -572,7 +572,11 @@ const ProjectTile: React.FC<ProjectProp> = ({
             </label>
             <div className="mt-6 flex flex-row justify-between">
               <button
-                onClick={() => setOpenAssignment(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setOpenAssignment(false);
+                }}
                 className={`min-w-[120px] border-2 bg-white`}
               >
                 Cancel

@@ -28,6 +28,7 @@ export function parseError(
     }
     setError(_error.response?.statusText || 'An unknown error occurred');
   } else {
+    console.log(error);
     setError('An unknown error occurred');
   }
 }

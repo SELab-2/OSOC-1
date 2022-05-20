@@ -115,7 +115,6 @@ function searchProject(
  * Students also don't get removed from the list even when they do not have a conflict anymore
  * This is to allow for better productivity flow and should be allowed separatly
  *
- * @param conflictMap - original conflict results, needed to not remove old results
  * @param setConflictMap - callback to set results
  * @param conflictsKeep - map of conflicts we wish to keep even though they are no longer a conflict
  * @param setConflictsKeep - if new conflicts are found, add them to the map we want to keep
@@ -125,7 +124,6 @@ function searchProject(
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 async function searchConflicts(
-  conflictMap: conflictMapType,
   setConflictMap: (map: conflictMapType) => void,
   conflictsKeep: conflictMapType,
   setConflictsKeep: (map: conflictMapType) => void,
@@ -353,7 +351,6 @@ const Projects: NextPage = () => {
     const signal = controller.signal;
     (async () => {
       await searchConflicts(
-        conflictMap,
         setConflictMap,
         conflictsKeep,
         setConflictsKeep,
