@@ -33,11 +33,11 @@ class ForgotPasswordServiceTests {
         return userRepository
     }
 
-    private fun getEnvironment(set: Boolean = true): Environment {
+    private fun getEnvironment(set: Boolean = true, frontendUrlSet: Boolean = true): Environment {
         val environment: Environment = mockk()
         every { environment.getProperty("OSOC_GMAIL_ADDRESS") } returns if (set) "email@gmail.com" else null
         every { environment.getProperty("OSOC_GMAIL_APP_PASSWORD") } returns if (set) "app_password" else null
-        every { environment.getProperty("OSOC_FRONTEND_URL") } returns null
+        every { environment.getProperty("OSOC_FRONTEND_URL") } returns if (frontendUrlSet) "https://sel2-1.ugent.be" else null
         return environment
     }
 
@@ -58,6 +58,14 @@ class ForgotPasswordServiceTests {
 
     @Test
     fun `sendEmailWithToken does not fail when email is invalid`() {
+        val emailService: EmailService = mockk()
+        val forgotPasswordService = ForgotPasswordService(getRepository(false), mockk(), emailService)
+        every { emailService.sendEmail(testEmail, any()) } just Runs
+        forgotPasswordService.sendEmailWithToken(testEmail)
+    }
+
+    @Test
+    fun `sendEmailWithToken also does not fail when OSOC_FRONTEND_URL is set`() {
         val emailService: EmailService = mockk()
         val forgotPasswordService = ForgotPasswordService(getRepository(false), mockk(), emailService)
         every { emailService.sendEmail(testEmail, any()) } just Runs
