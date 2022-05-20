@@ -367,7 +367,7 @@ const StudentView: React.FC<StudentViewProp> = ({
       <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
         <div className="flex flex-row pt-2">
           <h1 className="font-bold text-4xl">
-            {myStudent.firstName + ' ' + myStudent.lastName}
+            {answers.preferredName || (myStudent.firstName + ' ' + myStudent.lastName)}
           </h1>
           {pronouns != undefined && <p className="pt-2 pl-2">{pronouns}</p>}
           {user.role == UserRole.Admin && (
