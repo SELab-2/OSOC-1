@@ -15,7 +15,9 @@ import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import { useRef } from 'react';
 import useOnScreen from '../hooks/useOnScreen';
+import { Icon } from '@iconify/react';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
+const x_mark = <Icon icon="bx:x" />;
 
 /**
  * This is what StudentsSidebar expects as its argument
@@ -35,6 +37,7 @@ type StudentsSidebarProps = {
  * @param setStudents             - callback to set the results
  * @param setFilterAmount         - callback to set total amount of filtered results
  * @param state                   - holds page, loading, hasMoreItems, pageSize
+ * @param nextPage                - next page to set state page to, this is needed for polling
  * @param setState                - set the state variable
  * @param setLoading              - set loading or not, this is not the same as the state loading due to styling bug otherwise
  * @param signal                  - AbortSignal for the axios request
@@ -53,6 +56,7 @@ async function searchStudent(
     page: number;
     pageSize: number;
   },
+  nextPage: number,
   setState: (state: {
     hasMoreItems: boolean;
     loading: boolean;
@@ -86,7 +90,7 @@ async function searchStudent(
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
         status: getStatusFilterList(studentSearchParameters),
-        skills: skills.map((skill) => '"' + skill.label + '"').join(','),
+        skills: skills.map((skill) => `"${skill.label}"`).join(','),
         alumnOnly: studentSearchParameters.OnlyAlumni,
         studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
         unassignedOnly: studentSearchParameters.ExcludeAssigned,
@@ -98,9 +102,9 @@ async function searchStudent(
     })
     .then((response) => {
       const newState = { ...state };
-      newState.page = state.page + 1;
+      newState.page = nextPage;
       newState.hasMoreItems =
-        response.data.totalLength > state.page * state.pageSize;
+        response.data.totalLength > (state.page + 1) * state.pageSize;
       newState.loading = false;
       setState(newState);
       // VERY IMPORTANT TO CHANGE STATE FIRST!!!!
@@ -223,7 +227,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    */
   useEffect(() => {
     if ({ isOnScreen }.isOnScreen) {
-      return search(true);
+      return search(false);
     }
   }, [studentSearchParameters, skills, { isOnScreen }.isOnScreen]);
 
@@ -235,7 +239,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    refreshSkills ? getSkills(setSkillOptions, signal, setError, router) : null;
+    if (refreshSkills || skillOptions.length == 0) {
+      getSkills(setSkillOptions, signal, setError, router);
+    }
     searchStudent(
       studentNameSearch,
       skills,
@@ -243,6 +249,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       setStudents,
       setFilterAmount,
       state,
+      state.page + 1,
       setState,
       setLoading,
       signal,
@@ -289,7 +296,8 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
               page: 0,
               pageSize: Math.max(state.page, 1) * state.pageSize,
             },
-            () => null,
+            state.page,
+            setState,
             () => null,
             signal,
             setError,
@@ -301,7 +309,14 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
         };
       }
     },
-    [state, studentSearchParameters, skills, { isOnScreen }.isOnScreen],
+    [
+      state,
+      filterAmount,
+      studentNameSearch,
+      studentSearchParameters,
+      skills,
+      { isOnScreen }.isOnScreen,
+    ],
     {
       interval: 3000,
     }
@@ -332,7 +347,11 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    if (state.loading || !{ isOnScreen }.isOnScreen) {
+    if (
+      state.loading ||
+      !{ isOnScreen }.isOnScreen ||
+      (state.page + 1) * state.pageSize >= filterAmount
+    ) {
       return;
     }
     controller.abort();
@@ -346,6 +365,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
       updateStudents,
       setFilterAmount,
       state,
+      state.page + 1,
       setState,
       setLoading,
       signal,
@@ -365,17 +385,16 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     >
       <div className="flex max-h-[calc(100vh-32px)] flex-col">
         <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
-          {/* TODO add an easy reset/undo search button */}
           {/* The students searchbar */}
           <div className="justify-left md:w-[calc(100% - 200px)] mb-3 flex w-[80%] md:ml-0 lg:mb-0 ">
             <div className="relative w-full">
               <input
                 type="text"
-                className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+                className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding py-1.5 pl-8 pr-3 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
                 id="StudentsSearch"
                 placeholder="Search students by name"
                 value={studentNameSearch}
-                onChange={(e) => setStudentNameSearch(e.target.value)}
+                onChange={(e) => setStudentNameSearch(e.target.value || '')}
                 onKeyPress={(e) => {
                   if (e.key == 'Enter') {
                     return search();
@@ -383,13 +402,23 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 }}
               />
               <i
-                className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                className="absolute bottom-1 left-2 z-10 h-[24px] w-[16px] opacity-20"
                 onClick={() => {
                   return search();
                 }}
               >
                 {magnifying_glass}
               </i>
+              {studentNameSearch && studentNameSearch.length > 0 && (
+                <i
+                  className="absolute bottom-1 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                  onClick={() => {
+                    setStudentNameSearch('');
+                  }}
+                >
+                  {x_mark}
+                </i>
+              )}
             </div>
           </div>
 
