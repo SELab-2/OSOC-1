@@ -84,7 +84,7 @@ const CommsCreationPopup: FC<CCPProps> = ({
               className="grid grid-cols-4 justify-items-center gap-y-2"
               onSubmit={submit}
             >
-              <label className="col-span-4 w-11/12 pl-2">
+              <label className="col-span-4 w-full px-5">
                 Student
                 <Select
                   className="mt-1"
@@ -114,11 +114,11 @@ const CommsCreationPopup: FC<CCPProps> = ({
                   })}
                 />
               </label>
-              <label className="col-span-4 w-11/12 pl-2">
+              <label className="col-span-4 w-full px-5">
                 Information
                 <textarea
                   placeholder="Communication Information"
-                  className="mx-2 mt-1 w-full ml-0 resize-y border-2 px-1 min-h-[150px]"
+                  className="mx-2 mt-1 w-full ml-0 resize-y rounded border px-1 min-h-[150px]"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
