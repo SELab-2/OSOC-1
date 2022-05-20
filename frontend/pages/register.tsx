@@ -22,7 +22,18 @@ const register = () => {
   const [password, resetPassword, passwordProps] = useInput('');
   const [match, resetMatch, matchProps] = useInput('');
 
-  // TODO: update the errors for the register form
+  const nameError =
+    "Name cannot contain numbers or any other symbols than ,.'- and spaces.";
+  const emailError = 'Email must be a valid email address.';
+  const passwordError =
+    'Password must contain at least 8 characters and at most 64 characters.';
+  const repeatPasswordError = 'Repeated password differs from password.';
+
+  const [nameFocus, setNameFocus] = useState(true);
+  const [emailFocus, setEmailFocus] = useState(false);
+  const [passwordFocus, setPasswordFocus] = useState(false);
+  const [repeatPasswordFocus, setRepeatPasswordFocus] = useState(false);
+
   const [validName, setValidName] = useState(true);
   const [validEmail, setValidEmail] = useState(true);
   const [validPassword, setValidPassword] = useState(true);
@@ -101,7 +112,14 @@ const register = () => {
               placeholder="John Doe"
               ref={nameRef}
               {...nameProps}
+              onFocus={() => setNameFocus(true)}
+              onBlur={() => setNameFocus(false)}
             />
+            {!validName && nameFocus && (
+              <p className="mb-2 mt-1 inline-block w-full text-left text-sm font-medium text-red-600 opacity-90 hover:cursor-pointer">
+                {nameError}
+              </p>
+            )}
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Email Address
@@ -115,7 +133,14 @@ const register = () => {
               type="email"
               placeholder="you@example.com"
               {...emailProps}
+              onFocus={() => setEmailFocus(true)}
+              onBlur={() => setEmailFocus(false)}
             />
+            {!validEmail && emailFocus && (
+              <p className="mb-2 mt-1 inline-block w-full text-left text-sm font-medium text-red-600 opacity-90 hover:cursor-pointer">
+                {emailError}
+              </p>
+            )}
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Password
@@ -131,7 +156,14 @@ const register = () => {
               minLength={8}
               maxLength={64}
               {...passwordProps}
+              onFocus={() => setPasswordFocus(true)}
+              onBlur={() => setPasswordFocus(false)}
             />
+            {!validPassword && passwordFocus && (
+              <p className="mb-2 mt-1 inline-block w-full text-left text-sm font-medium text-red-600 opacity-90 hover:cursor-pointer">
+                {passwordError}
+              </p>
+            )}
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Repeat Password
@@ -147,7 +179,14 @@ const register = () => {
               minLength={8}
               maxLength={64}
               {...matchProps}
+              onFocus={() => setRepeatPasswordFocus(true)}
+              onBlur={() => setRepeatPasswordFocus(false)}
             />
+            {!validMatch && repeatPasswordFocus && (
+              <p className="mb-2 mt-1 inline-block w-full text-left text-sm font-medium text-red-600 opacity-90 hover:cursor-pointer">
+                {repeatPasswordError}
+              </p>
+            )}
           </label>
           <button
             className="m-auto block rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 hover:brightness-95 lg:mb-3"
