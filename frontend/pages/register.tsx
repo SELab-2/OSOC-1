@@ -91,7 +91,7 @@ const register = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Name
             <input
-              className={`mt-1 box-border block h-8 w-full border-2 ${
+              className={`mt-1 box-border block h-8 w-full rounded border border-2 ${
                 validName || name.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
@@ -105,7 +105,7 @@ const register = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Email Address
             <input
-              className={`mt-1 box-border block h-8 w-full border-2 ${
+              className={`mt-1 block h-8 w-full rounded border border-2 ${
                 validEmail || email.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
@@ -118,7 +118,7 @@ const register = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Password
             <input
-              className={`mt-1 box-border block h-8 w-full border-2 ${
+              className={`mt-1 block h-8 w-full rounded border border-2 ${
                 validPassword || password.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
@@ -133,7 +133,7 @@ const register = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Repeat Password
             <input
-              className={`mt-1 box-border block h-8 w-full border-2 ${
+              className={`mt-1 block h-8 w-full rounded border border-2 ${
                 validMatch || match.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
@@ -146,13 +146,13 @@ const register = () => {
             />
           </label>
           <button
-            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-3"
+            className="m-auto block rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 hover:brightness-95 lg:mb-3"
             type="submit"
           >
             Register
           </button>
           <Link href="/login">
-            <p className="m-auto w-fit text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
+            <p className="mt-2 inline-block text-xs underline underline-offset-1 opacity-90 hover:cursor-pointer">
               back to login
             </p>
           </Link>
