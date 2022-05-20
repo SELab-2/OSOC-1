@@ -97,7 +97,7 @@ const ForgotPassword: NextPage = () => {
             />
           </label>
           <button
-            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 lg:mb-4 hover:brightness-95"
+            className="rounded-sm bg-osoc-btn-primary px-4 py-1 font-medium text-osoc-blue shadow-sm shadow-gray-300 hover:brightness-95 lg:mb-4"
             type="submit"
           >
             Change password
