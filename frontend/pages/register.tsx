@@ -91,13 +91,14 @@ const register = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Name
             <input
-              className={`mt-1 box-border block h-8 w-full rounded border border-2 ${
+              className={`mt-1 box-border block h-8 w-full rounded border ${
                 validName || name.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
               } p-1 text-sm`}
               name="name"
               type="text"
+              placeholder="John Doe"
               ref={nameRef}
               {...nameProps}
             />
@@ -105,26 +106,28 @@ const register = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Email Address
             <input
-              className={`mt-1 block h-8 w-full rounded border border-2 ${
+              className={`mt-1 block h-8 w-full rounded border ${
                 validEmail || email.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
               } p-1 text-sm`}
               name="email"
               type="email"
+              placeholder="you@example.com"
               {...emailProps}
             />
           </label>
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Password
             <input
-              className={`mt-1 block h-8 w-full rounded border border-2 ${
+              className={`mt-1 block h-8 w-full rounded border ${
                 validPassword || password.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
               } p-1 text-sm`}
               name="password"
               type="password"
+              placeholder="placeholder"
               minLength={8}
               maxLength={64}
               {...passwordProps}
@@ -133,13 +136,14 @@ const register = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-4 lg:max-w-sm">
             Repeat Password
             <input
-              className={`mt-1 block h-8 w-full rounded border border-2 ${
+              className={`mt-1 block h-8 w-full rounded border ${
                 validMatch || match.length === 0
                   ? 'border-[#C4C4C4]'
                   : 'border-red-500'
               } p-1 text-sm`}
               name="repeatPassword"
               type="password"
+              placeholder="placeholder"
               minLength={8}
               maxLength={64}
               {...matchProps}

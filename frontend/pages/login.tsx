@@ -108,7 +108,7 @@ const Login = () => {
           <label className="mx-auto mb-4 block text-left lg:mb-8 lg:max-w-sm">
             Email Address
             <input
-              className="mt-1 block h-8 w-full rounded border border-2 border-[#C4C4C4] p-1 text-sm"
+              className="mt-1 block h-8 w-full rounded border border-[#C4C4C4] p-1 text-sm"
               name="email"
               type="email"
               placeholder="you@example.com"
@@ -124,7 +124,7 @@ const Login = () => {
               </p>
             </Link>
             <input
-              className="mt-1 block h-8 w-full rounded border border-2 border-[#C4C4C4] p-1 text-sm"
+              className="mt-1 block h-8 w-full rounded border border-[#C4C4C4] p-1 text-sm"
               name="password"
               type="password"
               placeholder="password"
