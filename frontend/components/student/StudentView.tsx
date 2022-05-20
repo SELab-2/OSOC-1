@@ -30,11 +30,11 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import Error from '../Error';
-import StudentFormView from "./StudentFormView";
+import StudentFormView from './StudentFormView';
 import axios, { AxiosError } from 'axios';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
-import {getAnswerStrings} from "../../lib/tallyForm";
+import { getAnswerStrings } from '../../lib/tallyForm';
 
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
@@ -358,16 +358,17 @@ const StudentView: React.FC<StudentViewProp> = ({
     });
   }, [myStudent]);
 
-  const answers = getAnswerStrings(myStudent.answers)
-  const pronouns = answers.commonPronouns || answers.otherPronouns
+  const answers = getAnswerStrings(myStudent.answers);
+  const pronouns = answers.commonPronouns || answers.otherPronouns;
   return (
     <div className={`flex flex-col-reverse justify-between xl:flex-row`}>
       {error && <Error error={error} className="mb-4" />}
       {/* hold the student information */}
-      <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
+      <div className="mx-8 flex w-full flex-col bg-osoc-neutral-bg px-4 py-3">
         <div className="flex flex-row pt-2">
-          <h1 className="font-bold text-4xl">
-            {answers.preferredName || (myStudent.firstName + ' ' + myStudent.lastName)}
+          <h1 className="text-4xl font-semibold">
+            {answers.preferredName ||
+              myStudent.firstName + ' ' + myStudent.lastName}
           </h1>
           {pronouns != undefined && <p className="pt-2 pl-2">{pronouns}</p>}
           {user.role == UserRole.Admin && (
@@ -384,7 +385,7 @@ const StudentView: React.FC<StudentViewProp> = ({
           )}
         </div>
         <div className="flex flex-col">
-          <h3 className="text-2xl pt-12">Suggestions</h3>
+          <h3 className="pt-12 text-2xl">Suggestions</h3>
           {myStudent.statusSuggestions.map((statusSuggestion) => (
             <StudentStatusSuggestion
               key={statusSuggestion.suggester.id}
@@ -620,13 +621,13 @@ const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
   }
 
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row items-center">
       <i className={`${myColor} w-[30px] px-2`}>{myLabel}</i>
       <p className="">{statusSuggestion.suggester.username}</p>
       <div className="tooltip pl-2 pt-1">
         <i className="icon-speech-blue text-xs">{speech_bubble}</i>
         {/* TODO Make this tooltip look nicer */}
-        <span className="tooltiptext bg-osoc-neutral-bg">
+        <span className="tooltiptext w-fit bg-gray-200 px-2">
           {statusSuggestion.motivation}
         </span>
       </div>
