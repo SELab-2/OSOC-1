@@ -50,8 +50,10 @@ const StudentFormView: React.FC<StudentFormViewProp> = ({answers}: StudentFormVi
       {practicalBulletPoints.map(([isCheckmark, label]) =>
         <CheckmarkList isCheckmark={isCheckmark} label={label}/>
       )}
-      <h4 className="pt-4">Applying for: <b>{answers.favoredRole || answers.otherFavoredRole}</b>
-      </h4>
+      {answers.otherResponsibilities &&
+          <p>The student could be hindered by these other responsibilities:
+              <b>{answers.otherResponsibilities}</b></p>}
+      <h4 className="pt-4">Applying for: <b>{answers.favoredRole || answers.otherFavoredRole}</b></h4>
       <h4 className="pt-4">Languages:</h4>
       <ul className="list-inside list-disc">
         <li>First language: <b>{answers.preferredLanguage}</b></li>
