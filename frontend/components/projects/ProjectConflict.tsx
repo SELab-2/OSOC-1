@@ -128,7 +128,7 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
 
         {/* Conflicts students list */}
         <div
-          className={`max-h- p-auto m-auto mt-4 h-auto w-[30%] bg-osoc-neutral-bg p-4`}
+          className={`p-auto m-auto mr-4 mt-4 h-auto w-[30%] bg-osoc-neutral-bg p-4`}
         >
           <h4 className={`mb-4 text-xl`}>Conflict Students</h4>
           {Array.from(conflictMap)

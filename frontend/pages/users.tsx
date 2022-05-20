@@ -81,7 +81,7 @@ const Users: NextPage = () => {
         return prev.filter((u) => u.id !== user.id);
       });
     } catch (err) {
-      parseError(err, setError, new AbortController().signal, router);
+      parseError(err, setError, router);
     }
   };
 
