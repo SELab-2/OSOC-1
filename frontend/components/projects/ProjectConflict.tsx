@@ -115,7 +115,9 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
                 key={project.id}
                 projectInput={project}
                 refreshProjects={() => null}
-                conflictStudents={Array.from(conflictMap.keys())}
+                conflictStudents={Array.from(conflictMap.keys()).filter(
+                  (conflict) => (conflictMap.get(conflict)?.amount || 0) > 1
+                )}
               />
             ))}
           </div>
