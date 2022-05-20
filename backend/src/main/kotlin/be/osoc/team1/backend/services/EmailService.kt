@@ -1,6 +1,10 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.exceptions.InvalidGmailCredentialsException
+import be.osoc.team1.backend.util.EnvUtil.osocEmailAddressSender
+import be.osoc.team1.backend.util.EnvUtil.osocPasswordSender
+import be.osoc.team1.backend.util.EnvUtil.osocScheme
+import be.osoc.team1.backend.util.EnvUtil.osocUrl
 import org.springframework.mail.MailAuthenticationException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSenderImpl
@@ -16,8 +20,8 @@ class EmailService {
     /**
      * Credentials of gmail account to send emails with.
      */
-    private var emailAddressSender: String? = System.getenv("OSOC_GMAIL_ADDRESS")
-    private var passwordSender: String? = System.getenv("OSOC_GMAIL_APP_PASSWORD")
+    private var emailAddressSender: String? = osocEmailAddressSender
+    private var passwordSender: String? = osocPasswordSender
     lateinit var mailSender: JavaMailSenderImpl
 
     init {
@@ -37,8 +41,6 @@ class EmailService {
      * Make the body of the email users receive when they request a password change.
      */
     private fun getForgotPasswordEmailBody(forgotPasswordUUID: UUID): String {
-        val osocScheme = System.getenv("OSOC_SCHEME") ?: "https"
-        val osocUrl = System.getenv("OSOC_URL") ?: "sel2-1.ugent.be"
         val url = "$osocScheme://$osocUrl/forgotPassword/$forgotPasswordUUID"
         return """
             Hi,

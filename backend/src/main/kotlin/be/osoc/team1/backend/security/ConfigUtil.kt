@@ -1,5 +1,8 @@
 package be.osoc.team1.backend.security
 
+import be.osoc.team1.backend.util.EnvUtil.osocScheme
+import be.osoc.team1.backend.util.EnvUtil.osocUrl
+
 /**
  * Configure which urls are excluded from the standard security measures. Those standard security measures are defined
  * in [SecurityConfig].
@@ -11,7 +14,5 @@ object ConfigUtil {
     val urlsOpenToAllToPostTo: Array<String> = arrayOf(
         "/users", "/forgotPassword", "/token/refresh", "/*/students"
     )
-    private val osocScheme = System.getenv("OSOC_SCHEME") ?: "https"
-    private val osocUrl = System.getenv("OSOC_URL") ?: "sel2-1.ugent.be"
     val allowedCorsOrigins: List<String> = listOf("http://localhost:3000", "$osocScheme://$osocUrl")
 }
