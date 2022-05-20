@@ -56,7 +56,7 @@ export async function getSkills(
     .then((response) =>
       setSkillOptions(
         response.data.map((skill) => {
-          return { value: '', label: skill.skillName };
+          return { value: skill.skillName, label: skill.skillName };
         })
       )
     )
