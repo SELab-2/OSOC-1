@@ -134,7 +134,7 @@ const CommsCreationPopup: FC<CCPProps> = ({
                 Cancel
               </button>
               <button
-                className="col-span-1 col-start-3 col-end-4 bg-check-green px-3 py-1 disabled:bg-green-200 disabled:text-gray-400 rounded-sm hover:brightness-95"
+                className="col-span-1 col-start-3 col-end-4 bg-check-green px-3 py-1 disabled:bg-green-200 disabled:text-gray-400 rounded-sm hover:brightness-95 disabled:brightness-100 disabled:cursor-not-allowed"
                 type="submit"
                 disabled={!student || !message}
               >

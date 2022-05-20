@@ -252,7 +252,7 @@ export enum CommunicationType {
 export type Communication = {
   message: string;
   type: CommunicationType;
-  registrationTime: number[]
+  registrationTime: number
   id: UUID;
 };
 
@@ -260,7 +260,7 @@ export type StudentComm = {
   studentId: UUID;
   name: string;
   commMessage: string;
-  registrationTime: number[]
+  registrationTime: number
   id: UUID;
 };
 
