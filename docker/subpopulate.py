@@ -96,7 +96,7 @@ def make_student():
                     "key": "question_3Ex0vL",
                     "label": "Are there any responsibilities you might have which could hinder you during the day?",
                     "type": "TEXTAREA",
-                    "value": fake.paragraph()
+                    "value": None if random.random() < 0.75 else fake.paragraph()
                 },
                 {
                     "key": "question_nroEGL",
