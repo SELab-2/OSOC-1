@@ -33,6 +33,26 @@ class EmailService(environment: Environment, private val mailSender: JavaMailSen
     private var passwordSender: String? = environment["OSOC_GMAIL_APP_PASSWORD"]
     private final val baseUrl = environment["OSOC_FRONTEND_URL"] ?: "http://localhost:3000"
 
+    private val invitationMailTitle = "You were invited to join OSOC"
+    private val forgotPasswordMailTitle = "Reset Password OSOC"
+    private val invitationMailBody: String = """
+        Hi there!
+        
+        Are you looking improve your skills while getting paid?
+        Open summer of code allows you to do just that. Work together with other students to bring an idea to life
+        in just one month, while being guided by experts in the field. You'll become more independent and
+        professional by managing a real project for a real client.
+        
+        Click the first link below to get started or click the second link below to get more information.
+        $baseUrl/register
+        https://osoc.be/students
+        (if these links aren't clickable, you can copy and paste them into the search bar)
+        
+        We hope to see you soon!
+        Cheers
+        The OSOC team
+    """.trimIndent()
+
     /**
      * Initialise the [mailSender].
      */
@@ -52,9 +72,9 @@ class EmailService(environment: Environment, private val mailSender: JavaMailSen
     }
 
     /**
-     * Make the body of the email users receive when they request a password change.
+     * Make the body of the email which users receive when they request a password change.
      */
-    private fun getForgotPasswordEmailBody(forgotPasswordUUID: UUID): String {
+    private fun getForgotPasswordMailBody(forgotPasswordUUID: UUID): String {
         val url = "$baseUrl/forgotPassword/$forgotPasswordUUID"
         return """
             Hi,
@@ -72,10 +92,15 @@ class EmailService(environment: Environment, private val mailSender: JavaMailSen
     /**
      * Set content, title, sender and receiver of email.
      */
-    private fun getEmailMessage(emailAddressReceiver: String, forgotPasswordUUID: UUID): SimpleMailMessage {
+    private fun getEmailMessage(emailAddressReceiver: String, forgotPasswordUUID: UUID?): SimpleMailMessage {
         return SimpleMailMessage().apply {
-            setSubject("Reset Password")
-            setText(getForgotPasswordEmailBody(forgotPasswordUUID))
+            if (forgotPasswordUUID == null) {
+                setSubject(invitationMailTitle)
+                setText(invitationMailBody)
+            } else {
+                setSubject(forgotPasswordMailTitle)
+                setText(getForgotPasswordMailBody(forgotPasswordUUID))
+            }
             setTo(emailAddressReceiver)
             setFrom(emailAddressSender!!)
         }
@@ -84,7 +109,7 @@ class EmailService(environment: Environment, private val mailSender: JavaMailSen
     /**
      * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
      */
-    fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID) {
+    fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID?) {
         if (emailAddressSender == null || passwordSender == null) {
             throw InvalidGmailCredentialsException("No 'OSOC_GMAIL_ADDRESS' or 'OSOC_GMAIL_APP_PASSWORD' found in environment variables.")
         }
