@@ -203,7 +203,11 @@ paths:
                     name: unassignedOnly
                     schema:
                         type: boolean
-                    description: Only return unassigned students
+                -   in: query
+                    name: assignedOnly
+                    schema:
+                        type: boolean
+                    description: Only return assigned students
                 -   in: query
                     name: view
                     schema:
@@ -927,7 +931,8 @@ paths:
             summary: Add a new communication with a student
             description: |
                 Add a communication to the database.
-                The created communication object is returned.
+                The created communication object is returned. This created object contains the id of this new object and
+                the registrationTime alongside the message and type which were provided in the request.
             parameters:
                 -   name: studentId
                     required: true

@@ -5,6 +5,7 @@ import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.StudentViewEnum
 import be.osoc.team1.backend.entities.filterByAlumn
+import be.osoc.team1.backend.entities.filterByAssigned
 import be.osoc.team1.backend.entities.filterByName
 import be.osoc.team1.backend.entities.filterByNotYetAssigned
 import be.osoc.team1.backend.entities.filterBySkills
@@ -55,7 +56,8 @@ class StudentController(
      * The results can also be filtered by [name] (default value is empty so no student is excluded),
      * by [status] (default value allows all statuses), by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
-     * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
+     * volunteers([studentCoachOnly]), by only unassigned students ([unassignedOnly]) students and by only assigned
+     * students ([assignedOnly]).
      *
      * The returned students can also be altered using the [view] query parameter:
      * [Basic] will limit the data the student object contains,
@@ -77,6 +79,7 @@ class StudentController(
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
         @RequestParam(defaultValue = "false") studentCoachOnly: Boolean,
         @RequestParam(defaultValue = "false") unassignedOnly: Boolean,
+        @RequestParam(defaultValue = "false") assignedOnly: Boolean,
         @RequestParam(defaultValue = "Full") view: StudentViewEnum,
         @PathVariable edition: String,
         principal: Principal,
@@ -104,6 +107,7 @@ class StudentController(
             .applyIf(status != StatusEnum.values().toSet()) { filterByStatus(status) }
             .applyIf(skillNames.isNotEmpty()) { filterBySkills(skillNames) }
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
+            .applyIf(assignedOnly) { filterByAssigned(assignmentRepository) }
             .page(pager)
 
         return ObjectMapper().writerWithView(studentViewEnumToStudentView(view)).writeValueAsString(filteredStudents)

@@ -86,6 +86,7 @@ async function searchStudent(
         alumnOnly: studentSearchParameters.OnlyAlumni,
         studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
         unassignedOnly: studentSearchParameters.ExcludeAssigned,
+        assignedOnly: studentSearchParameters.ExcludeUnassigned,
         pageNumber: state.page,
         pageSize: state.pageSize,
         view: 'List',
@@ -185,6 +186,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     OnlyStudentCoach: false,
     ExcludeSuggested: false,
     ExcludeAssigned: false,
+    ExcludeUnassigned: false,
   } as Record<string, boolean>;
 
   const [studentSearchParameters, setStudentSearchParameters] = useState(
@@ -223,12 +225,17 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * This will also get called on first render
    */
   useEffect(() => {
-    if ({ isOnScreen }.isOnScreen) {
+    if ({ isOnScreen }.isOnScreen && router.isReady) {
       setHasMoreItems(true);
       scrollRef.current?.scrollTo(0, 0);
       return search(false);
     }
-  }, [studentSearchParameters, skills, { isOnScreen }.isOnScreen]);
+  }, [
+    studentSearchParameters,
+    skills,
+    { isOnScreen }.isOnScreen,
+    router.isReady,
+  ]);
 
   /**
    * Call to refresh students list from page 0 with current filters applied
@@ -272,11 +279,14 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    */
   usePoll(
     () => {
+      if (!router.isReady) {
+        return;
+      }
       if (!fetching && !state.loading && { isOnScreen }.isOnScreen) {
         doPoll();
       }
     },
-    [fetching, state, { isOnScreen }.isOnScreen],
+    [fetching, state, { isOnScreen }.isOnScreen, router.isReady],
     {
       interval: 3000,
     }
@@ -317,7 +327,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    if (state.loading || !{ isOnScreen }.isOnScreen || !hasMoreItems) {
+    if (
+      state.loading ||
+      !{ isOnScreen }.isOnScreen ||
+      !hasMoreItems ||
+      !router.isReady
+    ) {
       return;
     }
     fetching = true;
@@ -547,6 +562,30 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
               </div>
               <label htmlFor="toggleAssigned" className="text-sm">
                 Exclude students already assigned
+              </label>
+            </div>
+            <div className="flex w-full flex-row flex-wrap">
+              <div className="relative mr-2 inline-block w-10 select-none transition duration-200 ease-in">
+                <input
+                  type="checkbox"
+                  name="toggleUnassigned"
+                  id="toggleUnassigned"
+                  className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
+                  checked={studentSearchParameters.ExcludeUnassigned}
+                  onChange={() =>
+                    handleSearchChange(
+                      'ExcludeUnassigned',
+                      !studentSearchParameters.ExcludeUnassigned
+                    )
+                  }
+                />
+                <label
+                  htmlFor="toggleUnassigned"
+                  className="toggle-label block h-5 cursor-pointer overflow-hidden rounded-full border-2 border-gray-300 bg-white"
+                />
+              </div>
+              <label htmlFor="toggleAssigned" className="text-sm">
+                Exclude students not yet assigned
               </label>
             </div>
           </div>

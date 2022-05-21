@@ -10,7 +10,9 @@ const Index = () => {
   const [user] = useUser();
 
   useEffect(() => {
-    if (edition) {
+    if (!user || !user.role) {
+      router.push('/login');
+    } else if (edition) {
       router.push(`/${edition}/projects`);
     } else {
       switch (user.role) {
@@ -27,7 +29,7 @@ const Index = () => {
           break;
       }
     }
-  }, [user]);
+  }, [user, edition, router]);
 
   return <></>;
 };
