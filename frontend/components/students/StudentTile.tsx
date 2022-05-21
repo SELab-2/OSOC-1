@@ -53,7 +53,7 @@ const StudentTile: React.FC<StudentProp> = ({
   studentInput,
   setStudentBase,
 }: StudentProp) => {
-  // Need to set a project with all keys present to avoid the render code throwing undefined errors
+  // Need to set a student with all keys present to avoid the render code throwing undefined errors
   const [myStudent, setMyStudent]: [
     StudentBaseList,
     (myStudent: StudentBaseList) => void
