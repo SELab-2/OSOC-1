@@ -260,7 +260,7 @@ export type StudentComm = {
   studentId: UUID;
   name: string;
   commMessage: string;
-  registrationTime: number;
+  registrationTime: Date;
   id: UUID;
 };
 

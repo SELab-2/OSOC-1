@@ -92,7 +92,7 @@ const communications = () => {
               studentId: student.id,
               name: student.firstName + ' ' + student.lastName,
               commMessage: csc.message,
-              registrationTime: csc.registrationTime,
+              registrationTime: new Date(csc.registrationTime),
               id: csc.id,
             });
           });
@@ -162,7 +162,7 @@ const communications = () => {
             studentId: studentId,
             name,
             commMessage: message,
-            registrationTime: response.data.registrationTime,
+            registrationTime: new Date(response.data.registrationTime),
             id: response.data.id,
           } as StudentComm,
         ];
@@ -210,7 +210,7 @@ const communications = () => {
                       id: comm.id,
                       name: comm.name,
                       message: comm.commMessage,
-                      timestamp: new Date(comm.registrationTime).toString(),
+                      timestamp: comm.registrationTime.toString(),
                     };
                   })
                 }
