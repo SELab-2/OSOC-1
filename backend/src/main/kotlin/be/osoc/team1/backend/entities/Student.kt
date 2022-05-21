@@ -19,9 +19,11 @@ import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
+import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
-import javax.persistence.OneToOne
 import javax.persistence.OrderBy
 import javax.validation.constraints.NotBlank
 
@@ -72,7 +74,7 @@ enum class SuggestionEnum {
  */
 @Entity
 class StatusSuggestion(
-    @OneToOne
+    @ManyToOne
     @JsonSerialize(using = UserSerializer::class)
     @JsonDeserialize(using = UserDeserializer::class)
     val suggester: User,
@@ -82,6 +84,15 @@ class StatusSuggestion(
     @NotBlank
     val edition: String = ""
 ) {
+    @ManyToOne(cascade = [CascadeType.DETACH])
+    @JsonIgnore
+    @JoinTable(
+        name = "student_status_suggestions",
+        joinColumns = [JoinColumn(name = "status_suggestions_id")],
+        inverseJoinColumns = [JoinColumn(name = "student_id")]
+    )
+    lateinit var student: Student
+        private set
 
     @Id
     val id: UUID = UUID.randomUUID()
@@ -159,6 +170,11 @@ class Student(
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinTable(
+        name = "student_status_suggestions",
+        joinColumns = [JoinColumn(name = "student_id")],
+        inverseJoinColumns = [JoinColumn(name = "status_suggestions_id")]
+    )
     @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = StatusSuggestionListSerializer::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
@@ -167,6 +183,10 @@ class Student(
     @field:JsonView(StudentView.Full::class, StudentView.Communication::class)
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
+
+    @OneToMany(mappedBy = "student", cascade = [CascadeType.DETACH], orphanRemoval = true)
+    @JsonIgnore
+    val assignments: MutableList<Assignment> = mutableListOf()
 
     @JsonGetter("statusSuggestionCount")
     fun calculateStatusSuggestionCount(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()

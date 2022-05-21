@@ -433,7 +433,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               <i
                 className={`${
                   user.role == UserRole.Admin ? 'visible' : 'hidden'
-                } i-inline inline pl-2 text-xl opacity-20`}
+                } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer`}
                 onClick={() => setShowEditProject(true)}
               >
                 {edit_icon}
@@ -572,7 +572,11 @@ const ProjectTile: React.FC<ProjectProp> = ({
             </label>
             <div className="mt-6 flex flex-row justify-between">
               <button
-                onClick={() => setOpenAssignment(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setOpenAssignment(false);
+                }}
                 className={`min-w-[120px] border-2 bg-white`}
               >
                 Cancel
@@ -709,7 +713,11 @@ const ProjectTile: React.FC<ProjectProp> = ({
           </h3>
           <div className="mt-3 flex flex-row justify-between px-5">
             <button
-              onClick={() => setDeletePopup(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setDeletePopup(false);
+              }}
               className={`min-w-[120px] border-2 bg-white`}
             >
               Cancel
@@ -717,7 +725,9 @@ const ProjectTile: React.FC<ProjectProp> = ({
 
             <button
               className={`min-w-[120px] border-2 bg-check-red py-1`}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 setDeletePopup(false);
                 setShowEditProject(false);
                 deleteProject(myProject.id, refreshProjects, setError, router);
@@ -772,7 +782,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
             <i className="icon-speech-blue text-xs">{speech_bubble}</i>
             {/* TODO Make this tooltip look nicer */}
             {/* TODO this tooltip should have a max width since it can bug the layout atm */}
-            <span className="tooltiptext bg-osoc-neutral-bg">
+            <span className="tooltiptext w-fit bg-gray-200 px-2">
               {assignment.reason}
             </span>
           </div>
@@ -786,14 +796,16 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
       </div>
       <div className="flex flex-col justify-center">
         <i
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
             setAssignmentId(assignment.id);
             setRemoveStudentName(
               assignment.student.firstName + ' ' + assignment.student.lastName
             );
             setOpenUnassignment(true);
           }}
-          className="icon-xcircle-red text-2xl"
+          className="icon-xcircle-red text-2xl hover:cursor-pointer"
         >
           {xmark_circle}
         </i>
