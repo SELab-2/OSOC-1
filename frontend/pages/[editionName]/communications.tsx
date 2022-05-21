@@ -204,16 +204,14 @@ const communications = () => {
                 Add New
               </button>
               <CsvDownloader
-                datas={
-                  communications.map((comm) => {
-                    return {
-                      id: comm.id,
-                      name: comm.name,
-                      message: comm.commMessage,
-                      timestamp: comm.registrationTime.toString(),
-                    };
-                  })
-                }
+                datas={communications.map((comm) => {
+                  return {
+                    id: comm.id,
+                    name: comm.name,
+                    message: comm.commMessage,
+                    timestamp: comm.registrationTime.toString(),
+                  };
+                })}
                 filename="communications"
                 suffix
                 className="inline-block cursor-default"
