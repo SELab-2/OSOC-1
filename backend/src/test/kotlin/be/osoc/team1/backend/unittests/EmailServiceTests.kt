@@ -20,11 +20,11 @@ class EmailServiceTests {
     private val testEmail = "test@email.com"
     private val captureSimpleMailMessage = slot<SimpleMailMessage>()
 
-    private fun getEnvironment(set: Boolean = true, frontendUrlSet: Boolean = true): Environment {
+    private fun getEnvironment(emailSet: Boolean = true, passwordSet: Boolean = true): Environment {
         val environment: Environment = mockk()
-        every { environment.getProperty("OSOC_GMAIL_ADDRESS") } returns if (set) "email@gmail.com" else null
-        every { environment.getProperty("OSOC_GMAIL_APP_PASSWORD") } returns if (set) "app_password" else null
-        every { environment.getProperty("OSOC_FRONTEND_URL") } returns if (frontendUrlSet) "https://sel2-1.ugent.be" else null
+        every { environment.getProperty("OSOC_GMAIL_ADDRESS") } returns if (emailSet) "email@gmail.com" else null
+        every { environment.getProperty("OSOC_GMAIL_APP_PASSWORD") } returns if (passwordSet) "app_password" else null
+        every { environment.getProperty("OSOC_FRONTEND_URL") } returns "https://sel2-1.ugent.be"
         return environment
     }
 
@@ -62,8 +62,17 @@ class EmailServiceTests {
     }
 
     @Test
-    fun `sendEmail fails when environment variables aren't set`() {
-        val emailService = EmailService(getEnvironment(false), JavaMailSenderImpl())
+    fun `sendEmail fails when email environment variables isn't set`() {
+        val emailService = EmailService(getEnvironment(emailSet = false), JavaMailSenderImpl())
+        val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
+            emailService.sendEmail(testEmail)
+        }
+        Assertions.assertTrue(exception.message?.startsWith("No 'OSOC_GMAIL_ADDRESS' or") ?: false)
+    }
+
+    @Test
+    fun `sendEmail fails when password environment variable isn't set`() {
+        val emailService = EmailService(getEnvironment(passwordSet = false), JavaMailSenderImpl())
         val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
             emailService.sendEmail(testEmail)
         }
