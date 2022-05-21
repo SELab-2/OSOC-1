@@ -429,7 +429,7 @@ const Projects: NextPage = () => {
           <title>{edition}: projects</title>
         </Head>
         <div className="min-w-screen flex min-h-screen flex-col items-center">
-          <Header />
+          <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={1}>
             <main className="flex w-full flex-row">
               {/* Holds the sidebar with search, filter and student results */}
