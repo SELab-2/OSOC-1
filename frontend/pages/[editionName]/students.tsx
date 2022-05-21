@@ -87,7 +87,7 @@ const Students: NextPage = () => {
                   </div>
                 </div>
 
-                {error && <Error error={error} className="mb-4" />}
+                {error && <Error error={error} className="mb-4" setError={setError}/>}
 
                 {/* This contains the actual student info */}
                 <div>
