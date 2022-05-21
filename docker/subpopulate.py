@@ -3,7 +3,6 @@ import requests
 import sys
 import random
 from faker import Faker
-fake = Faker()
 login = requests.post('http://localhost:8080/api/login',
                       data={"email": "tester@mail.com", "password": "tester"}).json()
 token = login["accessToken"]
@@ -18,9 +17,13 @@ requests.post('http://localhost:8080/api/editions/ed/activate',
               headers=authheaders)
 total = 1000
 wsl = False
-if len(sys.argv) == 2 and (sys.argv[1] == "--wsl" or sys.argv[1] == "-w"):
+if "--wsl" in sys.argv or "-w" in sys.argv:
     wsl = True
     total = 100
+
+if "--seed" in sys.argv or "-s" in sys.argv:
+    Faker.seed(1)
+fake = Faker()
 
 
 def make_student():

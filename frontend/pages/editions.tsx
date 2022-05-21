@@ -123,9 +123,11 @@ const Editions: NextPage = () => {
           <title>Editions</title>
         </Head>
         <div className="h-screen">
-          <Header />
+          <Header setError={setError} />
 
-          {error && <Error error={error} className="mt-4 w-3/5" />}
+          {error && (
+            <Error error={error} className="mt-4 w-3/5" setError={setError} />
+          )}
 
           <div className="row-auto m-auto mt-4 grid w-9/12 grid-cols-1 items-center gap-4 md:mt-8 md:grid-cols-2 lg:mt-12 lg:grid-cols-3 xl:grid-cols-4">
             {showCreateForm ? (

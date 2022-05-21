@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { FC, PropsWithChildren, useEffect, useState } from 'react';
 import useEdition from '../hooks/useEdition';
 import useRefreshToken from '../hooks/useRefreshToken';
@@ -32,6 +33,7 @@ const PersistLogin: FC<PropsWithChildren<unknown>> = ({
   const [tokens] = useTokens();
   const [, setEdition] = useEdition();
   const [, setUser] = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     /**
@@ -63,6 +65,24 @@ const PersistLogin: FC<PropsWithChildren<unknown>> = ({
     };
 
     tokens.accessToken ? setLoading(false) : verifyRefreshToken();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    if (typeof window !== 'undefined') {
+      window.addEventListener(
+        'storage',
+        (e) => {
+          if (e.key === 'refreshToken' && !e.newValue) {
+            // automatically logout (we only need to return to login because another browser window already did the rest)
+            router.push('/login');
+            controller.abort();
+          }
+        },
+        { signal }
+      );
+    }
   }, []);
 
   return <>{loading ? undefined : children}</>;
