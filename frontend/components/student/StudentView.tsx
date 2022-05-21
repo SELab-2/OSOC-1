@@ -462,7 +462,6 @@ const StudentView: React.FC<StudentViewProp> = ({
           <textarea
             placeholder="Motivation"
             className="mt-3 w-full resize-y border-2 border-check-gray"
-            required
             value={motivation}
             onChange={(e) => setMotivation(e.target.value || '')}
           />
