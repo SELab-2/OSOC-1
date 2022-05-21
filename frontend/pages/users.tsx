@@ -46,7 +46,7 @@ const Users: NextPage = () => {
    *
    * {@label USERS_PAGE_ERROR}
    */
-  const [error, setError] = useState('This is an error');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(false);
 
