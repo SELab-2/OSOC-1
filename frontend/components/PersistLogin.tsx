@@ -68,13 +68,20 @@ const PersistLogin: FC<PropsWithChildren<unknown>> = ({
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     if (typeof window !== 'undefined') {
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'refreshToken' && !e.newValue) {
-          // automatically logout (we only need to return to login because another browser window already did the rest)
-          router.push('/login');
-        }
-      });
+      window.addEventListener(
+        'storage',
+        (e) => {
+          if (e.key === 'refreshToken' && !e.newValue) {
+            // automatically logout (we only need to return to login because another browser window already did the rest)
+            router.push('/login');
+            controller.abort();
+          }
+        },
+        { signal }
+      );
     }
   }, []);
 
