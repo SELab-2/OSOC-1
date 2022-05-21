@@ -16,7 +16,7 @@ class InviteController(private val emailService: EmailService) {
      * Send an invitation to [emailAddress] to register.
      */
     @PostMapping
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @ResponseStatus(value = HttpStatus.OK)
     @Secured("ROLE_COACH")
     fun inviteEmail(@RequestBody emailAddress: String) = emailService.sendEmail(emailAddress)
 }

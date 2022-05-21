@@ -107,7 +107,8 @@ class EmailService(environment: Environment, private val mailSender: JavaMailSen
     }
 
     /**
-     * Email [emailAddressReceiver] with a [forgotPasswordUUID], so [emailAddressReceiver] can reset its email.
+     * If [forgotPasswordUUID] is null, an invitation mail gets send to [emailAddressReceiver].
+     * Otherwise, email [emailAddressReceiver] a link to reset its password.
      */
     fun sendEmail(emailAddressReceiver: String, forgotPasswordUUID: UUID? = null) {
         if (emailAddressSender == null || passwordSender == null) {

@@ -212,10 +212,10 @@ paths:
                     name: view
                     schema:
                         $ref: '#/components/schemas/StudentView'
-                    description: The view of the student, with different views the students will contain less or more information (default is Full). 
-                                The List view can be used to get basic information of the student to display it in a listing,
-                                the Communication view can be used to just get info about the student and his/hers communication
-                                and the Basic view can be used to show the bare minimum info of a student (just name and id). This way unnecessary data does not need to be sent.
+                    description: The view of the student, with different views the students will contain less or more information (default is Full).
+                        The List view can be used to get basic information of the student to display it in a listing,
+                        the Communication view can be used to just get info about the student and his/hers communication
+                        and the Basic view can be used to show the bare minimum info of a student (just name and id). This way unnecessary data does not need to be sent.
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -289,10 +289,10 @@ paths:
                     name: view
                     schema:
                         $ref: '#/components/schemas/StudentView'
-                    description: The view of the student, with different views the students will contain less or more information (default is Full). 
-                                The List view can be used to get basic information of the student to display it in a listing,
-                                the Communication view can be used to just get info about the student and his/hers communication
-                                and the Basic view can be used to show the bare minimum info of a student (just name and id). This way unnecessary data does not need to be sent.
+                    description: The view of the student, with different views the students will contain less or more information (default is Full).
+                        The List view can be used to get basic information of the student to display it in a listing,
+                        the Communication view can be used to just get info about the student and his/hers communication
+                        and the Basic view can be used to show the bare minimum info of a student (just name and id). This way unnecessary data does not need to be sent.
             responses:
                 '200':
                     description: |
@@ -1097,6 +1097,8 @@ paths:
                     text/plain:
                         schema:
                             type: string
+                            format: email
+                        example: example@mail.com
             responses:
                 '200':
                     description: successful operation
@@ -1299,6 +1301,22 @@ paths:
                                         type: integer
                 '400':
                     description: Bad Request.
+    /invite:
+        post:
+            summary: send invitation mail to given email address
+            requestBody:
+                content:
+                    text/plain:
+                        schema:
+                            type: string
+                            format: email
+                        example: example@mail.com
+            responses:
+                '200':
+                    description: sucessful operation
+                '400':
+                    description: Bad Request.
+
 components:
     schemas:
         Student:
@@ -1361,16 +1379,16 @@ components:
                 statusSuggestionCount:
                     type: object
                     properties:
-                      Yes:
-                        type: integer
-                        example: 17
-                      No: 
-                        type: integer
-                        example: 11
-                      Maybe: 
-                        type: integer
-                        example: 02
- 
+                        Yes:
+                            type: integer
+                            example: 17
+                        No:
+                            type: integer
+                            example: 11
+                        Maybe:
+                            type: integer
+                            example: 02
+
         Answer:
             type: object
             properties:
