@@ -250,6 +250,7 @@ const Projects: NextPage = () => {
     if (!showConflicts) {
       setConflictMap(new Map() as conflictMapType);
       setProjects([] as ProjectBase[]);
+      setConflictsKeep(new Map() as conflictMapType);
     }
   }, [showConflicts]);
 
