@@ -203,7 +203,9 @@ const Users: NextPage = () => {
               </div>
             ) : (
               <>
-                {error && <Error error={error} className="mb-4" />}
+                {error && (
+                  <Error error={error} setError={setError} className="mb-4" />
+                )}
                 <form
                   className="mb-2 flex w-full flex-row items-center justify-center gap-2 px-4"
                   onSubmit={invite}
