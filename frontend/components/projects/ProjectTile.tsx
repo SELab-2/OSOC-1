@@ -433,7 +433,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               <i
                 className={`${
                   user.role == UserRole.Admin ? 'visible' : 'hidden'
-                } i-inline inline pl-2 text-xl opacity-20`}
+                } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer`}
                 onClick={() => setShowEditProject(true)}
               >
                 {edit_icon}
@@ -772,7 +772,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
             <i className="icon-speech-blue text-xs">{speech_bubble}</i>
             {/* TODO Make this tooltip look nicer */}
             {/* TODO this tooltip should have a max width since it can bug the layout atm */}
-            <span className="tooltiptext bg-osoc-neutral-bg">
+            <span className="tooltiptext w-fit bg-gray-200 px-2">
               {assignment.reason}
             </span>
           </div>
@@ -793,7 +793,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
             );
             setOpenUnassignment(true);
           }}
-          className="icon-xcircle-red text-2xl"
+          className="icon-xcircle-red text-2xl hover:cursor-pointer"
         >
           {xmark_circle}
         </i>
