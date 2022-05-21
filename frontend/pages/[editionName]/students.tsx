@@ -39,13 +39,13 @@ const Students: NextPage = () => {
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
+        <Head>
+          <title>{edition}: students</title>
+        </Head>
         <div className="min-w-screen flex min-h-screen flex-col items-center">
-          <Head>
-            <title>{edition}: students</title>
-          </Head>
           <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={2}>
-            <main className="flex w-full flex-row">
+            <main className="mt-[180px] flex w-full flex-row sm:mt-12">
               {/* Holds the sidebar with search, filter and student results */}
               <section
                 className={`${

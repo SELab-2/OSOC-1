@@ -431,7 +431,7 @@ const Projects: NextPage = () => {
         <div className="min-w-screen flex min-h-screen flex-col items-center">
           <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={1}>
-            <main className="flex w-full flex-row">
+            <main className="mt-[180px] flex w-full flex-row sm:mt-12">
               {/* Holds the sidebar with search, filter and student results */}
               <section
                 className={`${

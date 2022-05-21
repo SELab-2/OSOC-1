@@ -161,9 +161,9 @@ const Users: NextPage = () => {
         <title>Users</title>
       </Head>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
-        <div className="h-screen">
+        <div className="min-w-screen flex min-h-screen">
           <Header setError={setError} />
-          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
+          <div className="mx-auto mt-[200px] mb-32 w-11/12 p-0 sm:mt-16 md:w-3/5">
             {loading ? (
               <div className="relative top-1/2 translate-y-1/2">
                 <p className="mb-4 text-center text-2xl opacity-75">

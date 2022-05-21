@@ -74,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
   };
 
   return (
-    <header className="flex h-fit w-full flex-col items-center justify-between px-4 shadow-lg sm:h-12 sm:flex-row">
+    <header className="fixed mb-4 flex h-fit w-full flex-col items-center justify-between px-4 shadow-lg sm:h-12 sm:flex-row">
       <div className="flex flex-row items-center">
         <img
           src="https://osoc.be/img/logo/logo-osoc-color.svg"
