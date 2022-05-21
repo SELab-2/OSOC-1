@@ -179,7 +179,9 @@ const Users: NextPage = () => {
               </div>
             ) : (
               <>
-                {error && <Error error={error} setError={setError} className="mb-4" />}
+                {error && (
+                  <Error error={error} setError={setError} className="mb-4" />
+                )}
                 <UserTable
                   users={filteredUsers.filter(Boolean)}
                   updateUsersLocal={updateUserLocal}

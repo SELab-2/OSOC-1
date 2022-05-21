@@ -197,7 +197,9 @@ const communications = () => {
         <div className="h-screen">
           <Header setError={setError} />
           <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
-            {error && <Error error={error} className="mb-4" setError={setError}/>}
+            {error && (
+              <Error error={error} className="mb-4" setError={setError} />
+            )}
             <div>
               <button
                 className="mx-2 my-1 rounded-sm bg-osoc-btn-primary px-2 py-1 text-white hover:brightness-95"

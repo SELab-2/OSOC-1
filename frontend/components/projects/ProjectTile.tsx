@@ -422,7 +422,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
         isOver && canDrop ? 'bg-check-green' : 'bg-osoc-neutral-bg'
       } m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]`}
     >
-      {error && <Error error={error} className="mb-4" setError={setError}/>}
+      {error && <Error error={error} className="mb-4" setError={setError} />}
       {/* project info top */}
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}
