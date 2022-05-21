@@ -3,6 +3,7 @@ import {
   ProjectBase,
   StudentBase,
   Url,
+  UUID,
 } from '../../lib/types';
 import { useState } from 'react';
 import { getUrlList } from '../../lib/requestUtils';
@@ -16,6 +17,9 @@ const xmark_circle = <Icon icon="akar-icons:circle-x" />;
 
 type ProjectConflictProp = {
   conflictMap: conflictMapType;
+  pollConflicts: () => void;
+  conflictsKeep: conflictMapType;
+  setConflictsKeep: (conflictsKeep: conflictMapType) => void;
 };
 
 type ProjectConflictStudentProp = {
@@ -23,7 +27,7 @@ type ProjectConflictStudentProp = {
   amount: number;
   setCurrentStudent: (currentStudent: StudentBase) => void;
   currentStudent: StudentBase;
-  removeCurrentStudent: () => void;
+  removeCurrentStudent: (id: UUID) => void;
 };
 
 /**
@@ -57,15 +61,23 @@ async function getProjects(
  */
 const ProjectConflict: React.FC<ProjectConflictProp> = ({
   conflictMap,
+  pollConflicts,
+  conflictsKeep,
+  setConflictsKeep,
 }: ProjectConflictProp) => {
   const [currentStudent, setCurrentStudent] = useState({} as StudentBase);
   const [projects, setProjects] = useState([] as ProjectBase[]);
   const [error, setError] = useState('');
   const router = useRouter();
   let controller = new AbortController();
+  let busy = false;
 
-  const removeCurrentStudent = () => {
-    conflictMap.delete(currentStudent.id);
+  const removeCurrentStudent = (id: UUID) => {
+    busy = true;
+    const newConflictsKeep = new Map(conflictsKeep) as conflictMapType;
+    newConflictsKeep.delete(id);
+    setConflictsKeep(newConflictsKeep);
+    busy = false;
   };
 
   /**
@@ -94,7 +106,22 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
         };
       }
     },
-    [currentStudent],
+    [currentStudent, conflictMap],
+    {
+      interval: 3000,
+    }
+  );
+
+  /**
+   * Poll the actual conflicts
+   */
+  usePoll(
+    () => {
+      if (!busy) {
+        pollConflicts();
+      }
+    },
+    [busy, conflictsKeep],
     {
       interval: 3000,
     }
@@ -115,7 +142,9 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
                 key={project.id}
                 projectInput={project}
                 refreshProjects={() => null}
-                conflictStudents={Array.from(conflictMap.keys())}
+                conflictStudents={Array.from(conflictMap.keys()).filter(
+                  (conflict) => (conflictMap.get(conflict)?.amount || 0) > 1
+                )}
               />
             ))}
           </div>
@@ -186,8 +215,10 @@ const ProjectConflictStudents: React.FC<ProjectConflictStudentProp> = ({
       {amount <= 1 && (
         <div className="flex flex-col justify-center">
           <i
-            onClick={() => {
-              removeCurrentStudent();
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              removeCurrentStudent(student.id);
             }}
             className="icon-xcircle-gray text-2xl"
           >
