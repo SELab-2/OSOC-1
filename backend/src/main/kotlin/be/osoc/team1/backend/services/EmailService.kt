@@ -33,8 +33,8 @@ class EmailService(environment: Environment, private val mailSender: JavaMailSen
     private var passwordSender: String? = environment["OSOC_GMAIL_APP_PASSWORD"]
     private final val baseUrl = environment["OSOC_FRONTEND_URL"] ?: "http://localhost:3000"
 
-    private val invitationMailTitle = "You were invited to join OSOC"
-    private val forgotPasswordMailTitle = "Reset Password OSOC"
+    val invitationMailTitle: String = "You were invited to join OSOC"
+    val forgotPasswordMailTitle: String = "Reset Password OSOC"
     private val invitationMailBody: String = """
         Hi there!
         
