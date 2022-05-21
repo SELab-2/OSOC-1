@@ -90,7 +90,7 @@ const StudentTile: React.FC<StudentProp> = ({
       onClick={() => setStudentBase(myStudent)}
     >
       <div
-        className={`my-4 mx-1 flex flex-row justify-between p-2 opacity-100 shadow-sm shadow-gray-500 hover:bg-osoc-neutral-bg hover:brightness-75 cursor-pointer`}
+        className={`my-4 mx-1 flex cursor-pointer flex-row justify-between p-2 opacity-100 shadow-sm shadow-gray-500 hover:bg-osoc-neutral-bg hover:brightness-75`}
       >
         {/* basic student info */}
         <div className="flex w-3/4 flex-col justify-center">
