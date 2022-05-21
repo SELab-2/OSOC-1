@@ -30,6 +30,7 @@ const chevron_up = <Icon icon="akar-icons:circle-chevron-up" />;
 type StudentProp = {
   studentInput: StudentBaseList;
   setStudentBase: (studentBase: StudentBaseList) => void;
+  setShowSidebar: (showSidebar: boolean) => void;
 };
 
 /**
@@ -82,6 +83,7 @@ function getStudentExtra(
 const StudentTile: React.FC<StudentProp> = ({
   studentInput,
   setStudentBase,
+  setShowSidebar,
 }: StudentProp) => {
   const [myStudentList, setMyStudentList]: [
     StudentBaseList,
@@ -109,7 +111,6 @@ const StudentTile: React.FC<StudentProp> = ({
 
   useEffect(() => {
     if (isOpen && router.isReady) {
-      console.log('isOpen: ' + isOpen);
       controller.abort();
       controller = new AbortController();
       const signal = controller.signal;
@@ -127,7 +128,7 @@ const StudentTile: React.FC<StudentProp> = ({
    * This hook allows dragging the StudentTile
    * It can be dropped onto a ProjectTile and will then open assignment functionality
    */
-  const [, drag] = useDrag(
+  const [{ isDragging }, drag] = useDrag(
     () => ({
       type: ItemTypes.STUDENTTILE,
       item: myStudentList, // This is what will be 'given' to the project this is dropped on
@@ -137,6 +138,12 @@ const StudentTile: React.FC<StudentProp> = ({
     }),
     [myStudentList]
   );
+
+  useEffect(() => {
+    if (isDragging) {
+      setShowSidebar(false);
+    }
+  }, [isDragging]);
 
   return (
     <div

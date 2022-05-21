@@ -24,6 +24,7 @@ const x_mark = <Icon icon="bx:x" />;
 type StudentsSidebarProps = {
   setError: (error: string) => void;
   setStudentBase: (studentBase: StudentBaseList) => void;
+  setShowSidebar: (showSidebar: boolean) => void;
 };
 
 /**
@@ -141,6 +142,7 @@ function getStatusFilterList(
 const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   setError,
   setStudentBase,
+  setShowSidebar,
 }: StudentsSidebarProps) => {
   const router = useRouter();
   const [showFilter, setShowFilter] = useState(true);
@@ -673,6 +675,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 key={student.id}
                 studentInput={student}
                 setStudentBase={setStudentBase}
+                setShowSidebar={setShowSidebar}
               />
             )}
             loadingText={'Loading Students'}
