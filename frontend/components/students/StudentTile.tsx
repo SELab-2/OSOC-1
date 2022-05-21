@@ -3,10 +3,19 @@ import { Icon } from '@iconify/react';
 import {
   ItemTypes,
   StatusSuggestionStatus,
+  StudentBaseExtra,
   StudentBaseList,
+  UUID,
 } from '../../lib/types';
 import { useDrag } from 'react-dnd';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { NextRouter } from 'next/dist/client/router';
+import useAxiosAuth from '../../hooks/useAxiosAuth';
+import { axiosAuthenticated } from '../../lib/axios';
+import Endpoints from '../../lib/endpoints';
+import { convertStudentBaseListToExtra } from '../../lib/conversionUtils';
+import { parseError } from '../../lib/requestUtils';
 const check_mark = <Icon icon="bi:check-lg" />;
 const question_mark = <Icon icon="bi:question-lg" />;
 const x_mark = <Icon icon="bx:x" />;
@@ -42,6 +51,27 @@ const chartHelper = {
   Default: [tilde_mark, 'text-check-gray'],
 } as stringToArrayDict;
 
+function getStudentExtra(
+  studentId: UUID,
+  setMyStudentExtra: (myStudentExtra: StudentBaseExtra) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  const edition = router.query.editionName as string;
+  axiosAuthenticated
+    .get<StudentBaseExtra>(`/${edition}${Endpoints.STUDENTS}/${studentId}`, {
+      params: { view: 'Extra' },
+      signal: signal,
+    })
+    .then((response) => {
+      setMyStudentExtra(response.data as StudentBaseExtra);
+    })
+    .catch((err) => {
+      parseError(err, setError, router, signal);
+    });
+}
+
 /**
  * This creates the tiles show in the StudentSidebar
  * @param student - The student whose information should be shown
@@ -53,22 +83,45 @@ const StudentTile: React.FC<StudentProp> = ({
   studentInput,
   setStudentBase,
 }: StudentProp) => {
-  // Need to set a student with all keys present to avoid the render code throwing undefined errors
-  const [myStudent, setMyStudent]: [
+  const [myStudentList, setMyStudentList]: [
     StudentBaseList,
-    (myStudent: StudentBaseList) => void
+    (myStudentList: StudentBaseList) => void
   ] = useState(studentInput as StudentBaseList); // using different names to avoid confusion
   const [isOpen, setIsOpen] = useState(false);
+  const [myStudentExtra, setMyStudentExtra] = useState(
+    convertStudentBaseListToExtra(studentInput) as StudentBaseExtra
+  );
+  // const [myStudentPulled, setMyStudentPulled] = useState(studentInput);
+
+  const router = useRouter();
+  let controller = new AbortController();
+  useAxiosAuth();
 
   /**
    * Since polling is done in parent StudentSidebar.tsx, we only watch if
    * we get passed a different object than we were already showing.
    */
   useEffect(() => {
-    if (JSON.stringify(studentInput) != JSON.stringify(myStudent)) {
-      setMyStudent(studentInput as StudentBaseList);
+    if (JSON.stringify(studentInput) != JSON.stringify(myStudentList)) {
+      setMyStudentList(studentInput as StudentBaseList);
     }
   }, [studentInput]);
+
+  useEffect(() => {
+    if (isOpen && router.isReady) {
+      console.log('isOpen: ' + isOpen);
+      controller.abort();
+      controller = new AbortController();
+      const signal = controller.signal;
+      getStudentExtra(
+        myStudentList.id,
+        setMyStudentExtra,
+        signal,
+        () => null,
+        router
+      );
+    }
+  }, [isOpen, router.isReady]);
 
   /**
    * This hook allows dragging the StudentTile
@@ -77,19 +130,19 @@ const StudentTile: React.FC<StudentProp> = ({
   const [, drag] = useDrag(
     () => ({
       type: ItemTypes.STUDENTTILE,
-      item: myStudent, // This is what will be 'given' to the project this is dropped on
+      item: myStudentList, // This is what will be 'given' to the project this is dropped on
       collect: (monitor) => ({
         isDragging: monitor.isDragging(), // WONTFIX add isDragging styling
       }),
     }),
-    [myStudent]
+    [myStudentList]
   );
 
   return (
     <div
       ref={drag}
-      key={myStudent.id}
-      onClick={() => setStudentBase(myStudent)}
+      key={myStudentList.id}
+      onClick={() => setStudentBase(myStudentList)}
     >
       <div className="my-4 mx-1 flex cursor-pointer flex-col justify-between p-2 opacity-100 shadow-sm shadow-gray-500 hover:bg-osoc-neutral-bg hover:brightness-75">
         <div className="flex flex-row">
@@ -97,21 +150,21 @@ const StudentTile: React.FC<StudentProp> = ({
           <div className="flex w-3/4 flex-col justify-center">
             <div
               className={`flex flex-row ${
-                myStudent.alumn || myStudent.possibleStudentCoach
+                myStudentList.alumn || myStudentList.possibleStudentCoach
                   ? 'visible'
                   : 'hidden h-0 w-0'
               }`}
             >
               <p
                 className={`m-0 rounded-xl bg-osoc-bg text-xs ${
-                  myStudent.alumn ? 'visible mr-2 px-1' : 'hidden h-0 px-0'
+                  myStudentList.alumn ? 'visible mr-2 px-1' : 'hidden h-0 px-0'
                 }`}
               >
                 Alumn
               </p>
               <p
                 className={`m-0 rounded-xl bg-osoc-btn-primary text-xs ${
-                  myStudent.possibleStudentCoach
+                  myStudentList.possibleStudentCoach
                     ? 'visible px-1'
                     : 'hidden h-0 px-0'
                 }`}
@@ -135,7 +188,7 @@ const StudentTile: React.FC<StudentProp> = ({
                 </i>
               </div>
               <p className="pl-1">
-                {myStudent.firstName + ' ' + myStudent.lastName}
+                {myStudentList.firstName + ' ' + myStudentList.lastName}
               </p>
             </div>
           </div>
@@ -148,7 +201,7 @@ const StudentTile: React.FC<StudentProp> = ({
                 {
                   title: 'Yes',
                   value:
-                    myStudent.statusSuggestionCount[
+                    myStudentList.statusSuggestionCount[
                       StatusSuggestionStatus.Yes
                     ] || 0,
                   color: '#22c55e', // I can't get tailwind config colors to work here
@@ -156,7 +209,7 @@ const StudentTile: React.FC<StudentProp> = ({
                 {
                   title: 'No',
                   value:
-                    myStudent.statusSuggestionCount[
+                    myStudentList.statusSuggestionCount[
                       StatusSuggestionStatus.No
                     ] || 0,
                   color: '#ef4444',
@@ -164,7 +217,7 @@ const StudentTile: React.FC<StudentProp> = ({
                 {
                   title: 'Maybe',
                   value:
-                    myStudent.statusSuggestionCount[
+                    myStudentList.statusSuggestionCount[
                       StatusSuggestionStatus.Maybe
                     ] || 0,
                   color: '#f97316',
@@ -174,18 +227,37 @@ const StudentTile: React.FC<StudentProp> = ({
             />
             <i
               className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[28px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${
-                chartHelper[myStudent.status]
-                  ? chartHelper[myStudent.status][1]
+                chartHelper[myStudentList.status]
+                  ? chartHelper[myStudentList.status][1]
                   : chartHelper['Default'][1]
               }`}
             >
-              {chartHelper[myStudent.status]
-                ? chartHelper[myStudent.status][0]
+              {chartHelper[myStudentList.status]
+                ? chartHelper[myStudentList.status][0]
                 : chartHelper['Default'][0]}
             </i>
           </div>
         </div>
-        {isOpen && <div>I am open</div>}
+        {isOpen && (
+          <div className="mt-2 flex flex-col">
+            <div className="flex flex-row">
+              <p className="pr-1">Skills:</p>
+              <div className="flex flex-col">
+                {myStudentExtra.skills.map((skill) => (
+                  <p key={skill.skillName}>{skill.skillName}</p>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p>Suggestions:</p>
+              <p className="ml-4">
+                Yes: {myStudentExtra.statusSuggestionCount.Yes || 0}, No:{' '}
+                {myStudentExtra.statusSuggestionCount.No || 0}, Maybe:{' '}
+                {myStudentExtra.statusSuggestionCount.Maybe || 0}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
