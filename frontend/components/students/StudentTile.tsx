@@ -96,15 +96,26 @@ const StudentTile: React.FC<StudentProp> = ({
         <div className="flex w-3/4 flex-col justify-center">
           <div
             className={`flex flex-row ${
-              myStudent.alumn ? 'visible' : 'hidden h-0 w-0'
+              myStudent.alumn || myStudent.possibleStudentCoach
+                ? 'visible'
+                : 'hidden h-0 w-0'
             }`}
           >
             <p
               className={`m-0 rounded-xl bg-osoc-bg text-xs ${
-                myStudent.alumn ? 'visible px-1' : 'invisible h-0 px-0'
+                myStudent.alumn ? 'visible mr-2 px-1' : 'hidden h-0 px-0'
               }`}
             >
               Alumn
+            </p>
+            <p
+              className={`m-0 rounded-xl bg-osoc-btn-primary text-xs ${
+                myStudent.possibleStudentCoach
+                  ? 'visible px-1'
+                  : 'hidden h-0 px-0'
+              }`}
+            >
+              Coach
             </p>
           </div>
           <p className="pl-2">
