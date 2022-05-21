@@ -94,20 +94,20 @@ const Users: NextPage = () => {
 
     setInviteLoading(true);
 
-    if (! emailRegex.test(inviteEmail)) {
-      setError("Please provide a valid email address");
+    if (!emailRegex.test(inviteEmail)) {
+      setError('Please provide a valid email address');
     } else {
       await axiosAuth.post(Endpoints.INVITE, inviteEmail, {
         headers: {
-          'Content-Type': 'text/plain'
-        }
+          'Content-Type': 'text/plain',
+        },
       });
 
       setInviteEmail('');
       setError('');
       setInviteLoading(false);
     }
-  }
+  };
 
   /**
    * Update the filtered users with the new users/filters
@@ -190,22 +190,22 @@ const Users: NextPage = () => {
             ) : (
               <>
                 {error && <Error error={error} className="mb-4" />}
-                <form 
-                  className="flex flex-row w-full items-center justify-center px-4 gap-2 mb-2"
+                <form
+                  className="mb-2 flex w-full flex-row items-center justify-center gap-2 px-4"
                   onSubmit={invite}
-                  >
-                  <label htmlFor="userEmail" className="font-normal ml-1">Invite User:</label>
+                >
+                  <label htmlFor="userEmail" className="ml-1 font-normal">
+                    Invite User:
+                  </label>
                   <input
                     id="userEmail"
                     type="email"
-                    className="border-2 border-gray-200 rounded w-2/5 px-1 py-1"
+                    className="w-2/5 rounded border-2 border-gray-200 px-1 py-1"
                     required
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                   />
-                  {
-                    inviteLoading
-                    ? (
+                  {inviteLoading ? (
                     <SpinnerCircular
                       size={40}
                       thickness={150}
@@ -213,16 +213,14 @@ const Users: NextPage = () => {
                       color="#FCB70F"
                       secondaryColor="rgba(252, 183, 15, 0.4)"
                     />
-                    )
-                    : (
-                      <button
-                        type="submit"
-                        className="rounded-sm bg-osoc-yellow px-2 py-1 font-medium text-white shadow-sm shadow-gray-300 hover:brightness-95"
-                      >
-                        invite
-                      </button>
-                    )
-                  }
+                  ) : (
+                    <button
+                      type="submit"
+                      className="rounded-sm bg-osoc-yellow px-2 py-1 font-medium text-white shadow-sm shadow-gray-300 hover:brightness-95"
+                    >
+                      invite
+                    </button>
+                  )}
                 </form>
                 <UserTable
                   users={filteredUsers.filter(Boolean)}
