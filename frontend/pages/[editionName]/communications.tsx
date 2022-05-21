@@ -204,7 +204,16 @@ const communications = () => {
                 Add New
               </button>
               <CsvDownloader
-                datas={communications}
+                datas={
+                  communications.map((comm) => {
+                    return {
+                      id: comm.id,
+                      name: comm.name,
+                      message: comm.commMessage,
+                      timestamp: new Date(comm.registrationTime).toString(),
+                    };
+                  })
+                }
                 filename="communications"
                 suffix
                 className="inline-block cursor-default"
@@ -212,19 +221,19 @@ const communications = () => {
                 columns={[
                   {
                     id: 'id',
-                    displayName: 'id',
+                    displayName: 'Id',
                   },
                   {
                     id: 'name',
-                    displayName: 'name',
+                    displayName: 'Student name',
                   },
                   {
-                    id: 'commMessage',
-                    displayName: 'message',
+                    id: 'message',
+                    displayName: 'Communication info',
                   },
                   {
-                    id: 'registrationTime',
-                    displayName: 'timestamp',
+                    id: 'timestamp',
+                    displayName: 'Time',
                   },
                 ]}
               >
