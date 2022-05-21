@@ -62,7 +62,7 @@ class EmailServiceTests {
     }
 
     @Test
-    fun `sendEmail fails when email environment variables isn't set`() {
+    fun `sendEmail fails when email environment variable isn't set`() {
         val emailService = EmailService(getEnvironment(emailSet = false), JavaMailSenderImpl())
         val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
             emailService.sendEmail(testEmail)
