@@ -129,7 +129,7 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
 
   return (
     <div className={`mx-4`}>
-      {error && <Error error={error} className="mb-4" />}
+      {error && <Error error={error} className="mb-4" setError={setError} />}
       {conflictMap.size == 0 && (
         <h4 className="mt-4 text-center text-lg">No conflicts found!</h4>
       )}
