@@ -225,12 +225,17 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * This will also get called on first render
    */
   useEffect(() => {
-    if ({ isOnScreen }.isOnScreen) {
+    if ({ isOnScreen }.isOnScreen && router.isReady) {
       setHasMoreItems(true);
       scrollRef.current?.scrollTo(0, 0);
       return search(false);
     }
-  }, [studentSearchParameters, skills, { isOnScreen }.isOnScreen]);
+  }, [
+    studentSearchParameters,
+    skills,
+    { isOnScreen }.isOnScreen,
+    router.isReady,
+  ]);
 
   /**
    * Call to refresh students list from page 0 with current filters applied
@@ -274,11 +279,14 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    */
   usePoll(
     () => {
+      if (!router.isReady) {
+        return;
+      }
       if (!fetching && !state.loading && { isOnScreen }.isOnScreen) {
         doPoll();
       }
     },
-    [fetching, state, { isOnScreen }.isOnScreen],
+    [fetching, state, { isOnScreen }.isOnScreen, router.isReady],
     {
       interval: 3000,
     }
@@ -319,7 +327,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    if (state.loading || !{ isOnScreen }.isOnScreen || !hasMoreItems) {
+    if (
+      state.loading ||
+      !{ isOnScreen }.isOnScreen ||
+      !hasMoreItems ||
+      !router.isReady
+    ) {
       return;
     }
     fetching = true;
