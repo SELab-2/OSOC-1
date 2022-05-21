@@ -146,7 +146,7 @@ class Student(
 
     @ManyToMany(cascade = [CascadeType.MERGE])
     @OrderBy
-    @field:JsonView(StudentView.Full::class)
+    @field:JsonView(StudentView.Full::class, StudentView.Extra::class)
     val skills: Set<Skill> = sortedSetOf(),
 
     @field:JsonView(StudentView.List::class)
@@ -175,7 +175,7 @@ class Student(
         joinColumns = [JoinColumn(name = "student_id")],
         inverseJoinColumns = [JoinColumn(name = "status_suggestions_id")]
     )
-    @field:JsonView(StudentView.Full::class)
+    @field:JsonView(StudentView.Full::class, StudentView.Extra::class)
     @JsonSerialize(using = StatusSuggestionListSerializer::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
@@ -185,7 +185,7 @@ class Student(
     val communications: MutableList<Communication> = mutableListOf()
 
     @OneToMany(mappedBy = "student", cascade = [CascadeType.DETACH], orphanRemoval = true)
-    @JsonIgnore
+    @field:JsonView(StudentView.Full::class, StudentView.Extra::class)
     val assignments: MutableList<Assignment> = mutableListOf()
 
     @JsonGetter("statusSuggestionCount")
@@ -201,6 +201,7 @@ class Student(
 class StudentView {
     open class Basic
     open class List : Basic()
+    open class Extra : Basic()
     open class Communication : Basic()
     open class Full : List()
 }
@@ -209,7 +210,7 @@ class StudentView {
  * Enum to represent the [StudentView]s in the [StudentController]
  */
 enum class StudentViewEnum {
-    Basic, Full, Communication, List
+    Basic, Full, Communication, List, Extra
 }
 
 /**

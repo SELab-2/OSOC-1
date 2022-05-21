@@ -102,6 +102,7 @@ fun studentViewEnumToStudentView(viewEnum: StudentViewEnum): Class<out StudentVi
         StudentViewEnum.Full -> StudentView.Full::class.java
         StudentViewEnum.Basic -> StudentView.Basic::class.java
         StudentViewEnum.List -> StudentView.List::class.java
+        StudentViewEnum.Extra -> StudentView.Extra::class.java
         StudentViewEnum.Communication -> StudentView.Communication::class.java
     }
 }
