@@ -3,14 +3,11 @@ package be.osoc.team1.backend
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.env.Environment
-import org.springframework.core.env.get
 import java.util.Properties
-import javax.naming.ConfigurationException
 import javax.sql.DataSource
 
 @Configuration
-class DataSourceConfig(private val environment: Environment) {
+class DataSourceConfig {
     private lateinit var applicationProperties: Properties
 
     /**
@@ -19,14 +16,13 @@ class DataSourceConfig(private val environment: Environment) {
      * is lazily loaded and reused for subsequent requests.
      */
     private fun getProperty(name: String, propertyName: String): String {
-        var value = environment[name]
+        var value = System.getenv(name)
         if (value == null) {
             if (!this::applicationProperties.isInitialized) {
                 applicationProperties = Properties()
                 applicationProperties.load(javaClass.classLoader.getResourceAsStream("application.properties"))
             }
             value = applicationProperties.getProperty(propertyName)
-                ?: throw ConfigurationException("Fallback property \"$propertyName\" was not found!")
         }
         return value
     }
