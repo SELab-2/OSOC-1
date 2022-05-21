@@ -29,6 +29,6 @@ class InviteControllerTests(@Autowired val mockMvc: MockMvc) {
         every { emailService.sendEmail(testEmail) } just Runs
         mockMvc
             .perform(MockMvcRequestBuilders.post("/invite").content(testEmail))
-            .andExpect(MockMvcResultMatchers.status().isNoContent)
+            .andExpect(MockMvcResultMatchers.status().isOk)
     }
 }
