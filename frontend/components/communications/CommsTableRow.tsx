@@ -4,6 +4,7 @@ import { Dispatch, FC, SetStateAction, useState } from 'react';
 type CommsTableRowProps = {
   studentName: string;
   commsMessage: string;
+  registrationTime: number;
   commsId: string;
   /**
    * set the communication id to delete
@@ -19,6 +20,7 @@ type CommsTableRowProps = {
 const CommsTableRow: FC<CommsTableRowProps> = ({
   studentName,
   commsMessage,
+  registrationTime,
   commsId,
   setCommsToDelete,
   setShowDeleteForm,
@@ -31,20 +33,25 @@ const CommsTableRow: FC<CommsTableRowProps> = ({
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      <td className="flex flex-row py-4">
-        {studentName}
-        {hovering && (
-          <TrashIcon
-            className="h-6 w-6 pl-1 hover:cursor-pointer"
-            color="#F14A3B"
-            onClick={() => {
-              setCommsToDelete(commsId);
-              setShowDeleteForm(true);
-            }}
-          />
-        )}
+      <td className="m-auto py-4 pl-3">
+        <div className="flex flex-row">
+          {studentName}
+          {hovering && (
+            <TrashIcon
+              className="h-6 w-6 pl-1 hover:cursor-pointer"
+              color="#F14A3B"
+              onClick={() => {
+                setCommsToDelete(commsId);
+                setShowDeleteForm(true);
+              }}
+            />
+          )}
+        </div>
       </td>
-      <td>{commsMessage}</td>
+      <td className="py-4 ">{commsMessage}</td>
+      <td className="py-4 pr-3 text-right">
+        {new Date(registrationTime).toLocaleString()}
+      </td>
     </tr>
   );
 };
