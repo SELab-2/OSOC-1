@@ -20,6 +20,7 @@
     "font-awesome": "^4.7.0",
     "next": "latest",
     "react": "^18.1.0",
+    "react-context-mutex": "^2.0.0",
     "react-csv-downloader": "^2.8.0",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",

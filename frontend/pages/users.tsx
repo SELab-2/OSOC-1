@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import Error from '../components/Error';
 import Header from '../components/Header';
 import UserTable from '../components/users/UserTable';
@@ -9,12 +9,12 @@ import { User, UserRole, UUID } from '../lib/types';
 import { SpinnerCircular } from 'spinners-react';
 import { useRouter } from 'next/router';
 import useUser from '../hooks/useUser';
-import axios, { AxiosError } from 'axios';
 import RouteProtection from '../components/RouteProtection';
 import PersistLogin from '../components/PersistLogin';
 import UserDeleteForm from '../components/users/UserDeleteForm';
 import { parseError } from '../lib/requestUtils';
 import Head from 'next/head';
+import { emailRegex } from '../lib/regex';
 
 /**
  *
@@ -49,13 +49,18 @@ const Users: NextPage = () => {
    */
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [retry, setRetry] = useState(false);
 
   const [userToDelete, setUserToDelete] = useState<User | undefined>(undefined);
   const [showDeleteForm, setShowDeleteForm] = useState(false);
 
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+
   const axiosAuth = useAxiosAuth();
   const router = useRouter();
   const [user] = useUser();
+  let controller = new AbortController();
 
   /**
    * Update the role of the local user object
@@ -85,6 +90,26 @@ const Users: NextPage = () => {
     }
   };
 
+  const invite = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setInviteLoading(true);
+
+    if (!emailRegex.test(inviteEmail)) {
+      setError('Please provide a valid email address');
+    } else {
+      await axiosAuth.post(Endpoints.INVITE, inviteEmail, {
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      });
+
+      setInviteEmail('');
+      setError('');
+      setInviteLoading(false);
+    }
+  };
+
   /**
    * Update the filtered users with the new users/filters
    */
@@ -110,36 +135,49 @@ const Users: NextPage = () => {
    * runs on mount
    */
   useEffect(() => {
-    let isMounted = true;
-
-    const getUsers = async () => {
-      try {
-        const response = await axiosAuth.get(Endpoints.USERS);
-        if (isMounted) {
-          setUsers(response.data as User[]);
-          setFilteredUsers(response.data as User[]);
-          setLoading(false);
-        }
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          const _err = err as AxiosError;
-          if (_err.response?.status === 418) router.push('/login'); // error when trying to refresh refreshtoken
-          if (isMounted) {
-            setError(_err.response?.statusText || 'An unknown error occurred');
-          }
-        } else {
-          console.error(err);
-          setError('Uhoh! It seems like something went wrong');
-        }
-      }
-    };
-
-    getUsers();
-
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await getUsers(signal);
+    })();
     return () => {
-      isMounted = false;
+      controller.abort();
     };
   }, []);
+
+  /**
+   * Fetch all users from backend and update user state
+   * When page is reloaded, first request will fail with 401, retry once
+   */
+  useEffect(() => {
+    if (!retry) {
+      return;
+    }
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await getUsers(signal);
+    })();
+    return () => {
+      controller.abort();
+    };
+  }, [retry]);
+
+  const getUsers = async (signal: AbortSignal) => {
+    try {
+      const response = await axiosAuth.get(Endpoints.USERS, { signal: signal });
+      if (!signal.aborted) {
+        setUsers(response.data as User[]);
+        setFilteredUsers(response.data as User[]);
+        setLoading(false);
+      }
+    } catch (err) {
+      parseError(err, setError, router, signal);
+      setRetry(true);
+    }
+  };
 
   return (
     <PersistLogin>
@@ -148,7 +186,7 @@ const Users: NextPage = () => {
       </Head>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="h-screen">
-          <Header />
+          <Header setError={setError} />
           <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
             {loading ? (
               <div className="relative top-1/2 translate-y-1/2">
@@ -166,6 +204,38 @@ const Users: NextPage = () => {
             ) : (
               <>
                 {error && <Error error={error} className="mb-4" />}
+                <form
+                  className="mb-2 flex w-full flex-row items-center justify-center gap-2 px-4"
+                  onSubmit={invite}
+                >
+                  <label htmlFor="userEmail" className="ml-1 font-normal">
+                    Invite User:
+                  </label>
+                  <input
+                    id="userEmail"
+                    type="email"
+                    className="w-2/5 rounded border-2 border-gray-200 px-1 py-1"
+                    required
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                  />
+                  {inviteLoading ? (
+                    <SpinnerCircular
+                      size={40}
+                      thickness={150}
+                      speed={150}
+                      color="#FCB70F"
+                      secondaryColor="rgba(252, 183, 15, 0.4)"
+                    />
+                  ) : (
+                    <button
+                      type="submit"
+                      className="rounded-sm bg-osoc-yellow px-2 py-1 font-medium text-white shadow-sm shadow-gray-300 hover:brightness-95"
+                    >
+                      invite
+                    </button>
+                  )}
+                </form>
                 <UserTable
                   users={filteredUsers.filter(Boolean)}
                   updateUsersLocal={updateUserLocal}

@@ -30,9 +30,11 @@ import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
 import useUser from '../../hooks/useUser';
 import Error from '../Error';
+import StudentFormView from './StudentFormView';
 import axios, { AxiosError } from 'axios';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
+import { getAnswerStrings } from '../../lib/tallyForm';
 
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
@@ -356,15 +358,19 @@ const StudentView: React.FC<StudentViewProp> = ({
     });
   }, [myStudent]);
 
+  const answers = getAnswerStrings(myStudent.answers);
+  const pronouns = answers.commonPronouns || answers.otherPronouns;
   return (
     <div className={`flex flex-col-reverse justify-between xl:flex-row`}>
       {error && <Error error={error} className="mb-4" />}
       {/* hold the student information */}
-      <div className="mx-8 flex flex-col bg-osoc-neutral-bg">
-        <div className="flex flex-row">
-          <h4 className="font-bold">
-            {myStudent.firstName + ' ' + myStudent.lastName}
-          </h4>
+      <div className="mx-8 flex w-full flex-col bg-osoc-neutral-bg px-4 py-3">
+        <div className="flex flex-row pt-2">
+          <h1 className="text-4xl font-semibold">
+            {answers.preferredName ||
+              myStudent.firstName + ' ' + myStudent.lastName}
+          </h1>
+          {pronouns != undefined && <p className="pt-2 pl-2">{pronouns}</p>}
           {user.role == UserRole.Admin && (
             <div className="ml-2 flex flex-col justify-center">
               <i
@@ -379,7 +385,7 @@ const StudentView: React.FC<StudentViewProp> = ({
           )}
         </div>
         <div className="flex flex-col">
-          <h5 className="font-bold">Suggestions</h5>
+          <h3 className="pt-12 text-2xl">Suggestions</h3>
           {myStudent.statusSuggestions.map((statusSuggestion) => (
             <StudentStatusSuggestion
               key={statusSuggestion.suggester.id}
@@ -387,16 +393,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             />
           ))}
         </div>
-        <div className="mt-4 flex flex-col">
-          <h5 className="font-bold">Answers:</h5>
-          {myStudent.answers.map((answer) => (
-            <div key={answer.id}>
-              <p>{answer.question}</p>
-              <p>{answer.answer}</p>
-              <br />
-            </div>
-          ))}
-        </div>
+        <StudentFormView answers={answers} />
       </div>
 
       {/* holds suggestion controls */}
@@ -436,23 +433,23 @@ const StudentView: React.FC<StudentViewProp> = ({
             };
           }}
         >
-          <div className={`flex w-[380px] flex-row justify-between`}>
+          <div className={`flex w-[400px] flex-row justify-between`}>
             <button
-              className={`w-[30%] bg-check-green py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              className={`w-[30%] rounded-sm bg-check-green py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('Yes')}
               type={`submit`}
             >
               Suggest Yes
             </button>
             <button
-              className={`w-[30%] bg-check-orange py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              className={`w-[30%] rounded-sm bg-check-orange py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('Maybe')}
               type={`submit`}
             >
               Suggest Maybe
             </button>
             <button
-              className={`w-[30%] bg-check-red py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              className={`w-[30%] rounded-sm bg-check-red py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('No')}
               type={`submit`}
             >
@@ -461,8 +458,7 @@ const StudentView: React.FC<StudentViewProp> = ({
           </div>
           <textarea
             placeholder="Motivation"
-            className="mt-3 w-full resize-y border-2 border-check-gray"
-            required
+            className="mt-3 min-h-[100px] w-full resize-y rounded border"
             value={motivation}
             onChange={(e) => setMotivation(e.target.value || '')}
           />
@@ -471,7 +467,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             (sugg) => sugg.suggester.id === user.id
           ).length > 0 && (
             <button
-              className={`w-[100%] bg-check-gray py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              className={`w-[100%] rounded-sm bg-check-gray py-[2px] text-sm text-white hover:brightness-95`}
               onClick={() => setSuggestion('Remove')}
               type={`submit`}
             >
@@ -484,7 +480,7 @@ const StudentView: React.FC<StudentViewProp> = ({
         <form
           className={`${
             user.role == UserRole.Admin ? 'visible' : 'hidden'
-          } mt-10 flex flex-row justify-between border-2 p-2`}
+          } mt-5 flex flex-row justify-between border-2 p-2`}
           onSubmit={(e) => {
             e.preventDefault();
             if (status.label != myStudent.status) {
@@ -542,7 +538,7 @@ const StudentView: React.FC<StudentViewProp> = ({
 
           {/* button to submit the admin status choice */}
           <button
-            className={`bg-check-gray px-2 py-[2px] text-sm shadow-md shadow-gray-400`}
+            className={`rounded-sm bg-check-gray px-2 py-[2px] text-sm hover:brightness-95`}
             type={`submit`}
           >
             Submit
@@ -624,13 +620,13 @@ const StudentStatusSuggestion: React.FC<StatusSuggestionProp> = ({
   }
 
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row items-center">
       <i className={`${myColor} w-[30px] px-2`}>{myLabel}</i>
       <p className="">{statusSuggestion.suggester.username}</p>
       <div className="tooltip pl-2 pt-1">
         <i className="icon-speech-blue text-xs">{speech_bubble}</i>
         {/* TODO Make this tooltip look nicer */}
-        <span className="tooltiptext bg-osoc-neutral-bg">
+        <span className="tooltiptext w-fit bg-gray-200 px-2">
           {statusSuggestion.motivation}
         </span>
       </div>

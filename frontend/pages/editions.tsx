@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import { PlusCircleIcon } from '@heroicons/react/outline';
 import { useRouter } from 'next/router';
 import useEdition from '../hooks/useEdition';
-import axios from 'axios';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import Endpoints from '../lib/endpoints';
 import { useEffect, useState } from 'react';
@@ -15,6 +14,7 @@ import RouteProtection from '../components/RouteProtection';
 import EditionDeletionPopup from '../components/editions/EditionDeletionPopup';
 import PersistLogin from '../components/PersistLogin';
 import Head from 'next/head';
+import { parseError } from '../lib/requestUtils';
 
 /**
  * Editions page where we list editions, show a form to create new editions and
@@ -32,52 +32,71 @@ const Editions: NextPage = () => {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [editionToDelete, setEditionToDelete] = useState('');
   const [error, setError] = useState('');
+  const [retry, setRetry] = useState(false);
 
   const axiosAuth = useAxiosAuth();
+  let controller = new AbortController();
 
   useEffect(() => {
-    const getAllEditions = async () => {
-      try {
-        const activeResponse = await axiosAuth.get(
-          Endpoints.EDITIONS + '/active'
-        );
-        const inactiveResponse = await axiosAuth.get(
-          Endpoints.EDITIONS + '/inactive'
-        );
-
-        const allEditionsList: Edition[] = inactiveResponse.data;
-
-        if (activeResponse.data) {
-          allEditionsList.push(activeResponse.data);
-        }
-
-        setAllEditions(allEditionsList);
-      } catch (err: unknown) {
-        if (axios.isAxiosError(err)) {
-          const status = err.response?.status;
-          if (status === 418) router.push('/login');
-          setError(err.message);
-        } else {
-          setError(err as string);
-        }
-      }
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await getAllEditions(signal);
+    })();
+    return () => {
+      controller.abort();
     };
-
-    getAllEditions();
   }, []);
+
+  /**
+   * When page is reloaded, first request will fail with 401, retry once
+   */
+  useEffect(() => {
+    if (!retry) {
+      return;
+    }
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await getAllEditions(signal);
+    })();
+    return () => {
+      controller.abort();
+    };
+  }, [retry]);
+
+  const getAllEditions = async (signal: AbortSignal) => {
+    try {
+      const activeResponse = await axiosAuth.get(
+        Endpoints.EDITIONS + '/active',
+        { signal: signal }
+      );
+      const inactiveResponse = await axiosAuth.get(
+        Endpoints.EDITIONS + '/inactive',
+        { signal: signal }
+      );
+
+      const allEditionsList: Edition[] = inactiveResponse.data;
+
+      if (activeResponse.data) {
+        allEditionsList.push(activeResponse.data);
+      }
+
+      setAllEditions(allEditionsList);
+    } catch (err: unknown) {
+      parseError(err, setError, router, signal);
+      setRetry(true);
+    }
+  };
 
   const createEdition = async (_edition: string) => {
     try {
       await axiosAuth.post(Endpoints.EDITIONS, _edition);
       setAllEditions([{ name: _edition, isActive: false }, ...allEditions]);
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const status = err.response?.status;
-        if (status === 418) router.push('/login');
-        setError(err.message);
-      } else {
-        setError(err as string);
-      }
+      parseError(err, setError, router);
     }
   };
 
@@ -93,13 +112,7 @@ const Editions: NextPage = () => {
       await axiosAuth.delete(Endpoints.EDITIONS + `/${_edition}`);
       setAllEditions(allEditions.filter((val) => val.name !== _edition));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const status = err.response?.status;
-        if (status === 418) router.push('/login');
-        setError(err.message);
-      } else {
-        setError(err as string);
-      }
+      parseError(err, setError, router);
     }
   };
 
@@ -110,7 +123,7 @@ const Editions: NextPage = () => {
           <title>Editions</title>
         </Head>
         <div className="h-screen">
-          <Header />
+          <Header setError={setError} />
 
           {error && <Error error={error} className="mt-4 w-3/5" />}
 

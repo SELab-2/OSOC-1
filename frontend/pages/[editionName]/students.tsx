@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import Header from '../../components/Header';
 import StudentSidebar from '../../components/StudentSidebar';
 import { Icon } from '@iconify/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StudentBaseList, UserRole } from '../../lib/types';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
@@ -25,11 +25,16 @@ const Students: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   // Needed to allow for click select from the sidebar to the main screen
   const [studentBase, setStudentBase] = useState({} as StudentBaseList);
-  const [error, setError]: [string, (error: string) => void] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
+  const [edition, setEdition] = useState(router.query.editionName as string);
   useAxiosAuth();
 
-  const router = useRouter();
-  const edition = router.query.editionName as string;
+  useEffect(() => {
+    if (router.isReady) {
+      setEdition(router.query.editionName as string);
+    }
+  }, [router.isReady]);
 
   return (
     <PersistLogin>
@@ -38,7 +43,7 @@ const Students: NextPage = () => {
           <Head>
             <title>{edition}: students</title>
           </Head>
-          <Header />
+          <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={2}>
             <main className="flex w-full flex-row">
               {/* Holds the sidebar with search, filter and student results */}

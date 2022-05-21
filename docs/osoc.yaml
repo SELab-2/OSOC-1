@@ -931,7 +931,8 @@ paths:
             summary: Add a new communication with a student
             description: |
                 Add a communication to the database.
-                The created communication object is returned.
+                The created communication object is returned. This created object contains the id of this new object and
+                the registrationTime alongside the message and type which were provided in the request.
             parameters:
                 -   name: studentId
                     required: true
@@ -1264,14 +1265,13 @@ paths:
                     description: |
                         The response if authorization has failed.
     /logout:
-        post:
-            summary: log user out. invalidate http session, refresh token and redirect to /login?logout
-            responses:
-                '302':
-                    description: logout successful, redirect to /login?logout
-                '400':
-                    description:
-                        Bad Request.
+      post:
+        summary: log user out. invalidate refresh token associated with logged in user.
+        responses:
+          '200':
+            description: logout successful
+          '401':
+            description: You need to be logged in to log out.
     /token/refresh:
         post:
             summary: renew access token using refresh token
