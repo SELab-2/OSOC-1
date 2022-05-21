@@ -407,7 +407,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
 
           {/* Show/hide filter button */}
           <button
-            className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300"
+            className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300"
             type="submit"
             onClick={() => setShowFilter(!showFilter)}
           >

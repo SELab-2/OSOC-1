@@ -62,14 +62,14 @@ const EditionCreateForm: React.FC<ECFProps> = ({
       </label>
 
       <button
-        className="mt-6 self-center justify-self-center bg-osoc-yellow px-2 py-1 text-white"
+        className="mt-6 self-center justify-self-center bg-osoc-yellow px-2 py-1 text-black"
         onClick={close}
       >
         Cancel
       </button>
 
       <button
-        className="mt-6 self-center justify-self-center bg-osoc-btn-primary px-2 py-1 text-white"
+        className="mt-6 self-center justify-self-center bg-osoc-btn-primary px-2 py-1 text-black"
         onClick={create}
       >
         Create

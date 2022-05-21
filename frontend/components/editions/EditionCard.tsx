@@ -33,7 +33,7 @@ const EditionCard: React.FC<EditionCardProps> = ({
   return (
     <section className="m-auto grid max-w-sm grid-cols-4 overflow-hidden rounded-lg border-2">
       {isActive && (
-        <p className="absolute translate-x-2 translate-y-2 rounded-md bg-osoc-green px-2 text-white">
+        <p className="absolute translate-x-2 translate-y-2 rounded-md bg-osoc-green px-2 text-black">
           Active
         </p>
       )}
@@ -49,7 +49,7 @@ const EditionCard: React.FC<EditionCardProps> = ({
         />
       </div>
       <button
-        className="col-start-2 col-end-4 mt-6 mb-3 justify-self-center bg-osoc-btn-primary px-3 py-2 text-white"
+        className="col-start-2 col-end-4 mt-6 mb-3 justify-self-center bg-osoc-btn-primary px-3 py-2 text-black"
         onClick={() => updateEdition(name)}
       >
         Open Edition
