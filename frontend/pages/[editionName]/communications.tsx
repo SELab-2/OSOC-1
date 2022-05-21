@@ -200,7 +200,7 @@ const communications = () => {
             {error && <Error error={error} className="mb-4" />}
             <div>
               <button
-                className="mx-2 my-1 rounded-sm bg-osoc-btn-primary px-2 py-1 text-white hover:brightness-95"
+                className="mx-2 my-1 rounded-sm bg-osoc-btn-primary px-2 py-1 text-black hover:brightness-95"
                 onClick={() => setOpenPopup(true)}
               >
                 Add New
@@ -238,7 +238,7 @@ const communications = () => {
                 ]}
               >
                 <button
-                  className="my-1 mr-2 rounded-sm bg-osoc-yellow px-2 py-1 text-white hover:brightness-95 disabled:cursor-not-allowed disabled:bg-yellow-300 disabled:text-gray-200 disabled:brightness-100"
+                  className="my-1 mr-2 rounded-sm bg-osoc-yellow px-2 py-1 text-black hover:brightness-95 disabled:cursor-not-allowed disabled:bg-yellow-300 disabled:text-gray-200 disabled:brightness-100"
                   disabled={communications.length === 0}
                 >
                   Download CSV

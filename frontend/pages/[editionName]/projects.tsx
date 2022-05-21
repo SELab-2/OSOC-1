@@ -540,7 +540,7 @@ const Projects: NextPage = () => {
                       >
                         {/* Button to show conflicts */}
                         <button
-                          className={`justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                          className={`justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300`}
                           onClick={() => setShowConflicts(!showConflicts)}
                         >
                           {showConflicts
@@ -552,7 +552,7 @@ const Projects: NextPage = () => {
                         <button
                           className={`${
                             user.role == UserRole.Admin ? 'visible' : 'hidden'
-                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300`}
                           onClick={() => setShowCreateProject(true)}
                         >
                           Create new project
