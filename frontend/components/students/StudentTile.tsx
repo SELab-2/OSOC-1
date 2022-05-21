@@ -11,6 +11,8 @@ const check_mark = <Icon icon="bi:check-lg" />;
 const question_mark = <Icon icon="bi:question-lg" />;
 const x_mark = <Icon icon="bx:x" />;
 const tilde_mark = <Icon icon="mdi:tilde" />;
+const chevron_down = <Icon icon="akar-icons:circle-chevron-down" />;
+const chevron_up = <Icon icon="akar-icons:circle-chevron-up" />;
 
 /**
  * This is what StudentTile expects as its argument
@@ -56,6 +58,7 @@ const StudentTile: React.FC<StudentProp> = ({
     StudentBaseList,
     (myStudent: StudentBaseList) => void
   ] = useState(studentInput as StudentBaseList); // using different names to avoid confusion
+  const [isOpen, setIsOpen] = useState(false);
 
   /**
    * Since polling is done in parent StudentSidebar.tsx, we only watch if
@@ -89,82 +92,101 @@ const StudentTile: React.FC<StudentProp> = ({
       key={myStudent.id}
       onClick={() => setStudentBase(myStudent)}
     >
-      <div
-        className={`my-4 mx-1 flex cursor-pointer flex-row justify-between p-2 opacity-100 shadow-sm shadow-gray-500 hover:bg-osoc-neutral-bg hover:brightness-75`}
-      >
-        {/* basic student info */}
-        <div className="flex w-3/4 flex-col justify-center">
-          <div
-            className={`flex flex-row ${
-              myStudent.alumn || myStudent.possibleStudentCoach
-                ? 'visible'
-                : 'hidden h-0 w-0'
-            }`}
-          >
-            <p
-              className={`m-0 rounded-xl bg-osoc-bg text-xs ${
-                myStudent.alumn ? 'visible mr-2 px-1' : 'hidden h-0 px-0'
+      <div className="my-4 mx-1 flex cursor-pointer flex-col justify-between p-2 opacity-100 shadow-sm shadow-gray-500 hover:bg-osoc-neutral-bg hover:brightness-75">
+        <div className="flex flex-row">
+          {/* basic student info */}
+          <div className="flex w-3/4 flex-col justify-center">
+            <div
+              className={`flex flex-row ${
+                myStudent.alumn || myStudent.possibleStudentCoach
+                  ? 'visible'
+                  : 'hidden h-0 w-0'
               }`}
             >
-              Alumn
-            </p>
-            <p
-              className={`m-0 rounded-xl bg-osoc-btn-primary text-xs ${
-                myStudent.possibleStudentCoach
-                  ? 'visible px-1'
-                  : 'hidden h-0 px-0'
-              }`}
-            >
-              Coach
-            </p>
+              <p
+                className={`m-0 rounded-xl bg-osoc-bg text-xs ${
+                  myStudent.alumn ? 'visible mr-2 px-1' : 'hidden h-0 px-0'
+                }`}
+              >
+                Alumn
+              </p>
+              <p
+                className={`m-0 rounded-xl bg-osoc-btn-primary text-xs ${
+                  myStudent.possibleStudentCoach
+                    ? 'visible px-1'
+                    : 'hidden h-0 px-0'
+                }`}
+              >
+                Coach
+              </p>
+            </div>
+            <div className="flex flex-row">
+              <div className="flex flex-col justify-center">
+                <i
+                  className="icon-chevron-gray"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    console.log('clicked');
+                    setIsOpen(!isOpen);
+                  }}
+                >
+                  {!isOpen && chevron_down}
+                  {isOpen && chevron_up}
+                </i>
+              </div>
+              <p className="pl-1">
+                {myStudent.firstName + ' ' + myStudent.lastName}
+              </p>
+            </div>
           </div>
-          <p className="pl-2">
-            {myStudent.firstName + ' ' + myStudent.lastName}
-          </p>
-        </div>
 
-        {/* TODO add some sort of counter to show total amount of suggestions for this student */}
-        {/* holds the suggestions circle image thing + checkmark */}
-        <div className="relative w-[10%]">
-          <PieChart
-            data={[
-              {
-                title: 'Yes',
-                value:
-                  myStudent.statusSuggestionCount[StatusSuggestionStatus.Yes] ||
-                  0,
-                color: '#22c55e', // I can't get tailwind config colors to work here
-              },
-              {
-                title: 'No',
-                value:
-                  myStudent.statusSuggestionCount[StatusSuggestionStatus.No] ||
-                  0,
-                color: '#ef4444',
-              },
-              {
-                title: 'Maybe',
-                value:
-                  myStudent.statusSuggestionCount[
-                    StatusSuggestionStatus.Maybe
-                  ] || 0,
-                color: '#f97316',
-              },
-            ]}
-            lineWidth={25}
-          />
-          <i
-            className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[28px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${
-              chartHelper[myStudent.status]
-                ? chartHelper[myStudent.status][1]
-                : chartHelper['Default'][1]
-            }`}
-          >
-            {chartHelper[myStudent.status]
-              ? chartHelper[myStudent.status][0]
-              : chartHelper['Default'][0]}
-          </i>
+          {/* TODO add some sort of counter to show total amount of suggestions for this student */}
+          {/* holds the suggestions circle image thing + checkmark */}
+          <div className="relative w-[10%]">
+            <PieChart
+              data={[
+                {
+                  title: 'Yes',
+                  value:
+                    myStudent.statusSuggestionCount[
+                      StatusSuggestionStatus.Yes
+                    ] || 0,
+                  color: '#22c55e', // I can't get tailwind config colors to work here
+                },
+                {
+                  title: 'No',
+                  value:
+                    myStudent.statusSuggestionCount[
+                      StatusSuggestionStatus.No
+                    ] || 0,
+                  color: '#ef4444',
+                },
+                {
+                  title: 'Maybe',
+                  value:
+                    myStudent.statusSuggestionCount[
+                      StatusSuggestionStatus.Maybe
+                    ] || 0,
+                  color: '#f97316',
+                },
+              ]}
+              lineWidth={25}
+            />
+            <i
+              className={`chart-label absolute left-1/2 top-1/2 text-[16px] sm:text-[28px] md:text-[12px] lg:text-[20px] xl:text-[20px] xl1920:text-[22px] ${
+                chartHelper[myStudent.status]
+                  ? chartHelper[myStudent.status][1]
+                  : chartHelper['Default'][1]
+              }`}
+            >
+              {chartHelper[myStudent.status]
+                ? chartHelper[myStudent.status][0]
+                : chartHelper['Default'][0]}
+            </i>
+          </div>
         </div>
+        {isOpen && <div>I am open</div>}
       </div>
     </div>
   );

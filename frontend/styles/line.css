@@ -42,6 +42,10 @@
   stroke: #9ca3af;
 }
 
+.icon-chevron-gray > svg > g {
+  stroke: #9ca3af;
+}
+
 .tooltip .tooltiptext {
   visibility: hidden;
   position: absolute;
