@@ -187,7 +187,7 @@ const Users: NextPage = () => {
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="h-screen">
           <Header setError={setError} />
-          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
+          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 lg:w-5/6 xl:w-4/5 xl1600:w-3/5">
             {loading ? (
               <div className="relative top-1/2 translate-y-1/2">
                 <p className="mb-4 text-center text-2xl opacity-75">
@@ -210,7 +210,7 @@ const Users: NextPage = () => {
                   className="mb-2 flex w-full flex-row items-center justify-center gap-2 px-4"
                   onSubmit={invite}
                 >
-                  <label htmlFor="userEmail" className="ml-1 font-normal">
+                  <label htmlFor="userEmail" className="mx-1 font-normal">
                     Invite User:
                   </label>
                   <input
@@ -232,9 +232,9 @@ const Users: NextPage = () => {
                   ) : (
                     <button
                       type="submit"
-                      className="rounded-sm bg-osoc-yellow px-2 py-1 font-medium text-white shadow-sm shadow-gray-300 hover:brightness-95"
+                      className="mx-1 w-[160px] rounded-sm bg-osoc-yellow px-2 py-1 font-medium text-black shadow-sm shadow-gray-300 hover:brightness-95"
                     >
-                      invite
+                      Invite
                     </button>
                   )}
                 </form>
