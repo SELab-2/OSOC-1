@@ -14,7 +14,9 @@ enum class CommunicationTypeEnum {
 
 /**
  * Represents communication in the database. Communication is constructed with a [type] and a [message]
- * Note that neither of these fields, nor the combination of both of them need to be unique.
+ * Note that neither of these fields, nor the combination of both of them need to be unique. When creating a
+ * communication, it will also get a [registrationTime], you can pass this as a parameter or use the default value which
+ * will just set the [registrationTime] to the current time.
  */
 @Entity
 class Communication(
