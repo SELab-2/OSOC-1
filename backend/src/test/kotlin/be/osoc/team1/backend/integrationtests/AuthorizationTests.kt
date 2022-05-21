@@ -419,20 +419,20 @@ class AuthorizationTests {
     }
 
     @Test
-    fun `logout works when not logged in`() {
+    fun `logout returns 401 when not logged in`() {
         val logoutRequest = HttpEntity(null, HttpHeaders())
         val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
-        assert(logoutResponse.statusCodeValue == 302)
+        assert(logoutResponse.statusCodeValue == 401)
     }
 
     @Test
-    fun `logout works when logged in`() {
+    fun `logout returns 200 when logged in`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken = JSONObject(logInResponse.body).get("accessToken") as String
 
         val logoutRequest = HttpEntity(null, createAuthHeaders(accessToken))
         val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
-        assert(logoutResponse.statusCodeValue == 302)
+        assert(logoutResponse.statusCodeValue == 200)
     }
 
     @Test
@@ -443,7 +443,7 @@ class AuthorizationTests {
 
         val logoutRequest = HttpEntity(null, createAuthHeaders(accessToken))
         val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
-        assert(logoutResponse.statusCodeValue == 302)
+        assert(logoutResponse.statusCodeValue == 200)
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(refreshResponse.statusCodeValue == 418)

@@ -115,16 +115,18 @@ function searchProject(
  * Students also don't get removed from the list even when they do not have a conflict anymore
  * This is to allow for better productivity flow and should be allowed separatly
  *
- * @param conflictMap - original conflict results, needed to not remove old results
  * @param setConflictMap - callback to set results
+ * @param conflictsKeep - map of conflicts we wish to keep even though they are no longer a conflict
+ * @param setConflictsKeep - if new conflicts are found, add them to the map we want to keep
  * @param setLoading - set loading or not, this is not the same as the state loading due to styling bug otherwise
  * @param signal - AbortSignal for the axios request
  * @param setError - callback to set error message
  * @param router - Router object needed for edition parameter & error handling on 400 response
  */
 async function searchConflicts(
-  conflictMap: conflictMapType,
   setConflictMap: (map: conflictMapType) => void,
+  conflictsKeep: conflictMapType,
+  setConflictsKeep: (map: conflictMapType) => void,
   setLoading: (loading: boolean) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
@@ -143,7 +145,7 @@ async function searchConflicts(
     const conflicts = conflictsResponse.data as Conflict[];
 
     const newConflictMap = new Map() as conflictMapType;
-    conflictMap.forEach((value, key) => {
+    conflictsKeep.forEach((value, key) => {
       const newValue = { ...value };
       newValue.amount = 1;
       newConflictMap.set(key, newValue);
@@ -164,26 +166,38 @@ async function searchConflicts(
       router
     );
 
+    let keepChanged = false;
+
     conflicts.forEach((conflict) => {
       const studId = conflict.student.split('/').pop() as UUID;
       const value = newConflictMap.get(studId);
       if (value) {
-        conflict.projects.forEach((item) =>
-          (value.projectUrls as Set<Url>).add(item)
-        );
+        conflict.projects.forEach((item) => {
+          (value.projectUrls as Set<Url>).add(item);
+          if (!conflictsKeep.get(studId)?.projectUrls.has(item)) {
+            conflictsKeep.get(studId)?.projectUrls.add(item);
+            keepChanged = true;
+          }
+        });
+
         value.amount = conflict.projects.length;
         newConflictMap.set(studId, value);
       } else {
+        keepChanged = true;
         const newValue = {
           projectUrls: new Set<Url>(conflict.projects),
           amount: conflict.projects.length,
           student: newConflictStudents.get(conflict.student) as StudentBase,
         };
         newConflictMap.set(studId, newValue);
+        conflictsKeep.set(studId, newValue);
       }
     });
 
     setConflictMap(newConflictMap);
+    if (keepChanged) {
+      setConflictsKeep(conflictsKeep);
+    }
   } catch (err) {
     parseError(err, setError, router, signal);
     if (!signal.aborted) {
@@ -207,6 +221,9 @@ const Projects: NextPage = () => {
   const [error, setError] = useState('');
   const [showConflicts, setShowConflicts] = useState(false);
   const [conflictMap, setConflictMap] = useState(new Map() as conflictMapType);
+  const [conflictsKeep, setConflictsKeep] = useState(
+    new Map() as conflictMapType
+  );
   const [projects, setProjects]: [
     ProjectBase[],
     (projects: ProjectBase[]) => void
@@ -224,12 +241,15 @@ const Projects: NextPage = () => {
 
   useEffect(() => {
     state.page = 0;
-    return search();
-  }, []);
+    if (router.isReady) {
+      return search();
+    }
+  }, [router.isReady]);
 
   useEffect(() => {
     if (!showConflicts) {
       setConflictMap(new Map() as conflictMapType);
+      setProjects([] as ProjectBase[]);
     }
   }, [showConflicts]);
 
@@ -297,6 +317,9 @@ const Projects: NextPage = () => {
    */
   usePoll(
     () => {
+      if (!router.isReady) {
+        return;
+      }
       if (!state.loading && { isOnScreen }.isOnScreen && !showConflicts) {
         controller.abort();
         controller = new AbortController();
@@ -319,28 +342,39 @@ const Projects: NextPage = () => {
         return () => {
           controller.abort();
         };
-      } else if (!state.loading && { isOnScreen }.isOnScreen && showConflicts) {
-        controller.abort();
-        controller = new AbortController();
-        const signal = controller.signal;
-        searchConflicts(
-          conflictMap,
-          setConflictMap,
-          setLoading,
-          signal,
-          setError,
-          router
-        );
-        return () => {
-          controller.abort();
-        };
       }
     },
-    [state, projectSearch, { isOnScreen }.isOnScreen, showConflicts],
+    [
+      state,
+      projectSearch,
+      { isOnScreen }.isOnScreen,
+      showConflicts,
+      router.isReady,
+    ],
     {
       interval: 3000,
     }
   );
+
+  const pollConflicts = () => {
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await searchConflicts(
+        setConflictMap,
+        conflictsKeep,
+        setConflictsKeep,
+        setLoading,
+        signal,
+        setError,
+        router
+      );
+    })();
+    return () => {
+      controller.abort();
+    };
+  };
 
   /**
    * What to show when the projects list is empty
@@ -395,7 +429,7 @@ const Projects: NextPage = () => {
           <title>{edition}: projects</title>
         </Head>
         <div className="min-w-screen flex min-h-screen flex-col items-center">
-          <Header />
+          <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={1}>
             <main className="flex w-full flex-row">
               {/* Holds the sidebar with search, filter and student results */}
@@ -567,7 +601,14 @@ const Projects: NextPage = () => {
                     </div>
                   </div>
                 )}
-                {showConflicts && <ProjectConflict conflictMap={conflictMap} />}
+                {showConflicts && (
+                  <ProjectConflict
+                    conflictMap={conflictMap}
+                    pollConflicts={pollConflicts}
+                    conflictsKeep={conflictsKeep}
+                    setConflictsKeep={setConflictsKeep}
+                  />
+                )}
               </section>
             </main>
           </DndProvider>
