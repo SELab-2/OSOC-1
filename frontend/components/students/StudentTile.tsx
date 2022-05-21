@@ -79,14 +79,13 @@ const StudentTile: React.FC<StudentProp> = ({
       type: ItemTypes.STUDENTTILE,
       item: myStudent, // This is what will be 'given' to the project this is dropped on
       collect: (monitor) => ({
-        isDragging: monitor.isDragging(), // TODO add isDragging styling
+        isDragging: monitor.isDragging(), // WONTFIX add isDragging styling
       }),
     }),
     [myStudent]
   );
 
   return (
-    // TODO add a chevron dropdown to show possible roles, student coach, ...
     <div
       ref={drag}
       key={myStudent.id}
@@ -141,7 +140,7 @@ const StudentTile: React.FC<StudentProp> = ({
             </div>
           </div>
 
-          {/* TODO add some sort of counter to show total amount of suggestions for this student */}
+          {/* WONTFIX add some sort of counter to show total amount of suggestions for this student */}
           {/* holds the suggestions circle image thing + checkmark */}
           <div className="relative w-[10%]">
             <PieChart
