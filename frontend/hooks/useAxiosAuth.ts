@@ -3,6 +3,7 @@ import useTokens from './useTokens';
 import useRefreshToken from './useRefreshToken';
 import { useEffect } from 'react';
 import { useMutex } from 'react-context-mutex';
+import { useRouter } from 'next/router';
 
 const UNAUTHORIZED_STATUSES = [401, 403];
 
@@ -25,6 +26,7 @@ const useAxiosAuth = () => {
   const [tokens] = useTokens();
   const MutexRunner = useMutex();
   const mutex = new MutexRunner('myUniqueKey1');
+  const router = useRouter();
 
   useEffect(() => {
     const requestIntercept = axiosAuthenticated.interceptors.request.use(
@@ -63,20 +65,35 @@ const useAxiosAuth = () => {
 
               // check for an existing in-progress request
               if (refreshTokenPromise === null) {
-                refreshTokenPromise = refresh().then((token) => {
-                  refreshTokenPromise = null; // clear state
-                  mutex.unlock();
-                  return token; // resolve with the new token
-                });
+                refreshTokenPromise = refresh()
+                  .then((token) => {
+                    refreshTokenPromise = null; // clear state
+                    mutex.unlock();
+                    return token; // resolve with the new token
+                  })
+                  .catch((errRefresh) => {
+                    mutex.unlock();
+                    return Promise.reject(errRefresh);
+                  });
               }
 
-              return refreshTokenPromise.then((newAccessToken) => {
-                prevRequest.headers[
-                  'Authorization'
-                ] = `Basic ${newAccessToken}`;
-                mutex.unlock();
-                return axiosAuthenticated(prevRequest);
-              });
+              refreshTokenPromise
+                .then((newAccessToken) => {
+                  prevRequest.headers[
+                    'Authorization'
+                  ] = `Basic ${newAccessToken}`;
+                  mutex.unlock();
+                  return axiosAuthenticated(prevRequest);
+                })
+                .catch((errRefresh) => {
+                  mutex.unlock();
+                  // This error does not get caught unless we do it here
+                  if (errRefresh.response?.status === 418) {
+                    router.push('/login');
+                    return;
+                  }
+                  return Promise.reject(errRefresh);
+                });
             } catch (err: unknown) {
               mutex.unlock();
               return Promise.reject(err);
