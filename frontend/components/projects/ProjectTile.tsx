@@ -750,9 +750,10 @@ const ProjectPositionsList: React.FC<PositionProp> = ({
   position,
 }: PositionProp) => {
   return (
-    <div className="text-right">
+    <div className="bg-gray-300 text-right">
       <p className="my-1 inline bg-gray-300 px-1">
-        {position.amount + 'x ' + position.skill.skillName}
+        <span className="font-semibold">{position.amount + 'x '}</span>
+        {position.skill.skillName}
       </p>
     </div>
   );
