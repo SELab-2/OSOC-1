@@ -435,21 +435,21 @@ const StudentView: React.FC<StudentViewProp> = ({
         >
           <div className={`flex w-[400px] flex-row justify-between`}>
             <button
-              className={`w-[30%] bg-check-green py-[2px] text-sm text-white rounded-sm font-medium px-1 py-1 hover:brightness-95`}
+              className={`w-[30%] rounded-sm bg-check-green py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('Yes')}
               type={`submit`}
             >
               Suggest Yes
             </button>
             <button
-              className={`w-[30%] bg-check-orange py-[2px] text-sm text-white rounded-sm font-medium px-1 py-1 hover:brightness-95`}
+              className={`w-[30%] rounded-sm bg-check-orange py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('Maybe')}
               type={`submit`}
             >
               Suggest Maybe
             </button>
             <button
-              className={`w-[30%] bg-check-red py-[2px] text-sm text-white rounded-sm font-medium px-1 py-1 hover:brightness-95`}
+              className={`w-[30%] rounded-sm bg-check-red py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('No')}
               type={`submit`}
             >
@@ -458,7 +458,7 @@ const StudentView: React.FC<StudentViewProp> = ({
           </div>
           <textarea
             placeholder="Motivation"
-            className="mt-3 w-full resize-y rounded border min-h-[100px]"
+            className="mt-3 min-h-[100px] w-full resize-y rounded border"
             value={motivation}
             onChange={(e) => setMotivation(e.target.value || '')}
           />
@@ -467,7 +467,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             (sugg) => sugg.suggester.id === user.id
           ).length > 0 && (
             <button
-              className={`w-[100%] bg-check-gray py-[2px] text-sm text-white rounded-sm hover:brightness-95`}
+              className={`w-[100%] rounded-sm bg-check-gray py-[2px] text-sm text-white hover:brightness-95`}
               onClick={() => setSuggestion('Remove')}
               type={`submit`}
             >
@@ -538,7 +538,7 @@ const StudentView: React.FC<StudentViewProp> = ({
 
           {/* button to submit the admin status choice */}
           <button
-            className={`bg-check-gray px-2 py-[2px] text-sm rounded-sm hover:brightness-95`}
+            className={`rounded-sm bg-check-gray px-2 py-[2px] text-sm hover:brightness-95`}
             type={`submit`}
           >
             Submit
