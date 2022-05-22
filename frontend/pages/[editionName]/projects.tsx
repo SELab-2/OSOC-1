@@ -4,7 +4,7 @@ import StudentSidebar from '../../components/StudentSidebar';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Conflict,
   ProjectBase,
@@ -38,7 +38,6 @@ import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import usePoll from 'react-use-poll';
-import useOnScreen from '../../hooks/useOnScreen';
 import PersistLogin from '../../components/PersistLogin';
 import Head from 'next/head';
 import ProjectConflict from '../../components/projects/ProjectConflict';
@@ -236,8 +235,6 @@ const Projects: NextPage = () => {
     JSON.parse(JSON.stringify({ ...defaultprojectForm }))
   );
   const [editionActive, setEditionActive] = useState(true);
-  const elementRef1 = useRef<HTMLDivElement>(null);
-  const isOnScreen = useOnScreen(elementRef1);
 
   const edition = router.query.editionName as string;
 
@@ -328,7 +325,7 @@ const Projects: NextPage = () => {
       if (!router.isReady) {
         return;
       }
-      if (!state.loading && { isOnScreen }.isOnScreen && !showConflicts) {
+      if (!state.loading && !showConflicts) {
         controller.abort();
         controller = new AbortController();
         const signal = controller.signal;
@@ -352,13 +349,7 @@ const Projects: NextPage = () => {
         };
       }
     },
-    [
-      state,
-      projectSearch,
-      { isOnScreen }.isOnScreen,
-      showConflicts,
-      router.isReady,
-    ],
+    [state, projectSearch, showConflicts, router.isReady],
     {
       interval: 3000,
     }
@@ -409,9 +400,6 @@ const Projects: NextPage = () => {
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    if (!{ isOnScreen }.isOnScreen) {
-      return;
-    }
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
@@ -481,7 +469,6 @@ const Projects: NextPage = () => {
 
                   <div
                     className={`flex w-full flex-row justify-center xl:mr-8 xl1920:mr-10`}
-                    ref={elementRef1}
                   >
                     {/* This is the projects searchbar */}
                     <div

@@ -36,7 +36,7 @@ printf "running\n"
 if [[ $1 == "--wsl" ]] || [[ $1 == "-w" ]]
 then
     printf "Adding other data: "
-    python3 ../docker/subpopulate.py --wsl $2
+    python3 ../docker/subpopulate.py --wsl $2 $3
     printf "added\n"
 else
     # ADMIN
@@ -47,7 +47,7 @@ else
     sudo docker exec -it osoc_postgres_container_local_dev psql -U postgres osoc -c "UPDATE account SET role=0;" > /dev/null
     printf "created\n"
     printf "Adding other data: "
-    python3 ../docker/subpopulate.py $1
+    python3 ../docker/subpopulate.py $1 $2
     printf "added\n"
 fi
 

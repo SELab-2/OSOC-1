@@ -10,21 +10,25 @@ testerid = login["user"]["id"]
 
 authheaders = {'Authorization': f'Basic {token}',
                'Content-Type': 'application/json'}
-# activate edition
-requests.post('http://localhost:8080/api/editions',
-              headers=authheaders, json="ed")
-requests.post('http://localhost:8080/api/editions/ed/activate',
-              headers=authheaders)
 total = 1000
 wsl = False
+edition = 'osoc2022'
 if "--wsl" in sys.argv or "-w" in sys.argv:
     wsl = True
     total = 100
 
 if "--seed" in sys.argv or "-s" in sys.argv:
     Faker.seed(1)
+
+if "--inactive" in sys.argv or "-i" in sys.argv:
+    edition = 'osoc2021'
 fake = Faker()
 
+# activate edition
+requests.post('http://localhost:8080/api/editions',
+              headers=authheaders, json=edition)
+requests.post(f'http://localhost:8080/api/editions/{edition}/activate',
+              headers=authheaders)
 
 def make_student():
     return {
@@ -761,7 +765,7 @@ def make_student():
 
 studentsids = []
 for _ in range(total):
-    studentsids.append(requests.post('http://localhost:8080/api/ed/students',
+    studentsids.append(requests.post(f'http://localhost:8080/api/{edition}/students',
                                      json=make_student(), headers=authheaders).json()["id"])
 if wsl:
     login = requests.post('http://localhost:8080/api/login',
@@ -770,30 +774,30 @@ if wsl:
     authheaders = {'Authorization': f'Basic {token}',
                    'Content-Type': 'application/json'}
 
-yes = requests.get('http://localhost:8080/api/ed/students',
+yes = requests.get(f'http://localhost:8080/api/{edition}/students',
                    headers=authheaders, params={"pageNumber": 0, "pageSize": total//20, "sortBy": "id"}).json()["collection"]
-no = requests.get('http://localhost:8080/api/ed/students',
+no = requests.get(f'http://localhost:8080/api/{edition}/students',
                   headers=authheaders, params={"pageNumber": 1, "pageSize": total//20, "sortBy": "id"}).json()["collection"]
-maybe = requests.get('http://localhost:8080/api/ed/students',
+maybe = requests.get(f'http://localhost:8080/api/{edition}/students',
                      headers=authheaders, params={"pageNumber": 2, "pageSize": total//20, "sortBy": "id"}).json()["collection"]
 
 # create 50 yes, no and maybe students
 for stud in yes:
     requests.post(
-        f'http://localhost:8080/api/ed/students/{stud["id"]}/status', json="Yes", headers=authheaders)
+        f'http://localhost:8080/api/{edition}/students/{stud["id"]}/status', json="Yes", headers=authheaders)
 
 for stud in no:
     requests.post(
-        f'http://localhost:8080/api/ed/students/{stud["id"]}/status', json="No", headers=authheaders)
+        f'http://localhost:8080/api/{edition}/students/{stud["id"]}/status', json="No", headers=authheaders)
 
 for stud in maybe:
     requests.post(
-        f'http://localhost:8080/api/ed/students/{stud["id"]}/status', json="Maybe", headers=authheaders)
+        f'http://localhost:8080/api/{edition}/students/{stud["id"]}/status', json="Maybe", headers=authheaders)
 
 # create 10 random projects with 5 random positions
 projects = []
 for _ in range(10):
-    projects.append(requests.post('http://localhost:8080/api/ed/projects', json={
+    projects.append(requests.post(f'http://localhost:8080/api/{edition}/projects', json={
         "clientName": fake.company(), "name": fake.catch_phrase(), "description": fake.bs(), "positions": [{"skill": {"skillName": fake.job()}, "amount": random.randint(1, 7)} for _ in range(5)]}, headers=authheaders).json())
 
 # users+coaches
@@ -815,7 +819,7 @@ for coach in coaches:
     coach_token = requests.post('http://localhost:8080/api/login',
                                 data={"email": coach["email"], "password": "suuuuuperseeeeecret"}).json()["accessToken"]
     for studid in studentsids[:total//4]:
-        requests.post(f'http://localhost:8080/api/ed/students/{studid}/suggestions', json={"suggester": f"http://localhost:8080/api/users/{coach['id']}", "status": random.choice(
+        requests.post(f'http://localhost:8080/api/{edition}/students/{studid}/suggestions', json={"suggester": f"http://localhost:8080/api/users/{coach['id']}", "status": random.choice(
             ["Yes", "No", "Maybe"]), "motivation": fake.paragraph(nb_sentences=4)}, headers={'Authorization': f'Basic {coach_token}', 'Content-Type': 'application/json'})
 # students to projects
 # coaches to projects
@@ -823,17 +827,17 @@ index = len(projects[0]["positions"][0]) - \
     projects[0]["positions"][0][::-1].index("/") - 1
 for proj in projects:
     for stud in random.sample(yes, 4):
-        requests.post(f'http://localhost:8080/api/ed/projects/{proj["id"]}/assignments', json={
+        requests.post(f'http://localhost:8080/api/{edition}/projects/{proj["id"]}/assignments', json={
             "student": stud["id"], "position": random.choice(proj["positions"])[index+1:], "suggester": testerid, "reason": fake.paragraph(nb_sentences=4)}, headers=authheaders)
     requests.post(
-        f'http://localhost:8080/api/ed/projects/{proj["id"]}/coaches', headers=authheaders, json=random.choice(coaches)["id"])
+        f'http://localhost:8080/api/{edition}/projects/{proj["id"]}/coaches', headers=authheaders, json=random.choice(coaches)["id"])
 # communications to students
 for studid in random.sample(studentsids, total//4):
-    requests.post(f'http://localhost:8080/api/ed/communications/{studid}', json={
+    requests.post(f'http://localhost:8080/api/{edition}/communications/{studid}', json={
         "message": fake.paragraph(nb_sentences=4), "type": "Email"}, headers=authheaders)
 # conflicts (force atleast 2 conflicts)
 conflictstudid = random.choice(studentsids)
-requests.post(f'http://localhost:8080/api/ed/projects/{projects[0]["id"]}/assignments', json={
+requests.post(f'http://localhost:8080/api/{edition}/projects/{projects[0]["id"]}/assignments', json={
     "student": conflictstudid, "position": random.choice(projects[0]["positions"])[index+1:], "suggester": testerid, "reason": fake.paragraph(nb_sentences=4)}, headers=authheaders)
-requests.post(f'http://localhost:8080/api/ed/projects/{projects[1]["id"]}/assignments', json={
+requests.post(f'http://localhost:8080/api/{edition}/projects/{projects[1]["id"]}/assignments', json={
     "student": conflictstudid, "position": random.choice(projects[1]["positions"])[index+1:], "suggester": testerid, "reason": fake.paragraph(nb_sentences=4)}, headers=authheaders)
