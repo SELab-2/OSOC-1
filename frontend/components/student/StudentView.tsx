@@ -306,7 +306,7 @@ const StudentView: React.FC<StudentViewProp> = ({
   const [suggestion, setSuggestion] = useState('');
   const [motivation, setMotivation] = useState('');
   const [deletePopup, setDeletePopup] = useState(false);
-  const [error, setError]: [string, (error: string) => void] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
   let controller = new AbortController();
 
@@ -362,9 +362,9 @@ const StudentView: React.FC<StudentViewProp> = ({
   const pronouns = answers.commonPronouns || answers.otherPronouns;
   return (
     <div className={`flex flex-col-reverse justify-between xl:flex-row`}>
-      {error && <Error error={error} className="mb-4" />}
+      {error && <Error error={error} setError={setError} className="mb-4" />}
       {/* hold the student information */}
-      <div className="mx-8 flex w-full flex-col bg-osoc-neutral-bg px-4 py-3">
+      <div className="mx-8 flex flex-col bg-osoc-neutral-bg px-4 py-3">
         <div className="flex flex-row pt-2">
           <h1 className="text-4xl font-semibold">
             {answers.preferredName ||
@@ -386,6 +386,9 @@ const StudentView: React.FC<StudentViewProp> = ({
         </div>
         <div className="flex flex-col">
           <h3 className="pt-12 text-2xl">Suggestions</h3>
+          {myStudent.statusSuggestions.length === 0 && (
+            <p>No suggestions yet.</p>
+          )}
           {myStudent.statusSuggestions.map((statusSuggestion) => (
             <StudentStatusSuggestion
               key={statusSuggestion.suggester.id}
@@ -397,7 +400,7 @@ const StudentView: React.FC<StudentViewProp> = ({
       </div>
 
       {/* holds suggestion controls */}
-      <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
+      <div className={`mr-8 ml-8 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
         {/* regular coach status suggestion form */}
         <form
           className={`border-2 p-2`}
@@ -433,23 +436,23 @@ const StudentView: React.FC<StudentViewProp> = ({
             };
           }}
         >
-          <div className={`flex w-[380px] flex-row justify-between`}>
+          <div className={`flex w-[400px] flex-row justify-between`}>
             <button
-              className={`w-[30%] bg-check-green py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              className={`w-[30%] rounded-sm bg-check-green py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('Yes')}
               type={`submit`}
             >
               Suggest Yes
             </button>
             <button
-              className={`w-[30%] bg-check-orange py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              className={`w-[30%] rounded-sm bg-check-orange py-[2px] px-1 py-1 text-sm font-medium text-black hover:brightness-95`}
               onClick={() => setSuggestion('Maybe')}
               type={`submit`}
             >
               Suggest Maybe
             </button>
             <button
-              className={`w-[30%] bg-check-red py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              className={`w-[30%] rounded-sm bg-check-red py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('No')}
               type={`submit`}
             >
@@ -458,7 +461,7 @@ const StudentView: React.FC<StudentViewProp> = ({
           </div>
           <textarea
             placeholder="Motivation"
-            className="mt-3 w-full resize-y border-2 border-check-gray"
+            className="mt-3 min-h-[100px] w-full resize-y rounded border"
             value={motivation}
             onChange={(e) => setMotivation(e.target.value || '')}
           />
@@ -467,7 +470,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             (sugg) => sugg.suggester.id === user.id
           ).length > 0 && (
             <button
-              className={`w-[100%] bg-check-gray py-[2px] text-sm text-white shadow-md shadow-gray-400`}
+              className={`w-[100%] rounded-sm bg-check-gray py-[2px] text-sm text-white hover:brightness-95`}
               onClick={() => setSuggestion('Remove')}
               type={`submit`}
             >
@@ -480,7 +483,7 @@ const StudentView: React.FC<StudentViewProp> = ({
         <form
           className={`${
             user.role == UserRole.Admin ? 'visible' : 'hidden'
-          } mt-10 flex flex-row justify-between border-2 p-2`}
+          } mt-5 flex flex-row justify-between border-2 p-2`}
           onSubmit={(e) => {
             e.preventDefault();
             if (status.label != myStudent.status) {
@@ -538,7 +541,7 @@ const StudentView: React.FC<StudentViewProp> = ({
 
           {/* button to submit the admin status choice */}
           <button
-            className={`bg-check-gray px-2 py-[2px] text-sm shadow-md shadow-gray-400`}
+            className={`rounded-sm bg-check-gray px-2 py-[2px] text-sm hover:brightness-95`}
             type={`submit`}
           >
             Submit

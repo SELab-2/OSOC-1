@@ -250,6 +250,7 @@ const Projects: NextPage = () => {
     if (!showConflicts) {
       setConflictMap(new Map() as conflictMapType);
       setProjects([] as ProjectBase[]);
+      setConflictsKeep(new Map() as conflictMapType);
     }
   }, [showConflicts]);
 
@@ -429,20 +430,20 @@ const Projects: NextPage = () => {
           <title>{edition}: projects</title>
         </Head>
         <div className="min-w-screen flex min-h-screen flex-col items-center">
-          <Header />
+          <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={1}>
-            <main className="flex w-full flex-row">
+            <main className="mt-[180px] flex w-full flex-row sm:mt-12">
               {/* Holds the sidebar with search, filter and student results */}
               <section
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
+                } relative mt-[14px] w-full md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
               >
                 {/* button to close sidebar on mobile */}
                 <div
                   className={`${
                     showSidebar ? 'visible' : 'hidden'
-                  } absolute left-[24px] top-[16px] z-50 flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                  } absolute left-[24px] top-[16px] z-50 flex flex-col text-[30px] opacity-20 md:hidden`}
                 >
                   <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
                 </div>
@@ -463,7 +464,7 @@ const Projects: NextPage = () => {
                   <div
                     className={`${
                       showSidebar ? 'hidden' : 'visible w-auto'
-                    } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                    } flex flex-col text-[30px] opacity-20 md:hidden`}
                   >
                     <i onClick={() => setShowSidebar(!showSidebar)}>
                       {arrow_out}
@@ -536,11 +537,11 @@ const Projects: NextPage = () => {
                           user.role == UserRole.Admin
                             ? 'xl:mt-0 xl:h-auto'
                             : 'md:mt-0 md:h-auto'
-                        } mt-2 flex h-[36px] flex-row justify-center`}
+                        } mt-2 ml-4 flex h-[36px] flex-row justify-center sm:mx-0`}
                       >
                         {/* Button to show conflicts */}
                         <button
-                          className={`justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                          className={`justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300`}
                           onClick={() => setShowConflicts(!showConflicts)}
                         >
                           {showConflicts
@@ -552,7 +553,7 @@ const Projects: NextPage = () => {
                         <button
                           className={`${
                             user.role == UserRole.Admin ? 'visible' : 'hidden'
-                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300`}
+                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300`}
                           onClick={() => setShowCreateProject(true)}
                         >
                           Create new project
@@ -562,7 +563,9 @@ const Projects: NextPage = () => {
                   </div>
                 </div>
 
-                {error && <Error error={error} className="mb-4" />}
+                {error && (
+                  <Error error={error} className="mb-4" setError={setError} />
+                )}
 
                 {/* This contains the project tiles */}
                 {!showConflicts && (

@@ -25,7 +25,7 @@ const Students: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   // Needed to allow for click select from the sidebar to the main screen
   const [studentBase, setStudentBase] = useState({} as StudentBaseList);
-  const [error, setError]: [string, (error: string) => void] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
   const [edition, setEdition] = useState(router.query.editionName as string);
   useAxiosAuth();
@@ -39,24 +39,24 @@ const Students: NextPage = () => {
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
+        <Head>
+          <title>{edition}: students</title>
+        </Head>
         <div className="min-w-screen flex min-h-screen flex-col items-center">
-          <Head>
-            <title>{edition}: students</title>
-          </Head>
-          <Header />
+          <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={2}>
-            <main className="flex w-full flex-row">
+            <main className="mt-[180px] flex w-full flex-row sm:mt-12">
               {/* Holds the sidebar with search, filter and student results */}
               <section
                 className={`${
                   showSidebar ? 'visible' : 'hidden'
-                } relative mt-[14px] w-full bg-osoc-neutral-bg px-4 md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
+                } relative mt-[14px] w-full md:visible md:block md:w-[400px] md:max-w-[450px] lg:min-w-[450px]`}
               >
                 {/* button to close sidebar on mobile */}
                 <div
                   className={`${
                     showSidebar ? 'visible' : 'hidden'
-                  } absolute left-[24px] top-[17px] flex flex-col justify-center text-[29px] opacity-20 md:hidden`}
+                  } absolute left-[24px] top-[16px] z-50 flex flex-col text-[30px] opacity-20 md:hidden`}
                 >
                   {/* button to close sidebar on mobile */}
                   <i onClick={() => setShowSidebar(!showSidebar)}>{arrow_in}</i>
@@ -79,7 +79,7 @@ const Students: NextPage = () => {
                   <div
                     className={`${
                       showSidebar ? 'hidden' : 'visible w-auto'
-                    } flex flex-col justify-center text-[30px] opacity-20 md:hidden`}
+                    } flex flex-col text-[30px] opacity-20 md:hidden`}
                   >
                     <i onClick={() => setShowSidebar(!showSidebar)}>
                       {arrow_out}
@@ -87,7 +87,9 @@ const Students: NextPage = () => {
                   </div>
                 </div>
 
-                {error && <Error error={error} className="mb-4" />}
+                {error && (
+                  <Error error={error} className="mb-4" setError={setError} />
+                )}
 
                 {/* This contains the actual student info */}
                 <div>

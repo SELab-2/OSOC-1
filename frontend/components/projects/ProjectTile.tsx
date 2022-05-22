@@ -422,7 +422,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
         isOver && canDrop ? 'bg-check-green' : 'bg-osoc-neutral-bg'
       } m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]`}
     >
-      {error && <Error error={error} className="mb-4" />}
+      {error && <Error error={error} className="mb-4" setError={setError} />}
       {/* project info top */}
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}
@@ -752,7 +752,8 @@ const ProjectPositionsList: React.FC<PositionProp> = ({
   return (
     <div className="text-right">
       <p className="my-1 inline bg-gray-300 px-1">
-        {position.amount + 'x ' + position.skill.skillName}
+        <span className="font-semibold">{position.amount + 'x '}</span>
+        {position.skill.skillName}
       </p>
     </div>
   );

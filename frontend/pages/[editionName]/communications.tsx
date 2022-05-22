@@ -20,6 +20,7 @@ import CommsCreationPopup from '../../components/communications/CommsCreationPop
 import CsvDownloader from 'react-csv-downloader';
 import PersistLogin from '../../components/PersistLogin';
 import CommsDeletePopup from '../../components/communications/CommsDeletePopup';
+import Head from 'next/head';
 
 const PAGE_SIZE = 50;
 
@@ -29,6 +30,9 @@ const communications = () => {
 
   const [students, setStudents] = useState([] as StudentBaseCommunication[]);
   const [communications, setCommunications] = useState([] as StudentComm[]);
+  const [filteredCommunications, setFilteredCommunications] = useState(
+    [] as StudentComm[]
+  );
 
   const [openPopup, setOpenPopup] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,6 +40,7 @@ const communications = () => {
 
   const [openDeletionPopup, setOpenDeletionPopup] = useState(false);
   const [commsToDelete, setCommsToDelete] = useState('');
+  const [nameFilter, setNameFilter] = useState('');
 
   const [loadState, setLoadState] = useState({
     page: 0,
@@ -88,6 +93,7 @@ const communications = () => {
               studentId: student.id,
               name: student.firstName + ' ' + student.lastName,
               commMessage: csc.message,
+              registrationTime: new Date(csc.registrationTime),
               id: csc.id,
             });
           });
@@ -141,6 +147,25 @@ const communications = () => {
     };
   }, [loadState, router.isReady]);
 
+  /**
+   * Update the communications to only include the name filtered communications
+   */
+  useEffect(() => {
+    const filterCommunications: () => StudentComm[] = () => {
+      const normalizedNameFilter = nameFilter.trim().toLowerCase();
+      return communications.filter((comm: StudentComm) => {
+        return comm.name.trim().toLowerCase().includes(normalizedNameFilter);
+      });
+    };
+
+    if (nameFilter) {
+      const _filteredCommunications = filterCommunications();
+      setFilteredCommunications(_filteredCommunications);
+    } else {
+      setFilteredCommunications(communications);
+    }
+  }, [communications, nameFilter]);
+
   const createCommunication = async (studentId: string, message: string) => {
     try {
       const response = await axiosAuth.post<Communication>(
@@ -161,6 +186,7 @@ const communications = () => {
             studentId: studentId,
             name,
             commMessage: message,
+            registrationTime: new Date(response.data.registrationTime),
             id: response.data.id,
           } as StudentComm,
         ];
@@ -190,52 +216,70 @@ const communications = () => {
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
-        <div className="h-screen">
-          <Header />
-          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
-            {error && <Error error={error} className="mb-4" />}
+        <Head>
+          <title>{edition}: communication</title>
+        </Head>
+        <div className="min-w-screen flex min-h-screen">
+          <Header setError={setError} />
+          <div className="mx-auto mt-[200px] mb-32 w-11/12 p-0 sm:mt-16 lg:w-5/6 xl:w-4/5 xl1600:w-3/5">
+            {error && (
+              <Error error={error} className="mb-4" setError={setError} />
+            )}
             <div>
-              <CsvDownloader
-                datas={communications}
-                filename="communications"
-                suffix
-                className="inline-block cursor-default"
-                disabled={communications.length === 0}
-                columns={[
-                  {
-                    id: 'id',
-                    displayName: 'id',
-                  },
-                  {
-                    id: 'name',
-                    displayName: 'name',
-                  },
-                  {
-                    id: 'commMessage',
-                    displayName: 'message',
-                  },
-                ]}
-              >
-                <button
-                  className="my-1 mr-2 bg-osoc-yellow px-2 py-1 text-white disabled:bg-yellow-300 disabled:text-gray-200"
-                  disabled={communications.length === 0}
-                >
-                  Download CSV
-                </button>
-              </CsvDownloader>
               <button
-                className="mx-2 my-1 bg-osoc-btn-primary px-2 py-1 text-white"
+                className="mx-2 my-1 rounded-sm bg-osoc-btn-primary px-2 py-1 text-black hover:brightness-95"
                 onClick={() => setOpenPopup(true)}
               >
                 Add New
               </button>
+              <CsvDownloader
+                datas={filteredCommunications.map((comm) => {
+                  return {
+                    id: comm.id,
+                    name: comm.name,
+                    message: comm.commMessage,
+                    timestamp: comm.registrationTime.toString(),
+                  };
+                })}
+                filename="communications"
+                suffix
+                className="inline-block cursor-default"
+                disabled={filteredCommunications.length === 0}
+                columns={[
+                  {
+                    id: 'id',
+                    displayName: 'Id',
+                  },
+                  {
+                    id: 'name',
+                    displayName: 'Student name',
+                  },
+                  {
+                    id: 'message',
+                    displayName: 'Communication info',
+                  },
+                  {
+                    id: 'timestamp',
+                    displayName: 'Time',
+                  },
+                ]}
+              >
+                <button
+                  className="my-1 mr-2 rounded-sm bg-osoc-yellow px-2 py-1 text-white hover:brightness-95 disabled:cursor-not-allowed disabled:bg-yellow-300 disabled:text-gray-200 disabled:brightness-100"
+                  disabled={filteredCommunications.length === 0}
+                >
+                  Download CSV
+                </button>
+              </CsvDownloader>
             </div>
             <CommsTable
-              studentComms={communications}
+              studentComms={filteredCommunications}
               setCommsToDelete={setCommsToDelete}
               setShowDeleteForm={setOpenDeletionPopup}
+              nameFilter={nameFilter}
+              setNameFilter={setNameFilter}
             />
-            {loading && communications.length && (
+            {loading && filteredCommunications.length ? (
               <div className="">
                 <SpinnerCircular
                   size={100}
@@ -245,7 +289,7 @@ const communications = () => {
                   className="mx-auto"
                 />
               </div>
-            )}
+            ) : null}
           </div>
         </div>
         <CommsCreationPopup

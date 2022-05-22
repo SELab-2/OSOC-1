@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FC, PropsWithChildren } from 'react';
+import { Dispatch, FC, PropsWithChildren, SetStateAction } from 'react';
 import useUser from '../hooks/useUser';
 import { UserRole } from '../lib/types';
 import useEdition from '../hooks/useEdition';
-
-type HeaderProps = PropsWithChildren<unknown>;
+import useAxiosAuth from '../hooks/useAxiosAuth';
+import Endpoints from '../lib/endpoints';
+import axios from 'axios';
 
 type EditionHeaderLinkProps = HeaderLinkProps;
 
@@ -37,12 +38,43 @@ const HeaderLink: FC<HeaderLinkProps> = ({
   );
 };
 
-const Header: React.FC<HeaderProps> = () => {
+type HeaderProps = PropsWithChildren<{
+  setError: Dispatch<SetStateAction<string>>;
+}>;
+
+const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
   const [user] = useUser();
   const [edition] = useEdition();
+  const router = useRouter();
+  const axiosAuth = useAxiosAuth();
+
+  const logout = async () => {
+    try {
+      // remove information stored in localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('email');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      }
+      // log out on backend
+      await axiosAuth.post(Endpoints.LOGOUT);
+
+      // push back to login
+      router.push({
+        pathname: '/login',
+        query: { message: 'Succesfully logged out!' },
+      });
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.message);
+      } else {
+        setError(err as string);
+      }
+    }
+  };
 
   return (
-    <header className="flex h-fit w-full flex-col items-center justify-between px-4 shadow-lg sm:h-12 sm:flex-row">
+    <header className="fixed z-[100] mb-4 flex h-fit w-full flex-col items-center justify-between bg-white px-4 shadow-lg sm:h-12 sm:flex-row">
       <div className="flex flex-row items-center">
         <img
           src="https://osoc.be/img/logo/logo-osoc-color.svg"
@@ -71,8 +103,11 @@ const Header: React.FC<HeaderProps> = () => {
           {[UserRole.Admin].includes(user.role) && (
             <HeaderLink href="/editions">Manage Editions</HeaderLink>
           )}
-          <li className={`ml-3 hover:underline sm:inline`}>
-            <Link href="/logout">Log Out</Link>
+          <li
+            className="ml-3 hover:cursor-pointer hover:underline sm:inline"
+            onClick={logout}
+          >
+            Log Out
           </li>
         </ul>
       </nav>
