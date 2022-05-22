@@ -320,6 +320,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
    */
   useEffect(() => {
     if (JSON.stringify(projectInput) != JSON.stringify(myProjectBase)) {
+      setLoading(true);
       setMyProjectBase(projectInput as ProjectBase);
     } else {
       controller2.abort();
@@ -358,7 +359,6 @@ const ProjectTile: React.FC<ProjectProp> = ({
    * myProjectBase gets set to projectInput at the start.
    */
   useEffect(() => {
-    setLoading(true);
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
