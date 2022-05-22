@@ -277,7 +277,7 @@ const communications = () => {
               nameFilter={nameFilter}
               setNameFilter={setNameFilter}
             />
-            {loading && filteredCommunications.length && (
+            {loading && filteredCommunications.length ? (
               <div className="">
                 <SpinnerCircular
                   size={100}
@@ -287,7 +287,7 @@ const communications = () => {
                   className="mx-auto"
                 />
               </div>
-            )}
+            ) : null}
           </div>
         </div>
         <CommsCreationPopup
