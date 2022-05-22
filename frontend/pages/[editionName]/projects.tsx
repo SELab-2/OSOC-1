@@ -160,6 +160,27 @@ export async function load_edition(
   return;
 }
 
+export function fetchEditionState(setEditionActive: (v: boolean) => (void), setError: (error: string) => void, router: NextRouter) {
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    if (router.isReady) {
+      (async () => {
+        await load_edition(
+          axiosAuthenticated,
+          setEditionActive,
+          signal,
+          setError,
+          router
+        );
+      })();
+    }
+    return () => {
+      controller.abort();
+    };
+  }, [router.isReady]);
+}
+
 /**
  * Function to get all conflicts from conflict endpoint
  * Important notes:
@@ -292,24 +313,7 @@ const Projects: NextPage = () => {
   let controller = new AbortController();
   const axiosAuth = useAxiosAuth();
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    if (router.isReady) {
-      (async () => {
-        await load_edition(
-          axiosAuth,
-          setEditionActive,
-          signal,
-          setError,
-          router
-        );
-      })();
-    }
-    return () => {
-      controller.abort();
-    };
-  }, [router.isReady]);
+  fetchEditionState(setEditionActive, setError, router);
 
   useEffect(() => {
     state.page = 0;

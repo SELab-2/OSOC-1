@@ -35,7 +35,7 @@ import axios, { AxiosError } from 'axios';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
 import { getAnswerStrings } from '../../lib/tallyForm';
-import {load_edition} from "../../pages/[editionName]/projects";
+import { fetchEditionState } from "../../pages/[editionName]/projects";
 
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
@@ -312,24 +312,7 @@ const StudentView: React.FC<StudentViewProp> = ({
   const router = useRouter();
   let controller = new AbortController();
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    if (router.isReady) {
-      (async () => {
-        await load_edition(
-          axiosAuthenticated,
-          setEditionActive,
-          signal,
-          setError,
-          router
-        );
-      })();
-    }
-    return () => {
-      controller.abort();
-    };
-  }, [router.isReady]);
+  fetchEditionState(setEditionActive, setError, router);
 
   useEffect(() => {
     setStudentBaseList(studentInput);
