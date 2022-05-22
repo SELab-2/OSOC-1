@@ -50,6 +50,7 @@
   visibility: hidden;
   position: absolute;
   z-index: 1;
+  max-width: 18vw;
 }
 .tooltip:hover .tooltiptext {
   visibility: visible;
@@ -78,7 +79,6 @@
 .sidebar {
   position: -webkit-sticky;
   position: sticky;
-  top: 0;
 }
 
 .i-inline > svg {

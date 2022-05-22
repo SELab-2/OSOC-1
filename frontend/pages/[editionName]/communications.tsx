@@ -20,6 +20,7 @@ import CommsCreationPopup from '../../components/communications/CommsCreationPop
 import CsvDownloader from 'react-csv-downloader';
 import PersistLogin from '../../components/PersistLogin';
 import CommsDeletePopup from '../../components/communications/CommsDeletePopup';
+import Head from 'next/head';
 
 const PAGE_SIZE = 50;
 
@@ -175,8 +176,6 @@ const communications = () => {
         })
       );
 
-      console.log(response);
-
       // add new communication locally
       const _stud = students.find((stud) => stud.id === studentId);
       const name = _stud ? _stud.firstName + ' ' + _stud.lastName : '';
@@ -217,9 +216,12 @@ const communications = () => {
   return (
     <PersistLogin>
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
-        <div className="h-screen">
+        <Head>
+          <title>{edition}: communication</title>
+        </Head>
+        <div className="min-w-screen flex min-h-screen">
           <Header setError={setError} />
-          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 lg:w-5/6 xl:w-4/5 xl1600:w-3/5">
+          <div className="mx-auto mt-[200px] mb-32 w-11/12 p-0 sm:mt-16 lg:w-5/6 xl:w-4/5 xl1600:w-3/5">
             {error && (
               <Error error={error} className="mb-4" setError={setError} />
             )}
@@ -277,7 +279,7 @@ const communications = () => {
               nameFilter={nameFilter}
               setNameFilter={setNameFilter}
             />
-            {loading && filteredCommunications.length && (
+            {loading && filteredCommunications.length ? (
               <div className="">
                 <SpinnerCircular
                   size={100}
@@ -287,7 +289,7 @@ const communications = () => {
                   className="mx-auto"
                 />
               </div>
-            )}
+            ) : null}
           </div>
         </div>
         <CommsCreationPopup

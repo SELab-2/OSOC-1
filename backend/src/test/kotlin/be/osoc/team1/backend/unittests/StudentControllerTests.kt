@@ -9,6 +9,7 @@ import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.StudentView
 import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.entities.filterByName
@@ -149,13 +150,11 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents Full view returns the full form of students`() {
         val testStudent1 = Student("L1", "VC", testEdition)
-        val testStudent2 = Student("L2", "VC", testEdition)
-        val testStudent3 = Student("L3", "VC", testEdition)
-        val testStudent4 = Student("L4", "VC", testEdition)
-        val allStudents = listOf(testStudent1, testStudent2, testStudent3, testStudent4)
+        val test = "{ \"totalLength\": 1, \"collection\": [ { \"id\": \"${testStudent1.id}\", \"firstName\": \"${testStudent1.firstName}\", \"lastName\": \"${testStudent1.lastName}\", \"status\": \"${testStudent1.status}\", \"alumn\": ${testStudent1.alumn}, \"statusSuggestionCount\": {}, \"possibleStudentCoach\":  ${testStudent1.possibleStudentCoach}, \"skills\": [], \"answers\": [], \"statusSuggestions\": [], \"communications\": []  } ] }"
+        val allStudents = listOf(testStudent1)
         every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
         mockMvc.perform(get("$editionUrl?view=Full").principal(defaultPrincipal)).andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
+            .andExpect(content().json(test))
     }
 
     @Test
@@ -169,7 +168,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
         mockMvc.perform(get("$editionUrl?pageNumber=0&pageSize=1").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(expected, 3))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(expected, 3))))
     }
 
     @Test
@@ -186,19 +185,19 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
         mockMvc.perform(get("$editionUrl?status=Yes").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent1), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent1), 1))))
         mockMvc.perform(get("$editionUrl?status=No").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent2), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent2), 1))))
         mockMvc.perform(get("$editionUrl?status=Maybe").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent3), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent3), 1))))
         mockMvc.perform(get("$editionUrl?status=Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent4), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent4), 1))))
         mockMvc.perform(get("$editionUrl?status=Yes,No,Maybe,Undecided").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(allStudents, 4))))
         mockMvc.perform(get("$editionUrl?status=NonExistentStatus").principal(defaultPrincipal))
             .andExpect(status().isBadRequest)
         mockMvc.perform(get("$editionUrl?status=Yes,No,Undecided,").principal(defaultPrincipal))
@@ -219,7 +218,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         mockMvc.perform(get("$editionUrl?status=Yes&sortBy=name&pageSize=2").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(
-                content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent2, testStudent3), 2)))
+                content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent2, testStudent3), 2)))
             )
     }
 
@@ -233,22 +232,22 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort, testEdition) } returns allStudents
         mockMvc.perform(get("$editionUrl?name=lars").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent), 1))))
         mockMvc.perform(get("$editionUrl?name=ars").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(
-                content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent, testStudent3), 2)))
+                content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent, testStudent3), 2)))
             )
         mockMvc.perform(get("$editionUrl?name=uter").principal(defaultPrincipal))
             .andExpect(status().isOk)
             .andExpect(
                 content().json(
-                    objectMapper.writeValueAsString(PagedCollection(listOf(testStudent, testStudent3, testStudent4), 3))
+                    objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent, testStudent3, testStudent4), 3))
                 )
             )
         mockMvc.perform(get("$editionUrl?name=").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(allStudents, 4))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(allStudents, 4))))
     }
 
     @Test
@@ -258,10 +257,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort, testEdition) } returns listOf(testStudent)
         mockMvc.perform(get("$editionUrl?includeSuggested=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf<Student>(), 0))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf<Student>(), 0))))
         mockMvc.perform(get("$editionUrl?includeSuggested=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(testStudent), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(testStudent), 1))))
     }
 
     @Test
@@ -275,10 +274,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf<Student>(), 0))))
         mockMvc.perform(get("$editionUrl?skills=\"Backend\"").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(backendStudent), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(backendStudent), 1))))
         mockMvc.perform(get("$editionUrl?skills=\"Backend\",\"Frontend\"").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(studentList, studentList.size))))
 
         // Test if skills without the required quotes return a 400 bad request
         mockMvc.perform(get("$editionUrl?skills=Backend").principal(defaultPrincipal))
@@ -299,10 +298,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
         mockMvc.perform(get("$editionUrl?alumnOnly=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(studentList, studentList.size))))
         mockMvc.perform(get("$editionUrl?alumnOnly=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student2), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(student2), 1))))
     }
 
     @Test
@@ -313,10 +312,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         every { studentService.getAllStudents(defaultSort, testEdition) } returns studentList
         mockMvc.perform(get("$editionUrl?studentCoachOnly=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(studentList, studentList.size))))
         mockMvc.perform(get("$editionUrl?studentCoachOnly=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student2), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(student2), 1))))
     }
 
     @Test
@@ -335,10 +334,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         )
         mockMvc.perform(get("$editionUrl?unassignedOnly=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(studentList, studentList.size))))
         mockMvc.perform(get("$editionUrl?unassignedOnly=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student2), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(student2), 1))))
     }
 
     @Test
@@ -357,10 +356,10 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
         )
         mockMvc.perform(get("$editionUrl?assignedOnly=false").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(studentList, studentList.size))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(studentList, studentList.size))))
         mockMvc.perform(get("$editionUrl?assignedOnly=true").principal(defaultPrincipal))
             .andExpect(status().isOk)
-            .andExpect(content().json(objectMapper.writeValueAsString(PagedCollection(listOf(student1), 1))))
+            .andExpect(content().json(objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(PagedCollection(listOf(student1), 1))))
     }
 
     @Test
@@ -375,7 +374,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `getStudentById returns student if student with given id exists`() {
-        val jsonRepresentation = objectMapper.writeValueAsString(testStudent)
+        val jsonRepresentation = objectMapper.writerWithView(StudentView.Full::class.java).writeValueAsString(testStudent)
 
         every { studentService.getStudentById(studentId, testEdition) } returns testStudent
         mockMvc.perform(get("$editionUrl/$studentId"))

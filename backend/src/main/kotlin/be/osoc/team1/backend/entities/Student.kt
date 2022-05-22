@@ -186,7 +186,7 @@ class Student(
     val communications: MutableList<Communication> = mutableListOf()
 
     @OneToMany(mappedBy = "student", cascade = [CascadeType.DETACH], orphanRemoval = true)
-    @field:JsonView(StudentView.Full::class, StudentView.Extra::class)
+    @field:JsonView(StudentView.Extra::class)
     @JsonSerialize(using = AssignmentListSerializer::class)
     val assignments: MutableList<Assignment> = mutableListOf()
 
