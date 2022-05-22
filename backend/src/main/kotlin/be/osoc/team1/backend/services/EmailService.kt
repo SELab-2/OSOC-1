@@ -69,8 +69,6 @@ class InvitationMailContent : EmailContent {
     }
 }
 
-
-
 /**
  * This class contains every function needed to make and send emails.
  */
