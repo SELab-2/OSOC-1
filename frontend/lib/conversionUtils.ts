@@ -9,7 +9,9 @@ import {
   StatusSuggestionCountList,
   Student,
   StudentBase,
+  StudentBaseExtra,
   StudentBaseList,
+  Url,
   User,
 } from './types';
 
@@ -54,9 +56,28 @@ function convertStudentAny(studentAny: StudentBaseList | StudentBase): Student {
   newStudent.alumn = studentAny.alumn;
   newStudent.possibleStudentCoach = studentAny.possibleStudentCoach;
   newStudent.skills = [] as Skill[];
-  newStudent.communications = []; // TODO set correct type once communication is implemented
+  newStudent.communications = []; // WONTFIX does not get used set correct type once communication is implemented
   newStudent.answers = [] as Answer[];
   return newStudent as Student;
+}
+
+/**
+ * Function to convert a StudentBaseList object to a StudentBaseExtra object
+ * This will simply make all unknown fields be empty lists
+ * Use this to avoid rendering errors
+ *
+ * @param studentBaseList - base student object as returned by get request with view List
+ */
+export function convertStudentBaseListToExtra(
+  studentBaseList: StudentBaseList
+): StudentBaseExtra {
+  const newStudent = {} as StudentBaseExtra;
+  newStudent.id = studentBaseList.id;
+  newStudent.firstName = studentBaseList.firstName;
+  newStudent.lastName = studentBaseList.lastName;
+  newStudent.assignments = [] as Url[];
+  newStudent.skills = [] as Skill[];
+  return newStudent as StudentBaseExtra;
 }
 
 /**

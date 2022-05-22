@@ -450,6 +450,7 @@ const Projects: NextPage = () => {
                 <StudentSidebar
                   setError={setError}
                   setStudentBase={() => null}
+                  setShowSidebar={setShowSidebar}
                 />
               </section>
 

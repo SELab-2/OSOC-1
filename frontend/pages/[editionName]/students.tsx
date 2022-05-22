@@ -65,6 +65,7 @@ const Students: NextPage = () => {
                 <StudentSidebar
                   setError={setError}
                   setStudentBase={setStudentBase}
+                  setShowSidebar={setShowSidebar}
                 />
               </section>
 

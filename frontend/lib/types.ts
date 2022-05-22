@@ -149,6 +149,14 @@ export type StudentBaseList = {
   statusSuggestionCount: StatusSuggestionCountList;
 };
 
+export type StudentBaseExtra = {
+  id: UUID;
+  firstName: string;
+  lastName: string;
+  assignments: Url[];
+  skills: Skill[];
+};
+
 export type StatusSuggestionCountList = {
   Yes: number | null;
   Maybe: number | null;

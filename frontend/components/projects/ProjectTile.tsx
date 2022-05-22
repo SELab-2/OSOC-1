@@ -324,7 +324,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
     } else {
       controller2.abort();
       controller2 = new AbortController();
-      const signal = controller.signal;
+      const signal = controller2.signal;
       const newPositions = [] as Position[];
 
       (async () => {
