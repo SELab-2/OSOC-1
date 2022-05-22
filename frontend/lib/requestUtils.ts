@@ -1,8 +1,9 @@
 import { axiosAuthenticated } from './axios';
-import { Skill, Url, User, UserRole } from './types';
+import {Edition, Skill, Url, User, UserRole} from './types';
 import Endpoints from './endpoints';
-import axios, { AxiosError } from 'axios';
+import axios, {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
 import { NextRouter } from 'next/dist/client/router';
+import {useEffect} from "react";
 
 /**
  * Function to parse axios request errors
@@ -163,4 +164,73 @@ export async function getUrlMap<Type>(
     });
 }
 
+async function retry_once<T>(
+  func: () => Promise<T>,
+  doSomething: (arg: T) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  try {
+    const result = await func();
+    doSomething(result);
+  } catch (err) {
+    try {
+      const result = await func();
+      doSomething(result);
+    } catch (err) {
+      parseError(err, setError, router, signal);
+    }
+  }
+}
 
+/*
+ * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
+ * sure that the current edition is not active.
+ */
+async function load_edition(
+  axiosAuth: AxiosInstance,
+  setEditionActive: (active: boolean) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  await retry_once(
+    async () => {
+      return await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE);
+    },
+    (response: AxiosResponse<Edition>) => {
+      if (response.data) {
+        const edition = router.query.editionName as string;
+        setEditionActive(edition == response.data.name);
+        return;
+      }
+      setEditionActive(false);
+    },
+    signal,
+    setError,
+    router
+  );
+  return;
+}
+
+export function fetchEditionState(setEditionActive: (v: boolean) => (void), setError: (error: string) => void, router: NextRouter) {
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    if (router.isReady) {
+      (async () => {
+        await load_edition(
+          axiosAuthenticated,
+          setEditionActive,
+          signal,
+          setError,
+          router
+        );
+      })();
+    }
+    return () => {
+      controller.abort();
+    };
+  }, [router.isReady]);
+}

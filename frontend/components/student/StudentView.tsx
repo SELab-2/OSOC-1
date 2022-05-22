@@ -23,7 +23,7 @@ import {
   convertStudentBaseList,
   convertStudentFullToList,
 } from '../../lib/conversionUtils';
-import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
+import {fetchEditionState, getUrlList, getUrlMap, parseError} from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
 import { axiosAuthenticated } from '../../lib/axios';
@@ -35,7 +35,6 @@ import axios, { AxiosError } from 'axios';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
 import { getAnswerStrings } from '../../lib/tallyForm';
-import { fetchEditionState } from "../../pages/[editionName]/projects";
 
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
