@@ -89,7 +89,7 @@ const UserTable: React.FC<UserTableProps> = ({
 
   return (
     <table className="w-full table-fixed">
-      <thead className="sticky top-0 bg-white">
+      <thead className="sticky top-[48px] bg-white">
         <tr>
           <th className="w-1/4 py-4">
             <div className="flex flex-row items-center justify-start">

@@ -363,10 +363,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   return (
     // holds searchbar + hide filter button
     <div
-      className="sidebar mt-[50px] max-h-screen py-4 sm:mt-0"
+      className="sidebar top-[62px] bg-osoc-neutral-bg px-4 pt-4 sm:mt-0"
       ref={elementRef}
     >
-      <div className="flex max-h-[calc(100vh-32px)] flex-col">
+      <div className="flex max-h-screen flex-col sm:max-h-[calc(100vh-90px)]">
         <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
           {/* The students searchbar */}
           <div className="justify-left md:w-[calc(100% - 200px)] mb-3 flex w-[80%] md:ml-0 lg:mb-0 ">
@@ -662,7 +662,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
         </div>
 
         {/* These are the student tiles */}
-        <div ref={scrollRef} className="max-h-[100%] grow overflow-y-auto">
+        <div ref={scrollRef} className="grow overflow-y-auto">
           <div className="col-span-full border-b-2 border-gray-400 pb-1 pr-2 text-right text-xs font-normal">
             {filterAmount + ' total results'}
           </div>
