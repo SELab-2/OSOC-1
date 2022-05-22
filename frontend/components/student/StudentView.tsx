@@ -443,7 +443,7 @@ const StudentView: React.FC<StudentViewProp> = ({
               Suggest Yes
             </button>
             <button
-              className={`w-[30%] rounded-sm bg-check-orange py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
+              className={`w-[30%] rounded-sm bg-check-orange py-[2px] px-1 py-1 text-sm font-medium text-black hover:brightness-95`}
               onClick={() => setSuggestion('Maybe')}
               type={`submit`}
             >

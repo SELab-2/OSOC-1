@@ -4,7 +4,7 @@ import { Dispatch, FC, SetStateAction, useState } from 'react';
 type CommsTableRowProps = {
   studentName: string;
   commsMessage: string;
-  registrationTime: number;
+  registrationTime: Date;
   commsId: string;
   /**
    * set the communication id to delete
