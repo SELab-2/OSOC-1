@@ -4,6 +4,7 @@ import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import be.osoc.team1.backend.util.AnswerListSerializer
+import be.osoc.team1.backend.util.AssignmentListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
@@ -146,7 +147,7 @@ class Student(
 
     @ManyToMany(cascade = [CascadeType.MERGE])
     @OrderBy
-    @field:JsonView(StudentView.Full::class)
+    @field:JsonView(StudentView.Full::class, StudentView.Extra::class)
     val skills: Set<Skill> = sortedSetOf(),
 
     @field:JsonView(StudentView.List::class)
@@ -185,7 +186,8 @@ class Student(
     val communications: MutableList<Communication> = mutableListOf()
 
     @OneToMany(mappedBy = "student", cascade = [CascadeType.DETACH], orphanRemoval = true)
-    @JsonIgnore
+    @field:JsonView(StudentView.Extra::class)
+    @JsonSerialize(using = AssignmentListSerializer::class)
     val assignments: MutableList<Assignment> = mutableListOf()
 
     @JsonGetter("statusSuggestionCount")
@@ -201,6 +203,7 @@ class Student(
 class StudentView {
     open class Basic
     open class List : Basic()
+    open class Extra : Basic()
     open class Communication : Basic()
     open class Full : List()
 }
@@ -209,7 +212,7 @@ class StudentView {
  * Enum to represent the [StudentView]s in the [StudentController]
  */
 enum class StudentViewEnum {
-    Basic, Full, Communication, List
+    Basic, Full, Communication, List, Extra
 }
 
 /**
