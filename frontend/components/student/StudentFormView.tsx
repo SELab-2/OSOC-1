@@ -95,7 +95,7 @@ const StudentFormView: React.FC<StudentFormViewProp> = ({
       ))}
       {answers.otherResponsibilities && (
         <p>
-          The student could be hindered by these other responsibilities: {' '}
+          The student could be hindered by these other responsibilities:{' '}
           <span className="font-semibold">{answers.otherResponsibilities}</span>
         </p>
       )}
