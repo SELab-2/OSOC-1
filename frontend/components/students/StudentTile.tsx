@@ -187,7 +187,6 @@ const StudentTile: React.FC<StudentProp> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    console.log('clicked');
                     setIsOpen(!isOpen);
                   }}
                 >
