@@ -15,6 +15,10 @@ env:
   OSOC_DB_USERNAME: ${{ secrets.OSOC_DB_USERNAME }}
   OSOC_DB_PASSWORD: ${{ secrets.OSOC_DB_PASSWORD }}
   OSOC_DB_URL: ${{ secrets.OSOC_DB_URL }}
+  OSOC_SCHEME: ${{ secrets.OSOC_SCHEME }}
+  OSOC_FRONTEND_URL: ${{ secrets.OSOC_FRONTEND_URL }}
+  OSOC_GMAIL_ADDRESS: ${{ secrets.OSOC_GMAIL_ADDRESS }}
+  OSOC_GMAIL_APP_PASSWORD: ${{ secrets.OSOC_GMAIL_APP_PASSWORD }}
 
 jobs:
   build:
