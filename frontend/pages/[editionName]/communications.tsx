@@ -29,6 +29,9 @@ const communications = () => {
 
   const [students, setStudents] = useState([] as StudentBaseCommunication[]);
   const [communications, setCommunications] = useState([] as StudentComm[]);
+  const [filteredCommunications, setFilteredCommunications] = useState(
+    [] as StudentComm[]
+  );
 
   const [openPopup, setOpenPopup] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,6 +39,7 @@ const communications = () => {
 
   const [openDeletionPopup, setOpenDeletionPopup] = useState(false);
   const [commsToDelete, setCommsToDelete] = useState('');
+  const [nameFilter, setNameFilter] = useState('');
 
   const [loadState, setLoadState] = useState({
     page: 0,
@@ -142,6 +146,25 @@ const communications = () => {
     };
   }, [loadState, router.isReady]);
 
+  /**
+   * Update the communications to only include the name filtered communications
+   */
+  useEffect(() => {
+    const filterCommunications: () => StudentComm[] = () => {
+      const normalizedNameFilter = nameFilter.trim().toLowerCase();
+      return communications.filter((comm: StudentComm) => {
+        return comm.name.trim().toLowerCase().includes(normalizedNameFilter);
+      });
+    };
+
+    if (nameFilter) {
+      const _filteredCommunications = filterCommunications();
+      setFilteredCommunications(_filteredCommunications);
+    } else {
+      setFilteredCommunications(communications);
+    }
+  }, [communications, nameFilter]);
+
   const createCommunication = async (studentId: string, message: string) => {
     try {
       const response = await axiosAuth.post<Communication>(
@@ -208,7 +231,7 @@ const communications = () => {
                 Add New
               </button>
               <CsvDownloader
-                datas={communications.map((comm) => {
+                datas={filteredCommunications.map((comm) => {
                   return {
                     id: comm.id,
                     name: comm.name,
@@ -219,7 +242,7 @@ const communications = () => {
                 filename="communications"
                 suffix
                 className="inline-block cursor-default"
-                disabled={communications.length === 0}
+                disabled={filteredCommunications.length === 0}
                 columns={[
                   {
                     id: 'id',
@@ -240,19 +263,21 @@ const communications = () => {
                 ]}
               >
                 <button
-                  className="my-1 mr-2 rounded-sm bg-osoc-yellow px-2 py-1 text-black hover:brightness-95 disabled:cursor-not-allowed disabled:bg-yellow-300 disabled:text-gray-200 disabled:brightness-100"
-                  disabled={communications.length === 0}
+                  className="my-1 mr-2 rounded-sm bg-osoc-yellow px-2 py-1 text-white hover:brightness-95 disabled:cursor-not-allowed disabled:bg-yellow-300 disabled:text-gray-200 disabled:brightness-100"
+                  disabled={filteredCommunications.length === 0}
                 >
                   Download CSV
                 </button>
               </CsvDownloader>
             </div>
             <CommsTable
-              studentComms={communications}
+              studentComms={filteredCommunications}
               setCommsToDelete={setCommsToDelete}
               setShowDeleteForm={setOpenDeletionPopup}
+              nameFilter={nameFilter}
+              setNameFilter={setNameFilter}
             />
-            {loading && communications.length && (
+            {loading && filteredCommunications.length && (
               <div className="">
                 <SpinnerCircular
                   size={100}
