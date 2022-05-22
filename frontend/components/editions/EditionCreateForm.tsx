@@ -48,7 +48,7 @@ const EditionCreateForm: React.FC<ECFProps> = ({
 
   return (
     <div className="m-auto grid h-fit w-full max-w-sm grid-cols-2 overflow-hidden rounded-lg border-2 px-2 py-3">
-      <label className="col-span-2 mt-2 mb-4 mx-4">
+      <label className="col-span-2 mx-4 mt-2 mb-4">
         New Edition Name:
         <input
           ref={inputRef}
