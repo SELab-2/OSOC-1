@@ -25,7 +25,7 @@ const Students: NextPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   // Needed to allow for click select from the sidebar to the main screen
   const [studentBase, setStudentBase] = useState({} as StudentBaseList);
-  const [error, setError]: [string, (error: string) => void] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
   const [edition, setEdition] = useState(router.query.editionName as string);
   useAxiosAuth();
@@ -43,7 +43,7 @@ const Students: NextPage = () => {
           <Head>
             <title>{edition}: students</title>
           </Head>
-          <Header />
+          <Header setError={setError} />
           <DndProvider backend={HTML5Backend} key={2}>
             <main className="flex w-full flex-row">
               {/* Holds the sidebar with search, filter and student results */}
@@ -88,7 +88,9 @@ const Students: NextPage = () => {
                   </div>
                 </div>
 
-                {error && <Error error={error} className="mb-4" />}
+                {error && (
+                  <Error error={error} className="mb-4" setError={setError} />
+                )}
 
                 {/* This contains the actual student info */}
                 <div>

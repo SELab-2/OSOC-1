@@ -10,10 +10,6 @@ For many years, [Javascript](https://www.javascript.com/) has been **the** progr
 ### Next.js 12
 [Nextjs](https://nextjs.org/) is a [React](https://reactjs.org/) framework that has a lot of really awesome features. These include, but are not limited to, a really easy way to do routing using just the file structure of your application with so called *[pages](https://nextjs.org/docs/basic-features/pages)*; Support for Server-Side Rendering and Static-Site-Generation, which improve the user experience. This is also beneficial for caching, which leads to almost instant page loads on subsequent visits, as if you're just using a native app. Since the release of version 12, Vercel also added the ability to add [middleware](https://nextjs.org/docs/middleware) to the application, which makes authentication and the like a lot easier for us. Lastly it also greatly improves the developer experience, with features like [native Typescript support](https://nextjs.org/docs/basic-features/typescript), [Fast Refresh](https://nextjs.org/docs/basic-features/fast-refresh), easy [testing](https://nextjs.org/docs/testing) support and much more.
 
-### Recoil (still in debate)
-React is a stateful framework, but one of the drawbacks is that you sometimes need the same state in multiple components that are in different branches of the component tree. This can be fixed by lifting up the state in the components above it, but this can make the code a lot less clean. 
-This is why we want to enforce the use of a global state manager like [Recoil](https://recoiljs.org/), which is built by the team behind React itself. This adds some sort of 'static' object that can hold every state you use in the application, so you can access it from anywhere.
-
 ### NextAuth.js
 [NextAuth](https://next-auth.js.org/) is a simple authentication framework so you can set up authentication in your Next application in minutes. However, we are planning on routing all the authentication and OAuth2 services through the backend, so this extension will only serve as the messenger between the frontend and the backend and as the keeper of the JWT throughout the session.
 

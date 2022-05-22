@@ -1,7 +1,6 @@
 import '../styles/globals.css';
 import '../styles/line.css';
 import type { AppProps } from 'next/app';
-import { RecoilRoot } from 'recoil';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '../context/AuthProvider';
 import Head from 'next/head';
@@ -12,13 +11,10 @@ function App({ Component, pageProps: { pageProps } }: AppProps) {
       <Head>
         <link rel="shortcut icon" href="/favicon.ico" />
       </Head>
-      {/* RecoilRoot exposes the whole application to the Recoil state manager */}
-      <RecoilRoot>
-        <AuthProvider>
-          <Component {...pageProps} />
-          <Toaster position="top-right" />
-        </AuthProvider>
-      </RecoilRoot>
+      <AuthProvider>
+        <Component {...pageProps} />
+        <Toaster position="top-right" />
+      </AuthProvider>
     </>
   );
 }
