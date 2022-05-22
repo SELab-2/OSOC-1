@@ -44,12 +44,6 @@ const EditionCreateForm: React.FC<ECFProps> = ({
 
   return (
     <div className="m-auto grid h-full w-full max-w-sm grid-cols-2 overflow-hidden rounded-lg border-2 px-2 py-3">
-      <div className="col-span-2 border-2">
-        <PhotographIcon
-          className="m-auto mt-8 h-8 w-8 hover:cursor-pointer"
-          color="#b3b3b3"
-        />
-      </div>
       <label className="col-span-2 mx-2 my-4">
         New Edition Name:
         <input
