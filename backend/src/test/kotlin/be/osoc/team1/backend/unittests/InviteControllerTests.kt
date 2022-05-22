@@ -1,7 +1,9 @@
 package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.controllers.InviteController
+import be.osoc.team1.backend.services.EditionService
 import be.osoc.team1.backend.services.EmailService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.every
@@ -17,6 +19,10 @@ class InviteControllerTests(@Autowired val mockMvc: MockMvc) {
     private val testEmail = "test@mail.com"
     @MockkBean
     private lateinit var emailService: EmailService
+    @MockkBean
+    private lateinit var editionService: EditionService
+    @MockkBean
+    private lateinit var osocUserDetailService: OsocUserDetailService
 
     @Test
     fun `inviteEmail should not fail`() {
