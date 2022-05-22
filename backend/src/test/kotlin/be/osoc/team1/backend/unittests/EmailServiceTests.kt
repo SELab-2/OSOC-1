@@ -2,12 +2,15 @@ package be.osoc.team1.backend.unittests
 
 import be.osoc.team1.backend.exceptions.InvalidGmailCredentialsException
 import be.osoc.team1.backend.services.EmailService
+import be.osoc.team1.backend.services.ForgotPasswordEmailContent
+import be.osoc.team1.backend.services.InvitationMailContent
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.core.env.Environment
@@ -40,23 +43,25 @@ class EmailServiceTests {
     }
 
     @Test
-    fun `sendEmail sends invitation mail when no UUID given`() {
+    fun `sendEmail invitation mail test`() {
         val mailSender = getMailSender()
         val emailService = EmailService(getEnvironment(), mailSender)
-        emailService.sendEmail(testEmail)
-        Assertions.assertEquals(
-            emailService.invitationMailTitle,
+        val email = InvitationMailContent()
+        emailService.sendEmail(testEmail, email)
+        assertEquals(
+            email.getSubject(),
             captureSimpleMailMessage.captured.subject
         )
     }
 
     @Test
-    fun `sendEmail sends forgot password mail when a UUID is given`() {
+    fun `sendEmail forgot password test`() {
         val mailSender = getMailSender()
         val emailService = EmailService(getEnvironment(), mailSender)
-        emailService.sendEmail(testEmail, UUID.randomUUID())
-        Assertions.assertEquals(
-            emailService.forgotPasswordMailTitle,
+        val email = ForgotPasswordEmailContent(UUID.randomUUID())
+        emailService.sendEmail(testEmail, email)
+        assertEquals(
+            email.getSubject(),
             captureSimpleMailMessage.captured.subject
         )
     }
@@ -65,7 +70,7 @@ class EmailServiceTests {
     fun `sendEmail fails when email environment variable isn't set`() {
         val emailService = EmailService(getEnvironment(emailSet = false), JavaMailSenderImpl())
         val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
-            emailService.sendEmail(testEmail)
+            emailService.sendEmail(testEmail, InvitationMailContent())
         }
         Assertions.assertTrue(exception.message?.startsWith("No 'OSOC_GMAIL_ADDRESS' or") ?: false)
     }
@@ -74,7 +79,7 @@ class EmailServiceTests {
     fun `sendEmail fails when password environment variable isn't set`() {
         val emailService = EmailService(getEnvironment(passwordSet = false), JavaMailSenderImpl())
         val exception = Assertions.assertThrows(InvalidGmailCredentialsException().javaClass) {
-            emailService.sendEmail(testEmail)
+            emailService.sendEmail(testEmail, InvitationMailContent())
         }
         Assertions.assertTrue(exception.message?.startsWith("No 'OSOC_GMAIL_ADDRESS' or") ?: false)
     }
@@ -83,7 +88,7 @@ class EmailServiceTests {
     fun `sendEmailWithToken fails when environment variables aren't set correctly`() {
         val emailService = EmailService(getEnvironment(), JavaMailSenderImpl())
         val exception = assertThrows<InvalidGmailCredentialsException> {
-            emailService.sendEmail(testEmail)
+            emailService.sendEmail(testEmail, InvitationMailContent())
         }
         Assertions.assertTrue(exception.message?.startsWith("Make sure 'OSOC_GMAIL_ADDRESS' and") ?: false)
     }
