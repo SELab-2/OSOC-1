@@ -15,7 +15,11 @@ import { SpinnerCircular } from 'spinners-react';
 import Error from '../../components/Error';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
 import Endpoints from '../../lib/endpoints';
-import {fetchEditionState, getUrlList, parseError} from '../../lib/requestUtils';
+import {
+  fetchEditionState,
+  getUrlList,
+  parseError,
+} from '../../lib/requestUtils';
 import CommsCreationPopup from '../../components/communications/CommsCreationPopup';
 import CsvDownloader from 'react-csv-downloader';
 import PersistLogin from '../../components/PersistLogin';
@@ -230,7 +234,7 @@ const communications = () => {
             )}
             <div>
               <button
-                className="mx-2 my-1 rounded-sm bg-osoc-btn-primary px-2 py-1 text-black hover:brightness-95 disabled:brightness-75 disabled:cursor-not-allowed"
+                className="mx-2 my-1 rounded-sm bg-osoc-btn-primary px-2 py-1 text-black hover:brightness-95 disabled:cursor-not-allowed disabled:brightness-75"
                 onClick={() => setOpenPopup(true)}
                 disabled={!editionActive}
               >
