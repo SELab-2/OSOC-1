@@ -38,6 +38,7 @@ import useOnScreen from '../../hooks/useOnScreen';
 import PersistLogin from '../../components/PersistLogin';
 import Head from 'next/head';
 import ProjectConflict from '../../components/projects/ProjectConflict';
+import {AxiosInstance} from "axios";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -108,13 +109,18 @@ function searchProject(
     });
 }
 
-async function load_edition(setEditionActive: (active: boolean) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
+async function load_edition(axiosAuth: AxiosInstance, setEditionActive: (active: boolean) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
+  try {
+    const active_edition_response = await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE);
+  } catch(err) {
+    console.log("Do nothing");
+  }
   try {
     /*
      * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
      * sure that the current edition is not active.
      */
-    const active_edition_response = await axiosAuthenticated.get<Edition>(Endpoints.EDITIONACTIVE);
+    const active_edition_response = await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE);
     if (active_edition_response.data) {
       const edition = router.query.editionName as string;
       setEditionActive(edition == active_edition_response.data.name);
@@ -257,14 +263,14 @@ const Projects: NextPage = () => {
   const edition = router.query.editionName as string;
 
   let controller = new AbortController();
-  useAxiosAuth();
+  const axiosAuth = useAxiosAuth();
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
     if (router.isReady) {
       (async () => {
-        await load_edition(setEditionActive, signal, setError, router);
+        await load_edition(axiosAuth, setEditionActive, signal, setError, router);
       })();
     }
     return () => {
