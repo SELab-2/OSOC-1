@@ -13,6 +13,10 @@ import java.util.Properties
 import java.util.UUID
 import kotlin.collections.set
 
+/**
+ * A configuration class that allows you to inject a [JavaMailSenderImpl] into other spring beans. This is currently
+ * used to inject a [JavaMailSenderImpl] into the [EmailService].
+ */
 @Configuration
 class MailSenderConfig {
     @Bean
@@ -21,11 +25,17 @@ class MailSenderConfig {
     }
 }
 
+/**
+ * An interface representing the contents of an email.
+ */
 interface EmailContent {
     fun getSubject(): String
     fun getBody(baseUrl: String): String
 }
 
+/**
+ * A class that contains the subject and body for the forgot password email.
+ */
 class ForgotPasswordEmailContent(private val forgotPasswordUUID: UUID) : EmailContent {
     override fun getSubject(): String = "Reset Password OSOC"
 
@@ -45,6 +55,9 @@ class ForgotPasswordEmailContent(private val forgotPasswordUUID: UUID) : EmailCo
     }
 }
 
+/**
+ * A class that contains the subject and body for the coach invitation email.
+ */
 class InvitationMailContent : EmailContent {
     override fun getSubject(): String = "You were invited to join OSOC"
 
