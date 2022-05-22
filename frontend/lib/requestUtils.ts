@@ -164,6 +164,16 @@ export async function getUrlMap<Type>(
     });
 }
 
+/**
+ * Function that will try to run func and if it fails run it again, if it succeeds the result will be given to
+ * the function provided in doSomething.
+ *
+ * @param func - Function to get the result from
+ * @param doSomething - Function to use the result with
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 418 response
+ */
 async function retryOnce<T>(
   func: () => Promise<T>,
   doSomething: (arg: T) => void,
@@ -184,9 +194,14 @@ async function retryOnce<T>(
   }
 }
 
-/*
+/**
  * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
  * sure that the current edition is not active.
+ *
+ * @param setEditionActive - Function that sets the state
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 418 response
  */
 async function loadEdition(
   setEditionActive: (active: boolean) => void,
@@ -213,6 +228,13 @@ async function loadEdition(
   return;
 }
 
+/**
+ * Fetch the state of the current edition(active or inactive) and set it in the state using setEditionActive.
+ *
+ * @param setEditionActive - Function that sets the state
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 418 response
+ */
 export function fetchEditionState(
   setEditionActive: (v: boolean) => void,
   setError: (error: string) => void,
