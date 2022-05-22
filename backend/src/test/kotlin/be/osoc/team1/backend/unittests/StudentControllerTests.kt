@@ -140,7 +140,7 @@ class StudentControllerTests(@Autowired private val mockMvc: MockMvc) {
     @Test
     fun `getAllStudents Extra view returns a extra form of students`() {
         val testStudent1 = Student("L1", "VC", testEdition)
-        val test = "{ \"totalLength\": 1, \"collection\": [ { \"id\": \"${testStudent1.id}\", \"firstName\": \"${testStudent1.firstName}\", \"lastName\": \"${testStudent1.lastName}\", \"statusSuggestionCount\": {}, \"assignments\": [], \"statusSuggestions\": [], \"skills\": [] } ] }"
+        val test = "{ \"totalLength\": 1, \"collection\": [ { \"id\": \"${testStudent1.id}\", \"firstName\": \"${testStudent1.firstName}\", \"lastName\": \"${testStudent1.lastName}\", \"statusSuggestionCount\": {}, \"assignments\": [], \"skills\": [] } ] }"
         every { studentService.getAllStudents(defaultSort, testEdition) } returns listOf(testStudent1)
         mockMvc.perform(get("$editionUrl?view=Extra").principal(defaultPrincipal)).andExpect(status().isOk)
             .andExpect(content().json(test))

@@ -4,6 +4,7 @@ import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import be.osoc.team1.backend.util.AnswerListSerializer
+import be.osoc.team1.backend.util.AssignmentListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
@@ -175,7 +176,7 @@ class Student(
         joinColumns = [JoinColumn(name = "student_id")],
         inverseJoinColumns = [JoinColumn(name = "status_suggestions_id")]
     )
-    @field:JsonView(StudentView.Full::class, StudentView.Extra::class)
+    @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = StatusSuggestionListSerializer::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
@@ -186,6 +187,7 @@ class Student(
 
     @OneToMany(mappedBy = "student", cascade = [CascadeType.DETACH], orphanRemoval = true)
     @field:JsonView(StudentView.Full::class, StudentView.Extra::class)
+    @JsonSerialize(using = AssignmentListSerializer::class)
     val assignments: MutableList<Assignment> = mutableListOf()
 
     @JsonGetter("statusSuggestionCount")
