@@ -134,7 +134,7 @@ async function retry_once<T>(
  * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
  * sure that the current edition is not active.
  */
-async function load_edition(
+export async function load_edition(
   axiosAuth: AxiosInstance,
   setEditionActive: (active: boolean) => void,
   signal: AbortSignal,

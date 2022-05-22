@@ -35,6 +35,7 @@ import axios, { AxiosError } from 'axios';
 import { Icon } from '@iconify/react';
 import Popup from 'reactjs-popup';
 import { getAnswerStrings } from '../../lib/tallyForm';
+import {load_edition} from "../../pages/[editionName]/projects";
 
 const check_mark = <FontAwesomeIcon icon={faCheck} />;
 const question_mark = <FontAwesomeIcon icon={faQuestion} />;
@@ -306,9 +307,29 @@ const StudentView: React.FC<StudentViewProp> = ({
   const [suggestion, setSuggestion] = useState('');
   const [motivation, setMotivation] = useState('');
   const [deletePopup, setDeletePopup] = useState(false);
+  const [editionActive, setEditionActive] = useState(true);
   const [error, setError]: [string, (error: string) => void] = useState('');
   const router = useRouter();
   let controller = new AbortController();
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    if (router.isReady) {
+      (async () => {
+        await load_edition(
+          axiosAuthenticated,
+          setEditionActive,
+          signal,
+          setError,
+          router
+        );
+      })();
+    }
+    return () => {
+      controller.abort();
+    };
+  }, [router.isReady]);
 
   useEffect(() => {
     setStudentBaseList(studentInput);
@@ -397,7 +418,7 @@ const StudentView: React.FC<StudentViewProp> = ({
       </div>
 
       {/* holds suggestion controls */}
-      <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
+      <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0 ` + (editionActive ? 'visible' : 'block hidden')}>
         {/* regular coach status suggestion form */}
         <form
           className={`border-2 p-2`}
@@ -433,7 +454,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             };
           }}
         >
-          <div className={`flex w-[400px] flex-row justify-between`}>
+          <div className={`flex w-[400px] flex-row justify-between `}>
             <button
               className={`w-[30%] rounded-sm bg-check-green py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('Yes')}
