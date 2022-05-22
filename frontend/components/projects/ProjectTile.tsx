@@ -752,7 +752,7 @@ const ProjectPositionsList: React.FC<PositionProp> = ({
   return (
     <div className="mb-1 text-right">
       <p className="project-position">
-        <span className="font-semibold ">{position.amount + 'x '}</span>
+        <span className="font-semibold">{position.amount + 'x '}</span>
         {position.skill.skillName}
       </p>
     </div>
