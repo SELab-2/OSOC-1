@@ -62,8 +62,8 @@ function convertStudentAny(studentAny: StudentBaseList | StudentBase): Student {
 }
 
 /**
- * Function to convert a StudentBase object to a Student object
- * This will simply change all Url lists to empty lists of the correct type
+ * Function to convert a StudentBaseList object to a StudentBaseExtra object
+ * This will simply make all unknown fields be empty lists
  * Use this to avoid rendering errors
  *
  * @param studentBaseList - base student object as returned by get request with view List
