@@ -13,7 +13,8 @@ import {
   Url,
   UserRole,
   UUID,
-  conflictMapType, Edition,
+  conflictMapType,
+  Edition,
 } from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
@@ -38,8 +39,7 @@ import useOnScreen from '../../hooks/useOnScreen';
 import PersistLogin from '../../components/PersistLogin';
 import Head from 'next/head';
 import ProjectConflict from '../../components/projects/ProjectConflict';
-import {AxiosInstance, AxiosResponse} from "axios";
-import Editions from "../editions";
+import { AxiosInstance, AxiosResponse } from 'axios';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -110,15 +110,21 @@ function searchProject(
     });
 }
 
-async function retry_once<T>(func: () => Promise<T>, doSomething: (arg: T) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
+async function retry_once<T>(
+  func: () => Promise<T>,
+  doSomething: (arg: T) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
   try {
     const result = await func();
     doSomething(result);
-  } catch(err) {
+  } catch (err) {
     try {
       const result = await func();
       doSomething(result);
-    } catch(err) {
+    } catch (err) {
       parseError(err, setError, router, signal);
     }
   }
@@ -128,9 +134,16 @@ async function retry_once<T>(func: () => Promise<T>, doSomething: (arg: T) => vo
  * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
  * sure that the current edition is not active.
  */
-async function load_edition(axiosAuth: AxiosInstance, setEditionActive: (active: boolean) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
-  await retry_once(async () => {
-      return await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE)
+async function load_edition(
+  axiosAuth: AxiosInstance,
+  setEditionActive: (active: boolean) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  await retry_once(
+    async () => {
+      return await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE);
     },
     (response: AxiosResponse<Edition>) => {
       if (response.data) {
@@ -284,7 +297,13 @@ const Projects: NextPage = () => {
     const signal = controller.signal;
     if (router.isReady) {
       (async () => {
-        await load_edition(axiosAuth, setEditionActive, signal, setError, router);
+        await load_edition(
+          axiosAuth,
+          setEditionActive,
+          signal,
+          setError,
+          router
+        );
       })();
     }
     return () => {
@@ -606,9 +625,9 @@ const Projects: NextPage = () => {
                         <button
                           className={`${
                             user.role == UserRole.Admin ? 'visible' : 'hidden'
-                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300 disabled:brightness-75 disabled:cursor-not-allowed`}
+                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300 disabled:cursor-not-allowed disabled:brightness-75`}
                           onClick={() => {
-                            setShowCreateProject(true)
+                            setShowCreateProject(true);
                           }}
                           disabled={!editionActive}
                         >
