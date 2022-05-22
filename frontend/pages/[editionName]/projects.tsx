@@ -29,7 +29,11 @@ import FlatList from 'flatlist-react';
 import useUser from '../../hooks/useUser';
 import { SpinnerCircular } from 'spinners-react';
 import Error from '../../components/Error';
-import { getUrlMap, parseError } from '../../lib/requestUtils';
+import {
+  fetchEditionState,
+  getUrlMap,
+  parseError,
+} from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
@@ -230,11 +234,14 @@ const Projects: NextPage = () => {
   const [projectForm, setProjectForm] = useState(
     JSON.parse(JSON.stringify({ ...defaultprojectForm }))
   );
+  const [editionActive, setEditionActive] = useState(true);
 
   const edition = router.query.editionName as string;
 
   let controller = new AbortController();
   useAxiosAuth();
+
+  fetchEditionState(setEditionActive, setError, router);
 
   useEffect(() => {
     state.page = 0;
@@ -541,8 +548,11 @@ const Projects: NextPage = () => {
                         <button
                           className={`${
                             user.role == UserRole.Admin ? 'visible' : 'hidden'
-                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300`}
-                          onClick={() => setShowCreateProject(true)}
+                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300 disabled:cursor-not-allowed disabled:brightness-75`}
+                          onClick={() => {
+                            setShowCreateProject(true);
+                          }}
+                          disabled={!editionActive}
                         >
                           Create new project
                         </button>
@@ -566,6 +576,7 @@ const Projects: NextPage = () => {
                           projectInput={project}
                           conflictStudents={[] as string[]}
                           refreshProjects={refreshProjects}
+                          editionActive={editionActive}
                         />
                       )}
                       renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show

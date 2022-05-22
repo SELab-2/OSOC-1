@@ -23,7 +23,12 @@ import {
   convertStudentBaseList,
   convertStudentFullToList,
 } from '../../lib/conversionUtils';
-import { getUrlList, getUrlMap, parseError } from '../../lib/requestUtils';
+import {
+  fetchEditionState,
+  getUrlList,
+  getUrlMap,
+  parseError,
+} from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
 import { axiosAuthenticated } from '../../lib/axios';
@@ -306,9 +311,12 @@ const StudentView: React.FC<StudentViewProp> = ({
   const [suggestion, setSuggestion] = useState('');
   const [motivation, setMotivation] = useState('');
   const [deletePopup, setDeletePopup] = useState(false);
+  const [editionActive, setEditionActive] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
   let controller = new AbortController();
+
+  fetchEditionState(setEditionActive, setError, router);
 
   useEffect(() => {
     setStudentBaseList(studentInput);
@@ -400,7 +408,12 @@ const StudentView: React.FC<StudentViewProp> = ({
       </div>
 
       {/* holds suggestion controls */}
-      <div className={`mr-8 ml-8 mb-6 flex flex-col xl:mb-0 xl:ml-0`}>
+      <div
+        className={
+          `mr-8 ml-8 mb-6 flex flex-col xl:mb-0 xl:ml-0 ` +
+          (editionActive ? 'visible' : 'hidden')
+        }
+      >
         {/* regular coach status suggestion form */}
         <form
           className={`border-2 p-2`}

@@ -37,6 +37,7 @@ type ProjectProp = {
   projectInput: ProjectBase;
   refreshProjects: () => void;
   conflictStudents: UUID[];
+  editionActive: boolean;
 };
 
 type UserProp = {
@@ -53,6 +54,7 @@ type AssignmentProp = {
   setAssignmentId: (assignmentId: UUID) => void;
   setRemoveStudentName: (removeStudentName: string) => void;
   conflictStudents: UUID[];
+  editionActive: boolean;
 };
 
 /**
@@ -283,6 +285,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
   projectInput,
   refreshProjects,
   conflictStudents,
+  editionActive,
 }: ProjectProp) => {
   const router = useRouter();
   const [user] = useUser();
@@ -388,6 +391,8 @@ const ProjectTile: React.FC<ProjectProp> = ({
     () => ({
       accept: ItemTypes.STUDENTTILE,
       canDrop: (item) => {
+        if (!editionActive) return false;
+
         return !myProject.assignments
           .map((assignment) => assignment.student.id)
           .includes((item as Student).id);
@@ -401,7 +406,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
         canDrop: monitor.canDrop(),
       }),
     }),
-    [myProject]
+    [myProject, editionActive]
   );
 
   const refresh = () => {
@@ -450,9 +455,12 @@ const ProjectTile: React.FC<ProjectProp> = ({
             <p className="inline text-lg font-bold">
               {myProject.name}
               <i
-                className={`${
-                  user.role == UserRole.Admin ? 'visible' : 'hidden'
-                } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer`}
+                className={
+                  `${
+                    user.role == UserRole.Admin ? 'visible' : 'hidden'
+                  } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer ` +
+                  (editionActive ? 'visible' : 'hidden')
+                }
                 onClick={() => setShowEditProject(true)}
               >
                 {edit_icon}
@@ -487,6 +495,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               setAssignmentId={setAssignmentId}
               setRemoveStudentName={setRemoveStudentName}
               conflictStudents={conflictStudents}
+              editionActive={editionActive}
             />
           ))}
       </div>
@@ -784,6 +793,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
   setOpenUnassignment,
   setRemoveStudentName,
   conflictStudents,
+  editionActive,
 }: AssignmentProp) => {
   return (
     <div className="flex flex-row justify-between pb-4">
@@ -825,7 +835,10 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
             );
             setOpenUnassignment(true);
           }}
-          className="icon-xcircle-red text-2xl hover:cursor-pointer"
+          className={
+            'icon-xcircle-red text-2xl hover:cursor-pointer ' +
+            (editionActive ? 'visible block' : 'hidden')
+          }
         >
           {xmark_circle}
         </i>

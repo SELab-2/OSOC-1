@@ -102,6 +102,7 @@ const Editions: NextPage = () => {
 
   const updateEdition = (_edition: string) => {
     setEdition(_edition);
+    localStorage.setItem('edition', _edition);
     router.push(`/${_edition}/projects`);
   };
 
