@@ -436,7 +436,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               <i
                 className={`${
                   user.role == UserRole.Admin ? 'visible' : 'hidden'
-                } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer`}
+                } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer ` + (editionActive ? 'visible': 'block hidden')}
                 onClick={() => setShowEditProject(true)}
               >
                 {edit_icon}
