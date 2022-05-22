@@ -218,6 +218,7 @@ const Users: NextPage = () => {
                     type="email"
                     className="w-2/5 rounded border-2 border-gray-200 px-1 py-1"
                     required
+                    placeholder="user@example.com"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                   />
