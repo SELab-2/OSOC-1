@@ -33,6 +33,7 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
 
 class ProjectServiceTests {
+    private val scheme = System.getenv("OSOC_SCHEME") ?: "http"
     private val testId = UUID.randomUUID()
     private val testStudent = Student("Lars", "Van Cauter", "")
     private val testCoach = User("Lars2 Van Cauter", "lars2@email.com", Role.Coach, "password")
@@ -219,7 +220,7 @@ class ProjectServiceTests {
         val service = ProjectService(repository, mockk(), getUserService())
 
         val mockRequest = MockHttpServletRequest()
-        mockRequest.scheme = "http"
+        mockRequest.scheme = scheme
         mockRequest.serverName = "example.com"
         mockRequest.serverPort = -1
         mockRequest.contextPath = "/api"
@@ -227,19 +228,19 @@ class ProjectServiceTests {
         val conflictList = service.getConflicts(testEdition)
         assert(
             conflictList[0] == ProjectService.Conflict(
-                "http://example.com/api/$testEdition/students/" + testStudent.id,
+                "$scheme://example.com/api/$testEdition/students/" + testStudent.id,
                 mutableListOf(
-                    "http://example.com/api/$testEdition/projects/" + testProjectConflict.id,
-                    "http://example.com/api/$testEdition/projects/" + testProjectConflict2.id
+                    "$scheme://example.com/api/$testEdition/projects/" + testProjectConflict.id,
+                    "$scheme://example.com/api/$testEdition/projects/" + testProjectConflict2.id
                 )
             )
         )
         assert(
             conflictList[1] == ProjectService.Conflict(
-                "http://example.com/api/$testEdition/students/" + testStudent2.id,
+                "$scheme://example.com/api/$testEdition/students/" + testStudent2.id,
                 mutableListOf(
-                    "http://example.com/api/$testEdition/projects/" + testProjectConflict2.id,
-                    "http://example.com/api/$testEdition/projects/" + testProjectConflict3.id
+                    "$scheme://example.com/api/$testEdition/projects/" + testProjectConflict2.id,
+                    "$scheme://example.com/api/$testEdition/projects/" + testProjectConflict3.id
                 )
             )
         )
