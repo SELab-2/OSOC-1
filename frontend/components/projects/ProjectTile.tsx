@@ -391,6 +391,9 @@ const ProjectTile: React.FC<ProjectProp> = ({
     () => ({
       accept: ItemTypes.STUDENTTILE,
       canDrop: (item) => {
+        if (!editionActive)
+          return false;
+
         return !myProject.assignments
           .map((assignment) => assignment.student.id)
           .includes((item as Student).id);
