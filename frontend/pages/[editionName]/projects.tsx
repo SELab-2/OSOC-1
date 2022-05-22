@@ -13,7 +13,7 @@ import {
   Url,
   UserRole,
   UUID,
-  conflictMapType,
+  conflictMapType, Edition,
 } from '../../lib/types';
 import { axiosAuthenticated } from '../../lib/axios';
 import Endpoints from '../../lib/endpoints';
@@ -106,6 +106,19 @@ function searchProject(
         setLoading(false);
       }
     });
+}
+
+async function load_edition(setEditionActive: (active: boolean) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
+  try {
+    console.log("Load edition!");
+    const edition = router.query.editionName as string;
+    const response = await axiosAuthenticated.get<Edition>(Endpoints.EDITIONS + '/' + edition);
+    if (response.data) {
+      setEditionActive(response.data.isActive);
+    }
+  } catch (err) {
+    parseError(err, setError, router, signal);
+  }
 }
 
 /**
@@ -231,6 +244,7 @@ const Projects: NextPage = () => {
   const [projectForm, setProjectForm] = useState(
     JSON.parse(JSON.stringify({ ...defaultprojectForm }))
   );
+  const [editionActive, setEditionActive] = useState(true);
   const elementRef1 = useRef<HTMLDivElement>(null);
   const isOnScreen = useOnScreen(elementRef1);
 
@@ -238,6 +252,15 @@ const Projects: NextPage = () => {
 
   let controller = new AbortController();
   useAxiosAuth();
+
+  useEffect(() => {
+    const controller = new AbortController();
+    if (router.isReady) {
+      (async () => {
+        await load_edition(setEditionActive, controller.signal, setError, router);
+      })();
+    }
+  }, [router.isReady]);
 
   useEffect(() => {
     state.page = 0;
@@ -553,8 +576,11 @@ const Projects: NextPage = () => {
                         <button
                           className={`${
                             user.role == UserRole.Admin ? 'visible' : 'hidden'
-                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300`}
-                          onClick={() => setShowCreateProject(true)}
+                          } justify-right ml-2 min-w-[160px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300 disabled:brightness-75 disabled:cursor-not-allowed`}
+                          onClick={() => {
+                            setShowCreateProject(true)
+                          }}
+                          disabled={!editionActive}
                         >
                           Create new project
                         </button>
