@@ -70,7 +70,7 @@ const CommsTable: FC<CommsTableProps> = ({
               {showFilter ? (
                 <>
                   <input
-                    type="search"
+                    type="text"
                     className="box-border border-2 pl-5 sm:w-11/12 xl:w-3/5"
                     ref={filterRef}
                     value={nameFilter}
