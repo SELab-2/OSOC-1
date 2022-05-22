@@ -63,27 +63,40 @@ const CommsTable: FC<CommsTableProps> = ({
 
   return (
     <table className="w-full table-fixed">
-      <thead className="sticky top-0 bg-white">
+      <thead className="sticky top-[48px] bg-white">
         <tr>
           <th className="w-1/4 py-4 text-left text-lg">
             <div className="flex flex-row items-center justify-start">
               {showFilter ? (
-                <input
-                  type="text"
-                  className="border-2"
-                  ref={filterRef}
-                  value={nameFilter}
-                  onChange={(e) => setNameFilter(e.target.value)}
-                />
+                <>
+                  <input
+                    type="text"
+                    className="box-border border-2 pl-5 sm:w-11/12 xl:w-3/5"
+                    ref={filterRef}
+                    value={nameFilter}
+                    onChange={(e) => setNameFilter(e.target.value)}
+                  />
+                  <button
+                    className="absolute ml-1 block h-4 w-4 rounded-[50%] text-2xl leading-[14px]"
+                    onClick={() => setShowFilter(false)}
+                  >
+                    &times;
+                  </button>
+                </>
               ) : (
-                <p className="text-left text-lg">Student Name</p>
+                <>
+                  <div
+                    className="flex flex-row items-center hover:cursor-pointer"
+                    onClick={() => setShowFilter(true)}
+                    title="search user"
+                  >
+                    <p className="text-left text-lg">Student Name</p>
+                    <div className="ml-2 h-fit w-fit hover:cursor-pointer">
+                      <SearchIcon className="h-4 w-4" />
+                    </div>
+                  </div>
+                </>
               )}
-              <div
-                className="ml-2 h-fit w-fit hover:cursor-pointer"
-                onClick={() => setShowFilter(!showFilter)}
-              >
-                <SearchIcon className="h-4 w-4" />
-              </div>
             </div>
           </th>
           {/*<th className="w-1/4 py-4 text-left text-lg">Student Name</th>*/}

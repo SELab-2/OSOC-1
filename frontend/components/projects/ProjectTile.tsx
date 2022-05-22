@@ -327,7 +327,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
     } else {
       controller2.abort();
       controller2 = new AbortController();
-      const signal = controller.signal;
+      const signal = controller2.signal;
       const newPositions = [] as Position[];
 
       (async () => {
@@ -759,9 +759,10 @@ const ProjectPositionsList: React.FC<PositionProp> = ({
   position,
 }: PositionProp) => {
   return (
-    <div className="text-right">
-      <p className="my-1 inline bg-gray-300 px-1">
-        {position.amount + 'x ' + position.skill.skillName}
+    <div className="mb-1 text-right">
+      <p className="project-position">
+        <span className="font-semibold">{position.amount + 'x '}</span>
+        {position.skill.skillName}
       </p>
     </div>
   );

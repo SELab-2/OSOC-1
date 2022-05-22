@@ -312,7 +312,7 @@ const StudentView: React.FC<StudentViewProp> = ({
   const [motivation, setMotivation] = useState('');
   const [deletePopup, setDeletePopup] = useState(false);
   const [editionActive, setEditionActive] = useState(true);
-  const [error, setError]: [string, (error: string) => void] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
   let controller = new AbortController();
 
@@ -370,9 +370,9 @@ const StudentView: React.FC<StudentViewProp> = ({
   const pronouns = answers.commonPronouns || answers.otherPronouns;
   return (
     <div className={`flex flex-col-reverse justify-between xl:flex-row`}>
-      {error && <Error error={error} className="mb-4" />}
+      {error && <Error error={error} setError={setError} className="mb-4" />}
       {/* hold the student information */}
-      <div className="mx-8 flex w-full flex-col bg-osoc-neutral-bg px-4 py-3">
+      <div className="mx-8 flex flex-col bg-osoc-neutral-bg px-4 py-3">
         <div className="flex flex-row pt-2">
           <h1 className="text-4xl font-semibold">
             {answers.preferredName ||
@@ -394,6 +394,9 @@ const StudentView: React.FC<StudentViewProp> = ({
         </div>
         <div className="flex flex-col">
           <h3 className="pt-12 text-2xl">Suggestions</h3>
+          {myStudent.statusSuggestions.length === 0 && (
+            <p>No suggestions yet.</p>
+          )}
           {myStudent.statusSuggestions.map((statusSuggestion) => (
             <StudentStatusSuggestion
               key={statusSuggestion.suggester.id}
@@ -407,7 +410,7 @@ const StudentView: React.FC<StudentViewProp> = ({
       {/* holds suggestion controls */}
       <div
         className={
-          `mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0 ` +
+          `mr-8 ml-8 mb-6 flex flex-col xl:mb-0 xl:ml-0 ` +
           (editionActive ? 'visible' : 'block hidden')
         }
       >
@@ -446,7 +449,7 @@ const StudentView: React.FC<StudentViewProp> = ({
             };
           }}
         >
-          <div className={`flex w-[400px] flex-row justify-between `}>
+          <div className={`flex w-[400px] flex-row justify-between`}>
             <button
               className={`w-[30%] rounded-sm bg-check-green py-[2px] px-1 py-1 text-sm font-medium text-white hover:brightness-95`}
               onClick={() => setSuggestion('Yes')}

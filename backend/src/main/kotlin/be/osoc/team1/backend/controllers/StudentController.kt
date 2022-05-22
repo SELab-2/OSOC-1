@@ -63,6 +63,7 @@ class StudentController(
      * [Basic] will limit the data the student object contains,
      * [Communication] is limited but has the communication field of the student,
      * [List] is limited but has the required fields for a list view,
+     * [Extra] is limited but has the required fields for a more detailed view,
      * [Full] will return the full object.
      */
     @GetMapping
