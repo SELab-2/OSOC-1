@@ -386,7 +386,9 @@ const StudentView: React.FC<StudentViewProp> = ({
         </div>
         <div className="flex flex-col">
           <h3 className="pt-12 text-2xl">Suggestions</h3>
-          {suggestion.length === 0 && <p>No suggestions yet.</p>}
+          {myStudent.statusSuggestions.length === 0 && (
+            <p>No suggestions yet.</p>
+          )}
           {myStudent.statusSuggestions.map((statusSuggestion) => (
             <StudentStatusSuggestion
               key={statusSuggestion.suggester.id}
