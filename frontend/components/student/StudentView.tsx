@@ -411,7 +411,7 @@ const StudentView: React.FC<StudentViewProp> = ({
       <div
         className={
           `mr-8 ml-8 mb-6 flex flex-col xl:mb-0 xl:ml-0 ` +
-          (editionActive ? 'visible' : 'block hidden')
+          (editionActive ? 'visible' : 'hidden')
         }
       >
         {/* regular coach status suggestion form */}
