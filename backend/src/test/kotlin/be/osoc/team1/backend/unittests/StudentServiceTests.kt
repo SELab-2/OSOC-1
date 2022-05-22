@@ -10,8 +10,9 @@ import be.osoc.team1.backend.entities.SuggestionEnum
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidCommunicationIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
-import be.osoc.team1.backend.exceptions.InvalidUserIdException
+import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.Sort
-import java.util.UUID
 
 class StudentServiceTests {
 
@@ -35,7 +35,8 @@ class StudentServiceTests {
     private val testStudent = Student("Tom", "Alard", testEdition)
     private val studentId = testStudent.id
     private val testCoach = User("", "", Role.Coach, "")
-    private val testSuggestion = StatusSuggestion(testCoach.id, SuggestionEnum.Yes, "test motivation")
+    private val testSuggestion = StatusSuggestion(testCoach, SuggestionEnum.Yes, "test motivation")
+    private val testCommunication = Communication("test message", CommunicationTypeEnum.Email, student = testStudent)
     private val userService = mockk<UserService>()
     private val defaultSort = Sort.by("id")
 
@@ -50,56 +51,62 @@ class StudentServiceTests {
         return repository
     }
 
+    private fun getCommunicationRepository(communicationExists: Boolean): CommunicationRepository {
+        val communicationRepository: CommunicationRepository = mockk()
+        every { communicationRepository.findByIdAndEdition(testCommunication.id, testEdition) } returns if (communicationExists) testCommunication else null
+        return communicationRepository
+    }
+
     @Test
     fun `getAllStudents does not fail`() {
-        val service = StudentService(getRepository(true), userService)
+        val service = StudentService(getRepository(true), userService, getCommunicationRepository(true))
         assertEquals(listOf(testStudent), service.getAllStudents(defaultSort, testEdition))
     }
 
     @Test
     fun `getStudentById succeeds when student with id exists`() {
-        val service = StudentService(getRepository(true), userService)
+        val service = StudentService(getRepository(true), userService, getCommunicationRepository(true))
         assertEquals(testStudent, service.getStudentById(studentId, testEdition))
     }
 
     @Test
     fun `getStudentById fails when no student with that id exists`() {
-        val service = StudentService(getRepository(false), userService)
+        val service = StudentService(getRepository(false), userService, getCommunicationRepository(true))
         assertThrows<InvalidStudentIdException> { service.getStudentById(studentId, testEdition) }
     }
 
     @Test
     fun `deleteStudentById succeeds when student with id exists`() {
         val repository = getRepository(true)
-        val service = StudentService(repository, userService)
+        val service = StudentService(repository, userService, getCommunicationRepository(true))
         service.deleteStudentById(studentId)
         verify { repository.deleteById(studentId) }
     }
 
     @Test
     fun `deleteStudentById fails when no student with that id exists`() {
-        val service = StudentService(getRepository(false), userService)
+        val service = StudentService(getRepository(false), userService, getCommunicationRepository(true))
         assertThrows<InvalidStudentIdException> { service.deleteStudentById(studentId) }
     }
 
     @Test
     fun `addStudent saves student`() {
         val repository = getRepository(false)
-        val service = StudentService(repository, userService)
+        val service = StudentService(repository, userService, getCommunicationRepository(true))
         service.addStudent(testStudent)
         verify { repository.save(testStudent) }
     }
 
     @Test
     fun `addStudent returns student with some other id than what was passed`() {
-        val service = StudentService(getRepository(false), userService)
+        val service = StudentService(getRepository(false), userService, getCommunicationRepository(true))
         assertNotEquals(service.addStudent(testStudent).id, studentId)
     }
 
     @Test
     fun `setStudentStatus changes student status when student with id exists`() {
         val repository = getRepository(true)
-        val service = StudentService(repository, userService)
+        val service = StudentService(repository, userService, getCommunicationRepository(true))
         service.setStudentStatus(studentId, StatusEnum.Yes, testEdition)
         testStudent.status = StatusEnum.Yes // Bit of a hack
         verify { repository.save(testStudent) }
@@ -108,7 +115,7 @@ class StudentServiceTests {
 
     @Test
     fun `setStudentStatus fails when no student with that id exists`() {
-        val service = StudentService(getRepository(false), userService)
+        val service = StudentService(getRepository(false), userService, getCommunicationRepository(true))
         assertThrows<InvalidStudentIdException> { service.setStudentStatus(studentId, StatusEnum.Yes, testEdition) }
     }
 
@@ -121,8 +128,7 @@ class StudentServiceTests {
         every { repository.findByIdAndEdition(studentId, testEdition) } returns student
         every { repository.save(student) } returns student
         val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
-        val service = StudentService(repository, customUserService)
+        val service = StudentService(repository, customUserService, getCommunicationRepository(true))
         service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition)
         val suggestionId = testSuggestion.id
         verify { student.statusSuggestions.add(testSuggestion) }
@@ -132,8 +138,7 @@ class StudentServiceTests {
     @Test
     fun `addStudentStatusSuggestion fails when no student with that id exists`() {
         val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
-        val service = StudentService(getRepository(false), customUserService)
+        val service = StudentService(getRepository(false), customUserService, getCommunicationRepository(true))
         assertThrows<InvalidStudentIdException> { service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition) }
     }
 
@@ -141,46 +146,28 @@ class StudentServiceTests {
     fun `addStudentStatusSuggestion fails when coach already made suggestion for student`() {
         val repository: StudentRepository = mockk()
         val student: Student = mockk()
-        val coachId2 = UUID.randomUUID()
-        val testSuggestion2 = StatusSuggestion(coachId2, SuggestionEnum.No, "test motivation2")
+        val coach2 = User("coach 2", "coach2@email.com", Role.Admin, "password")
+        val testSuggestion2 = StatusSuggestion(coach2, SuggestionEnum.No, "test motivation2")
         every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion2, testSuggestion).iterator()
         every { repository.findByIdAndEdition(studentId, testEdition) } returns student
         val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
-        val service = StudentService(repository, customUserService)
+        val service = StudentService(repository, customUserService, getCommunicationRepository(true))
         assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition) }
     }
 
     @Test
-    fun `addStudentStatusSuggestion fails when coach does not exist`() {
-        val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) }.throws(InvalidUserIdException())
-        val service = StudentService(getRepository(true), customUserService)
-        assertThrows<InvalidUserIdException> { service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition) }
-    }
-
-    @Test
-    fun `addStudentStatusSuggestion fails when user does not have coach role`() {
-        val disabledUser = User("", "", Role.Disabled, "")
-        val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) } returns disabledUser
-        val service = StudentService(getRepository(true), customUserService)
-        assertThrows<ForbiddenOperationException> { service.addStudentStatusSuggestion(studentId, testSuggestion, testEdition) }
-    }
-
-    @Test
-    fun `deleteStudentStatusSuggestion removes suggestion when student, suggestion and coach exist`() {
+    fun `deleteStudentStatusSuggestion removes suggestion when student, suggestion and suggester exist`() {
         val repository: StudentRepository = mockk()
         val student: Student = mockk()
-        val coachId2 = UUID.randomUUID()
-        val testSuggestion2 = StatusSuggestion(coachId2, SuggestionEnum.No, "test motivation2")
+        val coach2 = User("coach 2", "coach2@email.com", Role.Admin, "password")
+        val testSuggestion2 = StatusSuggestion(coach2, SuggestionEnum.No, "test motivation2")
         every { student.statusSuggestions.remove(testSuggestion) } returns true
         every { student.statusSuggestions.iterator() } returns mutableListOf(testSuggestion2, testSuggestion).iterator()
         every { repository.findByIdAndEdition(studentId, testEdition) } returns student
         every { repository.save(student) } returns student
         val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
-        val service = StudentService(repository, customUserService)
+        every { customUserService.getUserById(testSuggestion.suggester.id) } returns testCoach
+        val service = StudentService(repository, customUserService, getCommunicationRepository(true))
         service.deleteStudentStatusSuggestion(studentId, testCoach.id, testEdition)
         verify { student.statusSuggestions.remove(testSuggestion) }
     }
@@ -188,43 +175,47 @@ class StudentServiceTests {
     @Test
     fun `deleteStudentStatusSuggestion fails when no student with that id exists`() {
         val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
-        val service = StudentService(getRepository(false), customUserService)
+        every { customUserService.getUserById(testCoach.id) } returns testCoach
+        val service = StudentService(getRepository(false), customUserService, getCommunicationRepository(true))
         assertThrows<InvalidStudentIdException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id, testEdition) }
     }
 
     @Test
     fun `deleteStudentStatusSuggestion fails when given coach hasn't made a suggestion for this student`() {
         val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) } returns testCoach
-        val service = StudentService(getRepository(true), customUserService)
+        every { customUserService.getUserById(testCoach.id) } returns testCoach
+        val service = StudentService(getRepository(true), customUserService, getCommunicationRepository(true))
         assertThrows<FailedOperationException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id, testEdition) }
-    }
-
-    @Test
-    fun `deleteStudentStatusSuggestion fails when coach does not exist`() {
-        val customUserService: UserService = mockk()
-        every { customUserService.getUserById(testSuggestion.coachId) }.throws(InvalidUserIdException())
-        val service = StudentService(getRepository(true), customUserService)
-        assertThrows<InvalidUserIdException> { service.deleteStudentStatusSuggestion(studentId, testCoach.id, testEdition) }
     }
 
     @Test
     fun `addCommunicationToStudent adds communication to list of student`() {
         val repository = getRepository(true)
-        val service = StudentService(repository, userService)
-        val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
-        service.addCommunicationToStudent(studentId, testCommunication, testEdition)
-        testStudent.communications.add(testCommunication) // Bit of a hack
+        val service = StudentService(repository, userService, getCommunicationRepository(true))
+        service.addCommunicationToStudent(testCommunication, testEdition)
         verify { repository.save(testStudent) }
-        testStudent.communications.remove(testCommunication)
+        assertEquals(true, testStudent.communications.remove(testCommunication))
     }
 
     @Test
-    fun `addCommunicationToStudent fails when no student with that id exists`() {
-        val service = StudentService(getRepository(false), userService)
-        val testCommunication = Communication("test message", CommunicationTypeEnum.Email)
-        assertThrows<InvalidStudentIdException> { service.addCommunicationToStudent(studentId, testCommunication, testEdition) }
+    fun `removeCommunicationForStudent removes communication to list of student`() {
+        val repository = getRepository(true)
+        val service = StudentService(repository, userService, getCommunicationRepository(true))
+        testStudent.communications.add(testCommunication)
+
+        service.removeCommunicationFromStudent(testCommunication.id, testEdition)
+        verify { repository.save(testStudent) }
+        assertEquals(false, testStudent.communications.remove(testCommunication))
+    }
+
+    @Test
+    fun `removeCommunicationForStudent fails if communication doesn't exist`() {
+        val repository = getRepository(true)
+        val service = StudentService(repository, userService, getCommunicationRepository(false))
+        testStudent.communications.add(testCommunication)
+
+        assertThrows<InvalidCommunicationIdException> { service.removeCommunicationFromStudent(testCommunication.id, testEdition) }
+        assertEquals(true, testStudent.communications.remove(testCommunication))
     }
 
     @Test

@@ -5,20 +5,46 @@ import be.osoc.team1.backend.entities.Assignment
 import be.osoc.team1.backend.entities.Position
 import be.osoc.team1.backend.entities.Skill
 import be.osoc.team1.backend.entities.StatusSuggestion
+import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.services.AnswerService
 import be.osoc.team1.backend.services.AssignmentService
 import be.osoc.team1.backend.services.BaseService
+import be.osoc.team1.backend.services.EditionService
+import be.osoc.team1.backend.services.OsocUserDetailService
 import be.osoc.team1.backend.services.PositionService
 import be.osoc.team1.backend.services.SkillService
 import be.osoc.team1.backend.services.StatusSuggestionService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import javax.servlet.http.HttpServletRequest
 
-abstract class BaseController<T, K>(open val service: BaseService<T, K>) {
+abstract class BaseController<T : Any, K>(open val service: BaseService<T, K>) {
+    @Autowired
+    lateinit var editionService: EditionService
+
+    @Autowired
+    lateinit var userDetailService: OsocUserDetailService
+
+    @Autowired
+    lateinit var request: HttpServletRequest
+
+    /**
+     * Checks if this [entity] can be accessed by the requesting user.
+     * If the edition of the [entity] isn't active and the requesting user isn't admin [attemptEditionAccess] will throw an [UnauthorizedOperationException]
+     */
+    private fun attemptAccess(entity: T): T {
+        val reflection = entity::class.java.getDeclaredField("edition")
+        reflection.isAccessible = true
+        val editionName = reflection.get(entity) as String
+        attemptEditionAccess(editionName, editionService, userDetailService, request)
+
+        return entity
+    }
 
     /**
      * Returns the [T] with the corresponding [id]. If no such [T] exists, returns a
@@ -26,10 +52,10 @@ abstract class BaseController<T, K>(open val service: BaseService<T, K>) {
      */
     @GetMapping("/{id}")
     @Secured("ROLE_COACH")
-    fun getById(@PathVariable id: K): T = service.getById(id)
+    open fun getById(@PathVariable id: K): T = attemptAccess(service.getById(id))
 }
 
-abstract class BaseAllController<T, K>(service: BaseService<T, K>) : BaseController<T, K>(service) {
+abstract class BaseAllController<T : Any, K>(service: BaseService<T, K>) : BaseController<T, K>(service) {
 
     /**
      * Returns all objects of type [T].

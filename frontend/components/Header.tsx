@@ -1,20 +1,80 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { PropsWithChildren } from 'react';
+import { Dispatch, FC, PropsWithChildren, SetStateAction } from 'react';
 import useUser from '../hooks/useUser';
 import { UserRole } from '../lib/types';
 import useEdition from '../hooks/useEdition';
+import useAxiosAuth from '../hooks/useAxiosAuth';
+import Endpoints from '../lib/endpoints';
+import axios from 'axios';
 
-type HeaderProps = PropsWithChildren<unknown>;
+type EditionHeaderLinkProps = HeaderLinkProps;
 
-const Header: React.FC<HeaderProps> = () => {
-  const router = useRouter();
-  const [user] = useUser();
+const EditionHeaderLink: FC<EditionHeaderLinkProps> = ({ href, children }) => {
   const [edition] = useEdition();
+
+  return <HeaderLink href={`/${edition}${href}`}>{children}</HeaderLink>;
+};
+
+type HeaderLinkProps = PropsWithChildren<{
+  href: string;
+}>;
+
+const HeaderLink: FC<HeaderLinkProps> = ({
+  href,
+  children,
+}: HeaderLinkProps) => {
+  const router = useRouter();
   const current_path = router.pathname;
 
   return (
-    <header className="flex h-fit w-full flex-col items-center justify-between px-4 shadow-lg sm:h-12 sm:flex-row">
+    <li
+      className={`ml-3 hover:underline sm:inline ${
+        current_path.endsWith(href) ? 'underline' : ''
+      }`}
+    >
+      <Link href={href}>{children}</Link>
+    </li>
+  );
+};
+
+type HeaderProps = PropsWithChildren<{
+  setError: Dispatch<SetStateAction<string>>;
+}>;
+
+const Header: React.FC<HeaderProps> = ({ setError }: HeaderProps) => {
+  const [user] = useUser();
+  const [edition] = useEdition();
+  const router = useRouter();
+  const axiosAuth = useAxiosAuth();
+
+  const logout = async () => {
+    try {
+      // remove information stored in localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('email');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      }
+      // log out on backend
+      await axiosAuth.post(Endpoints.LOGOUT);
+
+      // push back to login
+      router.push({
+        pathname: '/login',
+        query: { message: 'Succesfully logged out!' },
+      });
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.message);
+      } else {
+        setError(err as string);
+      }
+    }
+  };
+
+  return (
+    <header className="fixed z-[100] mb-4 flex h-fit w-full flex-col items-center justify-between bg-white px-4 shadow-lg sm:h-12 sm:flex-row">
       <div className="flex flex-row items-center">
         <img
           src="https://osoc.be/img/logo/logo-osoc-color.svg"
@@ -27,39 +87,27 @@ const Header: React.FC<HeaderProps> = () => {
       </div>
       <nav className="text-center">
         <ul className="m-0 p-0">
-          <li
-            className={`hover:underline sm:inline ${
-              current_path === '/students' ? 'underline' : ''
-            }`}
-          >
-            <Link href={`/${edition}/students`}>Select Students</Link>
-          </li>
-          <li
-            className={`ml-3 hover:underline sm:inline ${
-              current_path === '/projects' ? 'underline' : ''
-            }`}
-          >
-            <Link href={`/${edition}/projects`}>Projects</Link>
-          </li>
-          <li
-            className={`ml-3 hover:underline sm:inline ${
-              current_path === '/users' ? 'underline' : ''
-            }`}
-          >
-            <Link href="/users">Manage Users</Link>
-          </li>
+          {edition && (
+            <>
+              <EditionHeaderLink href="/students">
+                Select Students
+              </EditionHeaderLink>
+              <EditionHeaderLink href="/projects">Projects</EditionHeaderLink>
+              <EditionHeaderLink href="/communications">
+                Communications
+              </EditionHeaderLink>
+            </>
+          )}
+          <HeaderLink href="/users">Manage Users</HeaderLink>
 
-          {[UserRole.Admin].includes(user.role) ? (
-            <li
-              className={`ml-3 hover:underline sm:inline ${
-                current_path === '/editions' ? 'underline' : ''
-              }`}
-            >
-              <Link href="/editions">Manage Editions</Link>
-            </li>
-          ) : undefined}
-          <li className={`ml-3 hover:underline sm:inline`}>
-            <Link href="/logout">Log Out</Link>
+          {[UserRole.Admin].includes(user.role) && (
+            <HeaderLink href="/editions">Manage Editions</HeaderLink>
+          )}
+          <li
+            className="ml-3 hover:cursor-pointer hover:underline sm:inline"
+            onClick={logout}
+          >
+            Log Out
           </li>
         </ul>
       </nav>

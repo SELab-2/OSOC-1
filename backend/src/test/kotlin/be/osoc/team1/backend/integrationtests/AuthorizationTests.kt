@@ -1,8 +1,10 @@
 package be.osoc.team1.backend.integrationtests
 
+import be.osoc.team1.backend.entities.Edition
 import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
+import be.osoc.team1.backend.repositories.EditionRepository
 import be.osoc.team1.backend.repositories.StudentRepository
 import be.osoc.team1.backend.repositories.UserRepository
 import be.osoc.team1.backend.security.ConfigUtil
@@ -40,6 +42,7 @@ class AuthorizationTests {
         userRepository.save(coachUser)
         userRepository.save(disabledUser)
         studentRepository.save(testStudent)
+        editionRepository.save(testEdition)
     }
 
     @Autowired
@@ -51,7 +54,11 @@ class AuthorizationTests {
     @Autowired
     private lateinit var userRepository: UserRepository
 
+    @Autowired
+    private lateinit var editionRepository: EditionRepository
+
     private val testEditionName = "testEditionName"
+    private val testEdition = Edition(testEditionName, true)
     private val studentBaseUrl = "/$testEditionName/students"
 
     private val adminPassword = "adminPassword"
@@ -360,12 +367,12 @@ class AuthorizationTests {
     }
 
     @Test
-    fun `use access token to renew access token returns 400`() {
+    fun `use access token to renew access token returns 418`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken: String = JSONObject(logInResponse.body).get("accessToken") as String
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(accessToken)
-        assert(refreshResponse.statusCodeValue == 400)
+        assert(refreshResponse.statusCodeValue == 418)
     }
 
     @Test
@@ -385,14 +392,14 @@ class AuthorizationTests {
     }
 
     @Test
-    fun `using same refresh token twice returns 400`() {
+    fun `using same refresh token twice returns 418`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val refreshToken: String = JSONObject(logInResponse.body).get("refreshToken") as String
 
         val firstRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
         assert(firstRefreshResponse.statusCodeValue == 200)
         val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
-        assert(secondRefreshResponse.statusCodeValue == 400)
+        assert(secondRefreshResponse.statusCodeValue == 418)
     }
 
     @Test
@@ -404,42 +411,42 @@ class AuthorizationTests {
         assert(firstRefreshResponse.statusCodeValue == 200)
 
         val secondRefreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
-        assert(secondRefreshResponse.statusCodeValue == 400)
+        assert(secondRefreshResponse.statusCodeValue == 418)
 
         val firstRefreshToken: String = JSONObject(firstRefreshResponse.body).get("refreshToken") as String
         val thirdRefreshResponse: ResponseEntity<String> = requestNewAccessToken(firstRefreshToken)
-        assert(thirdRefreshResponse.statusCodeValue == 400)
+        assert(thirdRefreshResponse.statusCodeValue == 418)
     }
 
     @Test
-    fun `logout works when not logged in`() {
+    fun `logout returns 401 when not logged in`() {
         val logoutRequest = HttpEntity(null, HttpHeaders())
         val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
-        assert(logoutResponse.statusCodeValue == 302)
+        assert(logoutResponse.statusCodeValue == 401)
     }
 
     @Test
-    fun `logout works when logged in`() {
+    fun `logout returns 200 when logged in`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken = JSONObject(logInResponse.body).get("accessToken") as String
 
         val logoutRequest = HttpEntity(null, createAuthHeaders(accessToken))
         val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
-        assert(logoutResponse.statusCodeValue == 302)
+        assert(logoutResponse.statusCodeValue == 200)
     }
 
     @Test
-    fun `using refresh token after logout returns 400`() {
+    fun `using refresh token after logout returns 418`() {
         val logInResponse: ResponseEntity<String> = loginUser(adminEmail, adminPassword)
         val accessToken = JSONObject(logInResponse.body).get("accessToken") as String
         val refreshToken = JSONObject(logInResponse.body).get("refreshToken") as String
 
         val logoutRequest = HttpEntity(null, createAuthHeaders(accessToken))
         val logoutResponse = restTemplate.exchange(URI("/logout"), HttpMethod.POST, logoutRequest, String::class.java)
-        assert(logoutResponse.statusCodeValue == 302)
+        assert(logoutResponse.statusCodeValue == 200)
 
         val refreshResponse: ResponseEntity<String> = requestNewAccessToken(refreshToken)
-        assert(refreshResponse.statusCodeValue == 400)
+        assert(refreshResponse.statusCodeValue == 418)
     }
 
     // Login first to test GET with protected endpoint

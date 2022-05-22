@@ -170,7 +170,6 @@ paths:
                     description: Part of a name of a student that you want to filter on (this string will be made lowercase and spaces will be removed, this is done to more easily get matches).
                 -   in: query
                     name: status
-                    required: true
                     schema:
                         type: array
                         items:
@@ -181,6 +180,43 @@ paths:
                     schema:
                         type: boolean
                     description: Whether or not to include students you have already added a suggestion for (default value is true)
+                -   in: query
+                    name: skills
+                    schema:
+                        type: array
+                        items:
+                            type: string
+                    description: |
+                        Filter by skill, students that have atleast one of the skills listed are included. The skills
+                        should be provided with quotes around each of their names.
+                -   in: query
+                    name: alumnOnly
+                    schema:
+                        type: boolean
+                    description: Only return alumni students
+                -   in: query
+                    name: studentCoachOnly
+                    schema:
+                        type: boolean
+                    description: Only returns student coach volunteers
+                -   in: query
+                    name: unassignedOnly
+                    schema:
+                        type: boolean
+                -   in: query
+                    name: assignedOnly
+                    schema:
+                        type: boolean
+                    description: Only return assigned students
+                -   in: query
+                    name: view
+                    schema:
+                        $ref: '#/components/schemas/StudentView'
+                    description: The view of the student, with different views the students will contain less or more information (default is Full). 
+                                The List view can be used to get basic information of the student to display it in a listing,
+                                the Communication view can be used to just get info about the student and his/hers communication,
+                                The Extra view can be used to get some extra info about a student,
+                                and the Basic view can be used to show the bare minimum info of a student (just name and id). This way unnecessary data does not need to be sent.
             summary: Get a list containing all Student objects
             description: Get a list of all students in the database. This request cannot fail.
             responses:
@@ -197,6 +233,10 @@ paths:
                                                 type: array
                                                 items:
                                                     $ref: '#/components/schemas/Student'
+                '400':
+                    description: |
+                        A syntax error was made in one of the filter options, this could be a trailing comma in the
+                        status filter or skills not having the required quotes around them.
         post:
             parameters:
                 -   in: path
@@ -246,6 +286,14 @@ paths:
                     schema:
                         type: string
                         format: uuid
+                -   in: query
+                    name: view
+                    schema:
+                        $ref: '#/components/schemas/StudentView'
+                    description: The view of the student, with different views the students will contain less or more information (default is Full).
+                        The List view can be used to get basic information of the student to display it in a listing,
+                        the Communication view can be used to just get info about the student and his/hers communication
+                        and the Basic view can be used to show the bare minimum info of a student (just name and id). This way unnecessary data does not need to be sent.
             responses:
                 '200':
                     description: |
@@ -324,8 +372,9 @@ paths:
             summary: Delete student status suggestion
             description: |
                 Deletes the statusSuggestion made by the coach identified by the given coachId 
-                from the student with the given studentId. If either the student or the suggestion doesn't exist,
-                the method returns a "404: Not Found" message instead.
+                from the student with the given studentId. If the student doesn't exist,
+                the method returns a "404: Not Found" message. If there is no suggestion by
+                the coach with given Id, a "400: Bad Request" is returned.
             parameters:
                 -   in: path
                     required: true
@@ -424,28 +473,6 @@ paths:
                     schema:
                         type: integer
                     description: The page size for pagination. For example, if you pass 50 as value, there will be 50 projects on one page
-                -   in: query
-                    name: skills
-                    schema:
-                        type: array
-                        items:
-                            type: string
-                    description: Filter by skill, students that have atleast one of the skills listed are included
-                -   in: query
-                    name: alumnOnly
-                    schema:
-                        type: boolean
-                    description: Only return alumni students
-                -   in: query
-                    name: onlyStudentCoach
-                    schema:
-                        type: boolean
-                    description: Only returns student coach volunteers
-                -   in: query
-                    name: onlyNotAssigned
-                    schema:
-                        type: boolean
-                    description: Only return unassigned students
             responses:
                 '200':
                     description: successful operation
@@ -474,21 +501,21 @@ paths:
                         schema:
                             $ref: '#/components/schemas/Project'
                         example:
-                            {
-                                "name": "Project name",
-                                "clientName": "Client name",
-                                "description": "Description",
-                                "positions": [
-                                    {
-                                        "skill": { "skillName": "Backend" },
-                                        "amount": "2"
-                                    },
-                                    {
-                                        "skill": { "skillName": "Frontend" },
-                                        "amount": "1"
-                                    }
-                                ]
-                            }
+                          {
+                              "name": "Project name",
+                              "clientName": "Client name",
+                              "description": "Description",
+                              "positions": [
+                                  {
+                                      "skill": { "skillName": "Backend" },
+                                      "amount": "2"
+                                  },
+                                  {
+                                      "skill": { "skillName": "Frontend" },
+                                      "amount": "1"
+                                  }
+                              ]
+                          }
             responses:
                 '201':
                     description: |
@@ -549,28 +576,28 @@ paths:
                         schema:
                             $ref: '#/components/schemas/Project'
                         example:
-                              {
-                                  "name": "Project name",
-                                  "clientName": "Client name",
-                                  "description": "Description",
-                                  "edition": "testEdition",
-                                  "positions": [
-                                      {
-                                          "skill": { "skillName": "Backend" },
-                                          "amount": "2",
-                                          "id": "6adf6cb3-6638-4771-a281-403c0bf3427a"
-                                      },
-                                      {
-                                          "skill": { "skillName": "Frontend" },
-                                          "amount": "1",
-                                          "id": "41e25173-f7cb-4c4b-b4e7-d12f30e5fbe3"
-                                      }
-                                  ],
-                                  "assignments": [
-                                      "http://localhost:8080/api/assignments/f9fefa13-80a3-439a-bf59-3cdacd60e2fc"
-                                  ],
-                                  "id": "68afaeef-48f4-4bf1-9ac7-a6a2c1bcf6d7"
-                              }
+                          {
+                              "name": "Project name",
+                              "clientName": "Client name",
+                              "description": "Description",
+                              "edition": "testEdition",
+                              "positions": [
+                                  {
+                                      "skill": { "skillName": "Backend" },
+                                      "amount": "2",
+                                      "id": "6adf6cb3-6638-4771-a281-403c0bf3427a"
+                                  },
+                                  {
+                                      "skill": { "skillName": "Frontend" },
+                                      "amount": "1",
+                                      "id": "41e25173-f7cb-4c4b-b4e7-d12f30e5fbe3"
+                                  }
+                              ],
+                              "assignments": [
+                                  "http://localhost:8080/api/assignments/f9fefa13-80a3-439a-bf59-3cdacd60e2fc"
+                              ],
+                              "id": "68afaeef-48f4-4bf1-9ac7-a6a2c1bcf6d7"
+                          }
             responses:
                 '200':
                     description: successful operation
@@ -796,7 +823,7 @@ paths:
                             $ref: '#/components/schemas/Assignment'
             responses:
                 '200':
-                    description: succesful operation
+                    description: successful operation
                 '404':
                     description: Not Found. No such projectId.
                 '400':
@@ -824,7 +851,7 @@ paths:
                         format: uuid
             responses:
                 '204':
-                    description: succesful operation
+                    description: successful operation
                 '404':
                     description: Not Found. No such projectId or assignmentId.
     /{edition}/projects/conflicts:
@@ -846,10 +873,11 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Conflict'
                             example:
-                                student: "https://example.com/api/students/abb97568-ac54-11ec-b909-0242ac120002"
-                                projects: [ "https://example.com/api/projects/afc1e1cc-ac54-11ec-b909-0242ac120002", "https://example.com/api/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
+                                student: "https://example.com/api/OSOC2022/students/abb97568-ac54-11ec-b909-0242ac120002"
+                                projects: [ "https://example.com/api/OSOC2022/projects/afc1e1cc-ac54-11ec-b909-0242ac120002",
+                                            "https://example.com/api/OSOC2022/projects/b6a81d12-ac54-11ec-b909-0242ac120002" ]
 
-    /communications/{communicationId}:
+    /{edition}/communications/{communicationId}:
         get:
             summary: Get Communications by id
             description: |
@@ -863,6 +891,11 @@ paths:
                     schema:
                         type: string
                         format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
             responses:
                 '200':
                     description: |
@@ -875,12 +908,32 @@ paths:
                 '404':
                     description: |
                         The response if there is no communication in the database with the given id.
-    /communications/{studentId}:
+        delete:
+            summary: Remove a communication from a student
+            parameters:
+                -   name: communicationId
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
+            responses:
+                '204':
+                    description: Returned if the removal was successful.
+                '404':
+                    description: Returned if the communication does not exist (in this edition).
+    /{edition}/communications/{studentId}:
         post:
             summary: Add a new communication with a student
             description: |
                 Add a communication to the database.
-                The created communication object is returned.
+                The created communication object is returned. This created object contains the id of this new object and
+                the registrationTime alongside the message and type which were provided in the request.
             parameters:
                 -   name: studentId
                     required: true
@@ -888,6 +941,11 @@ paths:
                     schema:
                         type: string
                         format: uuid
+                -   in: path
+                    required: true
+                    name: edition
+                    schema:
+                        type: string
             requestBody:
                 content:
                     application/json:
@@ -914,7 +972,7 @@ paths:
             summary: Get list containing all users
             responses:
                 '200':
-                    description: succesful operation
+                    description: successful operation
                     content:
                         application/json:
                             schema:
@@ -930,7 +988,7 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '201':
-                    description: succesful operation
+                    description: successful operation
                     content:
                         application/json:
                             schema:
@@ -953,7 +1011,7 @@ paths:
                         format: uuid
             responses:
                 '200':
-                    description: succesful operation.
+                    description: successful operation.
                     content:
                         application/json:
                             schema:
@@ -976,7 +1034,7 @@ paths:
                             $ref: '#/components/schemas/User'
             responses:
                 '200':
-                    description: succesful operation
+                    description: successful operation
                     content:
                         application/json:
                             schema:
@@ -1003,7 +1061,7 @@ paths:
                         format: uuid
             responses:
                 '204':
-                    description: succesful operation
+                    description: successful operation
                 '404':
                     description: Not Found. No such userId.
     /users/{userId}/role:
@@ -1024,13 +1082,43 @@ paths:
                             enum: [ Disabled, Coach, Admin ]
             responses:
                 '200':
-                    description: succesful operation
+                    description: successful operation
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/User'
                 '404':
                     description: NOT FOUND
+                '400':
+                    description: Bad Request.
+    /forgotPassword:
+        post:
+            summary: request to change password of given email
+            requestBody:
+                content:
+                    text/plain:
+                        schema:
+                            type: string
+                            format: email
+                        example: example@mail.com
+            responses:
+                '200':
+                    description: successful operation
+                '400':
+                    description: Bad Request.
+    /forgotPassword/{forgotPasswordUUID}/:
+        patch:
+            summary: reset password of user linked to forgotPasswordUUID
+            parameters:
+                -   name: forgotPasswordUUID
+                    required: true
+                    in: path
+                    schema:
+                        type: string
+                        format: uuid
+            responses:
+                '200':
+                    description: successful operation
                 '400':
                     description: Bad Request.
     /assignments/{assignmentId}:
@@ -1179,13 +1267,12 @@ paths:
                         The response if authorization has failed.
     /logout:
       post:
-        summary: log user out. invalidate http session, refresh token and redirect to /login?logout
+        summary: log user out. invalidate refresh token associated with logged in user.
         responses:
-          '302':
-            description: logout successful, redirect to /login?logout
-          '400':
-            description:
-              Bad Request.
+          '200':
+            description: logout successful
+          '401':
+            description: You need to be logged in to log out.
     /token/refresh:
         post:
             summary: renew access token using refresh token
@@ -1215,6 +1302,22 @@ paths:
                                         type: integer
                 '400':
                     description: Bad Request.
+    /invite:
+        post:
+            summary: send invitation mail to given email address
+            requestBody:
+                content:
+                    text/plain:
+                        schema:
+                            type: string
+                            format: email
+                        example: example@mail.com
+            responses:
+                '200':
+                    description: sucessful operation
+                '400':
+                    description: Bad Request.
+
 components:
     schemas:
         Student:
@@ -1261,6 +1364,9 @@ components:
                 alumn:
                     type: boolean
                     default: false
+                possibleStudentCoach:
+                    type: boolean
+                    default: false
                 answers:
                     type: array
                     items:
@@ -1271,6 +1377,19 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Skill'
+                statusSuggestionCount:
+                    type: object
+                    properties:
+                        Yes:
+                            type: integer
+                            example: 17
+                        No:
+                            type: integer
+                            example: 11
+                        Maybe:
+                            type: integer
+                            example: 02
+
         Answer:
             type: object
             properties:
@@ -1465,13 +1584,14 @@ components:
         StatusSuggestion:
             type: object
             required:
-                - coachId
+                - suggester
                 - status
                 - motivation
             properties:
-                coachId:
+                suggester:
                     type: string
-                    format: uuid
+                    format: https://example.com/api/users/{userId}
+                    example: https://example.com/api/users/389a58ce-6bc2-496e-bea1-4991cd598651
                 status:
                     type: string
                     enum: [ Yes, Maybe, No ]
@@ -1565,9 +1685,13 @@ components:
                     example: OSOC 2022
                 isActive:
                     type: boolean
+        StudentView:
+            type: string
+            enum: [ Full, Basic, List, Communication, Extra ]
     securitySchemes:
         BasicAuth:
             type: http
             scheme: basic
 security:
     -   BasicAuth: [ ]
+

@@ -2,27 +2,29 @@ import { Fragment, useEffect, useState } from 'react';
 import usePoll from 'react-use-poll';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { StudentBase, StudentData } from '../lib/types';
+import { StudentBaseList, StudentDataList } from '../lib/types';
 import useAxiosAuth from '../hooks/useAxiosAuth';
 import { axiosAuthenticated } from '../lib/axios';
 import Endpoints from '../lib/endpoints';
 import Select from 'react-select';
-import FlatList from 'flatlist-react';
 import { getSkills, parseError } from '../lib/requestUtils';
 import StudentTile from './students/StudentTile';
-import { SpinnerCircular } from 'spinners-react';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
 import { useRef } from 'react';
 import useOnScreen from '../hooks/useOnScreen';
+import { Icon } from '@iconify/react';
+import InfiniteList from './InfiniteList';
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
+const x_mark = <Icon icon="bx:x" />;
 
 /**
  * This is what StudentsSidebar expects as its argument
  */
 type StudentsSidebarProps = {
   setError: (error: string) => void;
-  setStudentBase: (studentBase: StudentBase) => void;
+  setStudentBase: (studentBase: StudentBaseList) => void;
+  setShowSidebar: (showSidebar: boolean) => void;
 };
 
 /**
@@ -36,84 +38,80 @@ type StudentsSidebarProps = {
  * @param setFilterAmount         - callback to set total amount of filtered results
  * @param state                   - holds page, loading, hasMoreItems, pageSize
  * @param setState                - set the state variable
- * @param setLoading              - set loading or not, this is not the same as the state loading due to styling bug otherwise
+ * @param setHasMoreItems         - set if has more items to load after this
  * @param signal                  - AbortSignal for the axios request
  * @param setError                - callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 async function searchStudent(
   studentNameSearch: string,
   skills: Array<{ value: string; label: string }>,
   studentSearchParameters: Record<string, boolean>,
-  setStudents: (students: StudentBase[]) => void,
+  setStudents: (students: StudentBaseList[]) => void,
   setFilterAmount: (filterAmount: number) => void,
   state: {
-    hasMoreItems: boolean;
     loading: boolean;
     page: number;
     pageSize: number;
   },
   setState: (state: {
-    hasMoreItems: boolean;
     loading: boolean;
     page: number;
     pageSize: number;
   }) => void,
-  setLoading: (loading: boolean) => void,
+  setHasMoreItems: (hasMoreItems: boolean) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
   router: NextRouter
 ) {
-  setLoading(true);
-
   // Fallback for no status selected
   if (!getStatusFilterList(studentSearchParameters)) {
     const newState = { ...state };
     newState.page = 0;
-    newState.hasMoreItems = false;
     newState.loading = false;
-    setState(newState);
-    setStudents([] as StudentBase[]);
+    setState({ ...newState });
+    setHasMoreItems(false);
+    setStudents([] as StudentBaseList[]);
     setFilterAmount(0 as number);
-    setLoading(false);
     return;
   }
 
   const edition = router.query.editionName as string;
   axiosAuthenticated
-    .get<StudentData>('/' + edition + Endpoints.STUDENTS, {
+    .get<StudentDataList>('/' + edition + Endpoints.STUDENTS, {
       params: {
         name: studentNameSearch,
         includeSuggested: !studentSearchParameters.ExcludeSuggested,
         status: getStatusFilterList(studentSearchParameters),
-        skills: skills.map((skill) => skill.label).join(','),
+        skills: skills.map((skill) => `"${skill.label}"`).join(','),
         alumnOnly: studentSearchParameters.OnlyAlumni,
         studentCoachOnly: studentSearchParameters.OnlyStudentCoach,
         unassignedOnly: studentSearchParameters.ExcludeAssigned,
+        assignedOnly: studentSearchParameters.ExcludeUnassigned,
         pageNumber: state.page,
         pageSize: state.pageSize,
+        view: 'List',
       },
       signal: signal,
     })
     .then((response) => {
       const newState = { ...state };
-      newState.page = state.page + 1;
-      newState.hasMoreItems =
-        response.data.totalLength > state.page * state.pageSize;
+      newState.page += 1;
       newState.loading = false;
-      setState(newState);
+      setState({ ...newState });
+      setHasMoreItems(
+        response.data.totalLength > (state.page + 1) * state.pageSize
+      );
       // VERY IMPORTANT TO CHANGE STATE FIRST!!!!
-      setStudents(response.data.collection as StudentBase[]);
+      setStudents(response.data.collection as StudentBaseList[]);
       setFilterAmount(response.data.totalLength as number);
-      setLoading(false);
     })
     .catch((err) => {
-      const newState = { ...state };
-      newState.loading = false;
-      setState(newState);
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
       if (!signal.aborted) {
-        setLoading(false);
+        const newState = { ...state };
+        newState.loading = false;
+        setState({ ...newState });
       }
     });
 }
@@ -144,11 +142,15 @@ function getStatusFilterList(
 const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   setError,
   setStudentBase,
+  setShowSidebar,
 }: StudentsSidebarProps) => {
   const router = useRouter();
   const [showFilter, setShowFilter] = useState(true);
   const elementRef = useRef<HTMLDivElement>(null);
   const isOnScreen = useOnScreen(elementRef);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [hasMoreItems, setHasMoreItems] = useState(true);
+  let fetching = false;
 
   const [skills, setSkills] = useState(
     [] as Array<{ value: string; label: string }>
@@ -157,6 +159,12 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   const [skillOptions, setSkillOptions] = useState(
     [] as Array<{ value: string; label: string }>
   );
+
+  const [state, setState] = useState({
+    loading: true,
+    page: 0,
+    pageSize: 50,
+  });
 
   // Split this to control when to call searchStudent
   const [studentNameSearch, setStudentNameSearch] = useState('' as string);
@@ -167,12 +175,9 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   ] = useState(0);
 
   const [students, setStudents]: [
-    StudentBase[],
-    (students: StudentBase[]) => void
-  ] = useState([] as StudentBase[]);
-
-  const [loading, setLoading]: [boolean, (loading: boolean) => void] =
-    useState<boolean>(true);
+    StudentBaseList[],
+    (students: StudentBaseList[]) => void
+  ] = useState([] as StudentBaseList[]);
 
   const defaultStudentSearchParameters = {
     StatusYes: true,
@@ -183,6 +188,7 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
     OnlyStudentCoach: false,
     ExcludeSuggested: false,
     ExcludeAssigned: false,
+    ExcludeUnassigned: false,
   } as Record<string, boolean>;
 
   const [studentSearchParameters, setStudentSearchParameters] = useState(
@@ -205,12 +211,10 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * function to add new student results instead of overwriting old results
    * @param studentsList - list of students to add to all students
    */
-  const updateStudents: (param: StudentBase[]) => void = (
-    studentsList: StudentBase[]
+  const updateStudents: (param: StudentBaseList[]) => void = (
+    studentsList: StudentBaseList[]
   ) => {
-    const newStudents = students
-      ? [...students]
-      : ([] as StudentBase[] as StudentBase[]);
+    const newStudents = students ? [...students] : ([] as StudentBaseList[]);
     newStudents.push(...studentsList);
     setStudents(newStudents);
   };
@@ -223,48 +227,52 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    * This will also get called on first render
    */
   useEffect(() => {
-    if ({ isOnScreen }.isOnScreen) {
-      return search(true);
+    if ({ isOnScreen }.isOnScreen && router.isReady) {
+      setHasMoreItems(true);
+      scrollRef.current?.scrollTo(0, 0);
+      return search(false);
     }
-  }, [studentSearchParameters, skills, { isOnScreen }.isOnScreen]);
+  }, [
+    studentSearchParameters,
+    skills,
+    { isOnScreen }.isOnScreen,
+    router.isReady,
+  ]);
 
   /**
    * Call to refresh students list from page 0 with current filters applied
    */
   const search = (refreshSkills = false) => {
     state.page = 0;
+    fetching = true;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    refreshSkills ? getSkills(setSkillOptions, signal, setError, router) : null;
+    if (refreshSkills || skillOptions.length == 0) {
+      getSkills(setSkillOptions, signal, setError, router);
+    }
     searchStudent(
       studentNameSearch,
       skills,
       studentSearchParameters,
       setStudents,
       setFilterAmount,
-      state,
+      {
+        page: 0,
+        pageSize: state.pageSize,
+        loading: state.loading,
+      },
       setState,
-      setLoading,
+      setHasMoreItems,
       signal,
       setError,
       router
     );
+    fetching = false;
     return () => {
       controller.abort();
     };
   };
-
-  /**
-   * State for the infinite scroll FlatList
-   * FlatList has a few bugs so there are two different loading parameters
-   */
-  const [state, setState] = useState({
-    hasMoreItems: true,
-    loading: true,
-    page: 0,
-    pageSize: 50,
-  });
 
   /**
    * This is the polling hook that will reload the students list every 3000 ms
@@ -273,86 +281,82 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
    */
   usePoll(
     () => {
-      if (!state.loading && { isOnScreen }.isOnScreen) {
-        controller.abort();
-        controller = new AbortController();
-        const signal = controller.signal;
-        (async () => {
-          await searchStudent(
-            studentNameSearch,
-            skills,
-            studentSearchParameters,
-            setStudents,
-            setFilterAmount,
-            {
-              hasMoreItems: state.hasMoreItems,
-              loading: state.loading,
-              page: 0,
-              pageSize: Math.max(state.page, 1) * state.pageSize,
-            },
-            () => null,
-            () => null,
-            signal,
-            setError,
-            router
-          );
-        })();
-        return () => {
-          controller.abort();
-        };
+      if (!router.isReady) {
+        return;
+      }
+      if (!fetching && !state.loading && { isOnScreen }.isOnScreen) {
+        doPoll();
       }
     },
-    [state, studentSearchParameters, skills, { isOnScreen }.isOnScreen],
+    [fetching, state, { isOnScreen }.isOnScreen, router.isReady],
     {
       interval: 3000,
     }
   );
 
-  /**
-   * What to show when the students list is empty
-   */
-  const showBlank = () => {
-    if (loading) {
-      return (
-        <div className="text-center">
-          <p>Loading Students</p>
-          <SpinnerCircular
-            size={30}
-            thickness={100}
-            color="#FCB70F"
-            secondaryColor="rgba(252, 183, 15, 0.4)"
-            className="mx-auto"
-          />
-        </div>
-      );
+  const doPoll = () => {
+    if (fetching) {
+      return;
     }
-    return <div className="text-center">No students found.</div>;
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await searchStudent(
+        studentNameSearch,
+        skills,
+        studentSearchParameters,
+        setStudents,
+        setFilterAmount,
+        {
+          loading: state.loading,
+          page: 0,
+          pageSize: Math.max(state.page, 1) * state.pageSize,
+        },
+        () => null,
+        setHasMoreItems,
+        signal,
+        setError,
+        router
+      );
+    })();
+    return () => {
+      controller.abort();
+    };
   };
 
   /**
    * Called when FlatList is scrolled to the bottom
    */
   const fetchData = () => {
-    if (state.loading || !{ isOnScreen }.isOnScreen) {
+    if (
+      state.loading ||
+      !{ isOnScreen }.isOnScreen ||
+      !hasMoreItems ||
+      !router.isReady
+    ) {
       return;
     }
+    fetching = true;
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
-    state.loading = true;
-    searchStudent(
-      studentNameSearch,
-      skills,
-      studentSearchParameters,
-      updateStudents,
-      setFilterAmount,
-      state,
-      setState,
-      setLoading,
-      signal,
-      setError,
-      router
-    );
+    (async () => {
+      await searchStudent(
+        studentNameSearch,
+        skills,
+        studentSearchParameters,
+        updateStudents,
+        setFilterAmount,
+        state,
+        setState,
+        setHasMoreItems,
+        signal,
+        setError,
+        router
+      );
+    })();
+    fetching = false;
     return () => {
       controller.abort();
     };
@@ -361,22 +365,21 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
   return (
     // holds searchbar + hide filter button
     <div
-      className="sidebar mt-[50px] max-h-screen py-4 sm:mt-0"
+      className="sidebar top-[62px] bg-osoc-neutral-bg px-4 pt-4 sm:mt-0"
       ref={elementRef}
     >
-      <div className="flex max-h-[calc(100vh-32px)] flex-col">
+      <div className="flex max-h-screen flex-col sm:max-h-[calc(100vh-90px)]">
         <div className="mb-3 flex w-full flex-col items-center justify-between lg:flex-row">
-          {/* TODO add an easy reset/undo search button */}
           {/* The students searchbar */}
           <div className="justify-left md:w-[calc(100% - 200px)] mb-3 flex w-[80%] md:ml-0 lg:mb-0 ">
             <div className="relative w-full">
               <input
                 type="text"
-                className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1.5 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+                className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding py-1.5 pl-8 pr-3 text-base font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
                 id="StudentsSearch"
                 placeholder="Search students by name"
                 value={studentNameSearch}
-                onChange={(e) => setStudentNameSearch(e.target.value)}
+                onChange={(e) => setStudentNameSearch(e.target.value || '')}
                 onKeyPress={(e) => {
                   if (e.key == 'Enter') {
                     return search();
@@ -384,19 +387,29 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 }}
               />
               <i
-                className="absolute bottom-1.5 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                className="absolute bottom-1 left-2 z-10 h-[24px] w-[16px] opacity-20"
                 onClick={() => {
                   return search();
                 }}
               >
                 {magnifying_glass}
               </i>
+              {studentNameSearch && studentNameSearch.length > 0 && (
+                <i
+                  className="absolute bottom-1 right-2 z-10 h-[24px] w-[16px] opacity-20"
+                  onClick={() => {
+                    setStudentNameSearch('');
+                  }}
+                >
+                  {x_mark}
+                </i>
+              )}
             </div>
           </div>
 
           {/* Show/hide filter button */}
           <button
-            className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-white shadow-sm shadow-gray-300"
+            className="justify-right ml-2 min-w-[120px] rounded-sm bg-check-orange px-2 py-1 text-sm font-medium text-black shadow-sm shadow-gray-300"
             type="submit"
             onClick={() => setShowFilter(!showFilter)}
           >
@@ -553,6 +566,30 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
                 Exclude students already assigned
               </label>
             </div>
+            <div className="flex w-full flex-row flex-wrap">
+              <div className="relative mr-2 inline-block w-10 select-none transition duration-200 ease-in">
+                <input
+                  type="checkbox"
+                  name="toggleUnassigned"
+                  id="toggleUnassigned"
+                  className="toggle-checkbox absolute m-1 h-3 w-3 cursor-pointer appearance-none rounded-full bg-gray-300"
+                  checked={studentSearchParameters.ExcludeUnassigned}
+                  onChange={() =>
+                    handleSearchChange(
+                      'ExcludeUnassigned',
+                      !studentSearchParameters.ExcludeUnassigned
+                    )
+                  }
+                />
+                <label
+                  htmlFor="toggleUnassigned"
+                  className="toggle-label block h-5 cursor-pointer overflow-hidden rounded-full border-2 border-gray-300 bg-white"
+                />
+              </div>
+              <label htmlFor="toggleAssigned" className="text-sm">
+                Exclude students not yet assigned
+              </label>
+            </div>
           </div>
 
           <p className="justify-self-start">Filter on status</p>
@@ -627,40 +664,27 @@ const StudentSidebar: React.FC<StudentsSidebarProps> = ({
         </div>
 
         {/* These are the student tiles */}
-        <div className="max-h-[100%] grow overflow-y-auto">
+        <div ref={scrollRef} className="grow overflow-y-auto">
           <div className="col-span-full border-b-2 border-gray-400 pb-1 pr-2 text-right text-xs font-normal">
             {filterAmount + ' total results'}
           </div>
-          <FlatList
+          <InfiniteList
             list={students}
-            renderItem={(student: StudentBase) => (
+            renderItem={(student: StudentBaseList) => (
               <StudentTile
                 key={student.id}
                 studentInput={student}
                 setStudentBase={setStudentBase}
+                setShowSidebar={setShowSidebar}
               />
             )}
-            renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
-            hasMoreItems={state.hasMoreItems}
-            loadMoreItems={fetchData}
-            state={state}
-            paginationLoadingIndicator={<div />} // Use an empty div here to avoid showing the default since it has a bug
-            paginationLoadingIndicatorPosition="center"
+            loadingText={'Loading Students'}
+            hasMoreItems={hasMoreItems}
+            loading={state.loading}
+            loadMoreItems={() => {
+              fetchData();
+            }}
           />
-          <div
-            className={`${
-              state.loading && state.page > 0 ? 'visible block' : 'hidden'
-            } text-center`}
-          >
-            <p>Loading Students</p>
-            <SpinnerCircular
-              size={30}
-              thickness={100}
-              color="#FCB70F"
-              secondaryColor="rgba(252, 183, 15, 0.4)"
-              className="mx-auto"
-            />
-          </div>
         </div>
       </div>
     </div>

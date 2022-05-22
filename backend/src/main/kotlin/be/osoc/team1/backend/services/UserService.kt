@@ -41,14 +41,14 @@ class UserService(private val repository: UserRepository, private val passwordEn
         val encodedPassword = passwordEncoder.encode(plaintextPasswordUser.password)
         val encodedPasswordUser = User(
             plaintextPasswordUser.username,
-            plaintextPasswordUser.email,
+            plaintextPasswordUser.email.lowercase(),
             Role.Disabled,
             encodedPassword
         )
         try {
             return repository.save(encodedPasswordUser)
         } catch (_: DataIntegrityViolationException) {
-            throw ForbiddenOperationException("User with email = '${encodedPasswordUser.email}' already exists!")
+            throw ForbiddenOperationException("User with email = '${encodedPasswordUser.email.lowercase()}' already exists!")
         }
     }
 
@@ -79,7 +79,6 @@ class UserService(private val repository: UserRepository, private val passwordEn
         if (oldUser.password != updatedUser.password) {
             throw ForbiddenOperationException("Not allowed to update password field of users")
         }
-
         return repository.save(updatedUser)
     }
 }

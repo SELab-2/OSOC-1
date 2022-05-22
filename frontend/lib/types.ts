@@ -74,6 +74,22 @@ export type StudentData = {
 };
 
 /**
+ * This is the Communications view object returned by a get to the Student endpoint
+ */
+export type StudentDataCommunication = {
+  collection: StudentBaseCommunication[];
+  totalLength: number;
+};
+
+/**
+ * This is the full object returned by a get to the Student endpoint with view List
+ */
+export type StudentDataList = {
+  collection: StudentBaseList[];
+  totalLength: number;
+};
+
+/**
  * This is the full object returned by a get to the Project endpoint
  */
 export type ProjectData = {
@@ -84,7 +100,7 @@ export type ProjectData = {
 /**
  * This is the Student type as defined in osoc.yaml
  */
-// TODO fix this once communications is done
+// WONTFIX communications type since it does not get used in this object anyway
 export type Student = {
   id: UUID;
   firstName: string;
@@ -116,11 +132,51 @@ export type StudentBase = {
   answers: Url[];
 };
 
+export type StudentBaseCommunication = {
+  id: UUID;
+  firstName: string;
+  lastName: string;
+  communications: Url[];
+};
+
+export type StudentBaseList = {
+  id: UUID;
+  firstName: string;
+  lastName: string;
+  status: string;
+  alumn: boolean;
+  possibleStudentCoach: boolean;
+  statusSuggestionCount: StatusSuggestionCountList;
+};
+
+export type StudentBaseExtra = {
+  id: UUID;
+  firstName: string;
+  lastName: string;
+  assignments: Url[];
+  skills: Skill[];
+};
+
+export type StatusSuggestionCountList = {
+  Yes: number | null;
+  Maybe: number | null;
+  No: number | null;
+};
+
 /**
  * This is the StatusSuggestion type as defined in osoc.yaml
  */
 export type StatusSuggestion = {
-  coachId: UUID;
+  suggester: User;
+  status: StatusSuggestionStatus;
+  motivation: string;
+};
+
+/**
+ * This is the exact collection type returned by a get to the StatusSuggestion endpoint
+ */
+export type StatusSuggestionBase = {
+  suggester: Url;
   status: StatusSuggestionStatus;
   motivation: string;
 };
@@ -196,3 +252,38 @@ export type Answer = {
 export const ItemTypes = {
   STUDENTTILE: 'studentTile',
 };
+
+export enum CommunicationType {
+  Email = 'Email',
+}
+
+export type Communication = {
+  message: string;
+  type: CommunicationType;
+  registrationTime: number;
+  id: UUID;
+};
+
+export type StudentComm = {
+  studentId: UUID;
+  name: string;
+  commMessage: string;
+  registrationTime: Date;
+  id: UUID;
+};
+
+/**
+ * This is one element from the exact collection type returned by a get to the Conflicts endpoint
+ */
+export type Conflict = {
+  student: Url;
+  projects: Url[];
+};
+
+/**
+ * Helper type to all needed conflicts information
+ */
+export type conflictMapType = Map<
+  UUID,
+  { student: StudentBase; projectUrls: Set<Url>; amount: number }
+>;

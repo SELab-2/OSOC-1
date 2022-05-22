@@ -1,12 +1,18 @@
 package be.osoc.team1.backend.entities
 
+import be.osoc.team1.backend.controllers.StudentController
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.nameMatchesSearchQuery
 import be.osoc.team1.backend.util.AnswerListSerializer
+import be.osoc.team1.backend.util.AssignmentListSerializer
 import be.osoc.team1.backend.util.CommunicationListSerializer
 import be.osoc.team1.backend.util.StatusSuggestionListSerializer
 import be.osoc.team1.backend.util.TallyDeserializer
+import be.osoc.team1.backend.util.UserDeserializer
+import be.osoc.team1.backend.util.UserSerializer
+import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
@@ -14,7 +20,10 @@ import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
+import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OrderBy
 import javax.validation.constraints.NotBlank
@@ -53,10 +62,9 @@ enum class SuggestionEnum {
 
 /**
  * Represents the entry of a [status] suggestion in the database.
- * Every [StatusSuggestion] is made by a coach of type [User]. The [coachId] of the [User] who made the suggestion
- * is included in the object. A coach can make multiple suggestions about different [Student]s, but
- * it wouldn't make any sense for a coach to make multiple suggestions about the same [Student].
- * Therefore the combination of [coachId] and [Student] must be unique.
+ * Every [StatusSuggestion] is made by a [suggester] of type [User]. A coach can make multiple suggestions about
+ * different [Student]s, but it wouldn't make any sense for a coach to make multiple suggestions about the same [Student].
+ * Therefore, the combination of [suggester] and [Student] must be unique.
  * This constraint is checked when adding a new [StatusSuggestion] to a [Student].
  * A [StatusSuggestion] always belongs to one particular [Student] in the database.
  * This [Student] is included in the [StatusSuggestion] to verify the unique constraint,
@@ -67,13 +75,25 @@ enum class SuggestionEnum {
  */
 @Entity
 class StatusSuggestion(
-    val coachId: UUID,
+    @ManyToOne
+    @JsonSerialize(using = UserSerializer::class)
+    @JsonDeserialize(using = UserDeserializer::class)
+    val suggester: User,
     val status: SuggestionEnum,
     val motivation: String,
     @JsonIgnore
     @NotBlank
     val edition: String = ""
 ) {
+    @ManyToOne(cascade = [CascadeType.DETACH])
+    @JsonIgnore
+    @JoinTable(
+        name = "student_status_suggestions",
+        joinColumns = [JoinColumn(name = "status_suggestions_id")],
+        inverseJoinColumns = [JoinColumn(name = "student_id")]
+    )
+    lateinit var student: Student
+        private set
 
     @Id
     val id: UUID = UUID.randomUUID()
@@ -116,7 +136,9 @@ class Answer(
 @Entity
 @JsonDeserialize(using = TallyDeserializer::class)
 class Student(
+    @field:JsonView(StudentView.Basic::class)
     val firstName: String,
+    @field:JsonView(StudentView.Basic::class)
     val lastName: String,
 
     @JsonIgnore
@@ -125,26 +147,72 @@ class Student(
 
     @ManyToMany(cascade = [CascadeType.MERGE])
     @OrderBy
+    @field:JsonView(StudentView.Full::class, StudentView.Extra::class)
     val skills: Set<Skill> = sortedSetOf(),
+
+    @field:JsonView(StudentView.List::class)
     val alumn: Boolean = false,
+
+    @field:JsonView(StudentView.List::class)
     val possibleStudentCoach: Boolean = false,
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonSerialize(using = AnswerListSerializer::class)
-    val answers: List<Answer> = listOf()
+
 ) {
 
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @field:JsonView(StudentView.Full::class)
+    @JsonSerialize(using = AnswerListSerializer::class)
+    var answers: List<Answer> = listOf()
+
     @Id
+    @field:JsonView(StudentView.Basic::class)
     val id: UUID = UUID.randomUUID()
 
+    @field:JsonView(StudentView.List::class)
     var status: StatusEnum = StatusEnum.Undecided
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinTable(
+        name = "student_status_suggestions",
+        joinColumns = [JoinColumn(name = "student_id")],
+        inverseJoinColumns = [JoinColumn(name = "status_suggestions_id")]
+    )
+    @field:JsonView(StudentView.Full::class)
     @JsonSerialize(using = StatusSuggestionListSerializer::class)
     val statusSuggestions: MutableList<StatusSuggestion> = mutableListOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @field:JsonView(StudentView.Full::class, StudentView.Communication::class)
     @JsonSerialize(using = CommunicationListSerializer::class)
     val communications: MutableList<Communication> = mutableListOf()
+
+    @OneToMany(mappedBy = "student", cascade = [CascadeType.DETACH], orphanRemoval = true)
+    @field:JsonView(StudentView.Extra::class)
+    @JsonSerialize(using = AssignmentListSerializer::class)
+    val assignments: MutableList<Assignment> = mutableListOf()
+
+    @JsonGetter("statusSuggestionCount")
+    fun calculateStatusSuggestionCount(): Map<SuggestionEnum, Int> = statusSuggestions.groupingBy { it.status }.eachCount()
+}
+
+/**
+ * This class represents a few views which can be used by entities. For example a field marked as [Full] will not be displayed
+ * when writerWithView [Basic] is used, if writerWithView [Full] is used all the fields will be displayed.
+ * [Communication] is used for the communication page on the frontend,
+ * [List] is used for the student sidebar on the frontend.
+ */
+class StudentView {
+    open class Basic
+    open class List : Basic()
+    open class Extra : Basic()
+    open class Communication : Basic()
+    open class Full : List()
+}
+
+/**
+ * Enum to represent the [StudentView]s in the [StudentController]
+ */
+enum class StudentViewEnum {
+    Basic, Full, Communication, List, Extra
 }
 
 /**
@@ -166,7 +234,7 @@ fun List<Student>.filterByName(nameQuery: String) =
  * be returned.
  */
 fun List<Student>.filterBySuggested(callee: User) =
-    filter { student: Student -> student.statusSuggestions.none { it.coachId == callee.id } }
+    filter { student: Student -> student.statusSuggestions.none { it.suggester == callee } }
 
 /**
  * This function will filter [Student]s based on a set of [skillNames].
@@ -190,3 +258,9 @@ fun List<Student>.filterByStudentCoach() = filter { it.possibleStudentCoach }
  */
 fun List<Student>.filterByNotYetAssigned(assignmentRepository: AssignmentRepository) =
     this.toSet().subtract(assignmentRepository.findAll().map { it.student }.toSet()).toList()
+
+/**
+ * This function will filter a list of [Student]s to only return students who have already been assigned to a [Project].
+ */
+fun List<Student>.filterByAssigned(assignmentRepository: AssignmentRepository) =
+    this.toSet().intersect(assignmentRepository.findAll().map { it.student }.toSet()).toList()

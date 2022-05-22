@@ -1,22 +1,27 @@
 package be.osoc.team1.backend.services
 
 import be.osoc.team1.backend.entities.Communication
-import be.osoc.team1.backend.entities.Role
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
 import be.osoc.team1.backend.entities.User
 import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.ForbiddenOperationException
+import be.osoc.team1.backend.exceptions.InvalidCommunicationIdException
 import be.osoc.team1.backend.exceptions.InvalidStudentIdException
 import be.osoc.team1.backend.exceptions.InvalidUserIdException
+import be.osoc.team1.backend.repositories.CommunicationRepository
 import be.osoc.team1.backend.repositories.StudentRepository
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class StudentService(private val repository: StudentRepository, private val userService: UserService) {
+class StudentService(
+    private val repository: StudentRepository,
+    private val userService: UserService,
+    private val communicationRepository: CommunicationRepository
+) {
 
     /**
      * Get all students sorted using [sortBy].
@@ -70,12 +75,9 @@ class StudentService(private val repository: StudentRepository, private val user
      * the coach role.
      */
     fun addStudentStatusSuggestion(studentId: UUID, statusSuggestion: StatusSuggestion, edition: String) {
-        val coach = userService.getUserById(statusSuggestion.coachId)
-        if (!coach.role.hasPermissionLevel(Role.Coach)) {
-            throw ForbiddenOperationException("Only coaches and admins can make status suggestions.")
-        }
+        val coach = statusSuggestion.suggester
         val student = getStudentById(studentId, edition)
-        val sameCoachSuggestion = student.statusSuggestions.find { it.coachId == coach.id }
+        val sameCoachSuggestion = student.statusSuggestions.find { it.suggester == coach }
         if (sameCoachSuggestion !== null) {
             throw ForbiddenOperationException("This coach has already made a suggestion for this student.")
         }
@@ -94,7 +96,7 @@ class StudentService(private val repository: StudentRepository, private val user
     fun deleteStudentStatusSuggestion(studentId: UUID, coachId: UUID, edition: String) {
         val coach = userService.getUserById(coachId)
         val student = getStudentById(studentId, edition)
-        val suggestion = student.statusSuggestions.find { it.coachId == coach.id }
+        val suggestion = student.statusSuggestions.find { it.suggester == coach }
         if (suggestion === null) {
             throw FailedOperationException("This coach hasn't made a suggestion for the given student.")
         }
@@ -103,11 +105,22 @@ class StudentService(private val repository: StudentRepository, private val user
     }
 
     /**
-     * Adds a communication to student based on [studentId], if [studentId] is not in [repository] throw [InvalidStudentIdException]
+     * Adds a communication to the student that is referenced in the [communication] student field
      */
-    fun addCommunicationToStudent(studentId: UUID, communication: Communication, edition: String) {
-        val student = getStudentById(studentId, edition)
+    fun addCommunicationToStudent(communication: Communication, edition: String) {
+        val student = communication.student
         student.communications.add(communication)
+        repository.save(student)
+    }
+
+    /**
+     * Removes a communication from the student that is referenced in the communication with [communicationId]
+     */
+    fun removeCommunicationFromStudent(communicationId: UUID, edition: String) {
+        val communication = communicationRepository.findByIdAndEdition(communicationId, edition)
+            ?: throw InvalidCommunicationIdException()
+        val student = communication.student
+        student.communications.remove(communication)
         repository.save(student)
     }
 }

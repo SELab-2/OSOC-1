@@ -1,22 +1,36 @@
-import type { NextPage } from 'next';
-import Head from 'next/head';
-import Header from '../components/Header';
-import RouteProtection from '../components/RouteProtection';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import useEdition from '../hooks/useEdition';
+import useUser from '../hooks/useUser';
 import { UserRole } from '../lib/types';
 
-const Home: NextPage = () => {
-  return (
-    <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
-      <div className="h-screen">
-        <Head>
-          <title>Create Next App</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
+const Index = () => {
+  const router = useRouter();
+  const [edition] = useEdition();
+  const [user] = useUser();
 
-        <Header />
-      </div>
-    </RouteProtection>
-  );
+  useEffect(() => {
+    if (!user || !user.role) {
+      router.push('/login');
+    } else if (edition) {
+      router.push(`/${edition}/projects`);
+    } else {
+      switch (user.role) {
+        case UserRole.Admin:
+          router.push('/editions');
+          break;
+
+        case UserRole.Coach:
+          router.push('/users');
+          break;
+
+        case UserRole.Disabled:
+          router.push('/wait');
+          break;
+      }
+    }
+  }, [user, edition, router]);
+
+  return <></>;
 };
-
-export default Home;
+export default Index;

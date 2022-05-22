@@ -11,6 +11,13 @@ enum Endpoints {
   PROJECTS = '/projects',
   STUDENTS = '/students',
   SKILLS = '/skills',
+  FORGOTPASSWORD = '/forgotPassword',
+  COMMS = '/communications',
+  SUGGESTIONS = '/suggestions',
+  STATUS = '/status',
+  CONFLICTS = '/projects/conflicts',
+  INVITE = '/invite',
+  LOGOUT = '/logout',
 }
 
 export default Endpoints;

@@ -4,6 +4,7 @@ import {
   Dispatch,
   PropsWithChildren,
   SetStateAction,
+  useEffect,
   useState,
 } from 'react';
 import { AuthTokens, User } from '../lib/types';
@@ -64,6 +65,19 @@ export const AuthProvider = ({
   const [user, setUser] = useState({} as User);
   const [tokens, setTokens] = useState({} as AuthTokens);
   const [edition, setEdition] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      const storedEdition = localStorage.getItem('edition');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+      if (storedEdition) {
+        setEdition(storedEdition);
+      }
+    }
+  }, []);
 
   return (
     <AuthContext.Provider

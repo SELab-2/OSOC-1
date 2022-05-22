@@ -34,10 +34,23 @@
   stroke: #ef4444;
 }
 
+.icon-trashcan-red > svg > path {
+  fill: #f14a3b;
+}
+
+.icon-xcircle-gray > svg > g {
+  stroke: #9ca3af;
+}
+
+.icon-chevron-gray > svg > g {
+  stroke: #9ca3af;
+}
+
 .tooltip .tooltiptext {
   visibility: hidden;
   position: absolute;
   z-index: 1;
+  max-width: 18vw;
 }
 .tooltip:hover .tooltiptext {
   visibility: visible;
@@ -66,9 +79,32 @@
 .sidebar {
   position: -webkit-sticky;
   position: sticky;
-  top: 0;
 }
 
 .i-inline > svg {
   display: inline;
+}
+
+.okButton {
+  border: solid 2px #efefff;
+  border-radius: 0.4em;
+  width: 2.4em;
+  cursor: pointer;
+}
+
+.tile-reset > div {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.project-position {
+  border-radius: 0px;
+  box-shadow: 4px 0 0 0 #d1d5db, -8px 0 0 0 #d1d5db;
+  padding: 2px 0px 3px 0;
+  display: inline;
+  -webkit-box-decoration-break: slice;
+  box-decoration-break: slice;
+  word-wrap: break-word;
+  background-color: #d1d5db;
 }

@@ -1,11 +1,13 @@
 package be.osoc.team1.backend.controllers
 
 import be.osoc.team1.backend.entities.Communication
+import be.osoc.team1.backend.entities.CommunicationDTO
 import be.osoc.team1.backend.services.CommunicationService
 import be.osoc.team1.backend.services.StudentService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -17,7 +19,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/{edition}/communications")
 class CommunicationController(
-    private val communicationService: CommunicationService,
+    communicationService: CommunicationService,
     private val studentService: StudentService
 ) : BaseController<Communication, UUID>(communicationService) {
 
@@ -36,15 +38,33 @@ class CommunicationController(
      * Note that the type can be any of the types defined in [Communication]
      */
     @PostMapping("/{studentId}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @ResponseStatus(value = HttpStatus.CREATED)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun createCommunication(
         @PathVariable studentId: UUID,
         @PathVariable edition: String,
-        @RequestBody communication: Communication
+        @RequestBody communicationRegister: CommunicationDTO
     ): ResponseEntity<Communication> {
-        val createdCommunication = communicationService.createCommunication(communication)
-        studentService.addCommunicationToStudent(studentId, communication, edition)
-        return getObjectCreatedResponse(createdCommunication.id, createdCommunication)
+        val communication =
+            Communication(
+                communicationRegister.message,
+                communicationRegister.type,
+                edition,
+                studentService.getStudentById(studentId, edition)
+            )
+        studentService.addCommunicationToStudent(communication, edition)
+        return getObjectCreatedResponse(communication.id, communication)
     }
+
+    /**
+     * Remove a communication from the database and from the student that we communicated with.
+     * A 404 is returned if a communication with [communicationId] doesn't exist(in this edition that is).
+     */
+    @DeleteMapping("/{communicationId}")
+    @Secured("ROLE_COACH")
+    @SecuredEdition
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    fun deleteCommunication(@PathVariable communicationId: UUID, @PathVariable edition: String) =
+        studentService.removeCommunicationFromStudent(communicationId, edition)
 }

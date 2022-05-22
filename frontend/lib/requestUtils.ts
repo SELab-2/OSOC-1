@@ -1,32 +1,35 @@
 import { axiosAuthenticated } from './axios';
-import { Skill, Url, User, UserRole } from './types';
+import { Edition, Skill, Url, User, UserRole } from './types';
 import Endpoints from './endpoints';
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { NextRouter } from 'next/dist/client/router';
+import { useEffect } from 'react';
 
 /**
  * Function to parse axios request errors
  * @param error - The error thrown
  * @param setError - Callback to set error message
  * @param signal - AbortSignal for the original request
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export function parseError(
   error: unknown,
   setError: (error: string) => void,
-  signal: AbortSignal,
-  router: NextRouter
+  router: NextRouter,
+  signal?: AbortSignal
 ) {
-  if (signal.aborted) {
+  if (signal?.aborted) {
     return;
   }
   if (axios.isAxiosError(error)) {
     const _error = error as AxiosError;
-    if (_error.response?.status === 400) {
+    if (_error.response?.status === 418) {
       router.push('/login');
       return;
     }
-    setError(_error.response?.statusText || 'An unknown error occurred');
+    if (_error.response?.status !== 401) {
+      setError(_error.response?.statusText || 'An unknown error occurred');
+    }
   } else {
     setError('An unknown error occurred');
   }
@@ -39,7 +42,7 @@ export function parseError(
  * @param setSkillOptions - setter for the resulting options list
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export async function getSkills(
   setSkillOptions: (
@@ -54,12 +57,12 @@ export async function getSkills(
     .then((response) =>
       setSkillOptions(
         response.data.map((skill) => {
-          return { value: '', label: skill.skillName };
+          return { value: skill.skillName, label: skill.skillName };
         })
       )
     )
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -70,7 +73,7 @@ export async function getSkills(
  * @param setCoachOptions - Setter for the resulting options list
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export async function getCoaches(
   setCoachOptions: (
@@ -92,7 +95,7 @@ export async function getCoaches(
       )
     )
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -103,7 +106,7 @@ export async function getCoaches(
  * @param resultList - List to push results unto
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export async function getUrlList<Type>(
   urls: Url[],
@@ -123,7 +126,7 @@ export async function getUrlList<Type>(
       response.forEach((resp) => resultList.push(resp.data));
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -135,7 +138,7 @@ export async function getUrlList<Type>(
  * @param resultMap - Map to set the results in
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 export async function getUrlMap<Type>(
   urls: Url[],
@@ -157,6 +160,96 @@ export async function getUrlMap<Type>(
       );
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
+}
+
+/**
+ * Function that will try to run func and if it fails run it again, if it succeeds the result will be given to
+ * the function provided in doSomething.
+ *
+ * @param func - Function to get the result from
+ * @param doSomething - Function to use the result with
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 418 response
+ */
+async function retryOnce<T>(
+  func: () => Promise<T>,
+  doSomething: (arg: T) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  try {
+    const result = await func();
+    doSomething(result);
+  } catch (err) {
+    try {
+      const result = await func();
+      doSomething(result);
+    } catch (err) {
+      parseError(err, setError, router, signal);
+    }
+  }
+}
+
+/**
+ * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
+ * sure that the current edition is not active.
+ *
+ * @param setEditionActive - Function that sets the state
+ * @param signal - AbortSignal for the axios request
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 418 response
+ */
+async function loadEdition(
+  setEditionActive: (active: boolean) => void,
+  signal: AbortSignal,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  await retryOnce(
+    async () => {
+      return await axiosAuthenticated.get<Edition>(Endpoints.EDITIONACTIVE);
+    },
+    (response: AxiosResponse<Edition>) => {
+      if (response.data) {
+        const edition = router.query.editionName as string;
+        setEditionActive(edition == response.data.name);
+        return;
+      }
+      setEditionActive(false);
+    },
+    signal,
+    setError,
+    router
+  );
+  return;
+}
+
+/**
+ * Fetch the state of the current edition(active or inactive) and set it in the state using setEditionActive.
+ *
+ * @param setEditionActive - Function that sets the state
+ * @param setError - Callback to set error message
+ * @param router - Router object needed for error handling on 418 response
+ */
+export function fetchEditionState(
+  setEditionActive: (v: boolean) => void,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    if (router.isReady) {
+      (async () => {
+        await loadEdition(setEditionActive, signal, setError, router);
+      })();
+    }
+    return () => {
+      controller.abort();
+    };
+  }, [router.isReady]);
 }

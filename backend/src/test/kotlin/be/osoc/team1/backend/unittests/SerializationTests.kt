@@ -21,7 +21,6 @@ import org.springframework.boot.test.json.JsonContent
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import java.util.UUID
 
 @JsonTest
 class SerializationTests {
@@ -40,7 +39,7 @@ class SerializationTests {
     @BeforeEach
     fun setMockRequest() {
         val mockRequest = MockHttpServletRequest()
-        mockRequest.scheme = "https"
+        mockRequest.scheme = "http"
         mockRequest.serverName = "example.com"
         mockRequest.serverPort = -1
         mockRequest.contextPath = "/api"
@@ -62,11 +61,11 @@ class SerializationTests {
         val json: JsonContent<Project> = projectJacksonTester!!.write(testProject)
 
         assertThat(json).extractingJsonPathValue("$.coaches")
-            .isEqualTo(mutableListOf("https://example.com/api/users/${testUser.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/users/${testUser.id}"))
         assertThat(json).extractingJsonPathValue("$.positions")
-            .isEqualTo(mutableListOf("https://example.com/api/positions/${testPosition.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/positions/${testPosition.id}"))
         assertThat(json).extractingJsonPathValue("$.assignments")
-            .isEqualTo(mutableListOf("https://example.com/api/assignments/${testAssignment.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/assignments/${testAssignment.id}"))
     }
 
     @Test
@@ -81,17 +80,18 @@ class SerializationTests {
 
     @Test
     fun `Serialization of Student returns the correct result`() {
-        val testStatusSuggestion = StatusSuggestion(UUID.randomUUID(), SuggestionEnum.Yes, "motivation", testEdition)
-        val testCommunication = Communication("test", CommunicationTypeEnum.Email, testEdition)
+        val suggester = User("username", "email", Role.Coach, "password")
+        val testStatusSuggestion = StatusSuggestion(suggester, SuggestionEnum.Yes, "motivation", testEdition)
         val testStudent = Student("Jitse", "Willaert", testEdition)
+        val testCommunication = Communication("test", CommunicationTypeEnum.Email, testEdition, testStudent)
         testStudent.communications.add(testCommunication)
         testStudent.statusSuggestions.add(testStatusSuggestion)
         val json: JsonContent<Student> = studentJacksonTester!!.write(testStudent)
 
         assertThat(json).extractingJsonPathValue("$.statusSuggestions")
-            .isEqualTo(mutableListOf("https://example.com/api/statusSuggestions/${testStatusSuggestion.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/statusSuggestions/${testStatusSuggestion.id}"))
         assertThat(json).extractingJsonPathValue("$.communications")
-            .isEqualTo(mutableListOf("https://example.com/api/$testEdition/communications/${testCommunication.id}"))
+            .isEqualTo(mutableListOf("http://example.com/api/$testEdition/communications/${testCommunication.id}"))
     }
 
     @Test
@@ -113,10 +113,10 @@ class SerializationTests {
         val json: JsonContent<Assignment> = assignmentJacksonTester!!.write(testAssignment)
 
         assertThat(json).extractingJsonPathValue("$.student")
-            .isEqualTo("https://example.com/api/$testEdition/students/${testStudent.id}")
+            .isEqualTo("http://example.com/api/$testEdition/students/${testStudent.id}")
         assertThat(json).extractingJsonPathValue("$.position")
-            .isEqualTo("https://example.com/api/positions/${testPosition.id}")
+            .isEqualTo("http://example.com/api/positions/${testPosition.id}")
         assertThat(json).extractingJsonPathValue("$.suggester")
-            .isEqualTo("https://example.com/api/users/${testSuggester.id}")
+            .isEqualTo("http://example.com/api/users/${testSuggester.id}")
     }
 }

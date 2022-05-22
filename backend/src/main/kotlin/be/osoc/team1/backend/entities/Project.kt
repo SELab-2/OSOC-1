@@ -14,6 +14,8 @@ import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -32,8 +34,12 @@ class Position(
     val amount: Int,
     @JsonIgnore
     @NotBlank
-    val edition: String = ""
+    var edition: String = ""
 ) {
+    @OneToMany(mappedBy = "position", orphanRemoval = true)
+    @JsonIgnore
+    val assignments: MutableCollection<Assignment> = mutableListOf()
+
     @Id
     val id: UUID = UUID.randomUUID()
 }
@@ -44,11 +50,11 @@ class Position(
  */
 @Entity
 class Assignment(
-    @OneToOne
+    @ManyToOne
     @JsonSerialize(using = StudentSerializer::class)
     val student: Student,
 
-    @OneToOne
+    @ManyToOne
     @JsonSerialize(using = PositionSerializer::class)
     val position: Position,
 
@@ -62,6 +68,16 @@ class Assignment(
     @NotBlank
     val edition: String = ""
 ) {
+    @ManyToOne(cascade = [CascadeType.DETACH])
+    @JsonIgnore
+    @JoinTable(
+        name = "project_assignments",
+        joinColumns = [JoinColumn(name = "assignments_id")],
+        inverseJoinColumns = [JoinColumn(name = "project_id")]
+    )
+    lateinit var project: Project
+        private set
+
     @Id
     val id: UUID = UUID.randomUUID()
 }

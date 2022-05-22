@@ -3,7 +3,9 @@ package be.osoc.team1.backend.controllers
 import be.osoc.team1.backend.entities.StatusEnum
 import be.osoc.team1.backend.entities.StatusSuggestion
 import be.osoc.team1.backend.entities.Student
+import be.osoc.team1.backend.entities.StudentViewEnum
 import be.osoc.team1.backend.entities.filterByAlumn
+import be.osoc.team1.backend.entities.filterByAssigned
 import be.osoc.team1.backend.entities.filterByName
 import be.osoc.team1.backend.entities.filterByNotYetAssigned
 import be.osoc.team1.backend.entities.filterBySkills
@@ -14,12 +16,12 @@ import be.osoc.team1.backend.exceptions.FailedOperationException
 import be.osoc.team1.backend.exceptions.UnauthorizedOperationException
 import be.osoc.team1.backend.repositories.AssignmentRepository
 import be.osoc.team1.backend.services.OsocUserDetailService
-import be.osoc.team1.backend.services.PagedCollection
 import be.osoc.team1.backend.services.Pager
 import be.osoc.team1.backend.services.StudentService
 import be.osoc.team1.backend.services.applyIf
 import be.osoc.team1.backend.services.page
 import be.osoc.team1.backend.util.TallyDeserializer
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URLDecoder
 import java.security.Principal
 import java.util.UUID
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/{edition}/students")
@@ -53,10 +56,19 @@ class StudentController(
      * The results can also be filtered by [name] (default value is empty so no student is excluded),
      * by [status] (default value allows all statuses), by [includeSuggested] (default value is true, so
      * you will also see students you already suggested for), by [skills], by only alumni students([alumnOnly]), by only student coach
-     * volunteers([studentCoachOnly]) and by only unassigned students ([unassignedOnly]) students.
+     * volunteers([studentCoachOnly]), by only unassigned students ([unassignedOnly]) students and by only assigned
+     * students ([assignedOnly]).
+     *
+     * The returned students can also be altered using the [view] query parameter:
+     * [Basic] will limit the data the student object contains,
+     * [Communication] is limited but has the communication field of the student,
+     * [List] is limited but has the required fields for a list view,
+     * [Extra] is limited but has the required fields for a more detailed view,
+     * [Full] will return the full object.
      */
     @GetMapping
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun getAllStudents(
         @RequestParam(defaultValue = "0") pageNumber: Int,
         @RequestParam(defaultValue = "50") pageSize: Int,
@@ -64,13 +76,16 @@ class StudentController(
         @RequestParam(defaultValue = "Yes,No,Maybe,Undecided") status: Set<StatusEnum>,
         @RequestParam(defaultValue = "") name: String,
         @RequestParam(defaultValue = "true") includeSuggested: Boolean,
-        @RequestParam(defaultValue = "") skills: Set<String>,
+        @RequestParam(defaultValue = "\"\"") skills: String,
         @RequestParam(defaultValue = "false") alumnOnly: Boolean,
         @RequestParam(defaultValue = "false") studentCoachOnly: Boolean,
         @RequestParam(defaultValue = "false") unassignedOnly: Boolean,
+        @RequestParam(defaultValue = "false") assignedOnly: Boolean,
+        @RequestParam(defaultValue = "Full") view: StudentViewEnum,
         @PathVariable edition: String,
-        principal: Principal
-    ): PagedCollection<Student> {
+        principal: Principal,
+        response: HttpServletResponse
+    ): String? {
         /*
          * A trailing comma in the status filter will create a null value in the status set. This check handles that
          * seemingly impossible scenario and returns status code 400(Bad request).
@@ -78,28 +93,46 @@ class StudentController(
         if (status.filterNotNull().size != status.size)
             throw FailedOperationException("Status filter cannot contain null values! This might be caused by a trailing comma.")
 
+        if (skills.length < 2 || skills[0] != '"' || skills[skills.length - 1] != '"')
+            throw FailedOperationException("Skill-names in the skills field should have quotes around them.")
+
+        val skillNames = skills.substring(1, skills.length - 1).split("\",\"").filter { it.isNotEmpty() }.toSet()
         val decodedName = URLDecoder.decode(name, "UTF-8")
         val callee = userDetailService.getUserFromPrincipal(principal)
         val pager = Pager(pageNumber, pageSize)
-        return service.getAllStudents(Sort.by(sortBy), edition)
+        val filteredStudents = service.getAllStudents(Sort.by(sortBy), edition)
             .applyIf(studentCoachOnly) { filterByStudentCoach() }
             .applyIf(alumnOnly) { filterByAlumn() }
             .applyIf(name.isNotBlank()) { filterByName(decodedName) }
             .applyIf(!includeSuggested) { filterBySuggested(callee) }
             .applyIf(status != StatusEnum.values().toSet()) { filterByStatus(status) }
-            .applyIf(skills.isNotEmpty()) { filterBySkills(skills) }
+            .applyIf(skillNames.isNotEmpty()) { filterBySkills(skillNames) }
             .applyIf(unassignedOnly) { filterByNotYetAssigned(assignmentRepository) }
+            .applyIf(assignedOnly) { filterByAssigned(assignmentRepository) }
             .page(pager)
+
+        return ObjectMapper().writerWithView(studentViewEnumToStudentView(view)).writeValueAsString(filteredStudents)
     }
 
     /**
      * Returns the student with the corresponding [studentId]. If no such student exists, returns a
      * "404: Not Found" message instead.
+     *
+     * The returned student can also be altered using the [view] query parameter:
+     * [Basic] will limit the data the student object contains,
+     * [Communication] is limited but has the communication field of the student,
+     * [List] is limited but has the required fields for a list view,
+     * [Full] will return the full object.
      */
     @GetMapping("/{studentId}")
     @Secured("ROLE_COACH")
-    fun getStudentById(@PathVariable studentId: UUID, @PathVariable edition: String): Student =
-        service.getStudentById(studentId, edition)
+    @SecuredEdition
+    fun getStudentById(
+        @PathVariable studentId: UUID,
+        @PathVariable edition: String,
+        @RequestParam(defaultValue = "Full") view: StudentViewEnum
+    ): String = ObjectMapper().writerWithView(studentViewEnumToStudentView(view))
+        .writeValueAsString(service.getStudentById(studentId, edition))
 
     /**
      * Deletes the student with the corresponding [studentId]. If no such student exists, returns a
@@ -108,6 +141,7 @@ class StudentController(
     @DeleteMapping("/{studentId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
+    @SecuredEdition
     fun deleteStudentById(@PathVariable studentId: UUID, @PathVariable edition: String) =
         service.deleteStudentById(studentId)
 
@@ -133,8 +167,8 @@ class StudentController(
             studentRegistration.skills,
             studentRegistration.alumn,
             studentRegistration.possibleStudentCoach,
-            studentRegistration.answers
         )
+        student.answers = studentRegistration.answers
         val createdStudent = service.addStudent(student)
         return getObjectCreatedResponse(createdStudent.id, createdStudent)
     }
@@ -158,21 +192,24 @@ class StudentController(
     @PostMapping("/{studentId}/status")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_ADMIN")
-    fun setStudentStatus(@PathVariable studentId: UUID, @RequestBody status: StatusEnum, @PathVariable edition: String) =
+    @SecuredEdition
+    fun setStudentStatus(
+        @PathVariable studentId: UUID,
+        @RequestBody status: StatusEnum,
+        @PathVariable edition: String
+    ) =
         service.setStudentStatus(studentId, status, edition)
 
     /**
-     * Add a [statusSuggestion] to the student with the given [studentId]. The coachId field should
-     * be equal to the id of the coach who is making this suggestion, so equal to the id of the
-     * currently authenticated user. If either of these id's do not have a matching record in the
-     * database, a "404: Not Found" message is returned to the caller instead. If the coachId does
-     * not match the id of the currently authenticated user a '401: Unauthorized" is returned. The
-     * [statusSuggestion] should be passed in the request body as a JSON object and should have the
+     * Add a [statusSuggestionRegistration] to the student with the given [studentId]. The suggester field should
+     * be equal to the coach who is making this suggestion, so equal to the currently authenticated user.
+     * If the suggester does not match the currently authenticated user a '401: Unauthorized" is returned. The
+     * [statusSuggestionRegistration] should be passed in the request body as a JSON object and should have the
      * following format:
      *
      * ```
      * {
-     *      "coachId": "(INSERT ID)"
+     *      "suggester": "(INSERT url to User)"
      *      "status": "Yes" OR "Maybe" OR "No",
      *      "motivation": "(INSERT MOTIVATION)"
      * }
@@ -185,17 +222,22 @@ class StudentController(
     @PostMapping("/{studentId}/suggestions")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun addStudentStatusSuggestion(
         @PathVariable studentId: UUID,
-        @RequestBody statusSuggestion: StatusSuggestion,
+        @RequestBody statusSuggestionRegistration: StatusSuggestion,
         @PathVariable edition: String,
         principal: Principal,
     ) {
+        val statusSuggestion = StatusSuggestion(
+            statusSuggestionRegistration.suggester,
+            statusSuggestionRegistration.status,
+            statusSuggestionRegistration.motivation,
+            edition
+        )
         val user = userDetailService.getUserFromPrincipal(principal)
-        if (statusSuggestion.coachId != user.id)
-            throw UnauthorizedOperationException(
-                "The 'coachId' did not equal authenticated user id!"
-            )
+        if (statusSuggestion.suggester != user)
+            throw UnauthorizedOperationException("The 'coachId' did not equal authenticated user id!")
 
         service.addStudentStatusSuggestion(studentId, statusSuggestion, edition)
     }
@@ -211,6 +253,7 @@ class StudentController(
     @DeleteMapping("/{studentId}/suggestions/{coachId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Secured("ROLE_COACH")
+    @SecuredEdition
     fun deleteStudentStatusSuggestion(
         @PathVariable studentId: UUID,
         @PathVariable coachId: UUID,

@@ -41,6 +41,21 @@ type UserTableProps = {
    * if the logged in user is an admin
    */
   isAdmin: boolean;
+
+  /**
+   * update the current user to delete
+   */
+  setDeleteUser: Dispatch<SetStateAction<User | undefined>>;
+
+  /**
+   * logged in user
+   */
+  loggedInUser: User;
+
+  /**
+   * state update function that sets wether the user delete form needs to be shown
+   */
+  setShowDeleteForm: Dispatch<SetStateAction<boolean>>;
 };
 
 /**
@@ -56,6 +71,9 @@ const UserTable: React.FC<UserTableProps> = ({
   setFilter,
   nameFilter,
   isAdmin,
+  setDeleteUser,
+  loggedInUser,
+  setShowDeleteForm,
 }: UserTableProps) => {
   const filterRef = useRef<HTMLInputElement>(null);
 
@@ -71,27 +89,40 @@ const UserTable: React.FC<UserTableProps> = ({
 
   return (
     <table className="w-full table-fixed">
-      <thead className="sticky top-0 bg-white">
+      <thead className="sticky top-[48px] bg-white">
         <tr>
           <th className="w-1/4 py-4">
             <div className="flex flex-row items-center justify-start">
               {showFilter ? (
-                <input
-                  type="text"
-                  className="border-2"
-                  ref={filterRef}
-                  value={nameFilter}
-                  onChange={(e) => setFilter(e.target.value)}
-                />
+                <>
+                  <input
+                    type="text"
+                    className="box-border border-2 pl-5 sm:w-11/12 xl:w-3/5"
+                    ref={filterRef}
+                    value={nameFilter}
+                    onChange={(e) => setFilter(e.target.value)}
+                  />
+                  <button
+                    className="absolute ml-1 block h-4 w-4 rounded-[50%] text-2xl leading-[14px]"
+                    onClick={() => setShowFilter(false)}
+                  >
+                    &times;
+                  </button>
+                </>
               ) : (
-                <p className="text-left text-lg">Name</p>
+                <>
+                  <div
+                    className="flex flex-row items-center hover:cursor-pointer"
+                    onClick={() => setShowFilter(true)}
+                    title="search user"
+                  >
+                    <p className="text-left text-lg">Name</p>
+                    <div className="ml-2 h-fit w-fit hover:cursor-pointer">
+                      <SearchIcon className="h-4 w-4" />
+                    </div>
+                  </div>
+                </>
               )}
-              <div
-                className="ml-2 h-fit w-fit hover:cursor-pointer"
-                onClick={() => setShowFilter(!showFilter)}
-              >
-                <SearchIcon className="h-4 w-4" />
-              </div>
             </div>
           </th>
           <th className="w-1/2 text-left text-lg">Email</th>
@@ -100,13 +131,16 @@ const UserTable: React.FC<UserTableProps> = ({
       </thead>
       <tbody>
         {users && users.length ? (
-          users.map((user) => (
+          users.map((_user) => (
             <UserTableRow
-              key={user.id}
-              user={user}
+              key={_user.id}
+              user={_user}
               updateUsersLocal={updateUsersLocal}
               setGlobalError={setGlobalError}
               isAdmin={isAdmin}
+              setDeleteUser={setDeleteUser}
+              loggedInUserId={loggedInUser.id}
+              setShowDeleteForm={setShowDeleteForm}
             />
           ))
         ) : (

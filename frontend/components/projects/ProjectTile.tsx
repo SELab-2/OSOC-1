@@ -36,6 +36,8 @@ const edit_icon = <Icon icon="akar-icons:edit" />;
 type ProjectProp = {
   projectInput: ProjectBase;
   refreshProjects: () => void;
+  conflictStudents: UUID[];
+  editionActive: boolean;
 };
 
 type UserProp = {
@@ -51,6 +53,8 @@ type AssignmentProp = {
   setOpenUnassignment: (openUnAssignment: boolean) => void;
   setAssignmentId: (assignmentId: UUID) => void;
   setRemoveStudentName: (removeStudentName: string) => void;
+  conflictStudents: UUID[];
+  editionActive: boolean;
 };
 
 /**
@@ -65,7 +69,7 @@ type AssignmentProp = {
  * @param setMyProjectBase  - callback for reloadProject that is called after this POST completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 // TODO when post is finished, should update the student filter
 function postStudentToProject(
@@ -94,7 +98,7 @@ function postStudentToProject(
       reloadProject(projectId, setMyProjectBase, signal, setError, router);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -107,7 +111,7 @@ function postStudentToProject(
  * @param setMyProjectBase    - callback for reloadProject that is called after this DELETE completes
  * @param signal - IMPORTANT signal only works on following get request to reload
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function deleteStudentFromProject(
   projectId: UUID,
@@ -132,7 +136,7 @@ function deleteStudentFromProject(
       reloadProject(projectId, setMyProjectBase, signal, setError, router);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -142,7 +146,7 @@ function deleteStudentFromProject(
  * @param projectId - the UUID of the project to remove
  * @param refreshProjects - callback to update main projects list
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function deleteProject(
   projectId: UUID,
@@ -157,7 +161,7 @@ function deleteProject(
       refreshProjects();
     })
     .catch((err) => {
-      parseError(err, setError, new AbortController().signal, router);
+      parseError(err, setError, router);
     });
 }
 
@@ -169,7 +173,7 @@ function deleteProject(
  * @param setMyProjectBase - a hook to set the reloaded project information
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for edition parameter & error handling on 400 response
+ * @param router - Router object needed for edition parameter & error handling on 418 response
  */
 function reloadProject(
   projectId: UUID,
@@ -185,7 +189,7 @@ function reloadProject(
       setMyProjectBase(response.data as ProjectBase);
     })
     .catch((err) => {
-      parseError(err, setError, signal, router);
+      parseError(err, setError, router, signal);
     });
 }
 
@@ -195,7 +199,7 @@ function reloadProject(
  * @param setLoading - callback to set when loading is finished
  * @param signal - AbortSignal for the axios request
  * @param setError - Callback to set error message
- * @param router - Router object needed for error handling on 400 response
+ * @param router - Router object needed for error handling on 418 response
  */
 async function getEntireProject(
   projectBase: ProjectBase,
@@ -280,6 +284,8 @@ async function getEntireProject(
 const ProjectTile: React.FC<ProjectProp> = ({
   projectInput,
   refreshProjects,
+  conflictStudents,
+  editionActive,
 }: ProjectProp) => {
   const router = useRouter();
   const [user] = useUser();
@@ -317,11 +323,12 @@ const ProjectTile: React.FC<ProjectProp> = ({
    */
   useEffect(() => {
     if (JSON.stringify(projectInput) != JSON.stringify(myProjectBase)) {
+      setLoading(true);
       setMyProjectBase(projectInput as ProjectBase);
     } else {
       controller2.abort();
       controller2 = new AbortController();
-      const signal = controller.signal;
+      const signal = controller2.signal;
       const newPositions = [] as Position[];
 
       (async () => {
@@ -355,7 +362,6 @@ const ProjectTile: React.FC<ProjectProp> = ({
    * myProjectBase gets set to projectInput at the start.
    */
   useEffect(() => {
-    setLoading(true);
     controller.abort();
     controller = new AbortController();
     const signal = controller.signal;
@@ -385,6 +391,8 @@ const ProjectTile: React.FC<ProjectProp> = ({
     () => ({
       accept: ItemTypes.STUDENTTILE,
       canDrop: (item) => {
+        if (!editionActive) return false;
+
         return !myProject.assignments
           .map((assignment) => assignment.student.id)
           .includes((item as Student).id);
@@ -398,8 +406,27 @@ const ProjectTile: React.FC<ProjectProp> = ({
         canDrop: monitor.canDrop(),
       }),
     }),
-    [myProject]
+    [myProject, editionActive]
   );
+
+  const refresh = () => {
+    setLoading(true);
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await reloadProject(
+        myProjectBase.id,
+        setMyProjectBase,
+        signal,
+        setError,
+        router
+      );
+    })();
+    return () => {
+      controller.abort();
+    };
+  };
 
   /**
    * react-select refuses to work unless you use this weird structure
@@ -419,7 +446,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
         isOver && canDrop ? 'bg-check-green' : 'bg-osoc-neutral-bg'
       } m-4 flex w-full flex-col rounded-xl bg-osoc-neutral-bg p-2 shadow-sm shadow-gray-500 xl:w-[calc(50%-48px)] xl1920:w-[calc(33.5%-48px)]`}
     >
-      {error && <Error error={error} className="mb-4" />}
+      {error && <Error error={error} className="mb-4" setError={setError} />}
       {/* project info top */}
       <div className="flex flex-row justify-between pb-12">
         {/* left part of header */}
@@ -428,9 +455,12 @@ const ProjectTile: React.FC<ProjectProp> = ({
             <p className="inline text-lg font-bold">
               {myProject.name}
               <i
-                className={`${
-                  user.role == UserRole.Admin ? 'visible' : 'hidden'
-                } i-inline inline pl-2 text-xl opacity-20`}
+                className={
+                  `${
+                    user.role == UserRole.Admin ? 'visible' : 'hidden'
+                  } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer ` +
+                  (editionActive ? 'visible' : 'hidden')
+                }
                 onClick={() => setShowEditProject(true)}
               >
                 {edit_icon}
@@ -455,15 +485,19 @@ const ProjectTile: React.FC<ProjectProp> = ({
 
       {/* assigned students list */}
       <div className="flex flex-col">
-        {myProject.assignments.map((assignment) => (
-          <ProjectAssignmentsList
-            key={assignment.id}
-            assignment={assignment}
-            setOpenUnassignment={setOpenUnassignment}
-            setAssignmentId={setAssignmentId}
-            setRemoveStudentName={setRemoveStudentName}
-          />
-        ))}
+        {myProject.assignments
+          .sort((one, two) => (one.id > two.id ? -1 : 1))
+          .map((assignment) => (
+            <ProjectAssignmentsList
+              key={assignment.id}
+              assignment={assignment}
+              setOpenUnassignment={setOpenUnassignment}
+              setAssignmentId={setAssignmentId}
+              setRemoveStudentName={setRemoveStudentName}
+              conflictStudents={conflictStudents}
+              editionActive={editionActive}
+            />
+          ))}
       </div>
 
       {loading && (
@@ -566,7 +600,11 @@ const ProjectTile: React.FC<ProjectProp> = ({
             </label>
             <div className="mt-6 flex flex-row justify-between">
               <button
-                onClick={() => setOpenAssignment(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setOpenAssignment(false);
+                }}
                 className={`min-w-[120px] border-2 bg-white`}
               >
                 Cancel
@@ -672,7 +710,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               setShowPopup={setShowEditProject}
               setProjectForm={setProjectForm}
               setError={setError}
-              setMyProjectBase={setMyProjectBase}
+              setMyProjectBase={refresh}
               setDeletePopup={setDeletePopup}
             />
           </div>
@@ -703,7 +741,11 @@ const ProjectTile: React.FC<ProjectProp> = ({
           </h3>
           <div className="mt-3 flex flex-row justify-between px-5">
             <button
-              onClick={() => setDeletePopup(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setDeletePopup(false);
+              }}
               className={`min-w-[120px] border-2 bg-white`}
             >
               Cancel
@@ -711,7 +753,9 @@ const ProjectTile: React.FC<ProjectProp> = ({
 
             <button
               className={`min-w-[120px] border-2 bg-check-red py-1`}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 setDeletePopup(false);
                 setShowEditProject(false);
                 deleteProject(myProject.id, refreshProjects, setError, router);
@@ -734,9 +778,10 @@ const ProjectPositionsList: React.FC<PositionProp> = ({
   position,
 }: PositionProp) => {
   return (
-    <div className="text-right">
-      <p className="my-1 inline bg-gray-300 px-1">
-        {position.amount + 'x ' + position.skill.skillName}
+    <div className="mb-1 text-right">
+      <p className="project-position">
+        <span className="font-semibold">{position.amount + 'x '}</span>
+        {position.skill.skillName}
       </p>
     </div>
   );
@@ -747,19 +792,27 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
   setAssignmentId,
   setOpenUnassignment,
   setRemoveStudentName,
+  conflictStudents,
+  editionActive,
 }: AssignmentProp) => {
   return (
     <div className="flex flex-row justify-between pb-4">
       <div>
         <div className="flex flex-row">
-          <p className="">
+          <p
+            className={`${
+              conflictStudents.includes(assignment.student.id)
+                ? 'bg-red-400'
+                : 'bg-inherit'
+            }`}
+          >
             {assignment.student.firstName + ' ' + assignment.student.lastName}
           </p>
           <div className="tooltip pl-2 pt-1">
             <i className="icon-speech-blue text-xs">{speech_bubble}</i>
             {/* TODO Make this tooltip look nicer */}
             {/* TODO this tooltip should have a max width since it can bug the layout atm */}
-            <span className="tooltiptext bg-osoc-neutral-bg">
+            <span className="tooltiptext w-fit bg-gray-200 px-2">
               {assignment.reason}
             </span>
           </div>
@@ -773,14 +826,19 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
       </div>
       <div className="flex flex-col justify-center">
         <i
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
             setAssignmentId(assignment.id);
             setRemoveStudentName(
               assignment.student.firstName + ' ' + assignment.student.lastName
             );
             setOpenUnassignment(true);
           }}
-          className="icon-xcircle-red text-2xl"
+          className={
+            'icon-xcircle-red text-2xl hover:cursor-pointer ' +
+            (editionActive ? 'visible block' : 'hidden')
+          }
         >
           {xmark_circle}
         </i>

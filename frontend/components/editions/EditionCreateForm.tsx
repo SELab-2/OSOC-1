@@ -1,5 +1,4 @@
-import { Dispatch, SetStateAction, useState } from 'react';
-import { PhotographIcon } from '@heroicons/react/outline';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 type ECFProps = {
   /**
@@ -26,6 +25,11 @@ const EditionCreateForm: React.FC<ECFProps> = ({
   createEdition,
 }: ECFProps) => {
   const [name, setName] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const close = () => {
     setName('');
@@ -43,16 +47,11 @@ const EditionCreateForm: React.FC<ECFProps> = ({
   };
 
   return (
-    <div className="m-auto grid h-full w-full max-w-sm grid-cols-2 overflow-hidden rounded-lg border-2 px-2 py-3">
-      <div className="col-span-2 border-2">
-        <PhotographIcon
-          className="m-auto mt-8 h-8 w-8 hover:cursor-pointer"
-          color="#b3b3b3"
-        />
-      </div>
-      <label className="col-span-2 mx-2 my-4">
+    <div className="m-auto grid h-fit w-full max-w-sm grid-cols-2 overflow-hidden rounded-lg border-2 px-2 py-3">
+      <label className="col-span-2 mx-4 mt-2 mb-4">
         New Edition Name:
         <input
+          ref={inputRef}
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -62,14 +61,14 @@ const EditionCreateForm: React.FC<ECFProps> = ({
       </label>
 
       <button
-        className="mt-6 self-center justify-self-center bg-osoc-yellow px-2 py-1 text-white"
+        className="mt-2 self-center justify-self-center bg-osoc-yellow px-2 py-1 text-black"
         onClick={close}
       >
         Cancel
       </button>
 
       <button
-        className="mt-6 self-center justify-self-center bg-osoc-btn-primary px-2 py-1 text-white"
+        className="mt-2 self-center justify-self-center bg-osoc-btn-primary px-2 py-1 text-black"
         onClick={create}
       >
         Create
