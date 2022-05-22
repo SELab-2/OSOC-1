@@ -404,6 +404,25 @@ const ProjectTile: React.FC<ProjectProp> = ({
     [myProject]
   );
 
+  const refresh = () => {
+    setLoading(true);
+    controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    (async () => {
+      await reloadProject(
+        myProjectBase.id,
+        setMyProjectBase,
+        signal,
+        setError,
+        router
+      );
+    })();
+    return () => {
+      controller.abort();
+    };
+  };
+
   /**
    * react-select refuses to work unless you use this weird structure
    * label is what is shown in the dropdown, value is used to pass to assign function
@@ -682,7 +701,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               setShowPopup={setShowEditProject}
               setProjectForm={setProjectForm}
               setError={setError}
-              setMyProjectBase={setMyProjectBase}
+              setMyProjectBase={refresh}
               setDeletePopup={setDeletePopup}
             />
           </div>
