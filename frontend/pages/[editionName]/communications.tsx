@@ -15,7 +15,7 @@ import { SpinnerCircular } from 'spinners-react';
 import Error from '../../components/Error';
 import useAxiosAuth from '../../hooks/useAxiosAuth';
 import Endpoints from '../../lib/endpoints';
-import { getUrlList, parseError } from '../../lib/requestUtils';
+import {fetchEditionState, getUrlList, parseError} from '../../lib/requestUtils';
 import CommsCreationPopup from '../../components/communications/CommsCreationPopup';
 import CsvDownloader from 'react-csv-downloader';
 import PersistLogin from '../../components/PersistLogin';
@@ -45,10 +45,13 @@ const communications = () => {
     page: 0,
     hasMore: true,
   });
+  const [editionActive, setEditionActive] = useState(true);
 
   const axiosAuth = useAxiosAuth();
   const [retry, setRetry] = useState(true);
   let controller = new AbortController();
+
+  fetchEditionState(setEditionActive, setError, router);
 
   /**
    * Fetches students and their communications and updates the state of the application accordingly.
@@ -225,8 +228,9 @@ const communications = () => {
             )}
             <div>
               <button
-                className="mx-2 my-1 rounded-sm bg-osoc-btn-primary px-2 py-1 text-black hover:brightness-95"
+                className="mx-2 my-1 rounded-sm bg-osoc-btn-primary px-2 py-1 text-black hover:brightness-95 disabled:brightness-75 disabled:cursor-not-allowed"
                 onClick={() => setOpenPopup(true)}
+                disabled={!editionActive}
               >
                 Add New
               </button>
