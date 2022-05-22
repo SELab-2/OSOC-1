@@ -462,7 +462,6 @@ const Projects: NextPage = () => {
 
                   <div
                     className={`flex w-full flex-row justify-center xl:mr-8 xl1920:mr-10`}
-                    // ref={elementRef1}
                   >
                     {/* This is the projects searchbar */}
                     <div
