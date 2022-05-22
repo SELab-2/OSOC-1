@@ -1,7 +1,7 @@
 import { axiosAuthenticated } from './axios';
 import { Edition, Skill, Url, User, UserRole } from './types';
 import Endpoints from './endpoints';
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { NextRouter } from 'next/dist/client/router';
 import { useEffect } from 'react';
 
@@ -164,7 +164,7 @@ export async function getUrlMap<Type>(
     });
 }
 
-async function retry_once<T>(
+async function retryOnce<T>(
   func: () => Promise<T>,
   doSomething: (arg: T) => void,
   signal: AbortSignal,
@@ -188,16 +188,15 @@ async function retry_once<T>(
  * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
  * sure that the current edition is not active.
  */
-async function load_edition(
-  axiosAuth: AxiosInstance,
+async function loadEdition(
   setEditionActive: (active: boolean) => void,
   signal: AbortSignal,
   setError: (error: string) => void,
   router: NextRouter
 ) {
-  await retry_once(
+  await retryOnce(
     async () => {
-      return await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE);
+      return await axiosAuthenticated.get<Edition>(Endpoints.EDITIONACTIVE);
     },
     (response: AxiosResponse<Edition>) => {
       if (response.data) {
@@ -224,8 +223,7 @@ export function fetchEditionState(
     const signal = controller.signal;
     if (router.isReady) {
       (async () => {
-        await load_edition(
-          axiosAuthenticated,
+        await loadEdition(
           setEditionActive,
           signal,
           setError,
