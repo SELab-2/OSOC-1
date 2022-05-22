@@ -37,6 +37,7 @@ type ProjectProp = {
   projectInput: ProjectBase;
   refreshProjects: () => void;
   conflictStudents: UUID[];
+  editionActive: boolean;
 };
 
 type UserProp = {
@@ -53,6 +54,7 @@ type AssignmentProp = {
   setAssignmentId: (assignmentId: UUID) => void;
   setRemoveStudentName: (removeStudentName: string) => void;
   conflictStudents: UUID[];
+  editionActive: boolean;
 };
 
 /**
@@ -283,6 +285,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
   projectInput,
   refreshProjects,
   conflictStudents,
+  editionActive,
 }: ProjectProp) => {
   const router = useRouter();
   const [user] = useUser();
@@ -468,6 +471,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
               setAssignmentId={setAssignmentId}
               setRemoveStudentName={setRemoveStudentName}
               conflictStudents={conflictStudents}
+              editionActive={editionActive}
             />
           ))}
       </div>
@@ -764,6 +768,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
   setOpenUnassignment,
   setRemoveStudentName,
   conflictStudents,
+  editionActive,
 }: AssignmentProp) => {
   return (
     <div className="flex flex-row justify-between pb-4">
@@ -805,7 +810,7 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
             );
             setOpenUnassignment(true);
           }}
-          className="icon-xcircle-red text-2xl hover:cursor-pointer"
+          className={"icon-xcircle-red text-2xl hover:cursor-pointer " + (editionActive ? "visible block": "hidden")}
         >
           {xmark_circle}
         </i>

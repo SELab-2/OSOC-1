@@ -653,6 +653,7 @@ const Projects: NextPage = () => {
                           projectInput={project}
                           conflictStudents={[] as string[]}
                           refreshProjects={refreshProjects}
+                          editionActive={editionActive}
                         />
                       )}
                       renderWhenEmpty={showBlank} // let user know if initial data is loading or there is no data to show
