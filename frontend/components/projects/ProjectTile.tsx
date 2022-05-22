@@ -391,8 +391,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
     () => ({
       accept: ItemTypes.STUDENTTILE,
       canDrop: (item) => {
-        if (!editionActive)
-          return false;
+        if (!editionActive) return false;
 
         return !myProject.assignments
           .map((assignment) => assignment.student.id)
@@ -437,9 +436,12 @@ const ProjectTile: React.FC<ProjectProp> = ({
             <p className="inline text-lg font-bold">
               {myProject.name}
               <i
-                className={`${
-                  user.role == UserRole.Admin ? 'visible' : 'hidden'
-                } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer ` + (editionActive ? 'visible': 'block hidden')}
+                className={
+                  `${
+                    user.role == UserRole.Admin ? 'visible' : 'hidden'
+                  } i-inline inline pl-2 text-xl opacity-20 hover:cursor-pointer ` +
+                  (editionActive ? 'visible' : 'block hidden')
+                }
                 onClick={() => setShowEditProject(true)}
               >
                 {edit_icon}
@@ -813,7 +815,10 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
             );
             setOpenUnassignment(true);
           }}
-          className={"icon-xcircle-red text-2xl hover:cursor-pointer " + (editionActive ? "visible block": "hidden")}
+          className={
+            'icon-xcircle-red text-2xl hover:cursor-pointer ' +
+            (editionActive ? 'visible block' : 'hidden')
+          }
         >
           {xmark_circle}
         </i>

@@ -1,9 +1,9 @@
 import { axiosAuthenticated } from './axios';
-import {Edition, Skill, Url, User, UserRole} from './types';
+import { Edition, Skill, Url, User, UserRole } from './types';
 import Endpoints from './endpoints';
-import axios, {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { NextRouter } from 'next/dist/client/router';
-import {useEffect} from "react";
+import { useEffect } from 'react';
 
 /**
  * Function to parse axios request errors
@@ -214,7 +214,11 @@ async function load_edition(
   return;
 }
 
-export function fetchEditionState(setEditionActive: (v: boolean) => (void), setError: (error: string) => void, router: NextRouter) {
+export function fetchEditionState(
+  setEditionActive: (v: boolean) => void,
+  setError: (error: string) => void,
+  router: NextRouter
+) {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;

@@ -23,7 +23,12 @@ import {
   convertStudentBaseList,
   convertStudentFullToList,
 } from '../../lib/conversionUtils';
-import {fetchEditionState, getUrlList, getUrlMap, parseError} from '../../lib/requestUtils';
+import {
+  fetchEditionState,
+  getUrlList,
+  getUrlMap,
+  parseError,
+} from '../../lib/requestUtils';
 import { NextRouter } from 'next/dist/client/router';
 import { useRouter } from 'next/router';
 import { axiosAuthenticated } from '../../lib/axios';
@@ -400,7 +405,12 @@ const StudentView: React.FC<StudentViewProp> = ({
       </div>
 
       {/* holds suggestion controls */}
-      <div className={`mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0 ` + (editionActive ? 'visible' : 'block hidden')}>
+      <div
+        className={
+          `mr-6 ml-6 mb-6 flex flex-col xl:mb-0 xl:ml-0 ` +
+          (editionActive ? 'visible' : 'block hidden')
+        }
+      >
         {/* regular coach status suggestion form */}
         <form
           className={`border-2 p-2`}

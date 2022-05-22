@@ -29,7 +29,11 @@ import FlatList from 'flatlist-react';
 import useUser from '../../hooks/useUser';
 import { SpinnerCircular } from 'spinners-react';
 import Error from '../../components/Error';
-import {fetchEditionState, getUrlMap, parseError} from '../../lib/requestUtils';
+import {
+  fetchEditionState,
+  getUrlMap,
+  parseError,
+} from '../../lib/requestUtils';
 import RouteProtection from '../../components/RouteProtection';
 import { useRouter } from 'next/router';
 import { NextRouter } from 'next/dist/client/router';
