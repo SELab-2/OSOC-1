@@ -223,12 +223,7 @@ export function fetchEditionState(
     const signal = controller.signal;
     if (router.isReady) {
       (async () => {
-        await loadEdition(
-          setEditionActive,
-          signal,
-          setError,
-          router
-        );
+        await loadEdition(setEditionActive, signal, setError, router);
       })();
     }
     return () => {
