@@ -406,7 +406,7 @@ const ProjectTile: React.FC<ProjectProp> = ({
         canDrop: monitor.canDrop(),
       }),
     }),
-    [myProject]
+    [myProject, editionActive]
   );
 
   /**
