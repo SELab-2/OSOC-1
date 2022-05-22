@@ -38,7 +38,8 @@ import useOnScreen from '../../hooks/useOnScreen';
 import PersistLogin from '../../components/PersistLogin';
 import Head from 'next/head';
 import ProjectConflict from '../../components/projects/ProjectConflict';
-import {AxiosInstance} from "axios";
+import {AxiosInstance, AxiosResponse} from "axios";
+import Editions from "../editions";
 const magnifying_glass = <FontAwesomeIcon icon={faMagnifyingGlass} />;
 const arrow_out = <Icon icon="bi:arrow-right-circle" />;
 const arrow_in = <Icon icon="bi:arrow-left-circle" />;
@@ -109,28 +110,41 @@ function searchProject(
     });
 }
 
-async function load_edition(axiosAuth: AxiosInstance, setEditionActive: (active: boolean) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
+async function retry_once<T>(func: () => Promise<T>, doSomething: (arg: T) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
   try {
-    const active_edition_response = await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE);
+    const result = await func();
+    doSomething(result);
   } catch(err) {
-    console.log("Do nothing");
-  }
-  try {
-    /*
-     * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
-     * sure that the current edition is not active.
-     */
-    const active_edition_response = await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE);
-    if (active_edition_response.data) {
-      const edition = router.query.editionName as string;
-      setEditionActive(edition == active_edition_response.data.name);
-      return;
+    try {
+      const result = await func();
+      doSomething(result);
+    } catch(err) {
+      parseError(err, setError, router, signal);
     }
-    setEditionActive(false);
-
-  } catch (err) {
-    parseError(err, setError, router, signal);
   }
+}
+
+/*
+ * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
+ * sure that the current edition is not active.
+ */
+async function load_edition(axiosAuth: AxiosInstance, setEditionActive: (active: boolean) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
+  await retry_once(async () => {
+      return await axiosAuth.get<Edition>(Endpoints.EDITIONACTIVE)
+    },
+    (response: AxiosResponse<Edition>) => {
+      if (response.data) {
+        const edition = router.query.editionName as string;
+        setEditionActive(edition == response.data.name);
+        return;
+      }
+      setEditionActive(false);
+    },
+    signal,
+    setError,
+    router
+  );
+  return;
 }
 
 /**
