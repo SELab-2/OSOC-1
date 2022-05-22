@@ -7,6 +7,7 @@ module.exports = {
     extend: {
       screens: {
         'xl1920': '1920px',
+        'xl1600': '1600px',
       },
       colors: {
         'osoc-blue': '#0A0839',

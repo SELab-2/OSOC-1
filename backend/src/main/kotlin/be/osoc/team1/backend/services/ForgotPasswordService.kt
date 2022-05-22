@@ -86,7 +86,7 @@ class ForgotPasswordService(
     fun sendEmailWithToken(emailAddress: String) {
         if (userRepository.findByEmail(emailAddress) != null) {
             val forgotPasswordUUID: UUID = newToken(emailAddress)
-            emailService.sendEmail(emailAddress, forgotPasswordUUID)
+            emailService.sendEmail(emailAddress, ForgotPasswordEmailContent(forgotPasswordUUID))
         }
     }
 

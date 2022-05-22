@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import Error from '../components/Error';
 import Header from '../components/Header';
 import UserTable from '../components/users/UserTable';
@@ -14,6 +14,7 @@ import PersistLogin from '../components/PersistLogin';
 import UserDeleteForm from '../components/users/UserDeleteForm';
 import { parseError } from '../lib/requestUtils';
 import Head from 'next/head';
+import { emailRegex } from '../lib/regex';
 
 /**
  *
@@ -53,6 +54,9 @@ const Users: NextPage = () => {
   const [userToDelete, setUserToDelete] = useState<User | undefined>(undefined);
   const [showDeleteForm, setShowDeleteForm] = useState(false);
 
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+
   const axiosAuth = useAxiosAuth();
   const router = useRouter();
   const [user] = useUser();
@@ -83,6 +87,26 @@ const Users: NextPage = () => {
       });
     } catch (err) {
       parseError(err, setError, router);
+    }
+  };
+
+  const invite = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setInviteLoading(true);
+
+    if (!emailRegex.test(inviteEmail)) {
+      setError('Please provide a valid email address');
+    } else {
+      await axiosAuth.post(Endpoints.INVITE, inviteEmail, {
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      });
+
+      setInviteEmail('');
+      setError('');
+      setInviteLoading(false);
     }
   };
 
@@ -163,7 +187,7 @@ const Users: NextPage = () => {
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="h-screen">
           <Header setError={setError} />
-          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
+          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 lg:w-5/6 xl:w-4/5 xl1600:w-3/5">
             {loading ? (
               <div className="relative top-1/2 translate-y-1/2">
                 <p className="mb-4 text-center text-2xl opacity-75">
@@ -182,6 +206,39 @@ const Users: NextPage = () => {
                 {error && (
                   <Error error={error} setError={setError} className="mb-4" />
                 )}
+                <form
+                  className="mb-2 flex w-full flex-row items-center justify-center gap-2 px-4"
+                  onSubmit={invite}
+                >
+                  <label htmlFor="userEmail" className="mx-1 font-normal">
+                    Invite User:
+                  </label>
+                  <input
+                    id="userEmail"
+                    type="email"
+                    className="w-2/5 rounded border-2 border-gray-200 px-1 py-1"
+                    required
+                    placeholder="user@example.com"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                  />
+                  {inviteLoading ? (
+                    <SpinnerCircular
+                      size={40}
+                      thickness={150}
+                      speed={150}
+                      color="#FCB70F"
+                      secondaryColor="rgba(252, 183, 15, 0.4)"
+                    />
+                  ) : (
+                    <button
+                      type="submit"
+                      className="mx-1 w-[160px] rounded-sm bg-osoc-yellow px-2 py-1 font-medium text-black shadow-sm shadow-gray-300 hover:brightness-95"
+                    >
+                      Invite
+                    </button>
+                  )}
+                </form>
                 <UserTable
                   users={filteredUsers.filter(Boolean)}
                   updateUsersLocal={updateUserLocal}

@@ -219,7 +219,7 @@ const communications = () => {
       <RouteProtection allowedRoles={[UserRole.Admin, UserRole.Coach]}>
         <div className="h-screen">
           <Header setError={setError} />
-          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 md:w-3/5">
+          <div className="mx-auto mt-16 mb-32 w-11/12 p-0 lg:w-5/6 xl:w-4/5 xl1600:w-3/5">
             {error && (
               <Error error={error} className="mb-4" setError={setError} />
             )}
