@@ -97,3 +97,14 @@
   margin-left: 0;
   margin-right: 0;
 }
+
+.project-position {
+  border-radius: 0px;
+  box-shadow: 4px 0 0 0 #d1d5db, -8px 0 0 0 #d1d5db;
+  padding: 2px 0px 3px 0;
+  display: inline;
+  -webkit-box-decoration-break: slice;
+  box-decoration-break: slice;
+  word-wrap: break-word;
+  background-color: #d1d5db;
+}
