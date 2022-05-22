@@ -93,7 +93,6 @@ const StudentTile: React.FC<StudentProp> = ({
   const [myStudentExtra, setMyStudentExtra] = useState(
     convertStudentBaseListToExtra(studentInput) as StudentBaseExtra
   );
-  // const [myStudentPulled, setMyStudentPulled] = useState(studentInput);
 
   const router = useRouter();
   let controller = new AbortController();
