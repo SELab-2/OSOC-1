@@ -110,12 +110,18 @@ function searchProject(
 
 async function load_edition(setEditionActive: (active: boolean) => void, signal: AbortSignal, setError: (error: string) => void, router: NextRouter) {
   try {
-    console.log("Load edition!");
-    const edition = router.query.editionName as string;
-    const response = await axiosAuthenticated.get<Edition>(Endpoints.EDITIONS + '/' + edition);
-    if (response.data) {
-      setEditionActive(response.data.isActive);
+    /*
+     * Check if there is an active edition, if so then we can compare. If there is no active edition then we know for
+     * sure that the current edition is not active.
+     */
+    const active_edition_response = await axiosAuthenticated.get<Edition>(Endpoints.EDITIONACTIVE);
+    if (active_edition_response.data) {
+      const edition = router.query.editionName as string;
+      setEditionActive(edition == active_edition_response.data.name);
+      return;
     }
+    setEditionActive(false);
+
   } catch (err) {
     parseError(err, setError, router, signal);
   }
@@ -255,11 +261,15 @@ const Projects: NextPage = () => {
 
   useEffect(() => {
     const controller = new AbortController();
+    const signal = controller.signal;
     if (router.isReady) {
       (async () => {
-        await load_edition(setEditionActive, controller.signal, setError, router);
+        await load_edition(setEditionActive, signal, setError, router);
       })();
     }
+    return () => {
+      controller.abort();
+    };
   }, [router.isReady]);
 
   useEffect(() => {
