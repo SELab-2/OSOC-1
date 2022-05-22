@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, useState } from 'react';
-import { PhotographIcon } from '@heroicons/react/outline';
 
 type ECFProps = {
   /**
