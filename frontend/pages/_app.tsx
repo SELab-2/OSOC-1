@@ -11,7 +11,6 @@ function App({ Component, pageProps: { pageProps } }: AppProps) {
       <Head>
         <link rel="shortcut icon" href="/favicon.ico" />
       </Head>
-      {/* RecoilRoot exposes the whole application to the Recoil state manager */}
       <AuthProvider>
         <Component {...pageProps} />
         <Toaster position="top-right" />
