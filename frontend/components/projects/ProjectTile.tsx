@@ -817,12 +817,22 @@ const ProjectAssignmentsList: React.FC<AssignmentProp> = ({
             </span>
           </div>
         </div>
-        <p className="my-1 inline bg-gray-300 px-1 text-sm">
-          {assignment.position.skill.skillName}
-        </p>
-        <p className="text-xs opacity-40">
-          Suggested by {assignment.suggester.username}
-        </p>
+
+        {assignment &&
+          assignment.position &&
+          assignment.position.skill &&
+          assignment.position.skill.skillName && (
+            <p className="my-1 inline bg-gray-300 px-1 text-sm">
+              {assignment.position.skill.skillName}
+            </p>
+          )}
+        {assignment &&
+          assignment.suggester &&
+          assignment.suggester.username && (
+            <p className="text-xs opacity-40">
+              Suggested by {assignment.suggester.username}
+            </p>
+          )}
       </div>
       <div className="flex flex-col justify-center">
         <i
