@@ -75,10 +75,7 @@ export function convertStudentBaseListToExtra(
   newStudent.id = studentBaseList.id;
   newStudent.firstName = studentBaseList.firstName;
   newStudent.lastName = studentBaseList.lastName;
-  newStudent.status = studentBaseList.status;
-  newStudent.statusSuggestions = [] as Url[];
-  newStudent.alumn = studentBaseList.alumn;
-  newStudent.possibleStudentCoach = studentBaseList.possibleStudentCoach;
+  newStudent.assignments = [] as Url[];
   newStudent.skills = [] as Skill[];
   return newStudent as StudentBaseExtra;
 }

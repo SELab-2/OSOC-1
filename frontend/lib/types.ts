@@ -153,11 +153,7 @@ export type StudentBaseExtra = {
   id: UUID;
   firstName: string;
   lastName: string;
-  status: string;
-  alumn: boolean;
-  possibleStudentCoach: boolean;
-  statusSuggestionCount: StatusSuggestionCountList;
-  statusSuggestions: Url[];
+  assignments: Url[];
   skills: Skill[];
 };
 

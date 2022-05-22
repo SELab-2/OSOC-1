@@ -52,7 +52,7 @@ const chartHelper = {
   Default: [tilde_mark, 'text-check-gray'],
 } as stringToArrayDict;
 
-function getStudentExtra(
+async function getStudentExtra(
   studentId: UUID,
   setMyStudentExtra: (myStudentExtra: StudentBaseExtra) => void,
   signal: AbortSignal,
@@ -60,7 +60,7 @@ function getStudentExtra(
   router: NextRouter
 ) {
   const edition = router.query.editionName as string;
-  axiosAuthenticated
+  await axiosAuthenticated
     .get<StudentBaseExtra>(`/${edition}${Endpoints.STUDENTS}/${studentId}`, {
       params: { view: 'Extra' },
       signal: signal,
@@ -114,13 +114,15 @@ const StudentTile: React.FC<StudentProp> = ({
       controller.abort();
       controller = new AbortController();
       const signal = controller.signal;
-      getStudentExtra(
-        myStudentList.id,
-        setMyStudentExtra,
-        signal,
-        () => null,
-        router
-      );
+      (async () => {
+        await getStudentExtra(
+          myStudentList.id,
+          setMyStudentExtra,
+          signal,
+          () => null,
+          router
+        );
+      })();
     }
   }, [isOpen, router.isReady]);
 
@@ -258,9 +260,15 @@ const StudentTile: React.FC<StudentProp> = ({
             <div>
               <p>Suggestions:</p>
               <p className="ml-4">
-                Yes: {myStudentExtra.statusSuggestionCount.Yes || 0}, No:{' '}
-                {myStudentExtra.statusSuggestionCount.No || 0}, Maybe:{' '}
-                {myStudentExtra.statusSuggestionCount.Maybe || 0}
+                Yes: {myStudentList.statusSuggestionCount.Yes || 0}, No:{' '}
+                {myStudentList.statusSuggestionCount.No || 0}, Maybe:{' '}
+                {myStudentList.statusSuggestionCount.Maybe || 0}
+              </p>
+            </div>
+            <div>
+              <p>
+                {myStudentExtra.assignments.length} Assignment
+                {myStudentExtra.assignments.length !== 1 && 's'}
               </p>
             </div>
           </div>
