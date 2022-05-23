@@ -609,6 +609,7 @@ const Projects: NextPage = () => {
                     pollConflicts={pollConflicts}
                     conflictsKeep={conflictsKeep}
                     setConflictsKeep={setConflictsKeep}
+                    editionActive={editionActive}
                   />
                 )}
               </section>
