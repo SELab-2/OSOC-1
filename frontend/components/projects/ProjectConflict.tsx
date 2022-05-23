@@ -20,6 +20,7 @@ type ProjectConflictProp = {
   pollConflicts: () => void;
   conflictsKeep: conflictMapType;
   setConflictsKeep: (conflictsKeep: conflictMapType) => void;
+  editionActive: boolean;
 };
 
 type ProjectConflictStudentProp = {
@@ -64,6 +65,7 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
   pollConflicts,
   conflictsKeep,
   setConflictsKeep,
+  editionActive,
 }: ProjectConflictProp) => {
   const [currentStudent, setCurrentStudent] = useState({} as StudentBase);
   const [projects, setProjects] = useState([] as ProjectBase[]);
@@ -145,6 +147,7 @@ const ProjectConflict: React.FC<ProjectConflictProp> = ({
                 conflictStudents={Array.from(conflictMap.keys()).filter(
                   (conflict) => (conflictMap.get(conflict)?.amount || 0) > 1
                 )}
+                editionActive={editionActive}
               />
             ))}
           </div>
